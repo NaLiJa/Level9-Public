@@ -1,0 +1,1002 @@
+; GAMEMISC.TXT Copyright (C) 1990 Level 9 Computing. Subroutines 
+; for Crystal Maze Game stations. Pete Austin, January 1991
+; 
+; Display routines: 
+;* AddGameScore  ; Visibly add new crystals to existing score
+;* SubGameScore  ; Visibly subtract crystals to existing score
+;* DisplayScore  ; Display GameScore in place of OldGameScore 
+; 
+; Initialisation routines: 
+;* MazeGameInit  ; done after system initialisation by every game
+;* MazeGameExit  ; done to exit every game
+;* MazeSetUpScreen ;Set one of dual/player/team screen(s)
+; 
+; Test routines:
+;* TestScreenOne        ; show screen one only
+;* TestScreenTwo        ; show screen two only
+;* ChooseEasyLevel      ; switch to easy level
+;* ChooseMediumLevel    ; switch to medium level
+;* ChooseDifficultLevel ; switch to difficult level
+; 
+const
+ CrystalZ=10000 ; base z coordinate of crystals in pyramid, 
+; with crystal z positions ranging from aropund 9800 to 11000
+ MaxCrystals=36 ; max crystals displayed in pyramid form
+ MaxCrystalsP1=37
+ MaxCrystalsM1=35
+; 
+var
+
+begin
+; 
+;;================================================================= 
+;                       DISPLAY ROUTINES 
+;================================================================= 
+;
+; Add GameScore to LocalCrystalsWon and show a pyramid of 
+; crystals over the game screen. Also print the appropriate 
+; one of the following messages at the top... 
+;  20: You won! 
+;  21: Quit! 
+;  22: Time Up! 
+;
+; On exit, LocalCrystalsWon=LocalCrystalsWon+GameScore
+;          Gamescore=0
+;
+.AddGameScore
+ &ListConfig(cfGameScore)=GameScore
+
+ if GameScore>32000 then @SubGameScore ; failsafe
+ gosub @DisplayResultMessage 
+ gosub @GetPyramidMargin ; work out margins in dv2,dv3
+;
+; Show existing crystals
+ v1=LocalCrystalsWon ; previous score
+ v2=false ; draw all crystals
+ dv5=dInsertRedraw
+ gosub @DisplayCrystalsdv5
+;
+; Append the crystals we've won to the pyramid
+ if GameScore=0 then @ACWsamescore ; no change in score
+.AppendCrystalsWon
+push dv2
+push dv3
+ WaitDelay=10
+ gosub @Delay 
+ sub GameScore,c1
+ gosub @DisplayScore ; show crystals being added
+ add LocalCrystalsWon,c1
+ v1=LocalCrystalsWon ; new number of crystals
+ v2=true ; only display crystal v1
+pop dv3
+pop dv2
+push dv2
+push dv3
+ dv5=dInsertRedraw
+ gosub @DisplayCrystalsdv5
+pop dv3
+pop dv2
+ if GameScore>0 then @AppendCrystalsWon
+.ACWsamescore
+;
+  cif AllowSoundEffects
+ &x1=ListConfig(cfGameScore)
+ if x1=0 then NoScore    ;if unchanged don't speak.
+ gosub @SayNewTotalScore ;Speak score. e.g. "You have five crystals."
+.NoScore
+  cend ;AllowSoundEffects
+;
+ WaitDelay=20
+ goto @Delay 
+;
+;----------------------------------------------------------------- 
+;
+; Variant of AddGameScore, to reduce the crystals in the 
+; pyramid. Usually called from AddGameScore when GameScore 
+; is negative.
+;
+; On exit, LocalCrystalsWon=LocalCrystalsWon+GameScore (negative)
+;          Gamescore=0
+;
+.SubGameScore
+ if GameScore<32000 then @AddGameScore ; failsafe
+ gosub @DisplayResultMessage 
+ gosub @GetPyramidMargin ; work out margins in dv2,dv3
+;
+; Show existing crystals
+ v1=LocalCrystalsWon ; previous score
+ v2=false ; draw all crystals
+ dv5=dInsertRedraw
+ gosub @DisplayCrystalsdv5
+;
+; Remove the crystals we've lost from the pyramid
+.RemoveCrystalsLost
+push dv2
+push dv3
+ WaitDelay=10
+ gosub @Delay 
+ add GameScore,c1
+ gosub @DisplayScore ; show crystals being reduced
+ v1=LocalCrystalsWon ; new number of crystals
+ v2=true ; only display crystal v1
+ sub LocalCrystalsWon,c1
+pop dv3
+pop dv2
+push dv2
+push dv3
+ dv5=dRemoveRedraw
+ gosub @DisplayCrystalsdv5
+pop dv3
+pop dv2
+ if GameScore>32000 then @RemoveCrystalsLost
+;
+ if LocalCrystalsWon<32000 then SGSgotendscore
+ LocalCrystalsWon=0 ; prevent total score going negative
+; Suggestion: blow a raspberry here?
+.SGSgotendscore
+;
+;; cif AllowSoundEffects
+;; gosub @SayNewTotalScore
+;; cend ;AllowSoundEffects
+;
+ WaitDelay=20
+ goto @Delay 
+;
+;----------------------------------------------------------------- 
+;
+; Print the appropriate one of the following messages at the top 
+; of the screen (to remind players of the game result)... 
+;  20: You won! 
+;  21: Quit! 
+;  22: Time Up! 
+; 
+.DisplayResultMessage 
+ push CurrentDO 
+ push CurrentPrintRaster 
+ push LeftMargin 
+ push TopMargin 
+ push TextBoxWidth 
+ push ForegroundColour 
+ push BorderColour 
+ push BackgroundColour 
+ push PlotScreenType 
+  m1=21 ; Quit! 
+  if GameScore=0 then drm1 
+  m1=22 ; Time Up! 
+  if GameScore>100 then drm1 ; negative 
+  m1=20 ; You won! 
+.drm1 
+  CurrentDO=ArcBigWindowDO ; text window display object
+  LeftMargin=124 
+  TopMargin=8 
+  TextBoxWidth=320 
+;;24/6/91;;  ForegroundColour=4
+;;24/6/91;;  BorderColour=2
+  BackgroundColour=0 
+  CurrentPrintRaster=ArcBigWindowRaster ; text window print raster
+  gosub @SetupCurrentPrintRaster
+  gosub @StartPrintToBuffer
+  code - 
+   message m1
+  code + 
+  gosub @EndPrintingWithBorder 
+  TextBoxDisplayed=0
+  dv1=CurrentPrintRaster
+  dv2=0 
+  dv3=512 
+  dv4=512
+  dv5=dInsertRedraw
+  dv6=0 ; non-reversed
+  PlotScreenType=BothScreens ; use both screens
+  gosub @MCDrawObjectDv1
+ pop PlotScreenType 
+ pop BackgroundColour 
+ pop BorderColour 
+ pop ForegroundColour 
+ pop TextBoxWidth 
+ pop TopMargin 
+ pop LeftMargin 
+ pop CurrentPrintRaster 
+ pop CurrentDO 
+ return 
+; 
+;----------------------------------------------------------------- 
+;
+  cif AllowSoundEffects
+.SayNewTotalScore
+ if LocalCrystalsWon>1000 then @SillyScore
+ if LocalCrystalsWon=0 then @SillyScore
+
+ v1=48 ;'0'                     ;\SOUND00\SCORE0x.SPL
+ v2=48 ;'0'
+ add v2,LocalCrystalsWon
+ if LocalCrystalsWon<10 then @SayScore ;\SOUND00\SCORE01.SPL thru SCORE09.SPL
+
+ v1=49 ;'1'                     ;\SOUND00\SCORE1x.SPL
+ v2=38 ;'0'-10
+ add v2,LocalCrystalsWon
+ if LocalCrystalsWon<20 then @SayScore ;\SOUND00\SCORE10.SPL thru SCORE19.SPL
+
+ v2=48 ;'0'
+ v1=50 ;'2'                     ;\SOUND00\OVER20.SPL
+ if LocalCrystalsWon<30 then @SayScoreOver
+ v1=51 ;'3'                     ;\SOUND00\OVER30.SPL
+ if LocalCrystalsWon<40 then @SayScoreOver
+ v1=52 ;'4'                     ;\SOUND00\OVER40.SPL
+ if LocalCrystalsWon<50 then @SayScoreOver
+ v1=53 ;'5'                     ;\SOUND00\OVER50.SPL
+ if LocalCrystalsWon<60 then @SayScoreOver
+ v1=54 ;'6'                     ;\SOUND00\OVER60.SPL
+ if LocalCrystalsWon<70 then @SayScoreOver
+ v1=55 ;'7'                     ;\SOUND00\OVER70.SPL
+ if LocalCrystalsWon<80 then @SayScoreOver
+ v1=56 ;'8'                     ;\SOUND00\OVER80.SPL
+ if LocalCrystalsWon<90 then @SayScoreOver
+ v1=57 ;'9'                     ;\SOUND00\OVER90.SPL
+ if LocalCrystalsWon<100 then @SayScoreOver
+
+ v2=57 ;'9' \SOUND\OVER99.SPL = "unbelievable"
+
+.SayScoreOver
+ x1=92 ;"\"
+ List17(8)=x1
+ x1=83 ;"S"
+ List17(9)=x1
+ x1=79 ;"O"
+ List17(10)=x1
+ x1=85 ;"U"
+ List17(11)=x1
+ x1=78 ;"N"
+ List17(12)=x1
+ x1=68 ;"D"
+ List17(13)=x1
+ x1=48 ;"0"
+ List17(14)=x1
+ x1=48 ;"0"
+ List17(15)=x1
+ x1=92 ;"\"
+ List17(16)=x1
+ x1=79 ;"O"
+ List17(17)=x1
+ x1=86 ;"V"
+ List17(18)=x1
+ x1=69 ;"E"
+ List17(19)=x1
+ x1=82 ;"R"
+ List17(20)=x1
+ List17(21)=v1 ;\SOUND00\OVER{v1}{v2}.SPL
+ List17(22)=v2
+ x1=46 ;'.'
+ List17(23)=x1
+ x1=83 ;'S'
+ List17(24)=x1
+ x1=80 ;'P'
+ List17(25)=x1
+ x1=76 ;'L'
+ List17(26)=x1
+ List17(27)=c0
+ gosub @PlayLongSample
+ return
+
+.SayScore
+ x1=92 ;"\"
+ List17(8)=x1
+ x1=83 ;"S"
+ List17(9)=x1
+ x1=79 ;"O"
+ List17(10)=x1
+ x1=85 ;"U"
+ List17(11)=x1
+ x1=78 ;"N"
+ List17(12)=x1
+ x1=68 ;"D"
+ List17(13)=x1
+ x1=48 ;"0"
+ List17(14)=x1
+ x1=48 ;"0"
+ List17(15)=x1
+ x1=92 ;"\"
+ List17(16)=x1
+ x1=83 ;"S"
+ List17(17)=x1
+ x1=67 ;"C"
+ List17(18)=x1
+ x1=79 ;"O"
+ List17(19)=x1
+ x1=82 ;"R"
+ List17(20)=x1
+ x1=69 ;"E"
+ List17(21)=x1
+ List17(22)=v1 ;\SOUND\SCORE{v1}{v2}.SPL
+ List17(23)=v2
+ x1=46 ;'.'
+ List17(24)=x1
+ x1=83 ;'S'
+ List17(25)=x1
+ x1=80 ;'P'
+ List17(26)=x1
+ x1=76 ;'L'
+ List17(27)=x1
+ List17(28)=c0
+ gosub @PlayLongSample 
+ return
+
+.SillyScore
+ return
+  cend ;AllowSoundEffects
+;
+;----------------------------------------------------------------- 
+;
+; Returns dv2,dv3 as left,top margins, based on a pyramid the 
+; size of LocalCrystalsWon + GameScore
+;
+.GetPyramidMargin
+ v1=LocalCrystalsWon
+ add v1,GameScore ; v1=resultant crystals after this game
+ if v1<32000 then DCcrystalsPositive
+ v1=0 ; prevent underflow
+.DCcrystalsPositive
+ if v1<MaxCrystalsP1 then DCgotmarginsize
+ v1=MaxCrystals ; total number of crystals for calculating a margin
+.DCgotmarginsize
+ gosub @DCscancrystal ; v2=x pos, v4=base crystal
+ v1=v4 ; find the x position of the right hand corner base crystal, 
+; so that we can correctly align the whole pyramid
+ gosub @DCgetcrystalpos ; v2=pixel x pos, v3=pixel y pos
+ asr v2 ; half width (or height) of pyramid
+ dv2=160 ; half screen width
+ sub dv2,v2 ; left margin
+ asr v2 ; y is half x
+ dv3=96 ; half screen height
+ add dv3,v2 ; bottom margin
+;
+; Fine-adjust the margins to accomodate for the width & depth 
+; of a crystal
+ sub dv2,c16 ; adjust x
+ sub dv3,c8 ; adjust y
+ return
+;
+;----------------------------------------------------------------- 
+;
+; Draw or remove crystal(s) in pyramid form in front of everything 
+; on the screen, using dv2,dv3 as left,top margins
+;
+; On entry, dv5=dInsertRedraw to draw the crystal(s)
+;            OR dRemoveRedraw to remove the crystal(s)
+;           v1=total number of crystals in the pyramid
+;	    IF v2=true then only crystal v1 is added 
+;            or removed from the pyramid
+; 
+.DisplayCrystalsdv5
+;
+; Regulate maximum number of crystals and work out how many of 
+; them are "super crystals". 
+ if v1<1 then @DCreturn ; no crystals
+ if v1>32000 then @DCreturn
+ v7=0 ; no "super crystals" so far
+ v5=v1 ; copy total number of crystals
+ if v1<MaxCrystalsP1 then DCvalid ; maximum number of crystals plus 1
+ v7=v1
+ v1=MaxCrystals ; maximum number of crystals
+ sub v7,v1 ; v7=number of crystals over MaxCrystals
+ v5=v1 ; copy total number of crystals
+ if v7<MaxCrystalsP1 then DCoverflowvalid
+ if v2=true then @DCreturn ; ignore individual excess crystals
+ v7=MaxCrystals ; maximum number of "super crystals"
+.DCoverflowvalid
+ sub v1,v7 ; plot super crystals backwards from the top of the 
+; pyramid
+ add v1,c1 ; because v7 ranges from 1, not 0
+.DCvalid
+ add v5,c1 ; total number of crystals + 1
+;
+; Now draw the crystals relative to the margins dv2,dv3
+ v4=v7 ; number of crystals
+ v7=MaxCrystals
+ sub v7,v4 ; crystals from v7 onwards are "super crystals"
+;
+ if v2<>false then DConecrystals ; code for "only draw crystal v1"
+ v1=1 ; v2 is code for "draw all crystals", so start with the first
+.DConecrystals
+;
+push BuildingRoom
+ BuildingRoom=False ; don't simply store the positions of the crystals
+.DCdrawloop
+push v2
+push dv2
+push dv3
+push dv5
+push v5
+push v1
+push v7
+ gosub @DCscancrystal ; v2=x pos, v4=base crystal
+ gosub @DCgetcrystalpos ; v2=pixel x pos, v3=pixel y pos
+ dv1=CrystalPlus1
+ add dv2,v2 ; add x offset to left margin
+ dv4=CrystalZ ; high z derived from high h
+ add dv3,dv4
+ sub dv3,v3 ; sub y offset from bottom margin
+ dv6=0 ; non-reversed
+pop v7
+pop v1
+ if v1=v7 then GotCrystalGraphic
+ if v1<v7 then GotCrystalGraphic
+ if v7>32000 then GotCrystalGraphic
+ dv1=CrystalPlus2 ; show super crystal
+ add dv3,c4 ; in case we have to change normal crystal to super-crystal
+ add dv4,c4
+ if dv5<>dRemoveRedraw then GotCrystalGraphic ; not removing
+ PlotScreenType=BothScreens ; use both screens
+ gosub @MCDrawObjectDv1 ; remove super crystal
+ dv1=CrystalPlus1 ; and replace with normal crystal...
+ sub dv3,c4
+ sub dv4,c4
+ dv5=dInsertRedraw
+.GotCrystalGraphic
+push v1
+push v7
+ PlotScreenType=BothScreens ; use both screens
+ gosub @MCDrawObjectDv1
+ gosub @DisplayEverything
+pop v7
+pop v1
+pop v5
+pop dv5
+pop dv3
+pop dv2
+pop v2
+ if v2<>false then DCendloop ; "only draw crystal v1"
+ add v1,c1 ; next crystal
+ if v1<v5 then @DCdrawloop
+.DCendloop
+pop BuildingRoom
+;
+.DCreturn
+ return
+;
+; Scan to see whereabouts crystal v1 is within the pyramid, 
+; returning v2 as it's x position and v4 as the base crystal 
+; below it.
+;
+.DCscancrystal
+ v2=0 ; counter = x position of the current base crystal
+ v3=1 ; counter = x position of the next base crystal
+ v4=1 ; cumulative of v2 = number of the current base crystal
+ v5=2 ; cumulative of v3 = number of the next base crystal
+.DCscanloop
+ if v1<v5 then DCreturn ; crystal is above base crystal v4
+ add v2,c1 ; current base position
+ add v3,c1 ; next base position
+ add v4,v2 ; add current cumulator
+ add v5,v3 ; add next cumulator
+ goto DCscanloop
+;
+; Crystal v1 extends from base crystal v4, at an x position 
+; of v2. Return v2,v3 as the relative x,y to the left 
+; hand corner of the pyramid.
+;
+.DCgetcrystalpos
+ add v2,v2
+ add v2,v2
+ add v2,v2
+ add v2,v2
+ add v2,v2 ; v2 = x position in pixels
+ v3=v1
+ sub v3,v4 ; v3 is the height of the crystal above base crystal v4
+ add v3,v3
+ add v3,v3
+ add v3,v3
+ add v3,v3
+ v4=v3
+; add v3,v3 ; v3 = y position in pixels
+ sub v2,v4 ; adjust x pos, according to height
+ return
+; 
+; Replace the current displayed score (OldGameScore) by its new 
+; value (GameScore). The score is shown by crystals, i.e: 
+;   +6 = +2 +2 +2         +5 = +2 +2 +1         +4 = +2 +1 +1 
+;   +3 = +1 +1 +1         +2 = +1 +1            +1 = +1       
+;   +0 =        (no crystals are displayed for 0) 
+;   -1 = -1               -2 = -1 -1            -3 = -1 -1 -1     
+;   -4 = -2 -1 -1         -5 = -2 -2 -1         -6 = -2 -2 -2 
+; 
+; The coordinates for these crystals are set from the current 
+; picture, which included rasters for +2,+1,-1 respectively. 
+; When the screen was built, SpecialRasterObject avoided showing 
+; them, but stored the coordinates ready for ReadDv1 (below). 
+; 
+.DisplayScore 
+ if GameScore=OldGameScore then @dsReturn 
+; 
+ if OldGameScore<32000 then dsRemoveGameScore ; Make OldGameScore +ve 
+ X1=0 
+ sub X1,OldGameScore 
+ OldGameScore=X1 
+; 
+.dsRemoveGameScore ; Remove old crystals... 
+ if OldGameScore=0 then @dsInsertGameScore ; Remove crystal 1 
+ dv1=CrystalPlus2 ; "+2" 
+ gosub @ReadDv1 
+ gosub @RemoveCrystalDv2Dv3Dv4 
+ if OldGameScore=1 then dsInsertGameScore ; Remove crystal 2 
+ dv1=CrystalPlus1 ; "+1" 
+ gosub @ReadDv1 
+ gosub @RemoveCrystalDv2Dv3Dv4 
+ if OldGameScore=2 then dsInsertGameScore ; Remove crystal 3 
+ dv1=CrystalMinus1 ; "-1" 
+ gosub @ReadDv1 
+ gosub @RemoveCrystalDv2Dv3Dv4 
+; 
+.dsInsertGameScore ; Insert new crystals... 
+ if GameScore=0 then @dsReturn 
+ OldGameScore=GameScore 
+ x1=CrystalPlus1 ; X1 is "Crystal +1" 
+ x2=CrystalPlus2 ; X2 is "Crystal +2" 
+ if OldGameScore<1000 then dsCrystal3 ; score +ve 
+ X1=0 
+ sub X1,OldGameScore ; OldGameScore := MOD GameScore 
+ OldGameScore=X1 
+ x1=CrystalMinus1 ; X1 is "Crystal -1" 
+ x2=CrystalMinus2 ; X2 is "Crystal -2" 
+; 
+.dsCrystal3 
+ if OldGameScore<3 then dsCrystal2 ; No crystal 3 
+ push X1 
+ push X2 
+  dv1=CrystalMinus1 
+  gosub @ReadDv1 
+ pop X2 
+ pop X1 
+ dv1=X2 ; "+2", or "-2" 
+ dv5=dInsertRedraw 
+ dv6=0 
+ if OldGameScore>5 then dsDrawCrystal3 ; Print "+2" crystal 3 
+ dv1=X1 ; "+1", or "-1" 
+.dsDrawCrystal3 
+ push X1 
+ push X2 
+  PlotScreenType=BothScreens ; use both screens
+  gosub @MCDrawObjectDv1 ; GMJ 29.01.91 (MC)
+ pop X2 
+ pop X1 
+; 
+.dsCrystal2 
+ if OldGameScore<2 then dsCrystal1 ; No crystal 2 
+ dv1=CrystalPlus1 
+ push X1 
+ push X2 
+  gosub @ReadDv1 
+ pop X2 
+ pop X1 
+ dv1=X2 ; "+2", or "-2" 
+ dv5=dInsertRedraw 
+ dv6=0 
+ if OldGameScore>4 then dsDrawCrystal2 ; Print "+2" crystal 2 
+ dv1=X1 ; "+1", or "-1" 
+.dsDrawCrystal2 
+ push X1 
+ push X2 
+  PlotScreenType=BothScreens ; use both screens
+  gosub @MCDrawObjectDv1 ; GMJ 29.01.91 (MC)
+ pop X2 
+ pop X1 
+; 
+.dsCrystal1 
+ if OldGameScore<1 then dsReturn ; No crystal 1 
+ dv1=CrystalPlus2 
+ push X1 
+ push X2 
+  gosub @ReadDv1 
+ pop X2 
+ pop X1 
+ dv1=X2 ; "+2", or "-2" 
+ dv5=dInsertRedraw 
+ dv6=0 
+ if OldGameScore>3 then dsDrawCrystal1 ; Print "+2" crystal 1 
+ dv1=X1 ; "+1", or "-1" 
+.dsDrawCrystal1 
+ PlotScreenType=BothScreens ; use both screens
+ gosub @MCDrawObjectDv1 ; GMJ 29.01.91 (MC)
+; 
+.dsReturn 
+ OldGameScore=GameScore 
+ return 
+; 
+; Remove any crystal which may be plotted at dv2,dv3,dv4 
+.RemoveCrystalDv2Dv3Dv4 
+ dv5=dRemoveRedraw 
+ dv6=0 
+ dv1=CrystalPlus2 
+ gosub rcdddTryToRemoveCrystal 
+ dv1=CrystalPlus1 
+ gosub rcdddTryToRemoveCrystal 
+ dv1=CrystalMinus1 
+ gosub rcdddTryToRemoveCrystal 
+ dv1=CrystalMinus2 
+.rcdddTryToRemoveCrystal 
+ push dv2 
+ push dv3 
+ push dv4 
+ dv5=dRemoveRedraw 
+ dv6=0 
+  PlotScreenType=BothScreens ; use both screens
+  gosub @mcDrawObjectDv1
+ pop dv4 
+ pop dv3 
+ pop dv2 
+ return 
+; 
+;;=================================================================
+;                       INITIALISATION ROUTINES 
+;=================================================================
+; 
+; Done after system initialisation by every game... 
+; 
+.MazeGameInit  
+; Ensure full crystals shown at start of each game
+ GameScore=0
+ OldGameScore=0 
+
+;All games must set their own palette
+
+ v1=4           ; list4
+  &v2=List4(16) ; palette
+ v3=16
+ v4=4096 ;1000h set both VGA screens
+ gosub @mcSetPalette
+; 
+ return 
+; 
+;=================================================================
+; 
+;...sMazeGameExit:0:
+; done to exit every game
+; 
+.MazeGameExit 
+ cif AllowMusic
+  gosub @StopTune
+ cend
+
+ cif ST 
+  goto @OverlayRestart 
+ cend ; ST 
+; 
+ &x1=ListConfig(cfTerminalID)  ;Crystal Dome ACOD2.ACD contains Dispatch/Alert.
+ if x1=36 then @OverlayRestart ;... so no need to swap overlays
+
+;Inform CC that game has finished/aborted
+;
+ cif PC
+  &x1=ListConfig(cfGameRTC)
+  if x1<>65535 then GameStarted
+  x1=0 ;QUIT while in instructions screen, so time=0
+.GameStarted
+  &ListConfig(cfGameTime)=x1
+
+  gosub @SetTSRlistPointers ;for safety
+
+  &v1=ListConfig(cfAbortReason)
+  if v1<>0 then @ExitOverlay ;Aborted by GoToIdle or GoToOffline
+
+  &x1=ListConfig(cfCellID)
+  if x1=c0 then @ExitLoginGame
+
+;     ;'normal' games: update CC score
+  mpMessageType=mtGameResult    ;12:GameResult
+  &ListConfig(cfTempAbortOrNot)=miAborted
+  &x1 = ListConfig(cfTerminalId)
+  &ListConfig(cfTempFrom)=x1
+  &x1=ListConfig(cfPlayTeamID)  ;team number
+  &ListConfig(cfTempTeamId)=x1
+  &x1=ListConfig(cfGameScore)
+  &ListConfig(cfTempResult)=x1  ;crystals won this game
+  &x1=ListConfig(cfGameTime)
+  &ListConfig(cfTempTime)=x1    ;time in seconds
+  gosub @SpecialTransmitMessage
+  &x1=ListConfig(cfNetworkFailed) ;Did GameResult get sent OK?
+  if x1=0 then @ExitOverlay       ;yes
+  gosub DisplayError12Part1       ;no - do our best to retry
+  gosub DisplayError12Part2
+  gosub @RetryGameResult
+  goto @ExitOverlay
+
+.ExitLoginGame
+     ;Login: (team name already set) Now set difficulty.
+  gosub @SetListString
+  v1=0
+.CopyTeamName2
+  v1=ListTeam(x1)
+  ListString(x1)=v1
+  add x1,c1
+  if x1<11 then CopyTeamName2 ;10 chars + null
+
+  mpMessageType=mtLoginTeam
+  &x1 = ListConfig(cfTerminalId)
+  &ListConfig(cfTempFrom)=x1
+  &x1=ListConfig(cfPlayTeamID)  ;team number
+  &ListConfig(cfTempTeamId)=x1
+  &ListConfig(cfTempDifficulty)=LocalDifficulty
+;***** If failed then ?? (Maybe should just drop to idle)
+  gosub @SpecialTransmitMessage
+
+;If running as a game ACODE.ACD is dispatch/alert, ACOD2.ACD is this game.
+;chain back to dispatch/alert...
+
+;If running standalone ACODE.ACD is this program; in which case chain
+;back to our own OverlayStart entry point...
+
+.ExitOverlay
+ code-
+  stack
+ code+
+  &WordWS(WordVBLdisabled)=c1 ;disable VBL (not required; but safer)
+  v1=69 ;Acod'e'.dat
+  v2=12
+  goto @vMCcallOverlay
+ cend ;PC
+; 
+;=================================================================
+;
+ cif PC
+.DisplayError12Part1
+     ;Network error during mtGameResult transmission. This could
+     ;hang the system as the team have completed this game but the
+     ;CC believes the game is still in PLAY.
+ LeftMargin=48
+ TopMargin=0 ;**  32
+ TextBoxWidth=280
+ CurrentPrintRaster=ArcBigWindowRaster ; text window print raster
+ gosub @SetupCurrentPrintRaster
+ gosub @StartPrintToBuffer
+ &x1=ListConfig(cfPlayTeamID)
+ code -          ;Display "error message" .. I don't like displaying error
+  prs "Team: "   ;messages on game screens.
+  print x1
+  message 4 ;newline
+ code+
+ &x1=ListConfig(cfGameScore)
+ code-
+  prs "Score: "
+  if x1<32000 then PlusScore
+  prs "-"
+  x2=x1
+  x1=c0
+  sub x1,x2
+.PlusScore
+  print x1
+  message 4 ;newline
+ code+
+ &x1=miAborted
+ code-
+  prs "Quit: "
+  print x1
+  message 4 ;newline
+ code+
+ &x1=ListConfig(cfGameTime)
+ code-
+  prs "Time: "
+  print x1
+  message 4 ;newline
+  prs "(Game Result Problem.) Sorry, I'm afraid there will be a short delay "
+  prs "before I can tell you your next game. Please wait."
+  message 4 ;newline
+  prs " "
+  message 4 ;newline
+ code+ 
+ return
+
+.DisplayError12Part2
+ gosub @EndPrintingWithBorder
+ TextBoxDisplayed=False 
+; 
+ dv1=1               ; (for all game sprites file) Instructions scroll
+ gosub @MarkAndPreloadDv1 
+ Cursor=InvisibleCursor 
+ gosub @SetScreenOne ; set player screen
+ NewScreen=1         ;Instructions scroll
+ gosub @BuildNewScreen 
+ gosub @SetScreenTwo ; set non-player screen
+ NewScreen=1         ;Instructions scroll
+ gosub @BuildNewScreen 
+ gosub @DisplayCurrentScreen
+ gosub @DisplayCurrentScreen
+ return
+  cend ;PC
+;
+;=================================================================
+; 
+ cif PC
+.RetryGameResult
+  gosub DisplayError12Part1
+  code-
+   prs "(To abort game insert engineer card) "
+  code+
+  gosub DisplayError12Part2
+
+  x1=0
+.WaitAwhile
+  push x1
+  gosub @DisplayCurrentScreen ;Delay 5 seconds while waiting for Engineer
+  gosub @GetReaderChangeV1
+  pop x1
+  if V1=cEngineerCard then @RetryGoTo
+  add x1,c1
+  if x1<60 then WaitAwhile
+
+  gosub DisplayError12Part1
+  code-
+   prs "(Retrying) "
+  code+
+  gosub DisplayError12Part2
+
+  gosub @SpecialReceiveMessage
+  if mpStatus=0 then @CheckRetry12RX
+
+  mpMessageType=mtGameResult    ;12:GameResult
+  &ListConfig(cfTempAbortOrNot)=miAborted
+  &x1 = ListConfig(cfTerminalId)
+  &ListConfig(cfTempFrom)=x1
+  &x1=ListConfig(cfPlayTeamID)  ;team number
+  &ListConfig(cfTempTeamId)=x1
+  &x1=ListConfig(cfGameScore)
+  &ListConfig(cfTempResult)=x1  ;crystals won this game
+  &x1=ListConfig(cfGameTime)
+  &ListConfig(cfTempTime)=x1    ;time in seconds
+  gosub @SpecialTransmitMessage
+
+  &x1=ListConfig(cfNetworkFailed) ;Did GameResult get sent OK?
+  if x1<>0 then @RetryGameResult
+.RetryGoTo
+  gosub DisplayError12Part1
+  code-
+   prs "(OK) "
+  code+
+  gosub DisplayError12Part2
+  return
+
+.CheckRetry12RX
+  if mpMessageType=30 then @RetryGoTo ;GoToIdle
+
+;     ;Write to error log "Trying to GameResult."
+  mpMessageType=mtLogSysEvent
+  &x1=ListConfig(cfTerminalID)
+  &ListConfig(cfTempFrom) = x1
+  gosub @SetListString
+  gosub @ClearListString
+  x1=84  ;'T'
+  ListString(c0)=x1
+  x1=114 ;'r'
+  ListString(c1)=x1
+  x1=121 ;'y'
+  ListString(c2)=x1
+  x1=105 ;'i'
+  ListString(c3)=x1
+  x1=110 ;'n'
+  ListString(4)=x1
+  x1=103 ;'g'
+  ListString(5)=x1
+  x1=32  ;' '
+  ListString(6)=x1
+  x1=116 ;'t'
+  ListString(7)=x1
+  x1=111 ;'o'
+  ListString(8)=x1
+  x1=32  ;' '
+  ListString(9)=x1
+  x1=71  ;'G'
+  ListString(10)=x1
+  x1=97  ;'a'
+  ListString(11)=x1
+  x1=109 ;'m'
+  ListString(12)=x1
+  x1=101 ;'e'
+  ListString(13)=x1
+  x1=82  ;'R'
+  ListString(14)=x1
+  x1=101 ;'e'
+  ListString(15)=x1
+  x1=115 ;'s'
+  ListString(16)=x1
+  x1=117 ;'u'
+  ListString(17)=x1
+  x1=108 ;'l'
+  ListString(18)=x1
+  x1=116 ;'t'
+  ListString(19)=x1
+  x1=46  ;'.'
+  ListString(20)=x1
+  ListString(21)=c0
+  gosub @SpecialTransmitMessage
+  goto @RetryGameResult
+ cend
+;...e
+;
+;=================================================================
+; 
+; Initialise "screen flags" for single or dual screens
+; 
+.MazeSetUpScreen
+     ;Tell CC game has started
+ mpMessageType = mtAckHeartBeat
+ &x1 = ListConfig(cfTerminalId)
+ &ListConfig(cfTempFrom) = x1
+ x1=gsPLAY ;glob_user_status_type
+ &ListConfig(cfTempUserStatus) = x1
+ gosub @SpecialTransmitMessage
+
+ &x1=ListConfig(cfPlayNoComms)  ;Hearbeat interval for PLAY mode
+ &ListConfig(cfNoCommsTimer)=x1
+
+ &ListConfig(cfGameRTC)=c0 ;Start clock running
+
+ &x1=ListConfig(cfDualScreen)
+ if x1<>0 then InitBoth
+
+ if TestScreen<>BothScreens then GotSTsingleScreen
+ TestScreen=ScreenTwo ; can't display both screens, so 
+; default to non-player screen if both screens chosen
+.GotSTsingleScreen
+ return
+
+.InitBoth ;PC with DUAL screen driver so force both screens on.
+  TestScreen=BothScreens
+ return
+;
+;;================================================================= 
+;                         TEST ROUTINES
+;================================================================= 
+;
+; Show only the primary screen on a single screen system
+;
+.TestScreenOne
+ TestScreen=ScreenOne
+ return
+;
+;=================================================================
+;
+; Show only the secondary screen on a single screen system
+;
+.TestScreenTwo
+ TestScreen=ScreenTwo
+ return
+;
+;=================================================================
+;
+; Switch to easy level of difficulty
+;
+.ChooseEasyLevel
+ LocalDifficulty=0
+ gosub ChosenNewDifficulty
+ return
+;
+;=================================================================
+;
+; Switch to medium level of difficulty
+;
+.ChooseMediumLevel
+ LocalDifficulty=1
+ gosub ChosenNewDifficulty
+ return
+;
+;=================================================================
+;
+; Switch to difficult level of difficulty
+;
+.ChooseDifficultLevel
+ LocalDifficulty=2
+ gosub ChosenNewDifficulty
+ return
+;
+;=================================================================
+;
+.ChosenNewDifficulty
+ GameScore=1 
+ if LocalDifficulty=0 then CNDret ; Easy.      Max score=1 
+ GameScore=3 
+ if LocalDifficulty=1 then CNDret ; Medium.    Max score=3 
+ GameScore=6 
+.CNDret                           ; Difficult. Max score=6 
+ gosub @DisplayScore 
+ return
+;
+;=================================================================

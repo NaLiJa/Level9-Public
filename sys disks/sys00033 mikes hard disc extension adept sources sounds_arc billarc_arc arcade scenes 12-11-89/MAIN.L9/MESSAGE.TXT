@@ -1,0 +1,338 @@
+; Text file for Hero
+;
+; body armour...
+[1:leather armour]
+[2:studded armour]
+[3:chain mail]
+[4:splint mail]
+[5:plate armour]
+[6:perfect plate]
+[7:steel armour]
+;
+; other armour accessories
+[8:a helmet]
+[9:some gauntlets]
+[10:a cloak]
+[11:a shield]
+[12:some boots]
+[13:a shield of faith]
+;
+; hand weapons...
+[20:a dagger]
+[21:a club]
+[22:a mace]
+[23:a sword]
+[24:a long sword]
+[25:a 2 handed sword]
+[26:a flail]
+[27:a lance of death]
+[28:a flaming sword]
+;
+; range weapons...
+[35:a bow]
+[36:a crossbow]
+[37:some throwing stars] ; inventory shows quantity
+;
+; rings...
+[40:a ring of adornment]
+[41:a teleportation ring]
+[42:a regeneration ring]
+[43:a ring of hunger]
+[44:a poison protect ring]
+[45:a fire resistant ring]
+[46:a cold resistant ring]
+[47:a ring of + damage]
+[48:a ring of protection]
+[49:a telep. control ring]
+[50:a leech ring]
+[51:a invisibility ring]
+[52:a ring of strength]
+[53:an undead prot. ring]
+;
+; wands...
+[60:a wand of create monster]
+[61:a magic missile wand]
+[62:a wand of slow monster]
+[63:a polymorph a wand]
+[64:a wand of teleport away]
+[65:a wand of digging]
+[66:a wand of fire]
+[67:a wand of cold]
+[68:a wand of death]
+[69:a wand of exorcism]
+[70:a wand of cloning]
+[71:a wand of dynamite]
+[72:a wand of fire storm]
+[73:a wand of protection]
+[74:a wand of reveal traps]
+;
+; scrolls...
+[80:a wishing scroll]
+[81:a scroll of + armour worn]
+[82:a scroll of lose armour worn]
+[83:a scroll of + wielded weapon]
+[84:a scroll of lose wld. weapon]
+[85:a scroll of remove crs & mgc]
+[86:a teleport scroll]
+[87:a scroll of identify]
+[88:a scroll of fire]
+[89:a blank scroll]
+[90:a scroll of dispel magic]
+[91:a scroll of black hand]
+;
+; potions...
+[95:a potion of restore strength]
+[96:a potion of booze]
+[97:a potion of confusion]
+[98:a potion of fruit juice]
+[99:a potion of invisibility]
+[100:a potion of healing]
+[101:a potion of super healing]
+[102:a potion of instant healing]
+[103:a potion of paralysis]
+[104:a potion of poison]
+[105:a potion of gain strength]
+[106:a potion of speed]
+[107:a potion of gain level]
+[108:a potion of heroism]
+[109:a potion of super heroism]
+[110:a potion of slowness]
+;
+; treasure...
+[120:_pieces of gold. ]
+;
+; Randomly-chosen object names before identification
+;
+; These are set in groups of 17 (0-16) bacause it is a prime number.
+; Hence, to choose a list of individual names for each object, we 
+; keep adding the same random number, and subtract 16 if we get out 
+; of the list range. This method prevents the same name re-occuring, 
+; since the random number we are adding is never a factor of 17.
+;
+; NB: Do not move to message numbers that are > 255, since they are 
+; used in a table of BYTES.
+;
+; rings...
+[140:a gold ring]
+[141:a brass ring]
+[142:a shiny ring]
+[143:a sparkling ring]
+[144:a dull ring]
+[145:a wedding ring]
+[146:an engagement ring]
+[147:a diamond ring]
+[148:an emerald ring]
+[149:a glowing ring]
+[150:a thin ring]
+[151:a pale ring]
+[152:a heavy ring]
+[153:a glittering ring]
+[154:a zodiac ring]
+[155:a large ring]
+[156:a tiny ring]
+;
+; wands...
+[160:a runed wand]
+[161:a platinum wand]
+[162:a shiny wand]
+[163:a wand of ivory]
+[164:a golden wand]
+[165:a wooden wand]
+[166:a warm wand]
+[167:a cold wand]
+[168:a dark wand]
+[169:a glowing wand]
+[170:a reflective wand]
+[171:a green wand]
+[172:a large red wand]
+[173:a strong wand]
+[174:a short wand]
+[175:a blue wand]
+[176:a long wand]
+;
+; scrolls...
+[180:a scroll marked OOGI BOOGI]
+[181:a scroll marked GRIBBLE]
+[182:a scroll marked GROBBEL]
+[183:a scroll marked BURP]
+[184:a scroll marked FROOP]
+[185:a scroll marked WIDDLE]
+[186:a scroll marked DANGLE]
+[187:a scroll marked QUIBBLE]
+[188:a scroll marked OOMPA]
+[189:a scroll marked DOOBEEDOO]
+[190:a scroll marked OOMIGOOLIES]
+[191:a scroll marked PLUGH]
+[192:a scroll marked HUMKAAT]
+[193:a scroll marked PLOVER]
+[194:a scroll marked XXYZZ]
+[195:a scroll marked SESAME]
+[196:a scroll marked ABRACADABRA]
+;
+; potions...
+[200:a bubbly potion]
+[201:a cloudy potion]
+[202:a sticky potion]
+[203:a sweet-smelling potion]
+[204:a clear potion]
+[205:a steaming potion]
+[206:a hot bubbling potion]
+[207:a boiling potion]
+[208:a frosty potion]
+[209:a foul-smelling potion]
+[210:a frothing potion]
+[211:a colourful potion]
+[212:a white potion]
+[213:a strong-smelling potion]
+[214:a smelly potion]
+[215:a thick potion]
+[216:a fizzy potion]
+;
+; main menu text...
+[500:Back]
+[501:Inventory]
+[502:Examine]
+[503:Drop]
+[504:Wield]
+[505:Wear]
+[506:Range]
+[507:Eat]
+[508:Drink]
+[509:System]
+;
+; system menu...
+[520:Back]
+[521:Save]
+[522:Load]
+[523:Map]
+[524:Restart]
+[525:Quit]
+;
+; standard scrolling text...
+[598:%]
+[599:. ]
+[600:Welcome to Adept. ]
+[601:Ouch! ]
+[602:Wowee! ]
+[603:Got him! ]
+;
+; Text for titles etc.
+[620:LEVEL ]
+[621:HIT ]
+[622:GOLD ]
+[623:AC ]
+[624:WC ]
+;
+; Messages when selecting/wielding objects
+[701:You are now wearing ] ; wear body armour
+[702:You are now wearing ] ; wear accessory armour
+[703:You are now wielding ] ; wield hand weapon
+[704:You are now wearing ] ; wear ring
+[705:Your range weapon is ] ; select range weapon
+;
+; Extension messages for objects wielded etc
+[721: (wrn)] ; body armour
+[722: (wrn)] ; accessory armour
+[723: (wld)] ; hand weapon
+[724: (wrn)] ; ring
+[725: (r)] ; range
+;
+; Adjustments to magic weapons
+[730: -5]
+[731: -4]
+[732: -3]
+[733: -2]
+[734: -1]
+[736: +1]
+[737: +2]
+[738: +3]
+[739: +4]
+[740: +5]
+;
+; Misc. object messages inc. errors
+[750:You have just dropped ]
+[751:You cannot wield or wear that. ]
+[752:You can't remove your existing one. ] ; e.g. try to wear a second 
+; helmet, but existing one is cursed
+[753:Oops! It seems to be cursed! ] ; after first wielding an object
+[754:It seems to be cursed! ] ; when trying to drop cursed object
+[755:Your existing armour won't come off. ]
+[756:Your can't let go of you existing weapon. ]
+[757:You cannot carry any more. ]
+[758:It vanishes as you drop it! ] ; no more sprites for drop
+[759:It looks cursed! ] ; on examining
+;
+[767:% Welcome to experience level_]
+
+;
+; Examine messages for scrolls
+[800:I wish I was in Greenall Whitley Land... ] ; wishing
+[801:Your armour begins to glow! ] ; enchant armour
+[802:Your armour turns to dust... ] ; destroy armour
+[803:Your weapon glows brightly! ] ; enchant weapon
+[804:Your weapon turns to dust... ] ; destroy weapn
+[805:You feel free of all curses... ] ; remove curse
+[806:Your head begins to spin... ] ; teleport
+[807:Mistical runes now seem clearer... ] ; identify
+[808:You're in for a scorcher! ] ; fire
+[809:Nothing happens... ] ; blank
+[810:You feel a lack of magic... ] ; dispel magic
+[811:Your hand turns a deathly black! ] ; black hand
+;
+; Scroll didn't work (e.g. enchant armour when no armour)
+[820:Nothing happens. ]
+;
+; Monster-related messages
+[1000:Your purse feels lighter! ]
+[1001:The Nymph charms off your armour! ]
+;
+[2000:0 ]
+[2001:1 ]
+[2002:2 ]
+[2003:3 ]
+[2004:4 ]
+[2005:5 ]
+[2006:6 ]
+[2007:7 ]
+[2008:8 ]
+[2009:9 ]
+[2010:0 ]
+[2011:11 ]
+[2012:12 ]
+[2013:13 ]
+[2014:14 ]
+[2015:15 ]
+[2016:16 ]
+[2017:17 ]
+[2018:18 ]
+[2019:19 ]
+[2020:20 ]
+[2021:21 ]
+[2022:22 ]
+[2023:23 ]
+[2024:24 ]
+[2025:25 ]
+[2026:26 ]
+[2027:27 ]
+[2028:28 ]
+[2029:29 ]
+[2030:30 ]
+[2031:31 ]
+[2032:32 ]
+[2033:33 ]
+[2034:34 ]
+[2035:35 ]
+[2036:36 ]
+[2037:37 ]
+[2038:38 ]
+[2039:39 ]
+[2040:40 ]
+[2041:41 ]
+[2042:42 ]
+[2043:43 ]
+[2044:44 ]
+[2045:45 ]
+[2046:46 ]
+[2047:47 ]
+[2048:48 ]
+[2049:49 ]

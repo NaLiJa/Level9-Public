@@ -1,0 +1,48 @@
+         AEON SAVE/RESTORE. COPYRIGHT (C) 1988. LEVEL 9 
+         ---------------------------------------------- 
+
+Aeon is intended for an entirely ROM-based micro, without disc or 
+tape on which to store a saved position. Accordingly, the only way 
+to save a position seems to be to display some data on the screen, 
+for the player to write down and re-enter next game. 
+
+This strategy severely restricts the amount of information that we 
+can reasonably save. It is not practical to save the location of 
+every object, for example. So the following strategies are used to 
+reduce the amount of data to what will fit in 8 letters:
+1) Return the player to the beginning of the current mountain level, 
+   so that we don't need his position. 
+2) Put a shop there, so that his ordinary possessions can be sold. 
+   We just store his amount of gold and let him buy back anything 
+   he needs next game. 
+3) For each special object, a single bit says if it's carried. 
+4) The map is semi-random, but we need only store the random number 
+   seed used to build the current level. 
+5) Code the amount of gold on a log scale, so that small numbers 
+   are held accurately and large numbers can also be stored without 
+   needing too many bits. 
+6) Don't store health, or experience within level. Reset them to 
+   100% and 0 respectively. 
+
+
+CODE DETAILS. The 8 letter code is made up as follows (using upper 
+case letters only): 
+* Character Level (4 bits)
+* Gold (8 bits)
+* Level of Mountain (4 bits)
+* Randomstand there until you do something to 
+trigger them off - but in "Ingrid's Back" it's actually fun to 
+follow the other gnomes and watch as they go about their lives. 
+
+
+                  Level 9 are on stand 3049
+
+ion. Accordingly, the only way 
+to save a position seems to be to display some data on the screen, 
+for the player to write down and re-enter next game. 
+
+This strategy severely restricts the amount of information that we 
+can reasonably save. It is not practical to save the location tton except RESTART (which restarts) to select the current letter. 
+When the 8 letters have been chosen, the game checks if they are a 
+valid code and, if so, you start at the saved position. (If invalid, 
+a head shakes "NO" and you get to try again)

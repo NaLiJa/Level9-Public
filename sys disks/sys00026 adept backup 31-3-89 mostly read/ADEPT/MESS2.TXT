@@ -1,0 +1,338 @@
+; Text file for Hero
+; Now to be turned into unsquashed text (becos of speed problems)
+; and addressed using acode table number 4. (which is actually a group
+; of tables all to do with the menu side of things.) GR14/10/88
+
+; body armour...
+M1       ds.b 'leather armour',0
+M2       ds.b 'studded armour',0
+M3       ds.b 'chain mail',0
+M4       ds.b 'splint mail',0
+M5       ds.b 'plate armour',0
+M6       ds.b 'perfect plate',0
+M7       ds.b 'steel armour',0
+;
+; other armour accessories
+M8       ds.b 'a helmet',0
+M9       ds.b 'some gauntlets',0
+M10       ds.b 'a cloak',0
+M11       ds.b 'a shield',0
+M12       ds.b 'some boots',0
+M13       ds.b 'a shield of faith',0
+;
+; hand weapons...
+M20       ds.b 'a dagger',0
+M21       ds.b 'a club',0
+M22       ds.b 'a mace',0
+M23       ds.b 'a sword',0
+M24       ds.b 'a long sword',0
+M25       ds.b 'a 2 handed sword',0
+M26       ds.b 'a flail',0
+M27       ds.b 'a lance of death',0
+M28       ds.b 'a flaming sword',0
+;
+; range weapons...
+M35       ds.b 'a bow',0
+M36       ds.b 'a crossbow',0
+M37       ds.b 'some throwing stars',0 ; inventory shows quantity
+;
+; rings...
+M40       ds.b 'a ring of adornment',0
+M41       ds.b 'a teleportation ring',0
+M42       ds.b 'a regeneration ring',0
+M43       ds.b 'a ring of hunger',0
+M44       ds.b 'a poison protect ring',0
+M45       ds.b 'a fire resistant ring',0
+M46       ds.b 'a cold resistant ring',0
+M47       ds.b 'a ring of + damage',0
+M48       ds.b 'a ring of protection',0
+M49       ds.b 'a telep. control ring',0
+M50       ds.b 'a leech ring',0
+M51       ds.b 'a invisibility ring',0
+M52       ds.b 'a ring of strength',0
+M53       ds.b 'an undead prot. ring',0
+;
+; wands...
+M60       ds.b 'a wand of create monster',0
+M61       ds.b 'a magic missile wand',0
+M62       ds.b 'a wand of slow monster',0
+M63       ds.b 'a polymorph a wand',0
+M64       ds.b 'a wand of teleport away',0
+M65       ds.b 'a wand of digging',0
+M66       ds.b 'a wand of fire',0
+M67       ds.b 'a wand of cold',0
+M68       ds.b 'a wand of death',0
+M69       ds.b 'a wand of exorcism',0
+M70       ds.b 'a wand of cloning',0
+M71       ds.b 'a wand of dynamite',0
+M72       ds.b 'a wand of fire storm',0
+M73       ds.b 'a wand of protection',0
+M74       ds.b 'a wand of reveal traps',0
+;
+; scrolls...
+M80       ds.b 'a wishing scroll',0
+M81       ds.b 'a scroll of + armour worn',0
+M82       ds.b 'a scroll of lose armour worn',0
+M83       ds.b 'a scroll of + wielded weapon',0
+M84       ds.b 'a scroll of lose wld. weapon',0
+M85       ds.b 'a scroll of remove crs & mgc',0
+M86       ds.b 'a teleport scroll',0
+M87       ds.b 'a scroll of identify',0
+M88       ds.b 'a scroll of fire',0
+M89       ds.b 'a blank scroll',0
+M90       ds.b 'a scroll of dispel magic',0
+M91       ds.b 'a scroll of black hand',0
+;
+; potions...
+M95       ds.b 'a potion of restore strength',0
+M96       ds.b 'a potion of booze',0
+M97       ds.b 'a potion of confusion',0
+M98       ds.b 'a potion of fruit juice',0
+M99       ds.b 'a potion of invisibility',0
+M100       ds.b 'a potion of healing',0
+M101       ds.b 'a potion of super healing',0
+M102       ds.b 'a potion of instant healing',0
+M103       ds.b 'a potion of paralysis',0
+M104       ds.b 'a potion of poison',0
+M105       ds.b 'a potion of gain strength',0
+M106       ds.b 'a potion of speed',0
+M107       ds.b 'a potion of gain level',0
+M108       ds.b 'a potion of heroism',0
+M109       ds.b 'a potion of super heroism',0
+M110       ds.b 'a potion of slowness',0
+;
+; treasure...
+M120       ds.b 'copies of Star Trek',0
+;
+; Randomly-chosen object names before identification
+;
+; These are set in groups of 17 (0-16) bacause it is a prime number.
+; Hence, to choose a list of individual names for each object, we 
+; keep adding the same random number, and subtract 16 if we get out 
+; of the list range. This method prevents the same name re-occuring, 
+; since the random number we are adding is never a factor of 17.
+;
+; NB       ds.b ' Do not move to message numbers that are > 255, since they are 
+; used in a table of BYTES.
+;
+; rings...
+M140       ds.b 'a gold ring',0
+M141       ds.b 'a brass ring',0
+M142       ds.b 'a shiny ring',0
+M143       ds.b 'a sparkling ring',0
+M144       ds.b 'a dull ring',0
+M145       ds.b 'a wedding ring',0
+M146       ds.b 'an engagement ring',0
+M147       ds.b 'a diamond ring',0
+M148       ds.b 'an emerald ring',0
+M149       ds.b 'a glowing ring',0
+M150       ds.b 'a thin ring',0
+M151       ds.b 'a pale ring',0
+M152       ds.b 'a heavy ring',0
+M153       ds.b 'a glittering ring',0
+M154       ds.b 'a zodiac ring',0
+M155       ds.b 'a large ring',0
+M156       ds.b 'a tiny ring',0
+;
+; wands...
+M160       ds.b 'a runed wand',0
+M161       ds.b 'a platinum wand',0
+M162       ds.b 'a shiny wand',0
+M163       ds.b 'a wand of ivory',0
+M164       ds.b 'a golden wand',0
+M165       ds.b 'a wooden wand',0
+M166       ds.b 'a warm wand',0
+M167       ds.b 'a cold wand',0
+M168       ds.b 'a dark wand',0
+M169       ds.b 'a glowing wand',0
+M170       ds.b 'a reflective wand',0
+M171       ds.b 'a green wand',0
+M172       ds.b 'a large red wand',0
+M173       ds.b 'a strong wand',0
+M174       ds.b 'a short wand',0
+M175       ds.b 'a blue wand',0
+M176       ds.b 'a long wand',0
+;
+; scrolls...
+M180       ds.b 'a scroll marked OOGI BOOGI',0
+M181       ds.b 'a scroll marked GRIBBLE',0
+M182       ds.b 'a scroll marked GROBBEL',0
+M183       ds.b 'a scroll marked BURP',0
+M184       ds.b 'a scroll marked FROOP',0
+M185       ds.b 'a scroll marked WIDDLE',0
+M186       ds.b 'a scroll marked DANGLE',0
+M187       ds.b 'a scroll marked QUIBBLE',0
+M188       ds.b 'a scroll marked OOMPA',0
+M189       ds.b 'a scroll marked DOOBEEDOO',0
+M190       ds.b 'a scroll marked OOMIGOOLIES',0
+M191       ds.b 'a scroll marked PLUGH',0
+M192       ds.b 'a scroll marked HUMKAAT',0
+M193       ds.b 'a scroll marked PLOVER',0
+M194       ds.b 'a scroll marked XXYZZ',0
+M195       ds.b 'a scroll marked SESAME',0
+M196       ds.b 'a scroll marked ABRACADABRA',0
+;
+; potions...
+M200       ds.b 'a bubbly potion',0
+M201       ds.b 'a cloudy potion',0
+M202       ds.b 'a sticky potion',0
+M203       ds.b 'a sweet-smelling potion',0
+M204       ds.b 'a clear potion',0
+M205       ds.b 'a steaming potion',0
+M206       ds.b 'a hot bubbling potion',0
+M207       ds.b 'a boiling potion',0
+M208       ds.b 'a frosty potion',0
+M209       ds.b 'a foul-smelling potion',0
+M210       ds.b 'a frothing potion',0
+M211       ds.b 'a colourful potion',0
+M212       ds.b 'a white potion',0
+M213       ds.b 'a strong-smelling potion',0
+M214       ds.b 'a smelly potion',0
+M215       ds.b 'a thick potion',0
+M216       ds.b 'a fizzy potion',0
+;
+; main menu text...
+M500       ds.b 'Back',0
+M501       ds.b 'Inventory',0
+M502       ds.b 'Examine',0
+M503       ds.b 'Drop',0
+M504       ds.b 'Wield',0
+M505       ds.b 'Wear',0
+M506       ds.b 'Range',0
+M507       ds.b 'Eat',0
+M508       ds.b 'Drink',0
+M509       ds.b 'System',0
+;
+; system menu...
+M520       ds.b 'Back',0
+M521       ds.b 'Save',0
+M522       ds.b 'Load',0
+M523       ds.b 'Map',0
+M524       ds.b 'Restart',0
+M525       ds.b 'Quit',0
+;
+; standard scrolling text...
+M598       ds.b '%',0
+M599       ds.b '. ',0
+M600       ds.b 'Welcome to Hero, from Level 9 Computing. ',0
+M601       ds.b 'Ouch! ',0
+M602       ds.b 'Wowee! ',0
+M603       ds.b 'Got him! ',0
+;
+; Text for titles etc.
+M620       ds.b 'LEVEL ',0
+M621       ds.b 'HIT ',0
+M622       ds.b 'GOLD ',0
+M623       ds.b 'AC ',0
+M624       ds.b 'WC ',0
+;
+; Messages when selecting/wielding objects
+M701       ds.b 'You are now wearing ',0 ; wear body armour
+M702       ds.b 'You are now wearing ',0 ; wear accessory armour
+M703       ds.b 'You are now wielding ',0 ; wield hand weapon
+M704       ds.b 'You are now wearing ',0 ; wear ring
+M705       ds.b 'Your range weapon is ',0 ; select range weapon
+;
+; Extension messages for objects wielded etc
+M721       ds.b ' (wrn)',0 ; body armour
+M722       ds.b ' (wrn)',0 ; accessory armour
+M723       ds.b ' (wld)',0 ; hand weapon
+M724       ds.b ' (wrn)',0 ; ring
+M725       ds.b ' (r)',0 ; range
+;
+; Adjustments to magic weapons
+M730       ds.b ' -5',0
+M731       ds.b ' -4',0
+M732       ds.b ' -3',0
+M733       ds.b ' -2',0
+M734       ds.b ' -1',0
+M736       ds.b ' +1',0
+M737       ds.b ' +2',0
+M738       ds.b ' +3',0
+M739       ds.b ' +4',0
+M740       ds.b ' +5',0
+;
+; Misc. object messages inc. errors
+M750       ds.b 'You have just dropped ',0
+M751       ds.b 'You cannot wield or wear that. ',0
+M752       ds.b 'You can't remove your existing one. ',0 ; e.g. try to wear a second 
+; helmet, but existing one is cursed
+M753       ds.b 'Oops! It seems to be cursed! ',0 ; after first wielding an object
+M754       ds.b 'It seems to be cursed! ',0 ; when trying to drop cursed object
+M755       ds.b 'Your existing armour won't come off. ',0
+M756       ds.b 'Your can't let go of you existing weapon. ',0
+M757       ds.b 'You cannot carry any more. ',0
+M758       ds.b 'It vanishes as you drop it! ',0 ; no more sprites for drop
+M759       ds.b 'It looks cursed! ',0 ; on examining
+;
+; Examine messages for scrolls
+M800       ds.b 'I wish I was in Greenall Whitley Land... ',0 ; wishing
+M801       ds.b 'Your armour begins to glow! ',0 ; enchant armour
+M802       ds.b 'Your armour turns to dust... ',0 ; destroy armour
+M803       ds.b 'Your weapon glows brightly! ',0 ; enchant weapon
+M804       ds.b 'Your weapon turns to dust... ',0 ; destroy weapn
+M805       ds.b 'You feel free of all curses... ',0 ; remove curse
+M806       ds.b 'Your head begins to spin... ',0 ; teleport
+M807       ds.b 'Mistical runes now seem clearer... ',0 ; identify
+M808       ds.b 'You're in for a scorcher! ',0 ; fire
+M809       ds.b 'Nothing happens... ',0 ; blank
+M810       ds.b 'You feel a lack of magic... ',0 ; dispel magic
+M811       ds.b 'Your hand turns a deathly black! ',0 ; black hand
+;
+; Scroll didn't work (e.g. enchant armour when no armour)
+M820       ds.b 'Nothing happens. ',0
+;
+; Monster-related messages
+M1000       ds.b 'Your purse feels lighter! ',0
+M1001       ds.b 'The Nymph charms off your armour! ',0
+;
+M2000       ds.b '0 ',0
+M2001       ds.b '1 ',0
+M2002       ds.b '2 ',0
+M2003       ds.b '3 ',0
+M2004       ds.b '4 ',0
+M2005       ds.b '5 ',0
+M2006       ds.b '6 ',0
+M2007       ds.b '7 ',0
+M2008       ds.b '8 ',0
+M2009       ds.b '9 ',0
+M2010       ds.b '0 ',0
+M2011       ds.b '11 ',0
+M2012       ds.b '12 ',0
+M2013       ds.b '13 ',0
+M2014       ds.b '14 ',0
+M2015       ds.b '15 ',0
+M2016       ds.b '16 ',0
+M2017       ds.b '17 ',0
+M2018       ds.b '18 ',0
+M2019       ds.b '19 ',0
+M2020       ds.b '20 ',0
+M2021       ds.b '21 ',0
+M2022       ds.b '22 ',0
+M2023       ds.b '23 ',0
+M2024       ds.b '24 ',0
+M2025       ds.b '25 ',0
+M2026       ds.b '26 ',0
+M2027       ds.b '27 ',0
+M2028       ds.b '28 ',0
+M2029       ds.b '29 ',0
+M2030       ds.b '30 ',0
+M2031       ds.b '31 ',0
+M2032       ds.b '32 ',0
+M2033       ds.b '33 ',0
+M2034       ds.b '34 ',0
+M2035       ds.b '35 ',0
+M2036       ds.b '36 ',0
+M2037       ds.b '37 ',0
+M2038       ds.b '38 ',0
+M2039       ds.b '39 ',0
+M2040       ds.b '40 ',0
+M2041       ds.b '41 ',0
+M2042       ds.b '42 ',0
+M2043       ds.b '43 ',0
+M2044       ds.b '44 ',0
+M2045       ds.b '45 ',0
+M2046       ds.b '46 ',0
+M2047       ds.b '47 ',0
+M2048       ds.b '48 ',0
+M2049       ds.b '49 ',0

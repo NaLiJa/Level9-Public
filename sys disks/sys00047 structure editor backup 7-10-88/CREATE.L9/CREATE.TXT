@@ -1,0 +1,2268 @@
+; Acode controller for Hero
+;
+;
+; known acode compiler bugs:
+; short forward branch in MC mode is compiled as $6000
+; (Which is actually the sign to 68000 to expect a subsequent
+; 16 bit argument)
+;
+ var
+ V1 ; must be first var
+ V2 ; must be second var
+ v3 v4 v5 v6 v7 ; etc..
+
+ x1 x2 x3 x4 x5 x6 ; misc temporary vars
+ m1 ; message number
+ LoopCounter1 LoopCounter2
+ c0 c1 c2 c3 c4
+ LeftMargin TopMargin HighlightedLine Line NumEntries RepeatCount SelectedLine
+ FirstLine
+ l0 l1 l2 ; Linked list temporary workspace
+ LLFree ; pointer to Linked list free space chain
+ CurrentMenu HS0 HS1
+ PreviousObjectInfo ObjectInfo
+ StarCounter
+ xmax ymax x y speed result xsize ysize zsize OldXSize OldYSize
+ EditX EditY
+ RoomX RoomY
+ room
+;; xstep ystep
+ size
+ PlayerSpriteOffset
+ StraightLength
+ xDigStep yDigStep
+ DigStep
+ dir
+ RoomsPlaced
+ TrialPlacements AttemptedNewRooms
+ CharactersInBuffer OutputBufferReadPtr
+ AmountOfScroll
+ TimeTillSampleBuffer SampledCharInBuffer
+ verb
+ PlayerX PlayerY
+ actor
+ BaseSprite
+ ObjectX ObjectY ObjectMaxX ObjectMaxY
+ ObjectCurrentXSize ObjectCurrentYSize
+ DisplayX DisplayY
+ EndOfStructureBuffer
+ ObjectNumber
+ Header
+ ScrollX ScrollY
+ LowKey HiKey
+ UpperContext LowerContext CurrentYBase
+ ObjectNumberType
+ MinXHZ MinCompressed MinCell
+ CurrentObject ; object to add to raster etc.
+ UpperContextLetter LowerContextLetter
+ PixelX PixelY Pixelxsize Pixelysize EditMode PixelCursorIsOn
+ bp0save bp1save bp2save bp3save
+ SavedObjectNumber
+ MouseX MouseY
+ PixelColour
+
+table
+;; ObjectBuffer=1
+ StructureBuffer=2
+ ContextTable=3
+; Workspace=1
+; OutputBuffer=2 ; used solely by acode
+; LL=3
+; MenuTable=4
+; RoomDefns=5
+; RoomMap=6 ; map giving room numbers etc. for follow. Word Based.
+; List7=7
+; List8=8 ; permament data special to each game
+ List9=9
+ List17=17 ; 64 bytes of scratchpad for Driver block
+ List18=18 ; scratchpad area (64K on ST)
+ List19=19
+ TempMovedSprite=20
+ PermMovedSprite=21
+ TempFixedSprite=22
+ PermFixedSprite=23
+ TextBuffer=24 ; filled whenever WordWs(TextBufferOffset)<>0
+
+ Map=27 ; map giving block numbers for display etc. Word Based.
+ SpriteTable=28
+ LongWS=29
+ WordWS=30
+ ByteWS=31
+
+const
+;-------
+; co-ordinate ranges for use by mouse handler code.
+ MinXUpperDisplayArea=16
+ MaxXUpperDisplayArea=200
+ MinYUpperDisplayArea=0
+ MaxYUpperDisplayArea=200
+
+ MinXLowerDisplayArea=16
+ MaxXLowerDisplayArea=200
+ MinYLowerDisplayArea=100
+ MaxYLowerDisplayArea=200
+
+ MinXColourBar=304
+ MinYColourBar=32
+ MaxYColourBar=160
+ SizeColourBarElement=8
+
+;-
+ RasterType=1
+ XHZType=2
+ CompressedType=3
+ CellType=4
+
+Blocks=0 ; default editing mode - i.e. EditMode
+Pixels=1 ; an editing mode
+;-
+; ObjectBufferSize=800 ; in bytes = (ObjectXSize+ObjectYSize)*2
+; ObjectXSize=20 ; horizontal size in 16x16 blocks
+; ObjectXSizeMinus1=19
+; ObjectYSize=20
+; ObjectYSizeMinus1=19
+; sizes for nearly full screen...
+ ScreenXSize=15
+ ScreenYSize=5
+ ScreenXSizePixels=241 ; pixels: =ScreenXSize*16+1
+ ScreenYSizePixels=161 ; pixels: =ScreenYSize*16+1
+
+; reduced screen size for testing:
+; ScreenXSize=10
+; ScreenYSize=7
+; ScreenXSizePixels=161 ; pixels: =ScreenXSize*16+1
+; ScreenYSizePixels=113 ; pixels: =ScreenYSize*16+1
+;---
+ false=0
+ true=1
+;----
+
+
+
+;----
+ ScreenXBlocks=50
+ ScreenXBlocksTimes2=100
+ ScreenYBlocks=50
+ MapSize=5000 ; ScreenXBlocks*ScreenYBlocks*2 (word based map table)
+
+ UpMapStep=65546 ; -ScreenXBlocks*2
+ RightMapStep=2 ; word-based map
+ DownMapStep=100 ; ScreenXBlocks*2
+ LeftMapStep=65534 ; word-based map
+
+
+ SpriteTableSize=3600 ; MaxMovingSprites*48
+;
+; output buffer offsets (i.e. list 2 offsets)
+ StartOutputBuffer=0
+;; EndOutputBuffer=255
+ EndOutputBufferPlus1=256 ; offset of first byte after used area of buffer
+ SizeOutputBuffer=256 ; EndOutputBufferPlus1-StartOutputBuffer
+ StartScreenLineBuffer=256
+ EndScreenLineBuffer=296
+;--------
+; message manifest constants...
+ cr=198
+;---
+; offsets within LongWs
+ HiLongRandomSeed=8 ; long value
+ LoLongRandomSeed=8 ; long value
+;------
+; offsets within WordWs
+ WordCursorXPos=0
+ WordCursorYPos=2
+ WordFrameTime=4
+ WordPlayer1SpriteOffset=6
+
+ WordScreenXPos=8
+ WordScreenYPos=10
+ WordScreenXMax=12
+ WordScreenYMax=14
+ WordPlayerXMax=16
+ WordPlayerYMax=18
+
+ WordScreenXBlocks=20
+ WordScreenYBlocks=22
+ WordXPosSave=24
+ WordYPosSave=26
+ WordTextBufferOffset=28
+ WordFreeSprites=30
+ WordMouseXDistance=32
+ WordMouseYDistance=34
+;--------
+; offsets within ByteWs
+ ByteJoystickStatus=0
+ ByteLastKeyPressed=1
+; ByteFrameReadyFlag=2
+ ByteInvertFlag=3
+ ByteBreakPointArmed=4
+ ByteScrollStep=5
+ ByteCurrentWeapon=6
+
+ ByteFrameReadyFlag=9
+ ByteStarPhase=10
+
+; offsets within permament sprite data block
+ StationaryAnimationOffset=14
+ MovingAnimationOffset=16
+ FightAnimationOffset=18
+ ThrowAnimationOffset=20
+ InitialHitPointOffset=22
+ InitialBlowStrengthOffset=24
+ TimeBetweenBlowsOffset=26
+ NumAnimationOffset=27
+ TypeOffset=28
+ SpeedOffset=29
+ NullMovesOffset=30
+ DistanceOffset=35
+ AddDirOffset=37
+
+;CDWithPlayer equ 0 * bit 0
+;CDWithMissiles equ 1
+;CDWithMonsters equ 2
+;CDWithBG equ 3 * bit 3
+;CDWithObject equ 4
+;CDWithInvisibles equ 5
+;CDWithMonsterMissile equ 6
+
+ PlayerMask=1
+ MissileMask=2
+ MonsterMask=4
+ BGMask=8
+ ObjectMask=16
+ InvisibleMask=32
+ MonsterMissileMask=64
+
+ PlayerType=1
+ MissileType=2
+ MonsterType=4
+ BGType=8
+ ObjectType=16
+ InvisibleType=32
+ MonsterMissileType=64
+
+; offsets within temporary sprite data block
+ xspeedOffset=4
+ YSpeedOffset=6
+ XPosOffset=8
+ YPosOffset=10
+ DataPtrOffset=12 ; LONG
+ LoDataPtrOffset=14
+ NameOffset=24
+ HitPointOffset=26
+ BlowStrengthOffset=28
+ TimeToNextBlowOffset=30
+ ViewOffset=31
+ StageOffset=32 ; animation stage
+ LifeCounterOffset=36
+ AnimationOffset=38
+
+; offsets of linked list pointers within LL list.
+; note that many of these are referenced by MenuTable
+ LLPlayerInv=0 ; ll showing player's inventory
+ LLRangedWeapons=2 ; ll giving available ranged weapons
+ LLEntrySize=10
+ LLTableSize=250
+
+; offsets of entries in LL table.
+ InvNameOffset=2 ; contains a word giving the "name" of the
+ RWNameOffset=2 ; holds word value
+ RWTypeOffset=4 ; holds byte value
+; object held. This will usually by the same as the number
+; of the sprite data.
+
+MenuDelay=1000 ; slow down menu to prevent flickering display
+
+; offsets within RoomData
+ ExitOffsetBase=4
+ North=2
+ East=4
+ South=6
+ West=8
+
+;
+; offsets within Workspace List
+ RoomTableOffset=0 ; gives number of exits used from each
+ RoomTableEntrySize=8 ; room - used in maze drawing
+
+; offsets within list7
+ NextAddDirTableOffset=10
+ ConvertViewToXY=38 ; 18+20 because index into table is -5..+5
+ ConvertViewToView=67 ; 62+5 """     ""    ""    ""  ""    ""
+
+;-------
+; sprite data numbers...
+; i.e. NAMES of OBJECTS (objects)
+ user=256
+ Bottle=14
+ Sword=15
+ Shield=16
+ Ring=17
+ Wand=18
+ Scroll=19
+ Gold=20
+ Club=21
+
+
+;---------
+ MenuHeight=8
+ MenuPixelWidth=142
+ MenuPixelHeight=64
+
+;----
+
+ begin
+ data @Start,@Start ; Dummy - overwritten by "ToMCEnd" vector
+.Start
+ code +
+
+ data @AcodeFns,@MCFns ; pointers to the major jump blocks
+
+
+.AcodeFns
+; jump table for acode functions called from MC
+ goto @AcodeStart
+ goto @FGSpecials
+ goto @FGSpecialsMovedSprite
+ goto @BGSpecials
+ goto @Dummy ; SpecialCollision
+ goto @DAMSSpecials
+
+.MCFns
+; jump table for MC functions called from Acode
+; reserve 6 bytes per jump - absolute, long jumps
+; poked in by MC
+.MCHeroOnceOnlyInit            data @Dummy,@Dummy,@Dummy ;0
+.MCHeroInit                    data @Dummy,@Dummy,@Dummy ;1
+.MCClearScreen                 data @Dummy,@Dummy,@Dummy ;2
+
+.MCMoveScreen                  data @Dummy,@Dummy,@Dummy ;3
+.MCSpecials                    data @Dummy,@Dummy,@Dummy ;4
+.MCBuildBackground             data @Dummy,@Dummy,@Dummy ;5
+.MCDisplayDestroyedWalls       data @Dummy,@Dummy,@Dummy ;6
+.MCMoveAllSprites              data @Dummy,@Dummy,@Dummy ;7
+.MCDisplayAllSprites           data @Dummy,@Dummy,@Dummy ;8
+.MCTrimEdges                   data @Dummy,@Dummy,@Dummy ;9
+.MCDisplayTextLine             data @Dummy,@Dummy,@Dummy ;a
+.MCDisplayUpperTextLine        data @Dummy,@Dummy,@Dummy ;b
+.MCDoAllTimers                 data @Dummy,@Dummy,@Dummy ;c
+.MCCalculateMemoryFree         data @Dummy,@Dummy,@Dummy ;d
+.MCHeroInput                   data @dummy,@Dummy,@Dummy ;e
+.MCOswrchV1                    data @Dummy,@Dummy,@Dummy ;f
+.MCInvertedOswrchV1            data @Dummy,@Dummy,@Dummy ;10
+.MCDestroyTempMoved            data @Dummy,@Dummy,@Dummy ;11
+.MCDestroyTempFixed            data @Dummy,@Dummy,@Dummy ;12
+.MCCloseDown                   data @Dummy,@Dummy,@Dummy ;13
+.MCFindSprite                  data @Dummy,@Dummy,@Dummy ;14
+.MCSetUpNewSprite              data @Dummy,@Dummy,@Dummy ;15
+.MCSprite                      data @Dummy,@Dummy,@Dummy ;16
+.MCHandlePlayerInput           data @Dummy,@Dummy,@Dummy ;17
+.MCReturnFrameTime             data @Dummy,@Dummy,@Dummy ;18
+.MCUpdateFrameTime             data @Dummy,@Dummy,@Dummy ;19
+.MCClearRectangle              data @Dummy,@Dummy,@Dummy ;1d
+.MCMapBuildBackground          data @Dummy,@Dummy,@Dummy ;1a
+.MCPreScrollMap                data @Dummy,@Dummy,@Dummy ;1b
+.MCSpecialCheck                data @Dummy,@Dummy,@Dummy ;1c
+.MCStartBigExplosion           data @Dummy,@Dummy,@Dummy ;1d
+.MCScrollTextLine              data @Dummy,@Dummy,@Dummy ;1e
+.MCReCalcSpriteGraphics        data @Dummy,@Dummy,@Dummy ;1f
+.MCOsrdch                      data @Dummy,@Dummy,@Dummy ;20
+.MCChecksum                    data @Dummy,@Dummy,@Dummy ;21
+.MCInit3D                      data @Dummy,@Dummy,@Dummy ;22
+.MCDrawObject                  data @Dummy,@Dummy,@Dummy ;23
+.MCBuildViewMap                data @Dummy,@Dummy,@Dummy ;24
+.MCDisplayViewMap              data @Dummy,@Dummy,@Dummy ;25
+.MCDisplay3DSprite             data @Dummy,@Dummy,@Dummy ;26
+.MCReturnSpriteAddress         data @Dummy,@Dummy,@Dummy ;27
+.MCNoClipSprite                data @Dummy,@Dummy,@Dummy ;28
+.MCCalcScreenAddress           data @Dummy,@Dummy,@Dummy ;29
+.MCSaveFile                    data @Dummy,@Dummy,@Dummy ;2a
+.MCLoadFile                    data @Dummy,@Dummy,@Dummy ;2b
+.MCCopy                        data @Dummy,@Dummy,@Dummy ;2c
+
+
+.Dummy
+ code -
+ prs " bug!"
+
+ code +
+.AcodeDelay
+; gosub @Delay
+; goto @HeroLoop
+
+.AcodeStart
+ c0=0
+ c1=1
+ c2=2
+ c3=3
+ c4=4
+ gosub @MCHeroOnceOnlyInit
+.RestartGame
+ gosub @MCHeroInit
+ code -
+ code +
+;; gosub @InitSpriteTable
+ x1=0
+ LongWS(HiLongRandomSeed)=x1
+ LongWS(LoLongRandomSeed)=x1
+ &StructureBuffer(c0)=c0
+ EndOfStructureBuffer=0 ; ptr to null entry
+ ObjectNumber=1
+;; gosub @CreateObject
+
+
+; test code...
+ x1=16
+ &StructureBuffer(0)=x1
+ EndOfStructureBuffer=24
+ x1=3 ; 3 blocks wide, 2 down
+ StructureBuffer(2)=x1
+ StructureBuffer(3)=c0 ; z size
+ &StructureBuffer(4)=c1
+ x1=8
+ &StructureBuffer(6)=x1
+ x1=16
+ &StructureBuffer(8)=x1
+ x1=24
+ &StructureBuffer(10)=x1
+ x1=32
+ &StructureBuffer(12)=x1
+ x1=40
+ &StructureBuffer(14)=x1
+; object 2
+ x1=8
+ &StructureBuffer(16)=x1
+ StructureBuffer(18)=c2
+ StructureBuffer(19)=c0
+ x1=48
+ &StructureBuffer(20)=x1
+ x1=56
+ &StructureBuffer(22)=x1
+ &StructureBuffer(24)=c0 ; end of table
+
+; gosub @FindObjectNumber
+; gosub @DecodeHeader
+; sub xsize,c1
+; gosub @ChangeSizeObjectNumber
+
+; end of test code.
+
+ ScrollX=0
+ ScrollY=0
+ EditX=0
+ EditY=0
+ gosub @InitContextTable
+ UpperContextLetter=113 ; 'q'
+ UpperContext=0
+ LowerContextLetter=119 ; 'w'
+ LowerContext=16
+ CurrentYBase=0 ; currently edit the top one
+
+ MinXHZ=50
+ MinCompressed=100
+ MinCell=2000
+
+code - ; reset registers etc.
+code +
+; load a neochrome format file into scratchpad area (64K)
+; which starts at List18
+ v1=18 ; load into list 18
+ v2=0 ; length (redundant)
+ x1=69 ; 'e'
+ list17(8)=x1
+ x1=68 ; 'd'
+ list17(9)=x1
+ x1=73 ; 'i'
+ list17(10)=x1
+ x1=84 ; 't'
+ list17(11)=x1
+ x1=79 ; 'o'
+ list17(12)=x1
+ x1=82 ; 'r'
+ list17(13)=x1
+ x1=46 ; '.'
+ list17(14)=x1
+ x1=78 ; 'n'
+ list17(15)=x1
+ x1=69 ; 'e'
+ list17(16)=x1
+ x1=79 ; 'o'
+ list17(17)=x1
+ list17(18)=c0
+ gosub @MCLoadFile
+
+.DCSLoop
+; gosub @MCClearScreen
+
+; copy neo picture to screen...
+ &WordWS(WordCursorXPos)=c0
+ &WordWS(WordCursorYPos)=c0
+ gosub @MCCalcScreenAddress ; get List19 as start of screen
+; x1=128 ; read ptr from neo screen
+; x2=0 ; write ptr
+;.LoadScreenLoop
+; &x3=List18(x1)
+; &List19(x2)=x3
+; add x1,c2
+; add x2,c2
+; if x2<32000 then loadScreenLoop
+ v1=18 ; source for copy is list18
+ v2=128 ; offset within source list
+ v3=19 ; destination is list19
+ v4=0 ; offset within dest list
+ v5=16000 ; no. of words to copy
+ gosub @MCCopy
+
+
+
+ gosub @SaveCurrentContext
+
+ x1=UpperContext
+ gosub @DecodeContextX1
+ v3=0 ; y position of upper half of screen
+ m1=UpperContextLetter
+ gosub @DisplayObjectArea
+
+ x1=LowerContext
+ gosub @DecodeContextX1
+ v3=100 ; yposition of lower half of screen
+ m1=LowerContextLetter
+ gosub @DisplayObjectArea
+
+ gosub @FindCurrentContext ; returns x2=current context
+ x1=x2
+ gosub @DecodeContextX1
+
+ gosub @MoveMouse
+ gosub @NewHandleKeyPress
+ gosub @PrintKey
+ gosub @DisplayColourBar
+ gosub @DisplayMouse
+
+ gosub @DisplayFrame
+ gosub @WaitForFrame
+
+ goto @DCSLoop
+
+;----
+.DisplayObjectArea
+; display the current object area at y position v3
+ push v3
+  gosub @DisplayContextLetterM1
+  gosub @DisplayObjectNumber ; DisplayCurrentObjectV3
+ pop v3
+ v2=240
+ &WordWS(WordCursorXPos)=v2
+ &WordWS(WordCursorYPos)=v3
+code -
+ message cr
+; prs "select. "
+ message cr
+ print ObjectNumber
+ message cr
+code +
+
+ x1=240
+ &WordWs(WordCursorXPos)=x1
+ x1=32
+ add x1,CurrentYBase
+ &WordWS(WordCursorYPos)=x1
+ gosub @GetObjectType
+code -
+ message cr
+ m1=600
+ add m1,ObjectNumberType
+ message m1
+
+code +
+.DONRet
+ return 
+;---
+.DisplayCell
+ v2=16 ; x
+ v3=0
+ v1=ObjectNumber
+ sub v1,MinCell
+ gosub @MCNoClipSprite
+ return
+;---
+.DisplayContextLetterM1
+; v3= y coord
+code -
+ message cr
+code +
+ v2=300
+ &WordWS(WordCursorXPos)=v2
+ &WordWS(WordCursorYPos)=v3
+ v1=m1
+ gosub @MCOswrchV1
+ return
+
+;---
+.DisplayObjectNumber
+; display ObjectNumber directly from StructureBuffer
+; starting from ScrollX,ScrollY blocks within the object (measured
+; from the top left, as always)
+ if ObjectNumber<MinCell then DON1
+ goto @DisplayCell
+
+.DON1
+ gosub @CreateObjectNumber ; returns x4 as start of header
+ gosub @DecodeHeader
+; now Header=start of header for this object
+ if size=4 then DONRet ; null object - don't bother
+
+ x1=ScrollY
+ x2=xsize
+ gosub @MultX1X2
+ add x1,x1 ; *2 because word-based table
+ add x1,ScrollX
+ add x1,ScrollX ; *2 because word-based table
+ x4=x1
+ add x4,Header
+ add x4,c4
+; x4=start of data area for object
+ y=ScrollY
+
+.DONYLoop
+ x=ScrollX
+ v2=16 ; x
+ push x4 ; save start of line
+.DONXLoop
+  &v1=StructureBuffer(x4)
+  if v1=0 then DONNull ;***
+  if v1>32000 then DONNull
+  gosub @DisplayObject ; display object v1. MCNoClipSprite
+.DONNull
+  add x4,c2
+  x1=16
+  add v2,x1 ; x coord
+  add x,c1
+  if x<xsize then DONXloop
+; Next Y
+ pop x4
+ add x4,xsize
+ add x4,xsize ; add on double because word-based table
+ x1=16
+ add v3,x1 ; y coord
+ add y,c1
+ if y<ysize then @DONYLoop
+.DCOEnd
+ return
+;----
+
+;---
+.DecodeHeader
+; decode header at Header
+ x4=Header
+ &Size=StructureBuffer(x4)
+ add x4,c2
+ xsize=StructureBuffer(x4)
+ add x4,c1
+ zsize=StructureBuffer(x4)
+; now calculate ysize (only valid for raster objects)
+ x1=size
+ sub x1,c4
+; halve size (word-based table), then divide it by xsize to give ysize
+ if size=0 then dhNullObject
+ x2=xsize
+ add x2,x2
+ gosub @x1DivX2
+ ysize=x1
+ return
+
+.dhNullObject
+; blank object
+ ysize=0
+ return
+;---
+.WriteHeader
+; update Header with xsize, ysize, zsize
+; and calculate size from xsize, ysize (only valid for raster objects)
+  x1=xsize
+  x2=ysize
+  gosub @Multx1x2
+  add x1,x1 ; double, because word-based tablke
+ add x1,c4 ; allow for size of header
+ x4=Header
+ &StructureBuffer(x4)=x1
+ add x4,c2
+ StructureBuffer(x4)=xsize
+ add x4,c1
+ StructureBuffer(x4)=zsize
+ return
+;---
+.x1DivX2
+; x1:=x1 div x2
+ x3=0 ; result
+ if x2=0 then X1DivX2End
+.x1DivX2a
+ sub x1,x2
+ if x1>32000 then x1DivX2End
+ add x3,c1
+ goto x1DivX2a
+
+.X1DivX2End
+ x1=x3
+ return
+;---
+.CorrectObjectXYSize
+; ensure ObjectNumber is not of zero size (e.g.
+; we're about to write to it).
+ push xsize
+ push ysize
+  gosub @FindObjectNumber ; must already exist
+  if result=false then COXYSEnd
+  gosub @DecodeHeader
+  gosub @CheckXYSize
+  gosub @ChangeSizeObjectNumber
+.COXYSEnd
+ pop ysize
+ pop xsize
+ return
+;---
+.CheckXYSize
+ if xsize=0 then cosResetX
+ if ysize=0 then cosResetY
+ return
+
+.cosResetX
+ xsize=1
+ if ysize<>0 then cosOky2
+
+.cosResetY
+ ysize=1
+.cosOky2
+ return
+;
+;---
+.ChangeSizeObjectNumber
+; to xsize, ysize blocks
+; (I guess this is only suitable for raster objects)
+ if ObjectNumber>MinXHZ then @CSONRet
+ push xsize
+ push ysize
+  gosub @FindObjectNumber ; must already exist
+  gosub @DecodeHeader
+  Oldxsize=xsize
+  Oldysize=ysize
+ pop ysize
+ pop xsize
+ if result=false then CSONRet
+
+ x1=xsize
+ x2=ysize
+ gosub @MultX1X2
+ add x1,x1 ; new size in bytes (excluding header)
+ &x2=StructureBuffer(Header)
+ sub x2,c4 ; old size in bytes (excluding header)
+; x1=new size, x2=old size
+ if x1=x2 then CSONRet
+ if x1>x2 then ToSON
+ sub x2,x1
+push x2
+ gosub @ShrinkNewRaster
+pop x2
+ gosub @ShrinkObjectNumber
+ gosub @WriteHeader
+ return
+
+.CSONRet
+ return
+
+.ToSON
+ sub x1,x2
+ x2=x1
+ gosub GrowObjectNumber
+ gosub @GrowNewRaster
+ gosub @WriteHeader
+ return
+;---
+.GrowObjectNumber
+; increase space for Object with header at Header by x2 bytes of data
+ x4=Header
+ &x1=StructureBuffer(x4) ; returns x1=size with header
+ add x4,x1
+; shift data between x4 and EndOfStructureBuffer up by x2 bytes.
+ x3=EndOfStructureBuffer
+ add x2,x3
+ EndOfStructureBuffer=x2 ; update ptr to end of table
+; x2=destination, x3=source. x4=last byte to copy as we decrement.
+.GONLoop
+ x1=StructureBuffer(x3)
+ StructureBuffer(x2)=x1
+ sub x3,c1
+ sub x2,c1
+ if x3<x4 then GONEnd
+ goto GONLoop
+
+.GONEnd
+ &StructureBuffer(EndOfStructureBuffer)=c0 ; dummy entry at end
+.GNRRet
+ return
+;---
+.GrowNewRaster
+; raster for object at Header is changing from Oldxsize, Oldysize
+; to xsize, ysize
+; shuffle up a line at a time, clearing rest of new line
+ y=ysize ; y decrements
+ sub y,c1 ; y coords are 0..ysize-1
+ if y>32000 then GNRRet ; was null block - don't bother with the rest
+.GNRYLoop
+ x=xsize ; x decrements
+ sub x,c1 ; x coords are 0..ysize-1
+; calculate read ptr in x5, write ptr in x6
+ x1=y
+ x2=xsize
+ gosub @MultX1X2
+ add x1,x1
+ add x1,Header
+ add x1,c4 ; skip header
+ add x1,x
+ add x1,x
+ x6=x1 ; write ptr - on new raster
+
+ x1=y
+ x2=Oldxsize
+ gosub @MultX1X2
+ add x1,x1
+ add x1,Header
+ add x1,c4 ; skip header
+ add x1,x
+ add x1,x
+ x5=x1 ; read ptr - on old raster
+
+.GNRXLoop
+ x1=0
+ if x>Oldxsize then GNRZero
+ if x=Oldxsize then GNRZero ; coords are 0..xsize-1
+ if y>Oldysize then GNRZero ;
+ if y=Oldysize then GNRZero ; and 0..ysize-1
+ &x1=StructureBuffer(x5)
+.GNRZero
+ &StructureBuffer(x6)=x1
+
+ sub x,c1
+ sub x5,c2
+ sub x6,c2
+ if x<32000 then @GNRXLoop
+
+.GNR1
+ sub y,c1
+ if y<32000 then @GNRYLoop
+.SNRRet
+ return
+;---
+.ShrinkNewRaster
+; raster for object at Header is shrinking from Oldxsize, Oldysize
+; to xsize, ysize
+; shuffle one a line at a time.
+ y=0 ; y increments
+ if Oldysize=0 then SNRRet ; was null block - don't bother with the rest
+.SNRYLoop
+ x=0 ; x increments
+; calculate read ptr in x5, write ptr in x6
+ x1=y
+ x2=xsize
+ gosub @MultX1X2
+ add x1,x1
+ add x1,Header
+ add x1,c4 ; skip header
+ add x1,x
+ add x1,x
+ x6=x1 ; write ptr - on new raster
+
+ x1=y
+ x2=Oldxsize
+ gosub @MultX1X2
+ add x1,x1
+ add x1,Header
+ add x1,c4 ; skip header
+ add x1,x
+ add x1,x
+ x5=x1 ; read ptr - on old raster
+
+.SNRXLoop
+ x1=0
+; if x>Oldxsize then SNRZero
+; if x=Oldxsize then SNRZero ; coords are 0..xsize-1
+; if y>Oldysize then SNRZero ;
+; if y=Oldysize then SNRZero ; and 0..ysize-1
+ &x1=StructureBuffer(x5)
+;.SNRZero
+ &StructureBuffer(x6)=x1
+
+ add x,c1
+ add x5,c2
+ add x6,c2
+ if x<xsize then @SNRXLoop
+
+.SNR1
+ add y,c1
+ if y<ysize then @SNRYLoop
+ return
+;---
+.ShrinkObjectNumber
+; decrease space for Object with header at Header by x2 bytes of data
+push x2
+ x4=Header
+ &x1=StructureBuffer(x4) ; returns x1=size with header
+ add x4,x1 ; end of current object - source for copy
+; shift data between x4 and EndOfStructureBuffer down by x2 bytes.
+ x5=x4
+ sub x5,x2
+; x5=destination, x4=source. x4=last byte to copy as we increment.
+.SONLoop
+ x1=StructureBuffer(x4)
+ StructureBuffer(x5)=x1
+ add x4,c1
+ add x5,c1
+ if x4<EndOfStructureBuffer then SONLoop
+pop x2
+ sub EndOfStructureBuffer,x2 ; new value
+ &StructureBuffer(EndOfStructureBuffer)=c0 ; terminate linked list
+ return
+;---
+.CreateObjectNumber
+; create ObjectNumber if it doesn't exist, and return x4=offset
+; within StructureBuffer
+ if ObjectNumber<MinCell then CONOk
+ goto ReturnZero
+
+.CONOk
+;************* arbitrary restriction
+ if ObjectNumber<100 then CONOk2 ; restrict memory usage
+ ObjectNumber=99
+
+.CONOk2
+ gosub @FindObjectNumber
+ if result=true then CONRet ; already exists.
+; not found - Header=null entry at end of list
+; and x2=object number
+.CON1
+ gosub @AddNullObject
+ if x2=ObjectNumber then CONDone
+ add Header,c4
+ add x2,c1
+ goto CON1
+
+.CONDone
+.CONRet
+ return
+
+.ReturnZero
+ x4=0
+ return
+;---
+.AddNullObject
+; add a null object to the end of the StructureBuffer
+ x1=4
+ x4=Header
+ &StructureBuffer(x4)=x1 ; offset of next item
+ add x4,c2
+ StructureBuffer(x4)=c0 ; x size
+ add x4,c1
+ StructureBuffer(x4)=c0 ; z size
+ add x4,c1
+ &StructureBuffer(x4)=c0 ; null ptr for next entry
+ EndOfStructureBuffer=x4 ; ptr for insert-delete operations etc.
+ return
+;---
+.FindObjectNumber
+; return Header=offset of ObjectNumber within StructureBuffer
+; if EditMode<>pixels then FONNotPixel
+; if ObjectNumber<MinCell then FONNotPixel
+; gosub @PixelCursorOn
+;
+;.FONNotPixel
+ gosub @GetObjectType
+ Header=0
+ x2=1 ; current object number
+.FON1
+ &x1=StructureBuffer(Header)
+ if x1=0 then FONEndOfBuffer
+ if x2=ObjectNumber then FONFound
+ add x2,c1 ; increment object number
+ add Header,x1
+ goto FON1
+
+.FONFound
+ result=true
+ return
+
+.FONEndOfBuffer
+ result=false ; not found
+ return
+;---
+.GetObjectType
+; find out what type of object is appropriate to ObjectNumber
+; return ObjectNumberType=raster, xhz, compressed or cell
+ ObjectNumberType=RasterType
+ if ObjectNumber<MinXHZ then GOT1
+ ObjectNumberType=XHZType
+ if ObjectNumber<MinCompressed then GOT1
+ ObjectNumberType=CompressedType
+ if ObjectNumber<MinCell then GOT1
+ ObjectNumberType=CellType
+.GOT1
+ return
+;---
+.ScrollObject
+; ensure that current position is within display area
+; and move DisplayX, DisplayY to suit, if necessary.
+ if EditX>ScrollX then SONotLeft
+ if ScrollX=0 then SONotLeft
+ sub ScrollX,c1
+
+.SONotLeft
+ x1=ScrollX
+ x2=ScreenXsize ; x size of display area
+ add x1,x2
+ if EditX<x1 then SONotRight
+ if x1>xsize then SONotRight
+ add ScrollX,c1
+
+.SONotRight
+ if EditY>ScrollY then SONotUp
+ if ScrollY=0 then SONotUp
+ sub ScrollY,c1
+
+.SONotUp
+ x1=ScrollY
+ x2=ScreenYsize ; Y size of display area
+ add x1,x2
+ if EditY<x1 then SONotDown
+ if x1>ysize then SONotDown
+ add ScrollY,c1
+
+.SONotDown
+ return
+;---
+.MultiplyCoords
+; multiply x co-ord by 16
+ add v2,v2
+ add v2,v2
+ add v2,v2
+ add v2,v2
+ add v3,v3
+ add v3,v3
+ add v3,v3
+ add v3,v3
+ return
+;---
+.InitContextTable
+; x1=0
+;.ICT1
+; &ContextTable(x1)=c0
+; add x1,c2
+; if x1<160 then ICT1
+ ObjectNumber=1
+ EditX=0
+ EditY=0
+ ScrollX=0
+ ScrollY=0
+
+ x2=0
+.ICT1
+push x2
+ gosub @SaveCurrentContextx2 ; save context x2
+pop x2
+ x1=16
+ add x2,x1
+ if x2<160 then ICT1
+ return
+;---
+.FindCurrentContext
+ x2=UpperContext
+ if CurrentYBase<50 then SCC1
+ x2=LowerContext
+.SCC1
+ return
+;---
+.SaveCurrentContext
+; save current context to ContextTable(UpperContext) if
+; CurrentYBase<50, else to ContextTable(LowerContext)
+; must preserve x1
+ gosub FindCurrentContext
+.SaveCurrentContextX2
+ &ContextTable(x2)=ObjectNumber
+ add x2,c2
+ &ContextTable(x2)=EditX
+ add x2,c2
+ &ContextTable(x2)=EditY
+ add x2,c2
+ &ContextTable(x2)=ScrollX
+ add x2,c2
+ &ContextTable(x2)=ScrollY
+ return
+;---
+.ContextShift
+; shift to context having parameters at ContextTable(x1)
+; first save current context
+push x1
+ gosub @SaveCurrentContext
+pop x1
+
+.ContextShiftNoSave
+; and change current context
+ if CurrentYBase<50 then CSUpper
+; CS lower
+ LowerContext=x1
+ LowerContextLetter=LowKey
+ goto CS2
+.CSUpper
+ UpperContext=x1
+ UpperContextLetter=LowKey
+
+.CS2
+.DecodeContextX1
+ &ObjectNumber=ContextTable(x1)
+ add x1,c2
+ &EditX=ContextTable(x1)
+ add x1,c2
+ &EditY=ContextTable(x1)
+ add x1,c2
+ &ScrollX=ContextTable(x1)
+ add x1,c2
+ &ScrollY=ContextTable(x1)
+ add x1,c2
+ gosub @FindObjectNumber
+ gosub @DecodeHeader
+ gosub @NewObjectNumber
+ return
+;------
+.NewObjectNumber
+; have just changed to new object number
+ if ObjectNumber<MinCell then NON1
+; gosub @PixelCursorOff ; iff saved and still on, turn it off
+ gosub @PixelCursorSave
+.NON1
+ return
+;------
+.AccelerateMouse
+ if v1<25 then AMSlow
+ if v1>65510 then AMSlow
+ x1=v1
+ add v1,v1
+ add v1,x1
+
+.AMSlow
+ return
+;------
+.MoveMouse
+; do mouse ptr
+ &v1=WordWS(WordMouseXDistance)
+ gosub @AccelerateMouse
+ add MouseX,v1
+ &WordWS(WordMouseXDistance)=c0
+
+ &v1=WordWS(WordMouseYDistance)
+ gosub @AccelerateMouse
+ add MouseY,v1
+ &WordWS(WordMouseYDistance)=c0
+
+ if MouseX<32000 then MMNotLimitX
+ MouseX=16
+
+.MMNotLimitX
+ if MouseX>15 then MMNotLowLimitX
+ MouseX=16
+
+.MMNotLowLimitX
+ if MouseX<329 then MMNotLimitX2
+ MouseX=329
+.MMNotLimitX2
+
+
+ if MouseY<32000 then MMNotLimitY
+ MouseY=0
+
+.MMNotLimitY
+ if MouseY<199 then MMNotLimitY2
+ MouseY=199
+.MMNotLimitY2
+ return
+;------
+.DisplayMouse
+ v1=1 ; mouse ptr
+ v2=MouseX
+ v3=MouseY
+ goto @MCNoClipSprite
+;------
+.NewHandleKeyPress
+
+; restore previous value of current edit cursor position
+; (i.e. cursor off)
+ if EditMode<>pixels then NHKP1
+; if objectNumber<MinCell then NHKP1
+ gosub @PixelCursorOff
+
+.NHKP1
+ gosub @MCOsrdch
+; v1=low word, v2=high word of os return (ST only)
+ LowKey=v1
+ HiKey=v2
+
+ x1=v1
+ v2=20 ; x coord
+ v3=180 ; y coord
+ gosub @PrintX1
+ x1=HiKey
+ v2=60 ; x coord
+ v3=180 ; y coord
+ gosub @PrintX1
+
+ x1=LowKey
+ if x1=32 then @MCCloseDown
+
+ if x1<>48 then NHKPNotSwap
+ CurrentObject=ObjectNumber
+ gosub @SaveCurrentContext
+ x2=0 ; new CurrentYBase
+ x1=UpperContext
+ if CurrentYBase>50 then NHKPSwap1
+ x2=100 ; new CurrentYBase
+ x1=LowerContext
+.NHKPSwap1
+ CurrentYBase=x2
+ gosub @ContextShiftNoSave
+ return
+
+.NHKPNotSwap
+ x1=0
+ if LowKey=113 then @ContextShift
+ x1=16
+ if LowKey=119 then @ContextShift
+ x1=32
+ if LowKey=101 then @ContextShift
+ x1=48
+ if LowKey=114 then @ContextShift
+ x1=64
+ if LowKey=116 then @ContextShift
+ x1=80
+ if LowKey=121 then @ContextShift
+ x1=96
+ if LowKey=117 then @ContextShift
+ x1=112
+ if LowKey=105 then @ContextShift
+ x1=128
+ if LowKey=111 then @ContextShift
+ x1=144
+ if LowKey=112 then @ContextShift
+
+ if LowKey<>40 then NotEditBlocks ;'('
+ EditMode=Blocks
+ return
+
+.NotEditBlocks
+ if LowKey<>41 then NotEditPixels ; ')'
+ EditMode=Pixels
+ return
+
+.NotEditPixels
+ if LowKey<>55 then NHKPNotDecrease
+ if ObjectNumber=1 then NHKPNotDecrease
+ sub ObjectNumber,c1
+ goto NHKPChangeObjectNumber
+
+.NHKPNotDecrease
+ if LowKey<>57 then NHKPNotIncrease
+;; if ObjectNumber=1 then NHKPNotIncrease
+ add ObjectNumber,c1
+.NHKPChangeObjectNumber
+ gosub @CreateObjectNumber
+ gosub @DecodeHeader
+; ensure that EditX,Y are on editable area:
+;; if EditX<xsize then NHKPxok
+ EditX=0
+ EditY=0
+ gosub @NewObjectNumber
+ return
+
+.NHKPNotIncrease
+ if LowKey<>90 then HKPNotDecreaseX ; 'z' - decrease x size
+ gosub @FindObjectNumber
+ gosub @DecodeHeader
+ sub xsize,c1
+ gosub @ChangeSizeObjectNumber
+ return
+
+.HKPNotDecreaseX
+ if LowKey<>88 then HKPNotIncreaseX ; x ; increase x size
+ gosub @CorrectObjectXYSize ; re-size if necessary
+ gosub @FindObjectNumber
+ gosub @DecodeHeader
+ add xsize,c1
+ gosub @ChangeSizeObjectNumber
+ return
+
+.HKPNotIncreaseX
+ if LowKey<>65 then HKPNotIncreaseY ; a - make y size bigger
+ gosub @CorrectObjectXYSize ; re-size if necessary
+ gosub @FindObjectNumber
+ gosub @DecodeHeader
+ add ysize,c1
+ gosub @ChangeSizeObjectNumber
+ return
+
+.HKPNotIncreaseY
+ if LowKey<>81 then HKPNotDecreaseY ; q - make y size smaller
+ gosub @FindObjectNumber
+ gosub @DecodeHeader
+ sub ysize,c1
+ gosub @ChangeSizeObjectNumber
+ return
+
+.HKPNotDecreaseY
+ if LowKey<>67 then NHKPNotRaster
+ ObjectNumber=1 ; MinRaster
+
+.NHKPNotRaster
+ if LowKey<>86 then NHKPNotXHZ
+ ObjectNumber=MinXHZ
+
+.NHKPNotXHZ
+ if LowKey<>66 then NHKPNotCell
+ ObjectNumber=MinCell
+
+.NHKPNotCell
+
+
+ Pixelysize=16
+ Pixelxsize=16
+ if ObjectNumber<MinCell then EditPixelsNotCell
+ goto EditPixelsCell
+.EditPixelsNotCell
+; calculate the size in pixels of the current object
+ gosub @FindObjectNumber
+ gosub @DecodeHeader
+ Pixelxsize=xsize
+ add Pixelxsize,Pixelxsize
+ add Pixelxsize,Pixelxsize
+ add Pixelxsize,Pixelxsize
+ add Pixelxsize,Pixelxsize
+
+ Pixelysize=ysize
+ add Pixelysize,Pixelysize
+ add Pixelysize,Pixelysize
+ add Pixelysize,Pixelysize
+ add Pixelysize,Pixelysize
+
+.EditPixelsCell
+
+
+ if EditMode=Blocks then @EditBlocks
+; drop through to EditPixels...
+
+
+
+;--------
+;; .EditPixels
+
+
+
+ gosub @PositionPixelCursor
+ x1=ByteWS(ByteJoystickStatus)
+ if ObjectNumber<MinCell then EPRaster
+ x2=128
+ and x1,x2
+ if x1<>128 then EPNotPlace
+; make cursor pixel permament (i.e. place pixel)
+ gosub @EPPlacePixel
+ gosub @ScrollObject ; ensure current position is within the scrolling window
+
+.EPNotPlace
+; mark current cursor position (i.e. show cursor)
+ gosub @PixelCursorOn
+ return
+;----
+.EPPlacePixel
+; make cursor pixel permament (i.e. place pixel)
+ gosub @PixelCursorOn ; display cursor
+ PixelCursorIsOn=false ; allow it to be saved with cursor on
+ gosub @PixelCursorSave
+
+ return
+;---
+.EPRaster
+ push ObjectNumber ; save raster object number
+  gosub @CalcCurrentPixelCell
+  if ObjectNumber=0 then EPRasterNotValid
+;;  if LowKEy<>53 then EPRasterNotPlace
+  x1=ByteWS(ByteJoystickStatus)
+  x2=128
+  and x1,x2
+  if x1<>128 then EPRasterNotPlace
+  gosub @EPPlacePixel
+
+.EPRasterNotPlace
+;; gosub @ScrollObject ; ensure current position is within the scrolling window
+
+; mark current cursor position (i.e. show cursor)
+  gosub @PixelCursorOn
+.EPRasterNotValid
+ pop ObjectNumber ; restore raster object number
+ return
+;----
+.CalcCurrentPixelCell
+; return ObjectNumber as the cell which PixelX,PixelY within ObjectNumber
+ x1=PixelX
+ x2=16
+ gosub @DivX1X2
+ x=x1
+
+ x1=PixelY
+ x2=16
+ gosub @DivX1X2
+ y=x1
+
+ x1=xsize ; max size of any one object
+ add x1,x1 ; double, because word-based table
+ x2=y
+ gosub @MultX1X2
+ add x1,x ; add in x coord
+ add x1,x ; double, for a word-based table
+ add x1,Header
+ add x1,c4 ; skip over header
+; current cell is &StructureBuffer(x1)
+ &ObjectNumber=StructureBuffer(x1)
+ return
+;----
+.PixelCursorOn
+ if PixelCursorIsOn=true then PCORet
+push ObjectNumber
+ gosub PixelCursorSave
+
+ if ObjectNumber<MinCell then PCOn1
+ goto PCOnGo
+
+.PCOn1
+; calculate the underlying cell we're modifying
+  gosub @CalcCurrentPixelCell
+
+.PCOnGo
+ if ObjectNumber<MinCell then PCOnEnd
+ x=PixelX
+ gosub @WritePixel
+ PixelCursorIsOn=true
+.PCOnEnd
+pop ObjectNumber
+.PCORet
+ return
+;----
+;.ToNewSprite
+;; have swapped to a new sprite
+; PixelCursorIsOn=false
+
+.PixelCursorSave
+; save data where pixel cursor will be placed
+push ObjectNumber
+ if ObjectNumber<MinCell then PCS1
+ goto PCSGo
+
+.PCS1
+; calculate the underlying cell we're modifying
+ gosub @CalcCurrentPixelCell
+;
+.PCSGo
+ if ObjectNumber<MinCell then PCSEnd
+ gosub @CalcCurrentSpriteAddress
+ if PixelCursorIsOn=true then PCSEnd
+; now x1 has offset of bit planes for current line of this tile.
+; now save current and modify it.
+ push x1
+  &bp0Save=list19(x1)
+  add x1,c2
+  &bp1Save=list19(x1)
+  add x1,c2
+  &bp2Save=list19(x1)
+  add x1,c2
+  &bp3Save=list19(x1)
+ pop x1
+ SavedObjectNumber=ObjectNumber
+.PCSEnd
+pop ObjectNumber
+ return
+;----
+.PixelCursorOff
+push ObjectNumber
+ if ObjectNumber<MinCell then PCO1
+ goto PCOGo
+
+.PCO1
+; calculate the underlying cell we're modifying
+ gosub @CalcCurrentPixelCell
+;
+.PCOGo
+ if ObjectNumber<MinCell then PCOEnd
+ gosub @CalcCurrentSpriteAddress
+ if SavedObjectNumber<>ObjectNumber then PCOEnd ; ToNewSprite ; have changed sprite - save it before writing cursor all over it!
+ if PixelCursorIsOn=false then PCOEnd
+; now x1 has offset of bit planes for current line of this tile.
+; now save current and modify it.
+ &list19(x1)=bp0Save
+ add x1,c2
+ &list19(x1)=bp1Save
+ add x1,c2
+ &list19(x1)=bp2Save
+ add x1,c2
+ &list19(x1)=bp3Save
+ PixelCursorIsOn=false
+.PCOEnd
+pop ObjectNumber
+ return
+;
+;----
+.CalcCurrentSpriteAddress
+; return x1 as address of bit plane data for current position
+; in sprite currently being edited (pixel mode)
+ v1=ObjectNumber
+ sub v1,MinCell
+ gosub @MCReturnSpriteAddress
+; now List19 is start of current sprite.
+ x1=PixelX
+ x2=16
+ gosub @ModX1X2
+ v2=x1
+
+ x1=PixelY
+ x2=16
+ gosub @ModX1X2
+ v3=x1
+
+; gosub @MultiplyCoords ; by 16
+ x1=v3
+ x2=10 ; 10 bytes per tile line
+ gosub @MultX1X2
+ add x1,c2 ; **skip over transparency mask
+ return
+;-----
+.WritePixel
+; write pixel into cell List19(x1) at x,y of colour PixelColour
+ push x1
+  gosub @CalcPixelMask
+ pop x1
+ x6=65535
+ xor x6,x3 ; produce inverted mask to remove pixel, keep all else.
+
+ &x4=List19(x1)
+ and x4,x6 ; remove pixel
+ x5=1
+ and x5,PixelColour ; is bit set in colour?
+ if x5=0 then WPP1
+ or x4,x3
+.WPP1
+ &List19(x1)=x4
+
+ add x1,c2
+ &x4=List19(x1)
+ and x4,x6 ; remove pixel
+ x5=2
+ and x5,PixelColour ; is bit set in colour?
+ if x5=0 then WPP2
+ or x4,x3
+.WPP2
+ &List19(x1)=x4
+
+ add x1,c2
+ &x4=List19(x1)
+ and x4,x6 ; remove pixel
+ x5=4
+ and x5,PixelColour ; is bit set in colour?
+ if x5=0 then WPP3
+ or x4,x3
+.WPP3
+ &List19(x1)=x4
+
+ add x1,c2
+ &x4=List19(x1)
+ and x4,x6 ; remove pixel
+ x5=8
+ and x5,PixelColour ; is bit set in colour?
+ if x5=0 then WPP4
+ or x4,x3
+.WPP4
+ &List19(x1)=x4
+ return
+;----
+.CalcPixelMask
+; calculate x3 as mask for pixel x horizontally along in cell
+ x1=x
+ x2=16
+ gosub @ModX1X2
+
+ x3=32768
+ if x1=0 then @WP1
+ x3=16384
+ if x1=1 then @WP1
+ x3=8192
+ if x1=2 then @WP1
+ x3=4096
+ if x1=3 then @WP1
+ x3=2048
+ if x1=4 then @WP1
+ x3=1024
+ if x1=5 then @WP1
+ x3=512
+ if x1=6 then @WP1
+ x3=256
+ if x1=7 then @WP1
+ x3=128
+ if x1=8 then @WP1
+ x3=64
+ if x1=9 then @WP1
+ x3=32
+ if x1=10 then @WP1
+ x3=16
+ if x1=11 then @WP1
+ x3=8
+ if x1=12 then @WP1
+ x3=4
+ if x1=13 then WP1
+ x3=2
+ if x1=14 then WP1
+ x3=1
+;; if x=15 then WP1
+.WP1
+ return 
+;----
+.EditBlocks
+ gosub @PositionBlockCursor
+
+ x1=ByteWS(ByteJoystickStatus)
+ x2=128
+ and x1,x2
+ if x1<>128 then NHKPNotPlace
+;; if LowKEy<>53 then NHKPNotPlace
+; put BaseSprite into object table at current location.
+ if ObjectNumber>MinXHZ then NHKPNotPlace
+ gosub @CorrectObjectXYSize ; re-size if necessary
+ gosub @FindObjectNumber
+ x1=xsize ; max size of any one object
+ add x1,x1 ; double, because word-based table
+ x2=EditY
+ gosub @MultX1X2
+ add x1,EditX ; add in x coord
+ add x1,EditX ; double, for a word-based table
+ add x1,Header
+ add x1,c4 ; skip over header
+ &StructureBuffer(x1)=CurrentObject
+
+.NHKPNotPlace
+ gosub @ScrollObject
+
+; flash current sprite at 'cursor' position
+ v1=CurrentObject
+ v2=EditX
+ sub v2,ScrollX
+ v3=EditY
+ sub v3,ScrollY
+ gosub @MultiplyCoords ; by 16
+ x1=16
+ add v2,x1
+ add v3,CurrentYBase
+
+ goto @DisplayObject
+;---
+.DisplayObject
+; to be superceded by MC routine...
+; display object V1 at coords v2,v3
+;; if v1<MinCell then @MCSprite
+ if v1<MinCell then DORet
+ sub v1,MinCell
+ goto @MCNoClipSprite
+
+.DORet
+ return
+;-------
+;.HandleKeyPress
+; x1=ByteWS(ByteLastKeyPressed)
+; if x1=32 then @MCCloseDown
+; if x1<>50 then HKPNotDown ; '2'
+; add BaseSprite,c1
+;.HKPNotDown
+; if x1<>51 then HKPNotBigDown ;'3'
+; x1=25
+; add BaseSprite,x1
+;
+;.HKPNotBigDown
+; if x1<>56 then HKPNotUp ; '8'
+; if BaseSprite=0 then HKPNotUp
+; sub BaseSprite,c1
+;.HKPNotUp
+; if x1<>57 then HKPNotBigUp ; '9'
+; if BaseSprite<25 then HKPNotBigUp
+; x1=25
+; sub BaseSprite,x1
+;
+;.HKPNotBigUp
+;; keys to choose currently edited object
+;
+;; if x1<>52 then HKPNotLeft
+;;.HKPNotLeft
+;
+; if x1=48 then @EditObject ;'0'
+; if x1=67 then ClearObjectBuffer ; 'C'
+; if x1=99 then ClearObjectBuffer ; 'c'
+; return
+;----
+;.ClearObjectBuffer
+; ObjectX=0
+; ObjectY=0
+; ObjectCurrentXSize=0
+; ObjectCurrentYSize=0
+; x1=0
+; x2=65535 ; -1
+;.COB1
+; &ObjectBuffer(x1)=x2
+; add x1,c2
+; if x1<ObjectBufferSize then COB1
+; return
+;---
+.PrintKey
+ x1=ByteWS(ByteLastKeyPressed)
+ if x1=0 then DCSNoKey
+ v2=20 ; x coord
+ v3=180 ; y coord
+ gosub @PrintX1
+.DCSNoKey
+ return
+;------
+.PrintX1
+; v2= x coord
+; v3= y coord
+code -
+ message cr
+code +
+ &WordWS(WordCursorXPos)=v2
+ &WordWS(WordCursorYPos)=v3
+code -
+ print x1
+; prs " "
+code +
+ return
+;----
+.DisplayFrame
+;;* debugging stuff:
+; x1=ByteWS(7) ; text line cleared?
+; if x1<>0 then df1
+; brEak ;*
+; gosub @MCDisplayUpperTextLine ;*
+; goto DisplayFrame
+;; brEak ;*
+;
+;.df1
+;;* end debugging
+ ByteWS(ByteFrameReadyFlag)=c1
+ return
+;------
+; wait for frame to be displayed
+.WaitForFrame
+ V1=ByteWS(ByteFrameReadyFlag)
+ if V1<>0 then WaitForFrame
+ return
+;----
+.LongDelay
+ V2=10
+.LongDelay1
+ gosub Delay
+ sub V2,c1
+ if V2<>0 then LongDelay1
+ return
+;---
+.Delay
+ V1=60000
+.DelayV1
+ c1=1
+
+.Delay1
+ sub V1,c1
+ if V1>0 then Delay1
+ return
+;------
+;---
+.WaitForJoystick
+ V1=ByteWS(ByteJoystickStatus)
+ if V1<>0 then WaitForJoystick
+ return
+;---
+.DivX1X2
+; x1:=x1/x2
+ x3=65535 ; result = 0 if x2>x1
+.DivLoop
+ add x3,c1
+ sub x1,x2
+ if x1<50000 then DivLoop
+ x1=x3
+ return
+;---
+.ModX1X2
+; x1:=x1 mod x2
+.ModLoop
+ x3=x1 ; trial result
+ sub x1,x2
+ if x1<50000 then ModLoop
+ x1=x3
+ return
+;---
+.MultX1X2
+; x1=x1*x2
+ x3=x1
+ if x2=0 then MultX1X2Zero
+ if x2=1 then MultX1X2Ret
+.MultX1X2Loop
+ add x1,x3
+ sub x2,c1
+ if x2>1 then MultX1X2Loop
+.MultX1X2Ret
+ return
+.MultX1X2Zero
+ x1=0
+ return
+;---
+.SignExtendX1
+; X1 contains a byte: sign-extend to a full word
+ x2=255
+ and x1,x2
+ if x1<128 then SignExtendRet
+ x2=65280 ; 65536-256
+ add x1,x2
+.SignExtendRet
+ return
+;---
+code -
+.SetUpNewSprite
+; Set up a sprite with v1=xpos, v2=ypos,
+; v3=xspeed, v4=yspeed, v5=object sprite block number.
+; Returns v6 as offset of new sprite within SpriteTable
+; and v7 as negative if we couldn't set up the sprite.
+code +
+ gosub @MCSetUpNewSprite
+code -
+ return
+;---
+ code +
+.DebugWaitKey
+ gosub @MCHeroInput ;****
+ V1=ByteWS(ByteLastKeyPressed) ;*
+ if V1=13 then @MCCloseDown ;*
+ if v1<>32 then @DebugWaitKey
+ return
+;---
+;.Pause
+;; nice debugging code...
+; gosub @CalcMapAddress
+; x2=40
+; &Map(x1)=x2
+; gosub @DebugShowMap
+; gosub @DebugWaitKey
+; &Map(x1)=c0
+; return
+;---
+.FGSpecials
+.FGSpecialsMovedSprite
+.BGSpecials
+;;.Dummy ; SpecialCollision
+.DAMSSpecials
+ return
+;---
+;-------------------
+; BACKUPS OF OLD CODE...
+;.CopyObjectNumberToBuffer
+; gosub @FindObjectNumber
+;; now Header=start address of ObjectNumber
+; &x1=StructureBuffer(x4) ; offset of next object in bytes.
+; sub x1,c4 ; discount header
+; add x4,c2 ; skip on to x size of data
+; xsize=StructureBuffer(x4) ; in pixels
+;; size is x1 bytes, xsize pixels wide
+;; copy buffer to ObjectBuffer
+; x2=0
+;.COTBXLoop
+; if x>xsize then COTB1
+; &x3=StructureBuffer(x4)
+; add x4,c2
+;.COTB1
+; &ObjectBuffer(x2)=x3
+; add x2,c2
+; add x,c1
+; if x<ObjectXSize then COTBXLoop
+; x=0
+; if x2<x1 then COTBXLoop
+; return
+ 
+;---
+;.EditObject
+;; called from handleKeyPress
+;; edit raster object: ObjectNumber
+; gosub @FindObjectNumber
+;; now x4=start address of ObjectNumber
+;
+;.EditObjectLoop
+; gosub @MCHeroInput
+; gosub @MCClearScreen
+; gosub @DisplaySpritesChoice
+; gosub @DisplayCurrentObject
+;
+; x1=ByteWS(ByteLastKeyPressed)
+; if x1<>48 then EONotSwap
+;; save currently-edited object with header etc.
+;; *** header format is:
+;
+; return
+;
+;.EONotSwap
+; if x1<>50 then EONotDown
+; if ObjectY=ObjectYSizeMinus1 then EONotDown
+; add ObjectY,c1
+;
+;.EONotDown
+; if x1<>52 then EONotLeft
+; if ObjectX=0 then EONotLeft
+; sub ObjectX,c1
+;
+;.EONotLeft
+; if x1<>54 then EONotRight
+; if ObjectX=ObjectXSizeMinus1 then EONotRight
+; add ObjectX,c1
+;
+;.EONotRight
+; if x1<>56 then EONotUp
+; if ObjectY=0 then EONotUp
+; sub ObjectY,c1
+;
+;.EONotUp
+; if x1<>53 then EONotPlace ; '5' in centre of keypad
+;; put BaseSprite into object table at current location.
+; x1=ObjectXSize ; max size of any one object
+; add x1,x1 ; double, because word-based table
+; x2=ObjectY
+; gosub @MultX1X2
+; add x1,ObjectX ; add in x coord
+; add x1,ObjectX ; double, for a word-based table
+; &ObjectBuffer(x1)=BaseSprite
+; if ObjectX<ObjectCurrentXSize then EONoXExpand
+; ObjectCurrentXSize=ObjectX
+;
+;.EONoXExpand
+; if ObjectY<ObjectCurrentYSize then EONoYExpand
+; ObjectCurrentYSize=ObjectY
+;
+;.EONoYExpand
+;
+;.EONotPlace
+; gosub @ScrollObject
+;; flash current sprite at 'cursor' position
+; v1=BaseSprite
+; v2=ObjectX
+; sub v2,DisplayX
+; v3=ObjectY
+; sub v3,DisplayY
+; gosub @MultiplyCoords ; by 16
+; x1=16
+; add v2,x1
+;
+; gosub @MCNoClipSprite
+;
+; m1=501 ; status line = 'Edit Object'
+; gosub @PrintStatus
+; x1=537 ; object number
+;code -
+; message cr ; flushes buffer - doesn't actually do a cr.
+; print x1
+; message cr
+;code +
+;
+; gosub @DisplayFrame
+; gosub @WaitForFrame
+; goto @EditObjectLoop
+;---
+;.DisplayCurrentObject
+; v3=0 ; y
+;.DisplayCurrentObjectV3
+; x4=0 ; start of object buffer
+;; start displaying from DisplayXPos, DisplayYPos - calculate 
+;; start address in buffer
+;
+; x1=DisplayY
+; x2=ObjectXSize
+; gosub @MultX1X2
+; add x1,x1 ; *2 because word-based table
+; add x1,DisplayX
+; add x1,DisplayX ; *2 because word-based table
+; x4=x1
+;
+;.DCOYLoop
+; v2=16 ; x
+; push x4 ; save start of line
+;.DCOXLoop
+; &v1=ObjectBuffer(x4)
+; if v1=0 then DCONull ;******
+; if v1>32000 then DCONull
+; gosub @MCNoClipSprite
+;.DCONull
+; add x4,c2
+; x1=16
+; add v2,x1 ; x coord
+;;*** if v2>ObjectCurrentXSize then DCONextY
+; if v2<ScreenXSizePixels then DCOXLoop
+;.DCONextY
+; pop x4
+; x1=ObjectXSize
+; add x4,x1
+; add x4,x1 ; add on double because word-based table
+; x1=16
+; add v3,x1 ; y coord
+;;*** if v3>ObjectCurrentYSize then DCOEnd
+; if v3<ScreenYSizePixels then @DCOYLoop
+;;.DCOEnd
+; return
+;;----
+;.DisplaySpritesChoice
+;; show choice of sprites in a vertical column down the right hand side
+;; of the screen
+;; Starting from BaseSprite
+; v1=BaseSprite
+; x1=3 ; 7 sprites on screen, use the middle one
+; sub v1,x1
+; v3=16
+;.DSCLoop
+; if v1>32000 then DSCNoDisplay
+; v2=290
+; x1=v1
+; gosub @PrintX1
+; if v1<>BaseSprite then DSCNotCurrent
+; v2=306
+; &WordWS(WordCursorXPos)=v2
+;code -
+; prs "* "
+;code +
+;.DSCNotCurrent
+; v2=254 ; 290
+; gosub @MCNoClipSprite
+;.DSCNoDisplay
+; add v1,c1
+; x1=24
+; add v3,x1
+; if v3<170 then DSCLoop
+; return
+;;----
+;; gosub @MCHeroInput
+;
+; gosub @MCClearScreen
+; gosub @DisplaySpritesChoice
+; gosub @DisplayCurrentObject
+;
+; gosub @PrintKey
+;
+; m1=500 ; status line = 'Choose sprite'
+; gosub @PrintStatus
+;
+; gosub @DisplayFrame
+; gosub @WaitForFrame
+;
+; gosub @HandleKeyPress
+; goto @DCSLoop
+;------
+;=======================================
+;
+; MOUSE DRIVERS
+;
+;=======================================
+.PositionPixelCursor
+ gosub @SetCorrectContext
+ gosub @MaybeChooseColour
+
+ if MouseX<MinXUpperDisplayArea then PPCNotUpper
+ x1=PixelXSize
+ x2=MinXUpperDisplayArea
+ add x1,x2
+ if MouseX>x1 then PPCNotUpper
+
+ if MouseY<MinYUpperDisplayArea then PPCNotUpper
+ x1=PixelYSize
+ x2=MinYUpperDisplayArea
+ add x1,x2
+ if MouseY>x1 then PPCNotUpper
+
+ PixelX=MouseX
+ x1=MinXUpperDisplayArea
+ sub PixelX,x1
+
+ PixelY=MouseY
+ x1=MinYUpperDisplayArea
+ sub PixelY,x1
+
+.PPCNotUpper
+ if MouseX<MinXLowerDisplayArea then PPCNotLower
+ x1=PixelXSize
+ x2=MinXLowerDisplayArea
+ add x1,x2
+ if MouseX>x1 then PPCNotLower
+
+ if MouseY<MinYLowerDisplayArea then PPCNotLower
+ x1=PixelYSize
+ x2=MinYLowerDisplayArea
+ add x1,x2
+ if MouseY>x1 then PPCNotLower
+
+; we're in the Lower display area
+; swap to make this the current context?
+ if CurrentYBase>80 then AlreadyInLower
+ gosub @SwapContext
+
+.AlreadyInLower
+ PixelX=MouseX
+ x1=MinXLowerDisplayArea
+ sub PixelX,x1
+
+ PixelY=MouseY
+ x1=MinYLowerDisplayArea
+ sub PixelY,x1
+
+.PPCNotLower
+.SCCRet
+ return
+;---------
+.SetCorrectContext
+; current context starts at CurrentYBase pixels down the screen
+; Mouse is at MouseX,MouseY. Change context if necessary
+ if MouseX>MaxXUpperDisplayArea then SCCRet ; over colour bar etc.
+ if CurrentYBase<80 then InUpper
+; currently editing lower context
+ if MouseY>99 then SCCRet
+ goto @SwapContext ; gosub, return
+
+.InUpper
+ if MouseY<100 then SCCRet
+ goto @SwapContext ; gosub, return
+;-----------
+.MaybeChooseColour
+; choose drawing colour if over the colour palette at the right
+ if MouseX<MinXColourBar then @MCCRet
+ if MouseY<MinYColourBar then @MCCRet
+ if MouseY>maxYColourBar then @MCCRet
+; is mouse button down?
+ x1=ByteWS(ByteJoystickStatus)
+ x2=128
+ and x1,x2
+ if x1<>128 then MCCRet
+; &WordWS(WordCursorXPos)=MouseX
+; &WordWS(WordCursorYPos)=MouseY
+; gosub @MCCalcScreenAddress ; get List19 as position on screen
+; PixelColour=
+ x1=MouseY
+ x2=MinYColourBar
+ sub x1,x2
+ x2=SizeColourBarElement
+ gosub @DivX1X2
+ PixelColour=x1
+.MCCRet
+ return
+;-----------
+.DisplayColourBar
+ return
+
+
+;****** not used now....
+ v1=2 ; sprite to change so as to display single colour
+ gosub @MCReturnSpriteAddress
+
+; clear out entire sprite
+ x1=0
+.DCBClear
+ &List19(x1)=c0
+ add x1,c2
+ if x1<160 then DCBClear ; includes transparency masks.
+
+
+ x1=0
+; List19 is sprite
+ x1=2 ; start after transparency mask
+ v1=2 ; sprite we've created
+ v2=312 ; x pos
+ v3=32 ;  y pos
+; set up 4 bit plane values to act as a counter
+; to display all colours...
+ x1=0
+.DCB4
+ x2=0
+.DCB3
+ x3=0
+.DCB2
+ x4=0
+.DCB1
+ gosub @DCBSprite
+ x5=8 ; 8 pixels each vertically
+ add v3,x5
+ x5=255
+ add x4,x5
+ if x4<256 then @DCB1
+ add x3,x5
+ if x3<256 then @DCB2
+ add x2,x5
+ if x2<256 then @DCB3
+ add x1,x5
+ if x1<256 then @DCB4
+ return
+;---
+.DCBSprite
+; display sprite List19 at (v2,v3)
+; and modify sprite to contain bit planes x1,x2,x3,x4
+ x5=2
+ x6=8 ; do 8 lines
+
+.DCBS1
+ List19(x5)=x1
+ add x5,c1
+ List19(x5)=x1
+ add x5,c1
+
+ List19(x5)=x2
+ add x5,c1
+ List19(x5)=x2
+ add x5,c1
+
+ List19(x5)=x3
+ add x5,c1
+ List19(x5)=x3
+ add x5,c1
+
+ List19(x5)=x4
+ add x5,c1
+ List19(x5)=x4
+ add x5,c3 ; and skip over transparency mask
+
+ sub x6,c1
+ if x6>0 then @DCBS1
+
+ gosub @MCNoClipSprite
+ return
+;--------
+.SwapContext
+ CurrentObject=ObjectNumber
+ gosub @SaveCurrentContext
+ x2=0 ; new CurrentYBase
+ x1=UpperContext
+ if CurrentYBase>50 then SC1
+ x2=100 ; new CurrentYBase
+ x1=LowerContext
+.SC1
+ CurrentYBase=x2
+ goto @ContextShiftNoSave ; gosub, return
+;---------
+;----
+.PositionBlockCursor
+ gosub @PositionPixelCursor
+ x1=PixelX
+ x2=16
+ gosub @DivX1X2
+ EditX=x1
+
+ x1=PixelY
+ x2=16
+ gosub @DivX1X2
+ EditY=x1
+ return
+;------
+

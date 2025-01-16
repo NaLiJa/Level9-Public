@@ -1,0 +1,13 @@
+
+Level themes are based around the four alchemical elements, as 
+appropriate for the dragon in charge: 
+9: Fire. Maze of Fire: Master Dragon's Realm. 
+8: Air. Mist and Smoke. 
+7: Water. Flooded Tunnels: Underwater Travel, Weed, Fish. 
+6: Earth. Necropolis. 
+5: Fire. Volcanic Crater, Fire Crevasses. 
+4: Air. Ventillation, Wind Machinery, Flags.  
+3: Water. Fish Lakes, Canals, Waterfalls. 
+2: Earth. Underground Farms: Mushrooms, Animal Pens, Mines.   
+1: Fire. Entrance Halls: Torches, Flame Jets. 
+

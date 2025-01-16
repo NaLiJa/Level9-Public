@@ -1,0 +1,198 @@
+; TEXTLINE.TXT
+;
+; Copyright (C) 1988 Level 9 Computing
+;
+; M.J.Austin 6-8-88
+;
+ begin
+
+.DisplayTextLine
+; set cursor pos
+ code - ;** reset internal regs
+ code +
+ &WordWs(WordCursorXPos)=c0
+ x1=192
+ &WordWs(WordCursorYPos)=x1
+; clear the text line...
+ v1=320 ; x size
+ v2=8 ; y size
+ gosub @MCClearRectangle
+
+ code - ;**** reset internal regs
+ code +
+ gosub @SelectScrollRate
+ if AmountOfScroll<8 then DTLNothingNew
+; need a new character - ripple buffer along
+ x4=StartScreenLineBuffer
+ x5=x4
+ add x5,c1
+.Ripple1
+ x1=OutputBuffer(x5)
+ OutputBuffer(x4)=x1
+ add x4,c1
+ add x5,c1
+ if x5<EndScreenLineBuffer then Ripple1
+; stops with x4=last character to be displayed
+ x1=8
+ sub AmountOfScroll,x1 ; make it smooth, regardless of step size
+ gosub @FetchNewChar
+ OutputBuffer(x4)=x1
+
+.DTLNothingNew
+; just plonk everything in OutputBuffer(StartScreenLineBuffer-End"")
+; onto screen, and scroll it now and again
+; StartScreenLineBuffer=256
+; EndScreenLineBuffer=296
+ x4=StartScreenLineBuffer
+.DTL1
+ v1=OutputBuffer(x4)
+ gosub @MCOswrchV1
+ add x4,c1
+ if x4<EndScreenLineBuffer then DTL1
+
+; and scroll it along by the appropriate amount to make it smooth
+ if AmountOfScroll=0 then DTLNoScroll
+ &WordWs(WordCursorXPos)=c0
+ x1=192
+ &WordWs(WordCursorYPos)=x1
+
+ v1=AmountOfScroll ; pixels to scroll by
+ gosub @MCScrollTextLine
+
+.DTLNoScroll
+; and blank off last character on line to make
+; text appear smoothly
+ x1=312
+ &WordWs(WordCursorXPos)=x1
+ x1=192
+ &WordWs(WordCursorYPos)=x1
+ v1=32
+ goto @MCOswrchV1 ; gosub, return
+
+;---
+.SelectScrollRate
+; vary scroll rate depending on how much is waiting
+; return new scroll-offset of scrolling text line in AMOUNTOFSCROLL
+ sub TimeTillSampleBuffer,c1
+ if TimeTillSampleBuffer<250 then DTLNoSample
+ SampledCharInBuffer=CharactersInBuffer
+ TimeTillSampleBuffer=20 ; 20 frames - about 2 seconds
+ if CharactersInBuffer<6 then DTLNoSample
+ TimeTillSampleBuffer=40 ; slow down more slowly when buffer full-ish. 15
+; chars take 30 frames to appear, so leave it on 'fast'
+
+.DTLNoSample
+; add AmountOfScroll,c1 ; one-pixel scroll
+; if SampledCharInBuffer=0 then GotRate
+ add AmountOfScroll,c2 ; two-pixel scroll 
+ if SampledCharInBuffer<10 then GotRate
+ add AmountOfScroll,c2 ; four-pixel scroll
+ if SampledCharInBuffer<40 then GotRate
+ add AmountOfScroll,c4 ; 8-pixel scroll
+.GotRate
+ return
+;---
+.FetchNewChar
+; return x1 as the next char to go onto the scrolling display
+ x1=32 ; return a space if nothing else doing
+ if CharactersInBuffer=0 then FNCRet ; buffer empty
+
+ x1=OutputBuffer(OutputBufferReadPtr)
+; filter out control codes, nulls etc.
+ if x1<32 then FNCFilter
+ if x1>127 then FNCFilter
+ goto FNCOk
+
+.FNCFilter
+ x1=32
+.FNCOk
+ sub CharactersInBuffer,c1
+ add OutputBufferReadPtr,c1
+ if OutputBufferReadPtr<EndOutputBufferPlus1 then FNCRet
+ OutputBufferReadPtr=StartOutputBuffer
+.FNCRet
+ return
+;---
+.InitOutputBuffer
+ CharactersInBuffer=0
+ OutputBufferReadPtr=StartOutputBuffer
+
+; fill screen line buffer with spaces
+ x4=StartScreenLineBuffer
+ x1=32
+.IOB1
+ OutputBuffer(x4)=x1
+ add x4,c1
+ if x4<EndScreenLineBuffer then IOB1
+ AmountOfScroll=0
+
+ m1=600
+ gosub @AddMessageToOutputBuffer
+ return
+;---
+.AddNumberToOutputBuffer
+; output number v1 to the scrolling text line
+code -
+ message cr
+code +
+ &WordWS(WordTextBufferOffset)=c1 ; start printing to buffer
+; gosub @MyPrintV1NoLeaders	; print v1, no leading zeros OR spaces
+code -
+ print v1
+ message cr
+code +
+ goto AMTOB0
+;---
+.GPrintBuffer
+ x1=Menutable(l1)		* V1 is char used by OSWRCH
+ If x1=0 then EndGPrintBuffer		* Is it end of line?
+ gosub @AddToOutputBuffer
+;; Gosub @MCOSWRCHV1		* .. nope.. so splat 1st char out
+; &x1=WORDWS(WordCursorXpos)	* Get current X co-ord
+; V1=8				* Width of a character
+; Add x1,V1			* One character along
+; &WORDWS(WordCursorXpos)=x1	* Get current X co-ord
+ Add l1,c1			* Add 1 to location to get chracter from
+ Goto GPrintBuffer			* ... then go back to start
+
+.EndGPrintBuffer
+ Return
+;---
+.AddMessageToOutputBuffer
+ gosub @ism1discovered ; show full name if object use is known *****
+; output message m1 to the scrolling text line
+ &WordWS(WordTextBufferOffset)=c1 ; start printing to buffer
+code -
+ message m1
+code +
+.AMTOB0
+; copy the message to the screen buffer
+ x4=1 ; ptr
+.AMTOB1
+ &x2=WordWS(WordTextBufferOffset)
+ if x2=x4 then AMTOBEnd
+ x1=TextBuffer(x4)
+; NB: control codes are filtered on output
+ gosub AddToOutputBuffer
+ add x4,c1
+ goto AMTOB1
+
+.AMTOBEnd
+ &WordWS(WordTextBufferOffset)=c0 ; cease printing to buffer
+ return
+;---
+.AddToOutputBuffer
+; add char x1 to output buffer
+ if CharactersInBuffer=SizeOutputBuffer then ATOBRet
+ x2=OutputBufferReadPtr
+ x3=CharactersInBuffer
+ add x2,x3
+ if x2<EndOutputBufferPlus1 then ATOB1
+ x3=SizeOutputBuffer
+ sub x2,x3
+.ATOB1
+ OutputBuffer(x2)=x1
+ add CharactersInBuffer,c1
+.ATOBRet
+ return
+;---

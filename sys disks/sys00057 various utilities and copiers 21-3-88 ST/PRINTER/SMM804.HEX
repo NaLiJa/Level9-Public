@@ -1,0 +1,118 @@
+****************************************************************
+*
+*    Atari SMM804 Matrix Printer Driver Configuration Table
+*
+*    This file contains tables defining the code sequences
+*    to be sent to the printer to perform various functions
+*    and to access the characters from codes in the Atari
+*    character set.
+*
+****************************************************************
+
+*
+* Name of printer
+* ===============
+*
+Atari SMM 804
+
+
+*
+* Miscellaneous configurable variables
+* ====================================
+*
+* 1: printer type, 0=dot matrix, 1=daisy wheel
+*    Note if printer type is 0 the following 4 variables are never used.
+* 2: unit width of one character
+* 3: unit height of one line
+* 4: Approximate middle of carriage after formfeed
+* 5: Carriage shift for bold overstrike
+*
+0, 0, 0, 0, 0
+
+*
+* Printer characteristics
+* =======================
+*
+* This table specifies the printer command sequences.
+* If the top bit of a code is set, then this indicates the position
+* of a parameter passed to the printer. The code whose top bit is set
+* in this table is added to the parameter passed before being sent to the
+* printer. It is not used in all command sequences, only in those where 
+* the printer requires  a variable value such as the length of a vertical 
+* tab.
+*
+* 0            * Character width
+1, D, A        * Linefeed WITH return
+* 2            * Forward print
+* 3            * Reverse print
+* 5            * Absolute horizontal tab 
+6, 1B, 45      * Draft bold on
+7, 1B, 46      * Draft bold off
+8, 1B, 45      * Near Letter Quality (NLQ) bold on 
+9, 1B, 46      * NLQ bold off
+A, 1B, 34      * Draft italic on
+B, 1B, 35      * Draft italic off
+C, 1B, 34      * NLQ italic on
+D, 1B, 35      * NLQ italic off
+* E            * Draft light on
+* F            * Draft light off
+* 10           * NLQ light on
+* 11           * NLQ light off
+12, 1B, 53, 0  * Draft superscript on
+13, 1B, 54     * Draft superscript off
+14, 1B, 53, 0  * NLQ superscript on
+15, 1B, 54     * NLQ superscript off
+16, 1B, 53, 1  * Draft subscript on
+17, 1B, 54     * Draft subscript off
+18, 1B, 53, 1  * NLQ subscript on
+19, 1B, 54     * NLQ subscript off
+1A, 1B, 2D, 1  * Draft underline on
+1B, 1B, 2D, 0  * Draft underline off
+1C, 1B, 2D, 1  * NLQ underline on
+1D, 1B, 2D, 0  * NLQ underline off
+1E, C          * Formfeed
+1F, 12         * Horizontal initialisation
+* 20           * Vertical initialisation
+21, 1B, 40     * Termination: printer reset
+0              * NULL termination byte
+
+*
+* Translation Table
+* =================
+*
+* This table provides translation from single Atari input bytes into
+* multiple printer codes, or to disable output of some characters.
+*
+* The entries must be arranged in ascending order of Atari input
+* code. The table is NULL terminated.
+* 
+
+0         * NULL: print a space 
+1         * CONTROL CODES: not printed
+2
+3
+4
+5
+6
+7
+8
+9
+A
+B
+C
+D
+E
+F
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+7F   * DELETE IS NOT PRINTABLE
+0    * end of table!
+

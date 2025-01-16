@@ -1,0 +1,2387 @@
+; Acode controller for Hero
+;
+;
+; known acode compiler bugs:
+; short forward branch in MC mode is compiled as $6000
+; (Which is actually the sign to 68000 to expect a subsequent
+; 16 bit argument)
+;
+ var
+ V1 ; must be first var
+ V2 ; must be second var
+ v3 v4 v5 v6 v7 ; etc..
+
+ x1 x2 x3 x4 x5 x6 ; misc temporary vars
+ m1 ; message number
+ LoopCounter1 LoopCounter2
+ c0 c1 c2 c3 c4
+ LeftMargin TopMargin HighlightedLine Line NumEntries RepeatCount SelectedLine
+ FirstLine
+ l0 l1 l2 ; Linked list temporary workspace
+ LLFree ; pointer to Linked list free space chain
+ CurrentMenu HS0 HS1
+ PreviousObjectInfo ObjectInfo
+ StarCounter
+ xmax ymax x y speed result xsize ysize
+ RoomX RoomY
+ room
+;; xstep ystep
+ size
+ PlayerSpriteOffset
+ StraightLength
+ xDigStep yDigStep
+ DigStep
+ dir
+ RoomsPlaced
+ TrialPlacements AttemptedNewRooms
+ CharactersInBuffer OutputBufferReadPtr
+ AmountOfScroll
+ TimeTillSampleBuffer SampledCharInBuffer
+ verb
+ PlayerX PlayerY
+
+table
+ Workspace=1
+ OutputBuffer=2 ; used solely by acode
+ LL=3
+ MenuTable=4
+ RoomDefns=5
+ RoomMap=6 ; map giving room numbers etc. for follow. Word Based.
+ List7=7
+ TempMovedSprite=20
+ PermMovedSprite=21
+ TempFixedSprite=22
+ PermFixedSprite=23
+ TextBuffer=24 ; filled whenever WordWs(TextBufferOffset)<>0
+
+ Map=27 ; map giving block numbers for display etc. Word Based.
+ SpriteTable=28
+ LongWS=29
+ WordWS=30
+ ByteWS=31
+
+const
+ false=0
+ true=1
+
+ ScreenXBlocks=50
+ ScreenXBlocksTimes2=100
+ ScreenYBlocks=50
+ MapSize=5000 ; ScreenXBlocks*ScreenYBlocks*2 (word based map table)
+
+ UpMapStep=65546 ; -ScreenXBlocks*2
+ RightMapStep=2 ; word-based map
+ DownMapStep=100 ; ScreenXBlocks*2
+ LeftMapStep=65534 ; word-based map
+
+
+ SpriteTableSize=3600 ; MaxMovingSprites*48
+;
+; output buffer offsets (i.e. list 2 offsets)
+ StartOutputBuffer=0
+;; EndOutputBuffer=255
+ EndOutputBufferPlus1=256 ; offset of first byte after used area of buffer
+ SizeOutputBuffer=256 ; EndOutputBufferPlus1-StartOutputBuffer
+ StartScreenLineBuffer=256
+ EndScreenLineBuffer=296
+;--------
+; offsets within LongWs
+ HiLongRandomSeed=8 ; long value
+ LoLongRandomSeed=8 ; long value
+;------
+; offsets within WordWs
+ WordCursorXPos=0
+ WordCursorYPos=2
+ WordFrameTime=4
+ WordPlayer1SpriteOffset=6
+
+ WordScreenXPos=8
+ WordScreenYPos=10
+ WordScreenXMax=12
+ WordScreenYMax=14
+ WordPlayerXMax=16
+ WordPlayerYMax=18
+
+ WordScreenXBlocks=20
+ WordScreenYBlocks=22
+ WordXPosSave=24
+ WordYPosSave=26
+ WordTextBufferOffset=28
+ WordFreeSprites=30
+;--------
+; offsets within ByteWs
+ ByteJoystickStatus=0
+ ByteLastKeyPressed=1
+; ByteFrameReadyFlag=2
+ ByteInvertFlag=3
+ ByteBreakPointArmed=4
+ ByteScrollStep=5
+ ByteCurrentWeapon=6
+
+ ByteFrameReadyFlag=9
+ ByteStarPhase=10
+
+; offsets within permament sprite data block
+ StationaryAnimationOffset=14
+ MovingAnimationOffset=16
+ FightAnimationOffset=18
+ ThrowAnimationOffset=20
+ InitialHitPointOffset=22
+ InitialBlowStrengthOffset=24
+ TimeBetweenBlowsOffset=26
+ NumAnimationOffset=27
+ TypeOffset=28
+ SpeedOffset=29
+ NullMovesOffset=30
+ DistanceOffset=35
+ AddDirOffset=37
+
+;CDWithPlayer equ 0 * bit 0
+;CDWithMissiles equ 1
+;CDWithMonsters equ 2
+;CDWithBG equ 3 * bit 3
+;CDWithObject equ 4
+;CDWithInvisibles equ 5
+;CDWithMonsterMissile equ 6
+
+ PlayerMask=1
+ MissileMask=2
+ MonsterMask=4
+ BGMask=8
+ ObjectMask=16
+ InvisibleMask=32
+ MonsterMissileMask=64
+
+ PlayerType=1
+ MissileType=2
+ MonsterType=4
+ BGType=8
+ ObjectType=16
+ InvisibleType=32
+ MonsterMissileType=64
+
+; offsets within temporary sprite data block
+ xspeedOffset=4
+ YSpeedOffset=6
+ XPosOffset=8
+ YPosOffset=10
+ DataPtrOffset=12 ; LONG
+  LoDataPtrOffset=14
+ NameOffset=24
+ HitPointOffset=26
+ BlowStrengthOffset=28
+ TimeToNextBlowOffset=30
+ LifeCounterOffset=36
+ AnimationOffset=38
+
+; offsets of linked list pointers within LL list.
+; note that many of these are referenced by MenuTable
+ LLPlayerInv=0 ; ll showing player's inventory
+ LLRangedWeapons=2 ; ll giving available ranged weapons
+ LLEntrySize=10
+ LLTableSize=250
+
+; offsets of entries in LL table.
+ InvNameOffset=2 ; contains a word giving the "name" of the
+ RWNameOffset=2 ; holds word value
+ RWTypeOffset=4 ; holds byte value
+; object held. This will usually by the same as the number
+; of the sprite data.
+
+MenuDelay=1000 ; slow down menu to prevent flickering display
+
+; offsets within RoomData
+ ExitOffsetBase=4
+ North=2
+ East=4
+ South=6
+ West=8
+
+;
+; offsets within Workspace List
+ RoomTableOffset=0 ; gives number of exits used from each
+ RoomTableEntrySize=8 ; room - used in maze drawing
+
+; offsets within list7
+ NextAddDirTableOffset=10
+ ConvertViewToXY=38 ; 18+20 because index into table is -5..+5
+
+; sprite data numbers...
+ SpriteBottle=14
+ SpriteSword=15
+ SpriteShield=16
+ SpriteRing=17
+ SpriteWand=18
+ SpriteScroll=19
+ SpriteGold=20
+ SpriteClub=21
+
+
+ MenuHeight=8
+ MenuPixelWidth=142
+ MenuPixelHeight=64
+
+;----
+
+ begin
+ data @Start,@Start ; Dummy - overwritten by "ToMCEnd" vector
+.Start
+ code +
+
+ data @AcodeFns,@MCFns ; pointers to the major jump blocks
+
+
+.AcodeFns
+; jump table for acode functions called from MC
+ goto @AcodeStart
+ goto @FGSpecials
+ goto @FGSpecialsMovedSprite
+ goto @BGSpecials
+ goto @Dummy ; SpecialCollision
+ goto @DAMSSpecials
+
+.MCFns
+; jump table for MC functions called from Acode
+; reserve 6 bytes per jump - absolute, long jumps
+; poked in by MC
+.MCHeroOnceOnlyInit            data @Dummy,@Dummy,@Dummy ;0
+.MCHeroInit                    data @Dummy,@Dummy,@Dummy ;1
+.MCClearScreen                 data @Dummy,@Dummy,@Dummy ;2
+
+.MCMoveScreen                  data @Dummy,@Dummy,@Dummy ;3
+.MCSpecials                    data @Dummy,@Dummy,@Dummy ;4
+.MCBuildBackground             data @Dummy,@Dummy,@Dummy ;5
+.MCDisplayDestroyedWalls       data @Dummy,@Dummy,@Dummy ;6
+.MCMoveAllSprites              data @Dummy,@Dummy,@Dummy ;7
+.MCDisplayAllSprites           data @Dummy,@Dummy,@Dummy ;8
+.MCTrimEdges                   data @Dummy,@Dummy,@Dummy ;9
+.MCDisplayTextLine             data @Dummy,@Dummy,@Dummy ;a
+.MCDisplayUpperTextLine        data @Dummy,@Dummy,@Dummy ;b
+.MCDoAllTimers                 data @Dummy,@Dummy,@Dummy ;c
+.MCCalculateMemoryFree           data @Dummy,@Dummy,@Dummy ;d
+;.MCDisplayHitPOints            data @Dummy,@Dummy,@Dummy ;e
+;.MCDisplayFreeSprites          data @Dummy,@Dummy,@Dummy ;f
+;.MCDisplayFrameTime            data @Dummy,@Dummy,@Dummy ;10
+.MCHeroInput                   data @dummy,@Dummy,@Dummy ;11
+.MCOswrchV1                    data @Dummy,@Dummy,@Dummy ;12
+.MCInvertedOswrchV1            data @Dummy,@Dummy,@Dummy ;13
+.MCDestroyTempMoved            data @Dummy,@Dummy,@Dummy ;14
+.MCDestroyTempFixed            data @Dummy,@Dummy,@Dummy ;15
+.MCCloseDown                   data @Dummy,@Dummy,@Dummy ;16
+.MCFindSprite                  data @Dummy,@Dummy,@Dummy ;17
+.MCSetUpNewSprite              data @Dummy,@Dummy,@Dummy ;18
+.MCSprite                      data @Dummy,@Dummy,@Dummy ;19
+.MCHandlePlayerInput           data @Dummy,@Dummy,@Dummy ;1a
+.MCReturnFrameTime             data @Dummy,@Dummy,@Dummy ;1b
+.MCUpdateFrameTime             data @Dummy,@Dummy,@Dummy ;1c
+.MCClearRectangle              data @Dummy,@Dummy,@Dummy ;1d
+.MCMapBuildBackground          data @Dummy,@Dummy,@Dummy ;1e
+.MCPreScrollMap                data @Dummy,@Dummy,@Dummy ;1f
+.MCSpecialCheck                data @Dummy,@Dummy,@Dummy ;20
+.MCStartBigExplosion           data @Dummy,@Dummy,@Dummy ;21
+.MCScrollTextLine              data @Dummy,@Dummy,@Dummy ;22
+.MCReCalcSpriteGraphics        data @Dummy,@Dummy,@Dummy ;23
+
+.Dummy
+ code -
+ prs " bug! "
+
+ code +
+.AcodeDelay
+ gosub @Delay
+ goto @HeroLoop
+
+.AcodeStart
+ c0=0
+ c1=1
+ c2=2
+ c3=3
+ c4=4
+ gosub @MCHeroOnceOnlyInit
+.RestartGame
+ gosub @MCHeroInit
+ code -
+ code +
+;; gosub @InitSpriteTable
+ x1=0
+ LongWS(HiLongRandomSeed)=x1
+ LongWS(LoLongRandomSeed)=x1
+
+;* gosub @SetUpMap
+;* gosub @InitSpriteTable
+;* gosub @InitOutputBuffer
+; x1=24
+;.MapLoop
+; x2=33
+; &Map(x1)=x2
+; x2=16
+; add x1,x2
+; if x1<3000 then MapLoop
+
+;
+;* gosub @MCPreScrollMap
+
+.RestartHero
+;** gosub @MCHeroInit
+ code - ; reset address registers.
+ code +
+ gosub @InitLL
+
+.HeroLoop
+ gosub @MCHeroInput
+ gosub @MCHandlePlayerInput
+ gosub @HandleKeyPress
+ gosub @MCMoveAllSprites
+
+ gosub @AllHero
+ gosub @DisplayFrame
+ gosub @WaitForFrame
+ gosub LimitFrameRate
+ goto @HeroLoop
+
+;-------
+.LimitFrameRate
+ gosub @MCReturnFrameTime
+ if v1>800 then LimitFrameRate1 ; often returns very high values
+; which seem totally spurious.
+
+; time is in 5ms ticks, so multiply by 5 to give ms display
+ x1=v1
+ add v1,v1
+ add v1,v1
+ add v1,x1
+; display it
+ x1=256
+ &WordWS(WordCursorXPos)=x1
+ x1=140
+ &WordWS(WordCursorYPos)=x1
+;code -
+; print V1
+;code +
+; v1=32
+; gosub @MCOswrchV1
+ gosub MyPrintV1
+
+.LimitFrameRate1
+ gosub @MCReturnFrameTime
+; v1 is the time taken so far by this frame
+ if v1<16 then LimitFrameRate1
+; in 5 ms ticks (200 Hz timer)
+ gosub @MCUpdateFrameTime
+ return
+;------
+;------
+.MyPrintV1
+; routine created due to frustration with word-wrap etc.
+; only works for smallish-numbers for debugging etc.
+; Fixed Number of significant figures - 4
+ x5=1 ; ok to supress 0s (i.e. leading zeros) whilst x5 is non-zero
+ x1=v1
+ x2=1000
+ gosub @MyPrintV1Digit
+ x2=100
+ gosub @MyPrintV1Digit
+ x2=10
+ gosub @MyPrintV1Digit
+ x2=1
+ x5=0 ; don't supress final 0 as a leading zero.
+
+.MyPrintV1Digit
+ v1=48 ; '0'
+.MyPrintV1Digit1
+ sub x1,x2
+ if x1>32000 then MyPrintV1Digit2
+ add v1,c1
+ goto MyPrintV1Digit1
+
+.MyPrintV1Digit2
+ add x1,x2 ; make it positive again
+ if x5=0 then NoSupress
+ if v1=48 then MaybeSupressLeading
+.NoSupress
+ x5=0 ; don't supress leading zeros from now on
+ goto @MCOswrchV1
+
+.MaybeSupressLeading
+; convert leading 0's to spaces
+ v1=32
+ goto @MCOswrchV1
+
+;-------
+.DisplayHitPoints
+ x1=256
+ &WordWS(WordCursorXPos)=x1
+ x1=156
+ &WordWS(WordCursorYPos)=x1
+ &x1=WordWS(WordPlayer1SpriteOffset)
+ x2=HitPointOffset
+ add x1,x2
+ &v1=SpriteTable(x1)
+ goto @MyPrintV1
+;------
+.DisplayFreeSprites
+ x1=256
+ &WordWS(WordCursorXPos)=x1
+ x1=164
+ &WordWS(WordCursorYPos)=x1
+; &x1=WordWS(WordPlayer1SpriteOffset)
+; x2=HitPointOffset
+; add x1,x2
+; &v1=SpriteTable(x1)
+ &v1=WordWS(WordFreeSprites)
+ goto @MyPrintV1
+;------
+.DisplayMemoryFree
+ gosub @MCCalculateMemoryFree
+ x1=256
+ &WordWS(WordCursorXPos)=x1
+ x1=172
+ &WordWS(WordCursorYPos)=x1
+; &x1=WordWS(WordPlayer1SpriteOffset)
+; x2=HitPointOffset
+; add x1,x2
+; &v1=SpriteTable(x1)
+; &v1=WordWS(WordFreeSprites)
+ gosub @MyPrintV1
+ v1=75 ; 'K'
+ goto @MCOswrchV1
+;------
+.DisplayFrame
+;;* debugging stuff:
+; x1=ByteWS(7) ; text line cleared?
+; if x1<>0 then df1
+; brEak ;*
+; gosub @MCDisplayUpperTextLine ;*
+; goto DisplayFrame
+;; brEak ;*
+;
+;.df1
+;;* end debugging
+ ByteWS(ByteFrameReadyFlag)=c1
+ return
+;------
+; wait for frame to be displayed
+.WaitForFrame
+ V1=ByteWS(ByteFrameReadyFlag)
+;* if V1<>0 then WaitForFrame
+ return
+;----
+.LongDelay
+ V2=10
+.LongDelay1
+ gosub Delay
+ sub V2,c1
+ if V2<>0 then LongDelay1
+ return
+;---
+.Delay
+ V1=60000
+.DelayV1
+ c1=1
+
+.Delay1
+ sub V1,c1
+ if V1>0 then Delay1
+ return
+;------
+.AllHero
+; call main routines for normal Hero display.
+; Note that most of these routines corrupt a3-a5, so should
+; do a code-, code+ to reset them if you want to do
+; any acode processing in-between calls.
+ gosub @MCMoveScreen
+ gosub CyclicSpecials
+.AllHero2
+ gosub @MCSpecials
+ gosub @MCBuildBackground
+ gosub @MCDisplayDestroyedWalls
+; gosub @MCMoveAllSprites
+ gosub @MCDisplayAllSprites
+ gosub @MCTrimEdges
+;* gosub @DisplayTextLine
+ gosub @MCDisplayUpperTextLine
+ gosub @MCDoALlTimers
+;* gosub @DisplayMemoryFree
+;* gosub @DisplayHitPoints
+;* gosub @DisplayFreeSprites
+;**** gosub @MCDisplayFrameTime
+ code -
+ code +
+ return
+;------
+;---
+.CyclicSpecials
+code -
+ add StarCounter,c1
+ if StarCounter<>2 then CsRet
+ StarCounter=0
+ x1=ByteWS(ByteStarPhase)
+ add x1,c1
+ if x1<8 then CsEnd
+ x1=0
+.CsEnd
+ ByteWS(ByteStarPhase)=x1
+.CsRet
+code +
+ return
+;---
+.EqualiseFrames
+; first ensure both frames have same display...
+ V1=1000
+ gosub @DelayV1
+ gosub @AllHero2
+ gosub @DisplayFrame
+ gosub @WaitForFrame
+ goto @LimitFrameRate ; gosub, return
+;---
+.DoMenu
+; first ensure both frames have same display...
+ gosub @EqualiseFrames
+
+ HighlightedLine=1
+ CurrentMenu=2 ; 0 is not present.
+
+.DoMenuLoop
+ if CurrentMenu=0 then @HeroLoop
+ gosub DisplayCurrentMenu
+;* gosub @DisplayTextLine
+ gosub @DisplayFrame
+ gosub @WaitForFrame
+
+code -
+ gosub @MakeMenuSelection
+code +
+ if SelectedLine=0 then NoSelection
+ gosub @HandleSelection
+.NoSelection
+ gosub @MCHeroInput ;*****
+ V1=ByteWS(ByteLastKeyPressed) ;*
+ if V1=13 then @MCCloseDown ;*
+; gosub @WaitForFrame ;*
+; gosub @LimitFrameRate
+ v1=MenuDelay
+ gosub @DelayV1
+
+ goto DoMenuLoop
+;---
+.DisplayCurrentMenu
+; Display CurrentMenu
+; 3 bytes per entry
+ gosub @DoFirstMenuLine ; clear screen, set up Line etc.
+ &l0=MenuTable(CurrentMenu) ; start with verbs table
+code -
+.DM1
+
+ V1=MenuTable(l0)
+ if V1=255 then DisplaymenuEnd
+ add l0,c3 ; get message number offset for this entry
+ V1=MenuTable(l0)
+ l1=100 ; base of messages
+ add l1,V1
+ gosub @PrintMenuLineL1 ; handles highlighted line etc., increments Line.
+ add l0,c1 ; on to next entry
+ goto DM1
+
+.DisplayMenuEnd
+ NumEntries=Line
+ SUB NumEntries,c1
+code +
+ return
+
+;---
+.GetObject
+; display inventory/whatever, using linked list starting with LL(L2)
+ HighlightedLine=1
+
+.GetObjectLoop
+ gosub @PrintInv
+;* gosub @DisplayTextLine
+ gosub @DisplayFrame
+ gosub @MCHeroInput
+code -
+ gosub MakeMenuSelection
+code +
+ gosub @WaitForFrame
+ gosub @LimitFrameRate
+ v1=MenuDelay
+ gosub @Delay1
+
+ if SelectedLine=0 then GetObjectLoop
+ HighLightedLine=1 ; reset for higher menu level
+ return
+;---
+code -
+.MakeMenuSelection
+; called from interpreted mode
+ SelectedLine=0
+ V1=ByteWS(ByteJoystickStatus)
+ if V1<>1 then NotUp
+ if HighlightedLine=1 then NotUp
+ if RepeatCount>0 then @JoystickDelay
+ RepeatCount=1
+ sub HighLightedLine,c1
+ goto MMSEnd
+
+.NotUp
+ if V1<>2 then NotDown
+ if HighlightedLine=NumEntries then NotDown
+ if RepeatCount>0 then @JoystickDelay
+ RepeatCount=1
+ add HighLightedLine,c1
+ goto MMSEnd
+
+.NotDown
+ if v1<>8 then NotRight
+ if RepeatCount>0 then @JoystickDelay
+ RepeatCount=1
+ x1=5
+ add HighlightedLine,x1
+ if HighLightedLine<NumEntries then NoLimitRight
+ HighlightedLine=NumEntries
+.NoLimitRight
+ goto MMSEnd
+
+.NotRight
+ if v1<>4 then NotLeft
+ if RepeatCount>0 then @JoystickDelay
+ RepeatCount=1
+ x1=5
+ sub HighLightedLine,x1
+ if highlightedLine>32000 then LimitLeft
+ if HighLightedLine<>0 then NoLimitLeft
+.LimitLeft
+ HighlightedLine=1
+.NoLimitLeft
+.MMSEnd
+; check if we need to scroll the window
+ if HighlightedLine>FirstLine then MMSTopOk
+ sub FirstLine,c1
+ goto MMSEnd ; check again for large movements up or down
+
+.MMSTopOk
+ x1=MenuHeight
+ add x1,FirstLine ; first line NOT displayed
+ if HighlightedLine<x1 then MMSBottomOk
+ add FirstLine,c1
+ goto MMSTopOk
+
+.MMSBottomOk
+ return
+
+.NotLeft
+ if V1<>128 then NotButton
+ SelectedLine=HighLightedLine
+code +
+  gosub @WaitForJoystick ;  return
+code -
+ goto JDRet
+
+.NotButton
+; no joystick input, so clear delay flag
+ RepeatCount=0
+
+.NotJoystick
+ goto JdRet
+;-
+.JoystickDelay
+; stop joystick movements being too rapid
+ add RepeatCount,c1
+ if RepeatCount<5 then JDRet
+ RepeatCount=0
+.JDRet
+ return
+;---
+code +
+.FGSpecials
+; TempFixedSprite=20
+; PermFixedSprite=21
+; TempMovedSprite=22
+; PermMovedSprite=23
+; the above give the sprite control blocks for the two sprites
+; involved in a collision.
+;
+; xspeedOffset=4 YSpeedOffset=6
+; XPosOffset=8   YPosOffset=10
+; NameOffset=24
+; HitPointOffset=26
+;
+;
+;.MCDestroyTempMoved
+;.MCDestroyTempFixed
+;
+; return: V1 false if no need to collision detect this
+; sprite with other possibilities. You must do this
+; if the moved sprite was destroyed
+; &TempMovedSprite(XSpeedOffset)=c0
+; &TempMovedSprite(YSpeedOffset)=c0
+; &TempFixedSprite(XSpeedOffset)=c0
+; &TempFixedSprite(YSpeedOffset)=c0
+ x5=PermMovedSprite(TypeOffset)
+ x6=PermFixedSprite(TypeOffset)
+
+ if x5<>PlayerType then @FGSpecialNotPlayer
+ x1=MonsterMask
+ and x1,x6
+ if x1=0 then FGSpecialNotFight
+.FGSFighting
+; land a blow
+ gosub @BlockSprite
+ gosub @LandABlow
+
+.FGSNotDestroyed
+; change graphics to reflect attack
+ &x1=PermMovedSprite(FightAnimationOffset)
+ &TempMovedSprite(AnimationOffset)=x1
+ gosub @MCReCalcSpriteGraphics ; update the pointers for new pic
+ goto @FGSpecialsStop ; regardless of whether or not anything destroyed
+
+.FGSpecialNotFight
+ V1=PermFixedSprite(TypeOffset)
+ if V1<>ObjectType then FGSNotObject
+
+ &v1=TempFixedSprite(NameOffset)
+; set up LL(LLFree) from the object the player is picking up.
+ L0=InvNameOffset
+ add L0,LLFree
+ &LL(L0)=V1 ; record object type
+ gosub @AddToPlayerInv
+ m1=208 ; you have found
+ gosub @AddMessageToOutputBuffer
+ m1=v1
+ gosub @AddMessageToOutputBuffer ; object name
+ m1=199 ; dot
+ gosub @AddMessageToOutputBUffer
+ gosub @MCDestroyTempFixed ; destroy the object
+
+.FGSNotObject
+
+.FGSpecialNotPlayer
+;; goto @FGSpecialsOk
+
+; monster?
+ x1=MonsterMask
+ and x1,x5
+ if x1=0 then FGSNotMonster
+ if x6<>PlayerType then @FGSNotAttackPlayer
+code -
+ random x1
+code +
+ if x1>5 then @FGSFighting
+ m1=201 ; ouch!
+ gosub @AddMessageToOutputBuffer
+ goto @FGSFighting
+
+.FGSNotAttackPlayer
+ x1=MonsterMask
+ and x1,x6
+ if x1=0 then FGSNotBlocked
+.FGSBlocked
+ gosub @BlockSprite ; prevent monsters climbing over each other
+ gosub @MonsterBlocked
+ goto @FgSpecialsOk
+
+.FGSNotBlocked
+; monster colliding with something else - ignore at present
+ gosub @MonsterNotBlocked ;** should do on EVERY successful move
+ goto @FGSpecialsOk ; check for other collisions
+
+.FGSNotMonster
+ x1=MissileMask
+ and x1,x5
+ if x1=0 then @FGSNotMissile
+ x1=MonsterMask
+ and x1,x6
+ if x1=0 then @FGSpecialsOk
+ gosub @MCSpecialCheck
+ if v1<>0 then @FGSNotMissile
+; missile REALLY did hit it
+ gosub @LandABlow
+; was what we hit destroyed?
+ &x1=TempFixedSprite(HitPointOffset)
+ if x1=0 then MissileDestroyed
+ gosub @StartExplosion
+
+.MissileDestroyed
+ &x1=TempMovedSprite(NameOffset)
+ if x1<>8 then NotBigExplosion
+code -
+ random x1
+code +
+ if x1>5 then FGSBigExp1
+ m1=202 ; wow!
+ gosub @AddMessageToOutputBuffer
+
+.FGSBigExp1
+ gosub @StartBigExplosion
+
+.NotBigExplosion
+; for missiles, an explosion is also started where the OTHER sprite was.
+
+code -
+ random x1
+code +
+ if x1>5 then FGSLittleExp1
+ m1=203 ; got him!
+ gosub @AddMessageToOutputBuffer
+
+.FGSLittleExp1
+ gosub @MCDestroyTempMoved
+ goto @FGSpecialsStop
+
+.FGSNotMissile
+
+; by default, scan for further collisions
+.FGSpecialsOk
+ v1=true ; continue with cd
+ return
+;---
+.FGSpecialsStop
+ v1=false
+ return
+;---
+.BlockSprite
+ &TempMovedSprite(XSpeedOffset)=c0 ; monsters blocked by everything
+ &TempMovedSprite(YSpeedOffset)=c0
+ &x1=WordWs(WordXPosSave)
+ &TempMovedSprite(XPosOffset)=x1
+
+ &x1=WordWs(WordYPosSave)
+ &TempMovedSprite(YPosOffset)=x1
+ return
+;---
+.MonsterBlocked
+ x1=TempMovedSprite(AddDirOffset)
+; goto mbok2 ;*****
+
+; gosub @SignExtendX1
+ if x1<20 then MBOk
+; break ;****
+
+.MBOk
+ x3=x1 ;*****
+ x2=NextAddDirTableOffset
+ add x2,x1
+ x1=list7(x2)
+ if x1<>x3 then MBOk2
+; break ;***
+.mbok2
+
+ TempMovedSprite(AddDirOffset)=x1
+ TempMovedSprite(DistanceOffset)=c0
+ return
+;---
+.MonsterNotBlocked
+; sprite can move ok - add to distance travelled, and
+; if AddDirOffset is set, eventually stop moving in that direction
+ x1=TempMovedSprite(DistanceOffset)
+ add x1,c1
+ TempMovedSprite(DistanceOffset)=x1
+; x2=TempMovedSprite(AddDirOffset)
+; if x2=0 then MonsterNotBlockedRet
+ if x1>8 then @MonsterBlocked ; max distance monster can move
+; in a direction not directly towards the player without reconsidering
+
+.MonsterNotBlockedRet
+ return
+;---
+.LandABlow
+ x1=TempMovedSprite(TimeToNextBlowOffset)
+ sub x1,c1
+ if x1<250 then FGSFighting1
+; do damage to fixed sprite
+ &x1=TempMovedSprite(BlowStrengthOffset)
+ gosub DoDamageX1
+ x1=PermMovedSprite(TimeBetweenBlowsOffset)
+
+.FGSFighting1
+ TempMovedSprite(TimeToNextBlowOffset)=x1
+ return
+;-------
+.DoDamageX1
+; subtract X1 hit points from sprite TempFixedSprite
+ &x2=TempFixedSprite(HitPointOffset)
+ sub x2,x1
+ &TempFixedSprite(HitPointOffset)=x2
+ if x2>50000 then DoDamageDestroy
+ if x2=0 then DoDamageDestroy
+ return
+
+.DoDamageDestroy
+ &TempFixedSprite(HitPointOffset)=c0
+ gosub @MCDestroyTempFixed
+ v5=13 ; death-explosion
+ goto StartExplosionV5 ; gosub, return
+;---
+
+.StartExplosion
+; start an explosion at (TempFixedSprite)
+ v5=3 ; sprite no. for explosion
+
+.StartExplosionV5
+ &v1=TempFixedSprite(XPosOffset)
+ &v2=TempFixedSprite(YPosOffset)
+ v3=0 ; xspeed
+ v4=0 ; yspeed
+; x1=ByteWS(ByteCurrentWeapon)
+; if x1=2 then StartBigExplosion
+ gosub @MCSetUpNewSprite
+; and set up explosion to self-destruct in 8 frames...
+ if v7>250 then HFE1 ; couldn't set up sprite
+ x1=8
+ x2=LifeCounterOffset
+ add x2,v6
+ SpriteTable(x2)=x1
+.HFE1
+ return
+
+.StartBigExplosion
+ &v1=TempFixedSprite(XPosOffset)
+ &v2=TempFixedSprite(YPosOffset)
+ v3=0 ; xspeed
+ v4=0 ; yspeed
+ v5=3 ; sprite no. for explosion
+ goto @MCStartBigExplosion
+
+;-------
+
+;-----------------------------------------------------------
+.FGSpecialsMovedSprite
+; TempFixedSprite=20
+; PermFixedSprite=21
+; TempMovedSprite=22
+; PermMovedSprite=23
+; the above give the sprite control blocks for the two sprites
+; involved in a collision.
+; MovedSPrite is guaranteed to have been the one that moved so as
+; to cause the collision.
+; V1=PermMovedSprite(TypeOffset)
+; if V1<>PlayerType then fgsmsNotPlayer
+
+.fgsmsNotPlayer
+ return
+;---
+.BGSpecials
+ x5=PermMovedSprite(TypeOffset)
+ x1=MonsterMask
+ and x1,x5
+ if x1=0 then BGSpecialsNotBlocked
+ gosub @MonsterBlocked
+
+.BGSpecialsNotBlocked
+ return
+;---
+.RemoveFromLL
+; remove Entry LL(ObjectInfo)
+; (Previous entry in chain was LL(PreviousObjectInfo))
+ &x1=LL(ObjectInfo)
+ &LL(PreviousObjectInfo)=x1
+; and add to the start of the free space list.
+ &LL(ObjectInfo)=LLFree
+ &LLFree=ObjectInfo
+ return
+;---
+.InitRangedWeapons
+; set up names of ranged weapons
+ x1=40 ; weapon with name 40
+ x2=0 ; weapon type
+ gosub AddRangedWeapon
+ x1=41
+ x2=1
+ gosub AddRangedWeapon
+ x1=42
+ x2=2
+; fall through to AddRangedWeapons
+
+.AddRangedWeapon
+; add ranged weapon with name x1
+ L0=LLRangedWeapons
+ v1=RWNameOffset
+ add v1,LLFree
+ &LL(V1)=x1
+ v1=RWTypeOffset
+ add v1,LLFree
+ LL(V1)=x2
+ goto AddToLL
+;---
+.AddToPlayerInv
+; Add LL(LLFree) to the inventory chain: LL(PlayerInv)
+ L0=LLPlayerInv
+; drop through to AddToLL
+;
+.AddToLL
+; add LL(LLFree) to LL(L0)
+ &l1=LL(L0)
+ &l2=LL(LLFree)
+; save next item in free space chain
+ if l2=0 then NoLLSpace
+ &LL(LLFree)=l1 ; insert entry in LL chain
+ &LL(L0)=LLFree
+ LLFree=L2 ; remove entry from free space chain
+ return
+;---
+.NoLLSpace
+ code -
+  prs " No LL Space. "
+ code +
+ gosub @DisplayFrame
+ gosub @LongDelay
+ goto @RestartHero
+;---
+.InitLL
+ L2=LLEntrySize
+ L0=0 ; first entry pointer
+ L1=LLEntrySize ; second entry pointer
+.InitLL1
+ &LL(L0)=L1
+ add L0,L2
+ add L1,L2
+ if L1<LLTableSize then InitLL1
+
+; the initial pointers for the LL occupy the first
+; few bytes of the LL (and therefore overlap with what would
+; otherwise by the first entry). Therefore make free space
+; point after this point:
+ &LLFree=LL(LLPlayerInv)
+ &LL(LLPlayerInv)=c0
+
+ &LL(LLRangedWeapons)=c0 ; no ranged weapons yet
+ gosub @InitRangedWeapons
+
+ return
+;----
+.PrintInv
+; print contents of Linked list which starts with LL(L2)
+ gosub @DoFirstMenuLine
+code -
+ L1=99 ; verbs-1
+ add l1,Verb
+ gosub @PrintMenuLineL1
+ ObjectInfo=L2
+code +
+ &L0=LL(L2)
+code -
+; PreviousObjectInfo will be overwritten before it may be needed 
+; FirstLine is the first line currently displayed in menu
+; scan through objects till we reach it...
+.PrintInvScan1
+ if l0=0 then @PrintInvEnd
+ if Line=FirstLine then PrintInv1
+ L1=InvNameOffset
+ add L1,L0
+code +
+ &L1=LL(L1) ; get object type
+ &L0=LL(L0)
+code -
+ add Line,c1
+ goto PrintInvScan1
+
+; now display the objects...
+.PrintInv1
+ if L0=0 then PrintInvEnd
+ L1=InvNameOffset
+ add L1,L0
+code +
+ &L1=LL(L1) ; get object type
+code -
+ if Line<>HighlightedLine then PrintInv2
+ PreviousObjectInfo=ObjectInfo
+ ObjectInfo=L0 ; preserve the object the user MAY select
+
+.PrintInv2
+ gosub @PrintMenuLineL1
+
+code +
+ &L0=LL(L0)
+code -
+ goto PrintInv1
+
+.PrintInvEnd
+code +
+ NumEntries=Line
+ SUB NumEntries,c1
+ return
+code -
+;---
+.PrintMenuLineL1
+ ByteWS(ByteInvertFlag)=c0
+ if Line<>HighLightedLine then PML1
+ ByteWS(ByteInvertFlag)=c1 ; set up mc to print inverted text
+
+.PML1
+; code -
+  message l1
+ message 198 ; cr
+code +
+ gosub @DoCr
+code -
+ add line,c1
+ ByteWS(ByteInvertFlag)=c0
+ return
+;----
+code +
+;*.DisplayTextLine
+; set cursor pos
+ code - ;** reset internal regs
+ code +
+ &WordWs(WordCursorXPos)=c0
+ x1=192
+ &WordWs(WordCursorYPos)=x1
+; clear the text line...
+ v1=320 ; x size
+ v2=8 ; y size
+ gosub @MCClearRectangle
+
+ code - ;**** reset internal regs
+ code +
+ gosub @SelectScrollRate
+ if AmountOfScroll<8 then DTLNothingNew
+; need a new character - ripple buffer along
+ x4=StartScreenLineBuffer
+ x5=x4
+ add x5,c1
+.Ripple1
+ x1=OutputBuffer(x5)
+ OutputBuffer(x4)=x1
+ add x4,c1
+ add x5,c1
+ if x5<EndScreenLineBuffer then Ripple1
+; stops with x4=last character to be displayed
+ x1=8
+ sub AmountOfScroll,x1 ; make it smooth, regardless of step size
+ gosub @FetchNewChar
+ OutputBuffer(x4)=x1
+
+.DTLNothingNew
+; just plonk everything in OutputBuffer(StartScreenLineBuffer-End"")
+; onto screen, and scroll it now and again
+; StartScreenLineBuffer=256
+; EndScreenLineBuffer=296
+ x4=StartScreenLineBuffer
+.DTL1
+ v1=OutputBuffer(x4)
+ gosub @MCOswrchV1
+ add x4,c1
+ if x4<EndScreenLineBuffer then DTL1
+
+; and scroll it along by the appropriate amount to make it smooth
+ if AmountOfScroll=0 then DTLNoScroll
+ &WordWs(WordCursorXPos)=c0
+ x1=192
+ &WordWs(WordCursorYPos)=x1
+
+ v1=AmountOfScroll ; pixels to scroll by
+ gosub @MCScrollTextLine
+
+.DTLNoScroll
+; and blank off last character on line to make
+; text appear smoothly
+ x1=312
+ &WordWs(WordCursorXPos)=x1
+ x1=192
+ &WordWs(WordCursorYPos)=x1
+ v1=32
+ goto @MCOswrchV1 ; gosub, return
+
+;---
+.SelectScrollRate
+; vary scroll rate depending on how much is waiting
+; return new scroll-offset of scrolling text line in AMOUNTOFSCROLL
+ sub TimeTillSampleBuffer,c1
+ if TimeTillSampleBuffer<250 then DTLNoSample
+ SampledCharInBuffer=CharactersInBuffer
+ TimeTillSampleBuffer=20 ; 20 frames - about 2 seconds
+ if CharactersInBuffer<6 then DTLNoSample
+ TimeTillSampleBuffer=40 ; slow down more slowly when buffer full-ish. 15
+; chars take 30 frames to appear, so leave it on 'fast'
+
+.DTLNoSample
+; add AmountOfScroll,c1 ; one-pixel scroll
+; if SampledCharInBuffer=0 then GotRate
+ add AmountOfScroll,c2 ; two-pixel scroll 
+ if SampledCharInBuffer<10 then GotRate
+ add AmountOfScroll,c2 ; four-pixel scroll
+ if SampledCharInBuffer<40 then GotRate
+ add AmountOfScroll,c4 ; 8-pixel scroll
+.GotRate
+ return
+;---
+.FetchNewChar
+; return x1 as the next char to go onto the scrolling display
+ x1=32 ; return a space if nothing else doing
+ if CharactersInBuffer=0 then FNCRet ; buffer empty
+
+ x1=OutputBuffer(OutputBufferReadPtr)
+; filter out control codes, nulls etc.
+ if x1<32 then FNCFilter
+ if x1>127 then FNCFilter
+ goto FNCOk
+
+.FNCFilter
+ x1=32
+.FNCOk
+ sub CharactersInBuffer,c1
+ add OutputBufferReadPtr,c1
+ if OutputBufferReadPtr<EndOutputBufferPlus1 then FNCRet
+ OutputBufferReadPtr=StartOutputBuffer
+.FNCRet
+ return
+;---
+.InitOutputBuffer
+ return ;********
+ CharactersInBuffer=0
+ OutputBufferReadPtr=StartOutputBuffer
+
+; fill screen line buffer with spaces
+ x4=StartScreenLineBuffer
+ x1=32
+.IOB1
+ OutputBuffer(x4)=x1
+ add x4,c1
+ if x4<EndScreenLineBuffer then IOB1
+ AmountOfScroll=0
+
+ m1=200
+ gosub @AddMessageToOutputBuffer
+ return
+;---
+.AddMessageToOutputBuffer
+; output message m1 to the scrolling text line
+ &WordWS(WordTextBufferOffset)=c1 ; start printing to buffer
+code -
+ message m1
+code +
+; output the message to the screen buffer
+ x4=1 ; ptr
+.AMTOB1
+ &x2=WordWS(WordTextBufferOffset)
+ if x2=x4 then AMTOBEnd
+ x1=TextBuffer(x4)
+; NB: control codes are filtered on output
+ gosub AddToOutputBuffer
+ add x4,c1
+ goto AMTOB1
+
+.AMTOBEnd
+ &WordWS(WordTextBufferOffset)=c0 ; cease printing to buffer
+ return
+;---
+.AddToOutputBuffer
+; add char x1 to output buffer
+ if CharactersInBuffer=SizeOutputBuffer then ATOBRet
+ x2=OutputBufferReadPtr
+ x3=CharactersInBuffer
+ add x2,x3
+ if x2<EndOutputBufferPlus1 then ATOB1
+ x3=SizeOutputBuffer
+ sub x2,x3
+.ATOB1
+ OutputBuffer(x2)=x1
+ add CharactersInBuffer,c1
+.ATOBRet
+ return
+;---
+.CursorTopLeft
+ LeftMargin=32
+ TopMargin=64
+ &WordWs(WordCursorXPos)=LeftMargin
+ &WordWs(WordCursorYPos)=TopMargin
+ return
+;---
+.DoCr
+ &V1=WordWs(WordCursorYPos)
+ V2=8
+ add V1,V2
+ &WordWs(WordCursorYPos)=V1
+ &WordWs(WordCursorXPos)=LeftMargin
+ return
+;---
+.DoFirstMenuLine
+;; gosub @MCClearScreen
+ gosub @CursorTopLeft
+ v1=MenuPixelWidth ; x size
+ v2=MenuPixelHeight ; y size
+ gosub @MCClearRectangle
+
+;; gosub @CursorTopLeft
+ Line=1 ; Back is first line, 2 is first generated one.
+ return
+;---
+.WaitForJoystick
+ V1=ByteWS(ByteJoystickStatus)
+ if V1<>0 then WaitForJoystick
+ return
+;---
+.HandleKeyPress
+; handle any key press
+ x1=ByteWS(ByteLastKeyPressed)
+ if x1=32 then @DoMenu ; space -> menu
+ if x1=82 then @RestartHero ; 'R'
+ if x1=114 then @RestartHero ; 'r'
+ if x1<65 then NotChangeMissile
+ if x1>67 then NotChangeMissile
+ x2=65
+ sub x1,x2
+ ByteWS(ByteCurrentWeapon)=x1
+
+.NotChangeMissile
+ if x1=112 then Pause1
+ if x1<>80 then NotPause ; 'P'
+.Pause1
+ gosub @MCHeroInput
+ x1=ByteWS(ByteLastKeyPressed)
+ if x1=0 then Pause1
+
+.NotPause
+ if x1=33 then @AcodeDelay
+ return
+;---
+.HandleSelection
+ &HS0=MenuTable(CurrentMenu)
+code -
+; given SelectedLine, CurrentMenu, take the appropriate action
+ HS1=SelectedLine
+ sub HS1,c1 ; give offset within menu
+; multiply by 4 and add (size of each entry in MenuTable)
+; to give position of the selection in MenuTable
+
+ add HS1,HS1
+ add HS1,HS1
+ add HS0,HS1
+; MenuTable(HS0) tells us what to do
+ V1=MenuTable(HS0)
+ if V1=0 then DoJump
+
+ if V1<>2 then NotChangeMenu
+ HighlightedLine=1
+ V1=1
+ add V1,HS0
+ CurrentMenu=MenuTable(V1)
+ goto @HandleSelectionEnd
+
+.NotChangeMenu
+ if V1<>1 then NotGetObject
+; get object/other item from linked list (e.g. spell) first
+ v1=2
+ add v1,HS0
+ L2=MenuTable(V1) ; get LL number to use in selection
+
+code +
+  Verb=HighlightedLine
+  gosub @GetObject
+code -
+ if SelectedLine=1 then @HandleSelectionEnd ; "BACK" instead of object
+; LL(ObjectInfo) is object to act upon
+
+.NotGetObject
+.DoJump
+ V1=1 ; extract which jump entry to use from MenuTable.
+ add V1,HS0
+ V1=MenuTable(V1)
+ jump @JumpTable V1 ; dummy comment!
+
+.JumpTable
+ data @Null,@Quit,@Examine,@Drop,@Wield,@Range,@Eat,@System,@DisplayMap ;
+ data @Restart ;
+
+.Null
+ goto @HandleSelectionEnd
+;-----
+.Restart
+ code +
+  goto @RestartGame
+ code -
+
+.Quit
+code +
+  goto @MCCloseDown
+code -
+
+;------
+.Examine
+ m1=InvNameOffset
+ add m1,ObjectInfo
+code +
+ &m1=LL(m1) ; name of object from inventory
+code -
+ if m1<>SpriteScroll then ExamineNotScroll
+ m1=205 ; hands twitch
+code +
+ gosub @AddMessageToOutputBuffer
+; and lose the sprite from the inventory
+ gosub @RemoveFromLL
+code -
+
+.ExamineNotScroll
+ goto @HandleSelectionEnd
+
+.Drop
+code +
+ v1=PlayerType ;name of sprite to find
+ v2=0 ; start search at start of sprite table
+ gosub @MCFindSprite
+; now SpriteTable(V2) is the temp player sprite block
+ x1=v2
+; set up args: v1=xpos, v2=ypos, v3=xspeed, v4=yspeed, v5=sprite num
+ v1=XPosOffset
+ add v1,x1
+ &v1=SpriteTable(v1) ; get x-coord of player
+
+ v2=YPosOffset
+ add v2,x1
+ &v2=SpriteTable(v2) ; get x-coord of player
+ v3=0 ; xspeed
+ v4=0 ; yspeed
+ v5=InvNameOffset
+ add v5,ObjectInfo
+ &v5=LL(v5) ; name of object from inventory
+ x1=16 ; get clear of player
+ add v1,x1
+ gosub @MCSetUpNewSprite
+
+; and lose the sprite from the inventory
+ gosub @RemoveFromLL
+code -
+
+.Wield
+ m1=207 ; you are now wielding
+code +
+ gosub @AddMessageToOutputBuffer
+ m1=InvNameOffset
+ add m1,ObjectInfo
+ &m1=LL(m1) ; name of object from inventory
+ gosub @AddMessageToOutputBuffer
+ m1=199 ; dot
+ gosub @AddMessageToOutputBuffer
+code -
+ goto @HandleSelectionEnd
+
+.Range
+ v5=RWTypeOffset
+ add v5,ObjectInfo
+ v5=LL(V5)
+ ByteWS(ByteCurrentWeapon)=v5
+ goto @HandleSelectionEnd
+
+;---
+.DisplayMap
+code +
+ gosub @EqualiseFrames
+.DisplayMap1
+; gosub @CyclicSpecials
+ gosub @MCMapBuildBackground
+code -
+code +
+
+ gosub @DisplayFrame
+.DisplayMap2
+ gosub @MCHeroInput
+ x1=ByteWS(ByteLastKeyPressed)
+ if x1=32 then @HeroLoop
+ goto @DisplayMap2
+code -
+;---
+
+.Eat
+ v5=InvNameOffset
+ add v5,ObjectInfo
+code +
+ &v5=LL(v5) ; name of object from inventory
+ gosub @RemoveFromLL
+ x2=HitPointOffset
+ add x2,PlayerSpriteOffset
+ &x1=SpriteTable(x2)
+ x3=500 ; more hit-points
+ add x1,x3
+ &SpriteTable(x2)=x1
+ m1=204 ; you now feel much better
+ gosub @AddMessageToOutputBuffer
+code -
+ goto HandleSelectionEnd
+;----
+.system
+
+.HandleSelectionEnd
+code +
+ return
+
+;---
+.ClearMap
+ x1=0
+.CM1
+ &Map(x1)=c0
+ &RoomMap(x1)=c0
+ add x1,c2
+ if x1<MapSize then CM1
+ return
+;------
+;.InitPlayer
+;; put player in room...
+; x1=PlayerSpriteOffset
+; x2=XPosOffset
+; add x1,x2
+;; x3=4
+;; add x3,RoomX
+; x3=x
+; add x3,c2
+; x5=WordScreenXPos
+; gosub @InitPlayer1
+; add x1,c2 ; yposoffset
+;; x3=3
+;; add x3,RoomY
+; x3=y
+; add x3,c2
+; x5=WordScreenYPos
+;;
+;; drop through to InitPlayer1
+;;
+;.InitPlayer1
+;; *16 to convert to pels
+; add x3,x3
+; add x3,x3
+; add x3,x3
+; add x3,x3
+; sub x3,c4 ; so that head overlap works, even with 8-pixel movement
+; &SpriteTable(x1)=x3
+; &WordWS(x5)=x3
+; return
+;---
+.PatchHoles
+; go through map, ensuring there is no connection between the 'non-existent'
+; area, and the walkable area. Of course, what the player does with
+; wands of digging is his own affair...
+ x4=0 ; ptr to map
+ x5=ScreenXBlocksTimes2 ; ptr to next row
+ x6=ScreenXBlocksTimes2
+ add x6,x6
+; thus x4,x5,x6 are 3 adjacent rows
+.PHLoop
+ x2=x5
+ &v1=Map(x2) ; current
+ if v1<>0 then @PHNotHole
+ sub x2,c2
+ &x1=Map(x2) ; to left
+ if x1=0 then PHNotPatchLeft
+ if x1<16 then PHPatchX2
+.PHNotPatchLeft
+ add x2,c4
+ &x1=Map(x2) ; right of current
+ if x1=0 then PHNotPatchRight
+ if x1<16 then PHPatchX2
+.PHNotPatchRight
+ x2=x4
+ &x1=Map(x2) ; above  current
+ if x1=0 then PHNotPatchAbove
+ if x1<16 then PHPatchX2
+.PHNotPatchAbove
+ x2=x6
+ &x1=Map(x2) ; below current
+ if x1=0 then PHNotPatchBelow
+ if x1<16 then PHPatchX2
+.PHNotPatchBelow
+ goto PHNotHole
+
+.PHPatchX2 ; x2 is the address of the walkable block adjacent
+; to a null block at x5
+ x1=32 ; straightforward block
+ &Map(x5)=x1
+
+.PHNotHole
+ add x5,c2
+ add x4,c2
+ add x6,c2
+
+ if x6<MapSize then @PHLoop
+ return
+;---
+.TidyMap
+; go through map, putting in the 3D effect etc.
+ x4=0 ; ptr to map
+ x5=ScreenXBlocksTimes2 ; ptr to next row
+.TM1
+ &x1=Map(x4)
+ if x1<16 then TM2 ; not a block, so no processing
+ &x1=Map(x5)
+ if x1>16 then TM2 ; line below IS a block, so no processing
+ x1=17 ; block with 'front' section
+ &Map(x4)=x1
+
+.TM2
+ add x4,c2
+ add x5,c2
+ if x5<MapSize then TM1
+ return
+;---
+;* .SetUpMap
+ RETURN ;******************************
+;*  gosub @ClearMap
+; build Map(0..2500) at random.
+;*  xmax=50
+;*  ymax=50
+;*  x=30
+;*  y=20
+;*  TrialPlacements=0
+;*  AttemptedNewRooms=0
+;*  RoomsPlaced=0
+; gosub @InitPlayer
+
+;* .SUMTryRoom
+;*  gosub @RandomRoomNumber ;  room=1
+;*  push x ; preserve co-ords of corridor end, in case placement fails
+;*  push y
+;*   RoomX=x
+;*   RoomY=y
+;*   gosub @PlaceRoom
+;*  pop y
+;*  pop x
+;*  add TrialPlacements,c1
+;*  if TrialPlacements>500 then @Terminate ;SUMRet ; escape!
+;*  if result=false then DC1 ; couldn't place room - continue digging
+;*  gosub @RecordRoom
+
+; Have we finished drawing the map?
+;*  if RoomsPlaced>14 then @SUMRet
+
+;* .SUMGetAnExit
+; now pick an exit at random, and grow a connection from it...
+;*  gosub @PickExit
+;*  if result=true then SUMGotExit
+; couldn't find an exit - try from one of the existing rooms...
+;* .SUMPickNewRoom
+;*  add AttemptedNewRooms,c1
+;*  if AttemptedNewRooms>500 then @Terminate ;* not acceptable in release?
+;*  gosub @PickNewRoom
+
+;*  if result=true then SUMGetAnExit ; try finding an exit
+;*  goto SUMPickNewRoom ;*
+;* 
+;* .SUMGotExit
+; now dig the corridor...
+;*  StraightLength=0
+;* .DC1
+;*  gosub @SetUpDigStep
+;*  gosub @DigTunnelStep
+
+;*  add x,xDigStep ; add on step perpendicular to exit
+;*  add y,yDigStep
+
+;*  gosub @CheckTunnelStep
+;*  if result=true then dcDigOk
+; can't carry on in current direction - at present, just terminate
+;*  gosub @TerminateCorridor
+;*  goto @SUMPickNewRoom
+
+;* .dcDigOk
+
+;*  add StraightLength,c1
+;*  if StraightLength<3 then DC1 ; dig tunnel step
+;*  if StraightLength>20 then sumCFT ; see if we've overrunning
+;* code -
+;*  random x1
+;* code +
+;*  if x1>120 then DC1 ; continue digging tunnel
+
+;* .SUMCFT
+;; gosub @DebugShowMap
+;*  gosub @CheckForcedTermination
+;*  if result=false then @SUMPickNewRoom ; terminated or placed final room
+; not forced to terminate - try bunging a room here.
+;*  goto @SUMTryRoom ; try placing room at current corridor tip
+
+;* .Terminate
+
+;* .SUMRet
+;*  gosub @PatchHoles
+;*  gosub @TidyMap
+;*  return
+;---
+;* .RandomRoomNumber
+; return ROOM as a random choice from the rooms available
+;* code -
+;*  random ROOM
+;* code +
+;*  x1=3
+;*  and room,x1
+;*  if room>2 then RandomRoomNumber
+;*  return
+;---
+;* .CheckForcedTermination
+; check if tunnel is getting too close to edge
+;*  if dir=0 then CFTTerminate ;*** 
+;*  if dir<>North then cftNotNorth
+;*  if Y<15 then CFTTerminate
+;* .cftNotNorth
+;*  if dir<>East then cftNotEast
+;*  if X>35 then CFTTerminate
+;* .cftNotEast
+;*  if dir<>South then cftNotSouth
+;*  if Y>35 then CFTTerminate
+;* .cftNotSouth
+;*  if dir<>West then cftNotWest
+;*  if X<15 then cftTerminate
+;* .cftnotWest
+;*  result=true ; ok
+;*  return
+
+;* .cftTerminate
+; have to terminate corridor, or maybe change direction
+;*  gosub @RandomRoomNumber ;  room=1
+;*  push x ; preserve co-ords of corridor end, in case placement fails
+;*  push y
+;*   RoomX=x
+;*   RoomY=y
+;*   gosub @PlaceRoom
+;*  pop y
+;*  pop x
+;*  StraightLength=0
+;*  if result=false then @TerminateCorridor ; couldn't place room
+;*  gosub @RecordRoom
+;*  result=false ; pick a new room to grow from
+;*  return
+;---
+;* .PickNewRoom
+; choose a room at random from those already placed.
+;*  result=true ; unless otherwise set
+;*  x1=RoomTableOffset
+;*  x2=RoomsPlaced
+;* .PNRLoop
+;*  if x2=0 then @Fail
+;* code -
+;*  random x3
+;* code +
+;*  if x3>60 then PNR1 ; don't even try this room this time
+;*  x3=Workspace(x1) ; number of exits used so far from this room
+;*  if x3<3 then PickNewRoomFound
+;* .PNR1
+;*  x3=RoomTableEntrySize
+;*  add x1,x3
+;*  sub x2,c1
+;*  goto PNRLoop
+
+;* .PickNewRoomFound
+;*  add x1,c1
+;*  Room=Workspace(x1) ; get data # used in drawing this room
+;*  add x1,c1
+;*  RoomX=Workspace(x1)
+;*  add x1,c1
+;*  RoomY=Workspace(x1)
+;*  return
+;---
+;* .RecordRoom
+; record ROOM, at RoomX, RoomY
+; for future use by PickNewRoom
+;*  x1=RoomsPlaced
+;; x2=RoomTableEntrySize
+;*  add x1,x1 ; assumes RoomTableEntrySize=8 and RoomTableOffset=0
+;*  add x1,x1
+;*  add x1,x1
+;*  WorkSpace(x1)=c0 ; zero exits so far from this room
+;*  add x1,c1
+;*  Workspace(x1)=Room
+;*  add x1,c1
+;*  Workspace(x1)=RoomX
+;*  add x1,c1
+;*  Workspace(x1)=RoomY
+;*  add RoomsPlaced,c1
+;*  return
+;---
+;* .PickExit
+; choose a potential exit at random from those
+; in ROOM at coords RoomX,RoomY.
+; Return its co-ordinates on the map as x,y
+;*  gosub @GetRoomData ; sets Result=true if ok
+;*  if result=false then @Fail
+;* code -
+;*  random x1
+;* code +
+;*  if RoomY<10 then PENotNorth
+;*  dir=North
+;*  if x1<64 then PE1
+;* .PENotNorth
+;*  if RoomX>35 then PENotEast
+;*  dir=East
+;*  if x1<128 then PE1
+;* .PENotEast
+;*  if RoomY>40 then PENotSouth
+;*  dir=South
+;*  if x1<192 then PE1
+;* .PENotSouth
+;*  dir=0 ; prevent invalid dir being returned
+;*  if RoomX<15 then @Fail ; couldn't decide on a viable exit!
+;*  dir=West
+;* .PE1
+;*  gosub @CheckExit ; get x,y=coords of exit from ROOM in DIRection
+;*  gosub @SetUpDigStep
+;*  push x
+;*  push y
+;*  push x3
+;*   gosub @CalcMapAddress
+;*   add x1,DigStep ; x1=MapAddress
+;*  pop x3
+;*  pop y
+;*  pop x
+;*  &x2=Map(x1)
+;*  if x2<32 then @Fail ; already an exit there
+;*  return
+;---
+;* .SetUpDigStep
+; note that DigStep is the direction that the WIDTH of the corridor
+; is drawn in, and is an offset to the Map Address
+; xDigStep, yDigStep are the steps along the LENGTH of the corridor
+
+;*  xDigStep=0
+;*  yDigStep=65535
+;*  DigStep=RightMapStep
+;*  if dir=North then DUDS1
+
+;*  xDigStep=0
+;*  ;* yDigStep=1
+;; DigStep=RightMapStep
+;*  if dir=South then DUDS1
+
+;*  xDigStep=1
+;*  yDigStep=0
+;*  DigStep=DownMapStep
+;*  if dir=East then DUDS1
+
+;*  xDigStep=65535
+;*  yDigStep=0
+;; DigStep=DownMapStep
+;*  if dir=West then DUDS1
+; break !
+;* .DUDS1
+;*  return
+;---
+;* .CheckExit
+; Enter with x4=ptr to room data for room at RoomX, RoomY
+; return x,y as coords of the potential exit in direction DIR,
+; and size as size of that exit. The existance
+; of the exit is not guaranteed
+;
+;*  x=0 ; offsets of wall we're using
+;*  y=0
+;*  if dir=North then @PEHoriz
+
+;*  add x4,c2
+;*  &x=RoomDefns(x4) ; get x size of room
+;*  sub x,c1 ; to give offset, not size
+;*  sub x4,c2
+;*  if dir=East then PEVert
+
+;*  x=0
+;*  add x4,c4
+;*   &y=RoomDefns(x4)
+;*   sub y,c1 ; to give offset, not size
+;*  sub x4,c4
+;*  if dir=South then PEHoriz
+;* 
+;* .PEVert
+; the offsets given in RoomDefns are vertical, from the top
+; side of the room...
+;*  x3=ExitOffsetBase
+;*  add x3,dir
+;*  add x3,x4 ; get position of exit info
+;*  y=RoomDefns(x3)
+;*  add y,RoomY ; now y is y co-ord of potential exit
+;*  add x,RoomX
+;*  goto PEOk
+;---
+;* .PEHoriz
+; the offsets given in RoomDefns are horizontal, from the left hand
+; side of the room...
+;*  x3=ExitOffsetBase
+;*  add x3,dir
+;*  add x3,x4 ; get position of exit info
+;*  x=RoomDefns(x3)
+;*  add x,RoomX ; now x is x co-ord of potential exit
+;*  add y,RoomY
+;* ; drop through to PEOk
+
+;* .PEOk
+;*  add x3,c1
+;*  size=RoomDefns(x3)
+;*  return
+;----
+;* .TerminateCorridor
+;*  push size
+;*  add size,c1 ; because loop terminates 1 early otherwise
+;*  x4=32
+;*  gosub @CalcMapAddress
+;* .TC1
+;*   &Map(x1)=x4
+;*   add x1,DigStep
+;*   sub size,c1
+;*   if size>0 then TC1
+;*  pop size
+;*  return
+;---
+;* .CheckTunnelStep
+; check a single step of tunnel at (x,y) of SIZE blocks,
+; in direction (xstep,ystep)
+;*  result=true
+;*  push size
+;*  gosub @CalcMapAddress
+;* .CTS1
+;*   &x4=Map(x1)
+;*   if x4<>0 then CTSFail
+;*   add x1,DigStep
+;*   sub size,c1
+;*   if size>0 then CTS1
+;*  pop size
+;*  return
+
+;* .CTSFail
+;*  pop size
+;*  goto @Fail
+;---
+;* .DigTunnelStep
+; dig a single step of tunnel at (x,y) of SIZE blocks,
+; in direction (xstep,ystep)
+;*  push size
+;*  x4=32
+;*  gosub @CalcMapAddress
+;* .DigTS1
+;*   &Map(x1)=x4
+;*   x4=1 ; blocks after first one are floor pattern
+;*   add x1,DigStep
+;*   sub size,c1
+;*   if size>0 then DigTS1
+;*   x4=32 ; finish up with a wall
+;*   &Map(x1)=x4
+;*  pop size
+;*  return
+;---
+;* .GetRoomData
+; return X4 as ptr to room data for ROOM
+; and RESULT=False if not found
+;*  result=true ; unless otherwise specified
+;*  x4=0
+;*  x1=ROOM
+;* .GRDLoop
+;*  &x3=RoomDefns(x4) ; ptr to next
+;*  if x3=0 then PlaceRoomFail
+;*  sub x1,c1
+;*  if x1>32000 then GRDFound
+;*  add x4,x3 ; add on offset of next room data block
+;*  goto GRDLoop
+
+;* .GRDFound
+;*  return
+;---
+;* code -
+;* .IntFail
+;*  result=false
+;*  return
+
+;* code+
+;* .PopDirFail
+; break !
+;*  pop dir
+
+;* .PlaceRoomFail
+;* .Fail
+;*  result=false
+;*  return
+;---
+;* .PlaceRoom
+; put ROOM at RoomX,RoomY if it will fit. Return result=1 if ok,
+; result=0 if not.
+
+; if we've been digging a tunnel, what exit must this room hook
+; on with.
+;*  if dir=0 then @PlaceRoomNoLink
+; reverse direction
+
+;*  push x ; save co-ords of the entrance door to this new room
+;*  push y
+;*  push size
+;*   RoomX=x
+;*   RoomY=y
+;*   push dir
+;*    &dir=list7(dir) ; reverses direction
+;*    gosub @GetRoomData ; sets result=true if ok
+;*    if result=false then @PopDirFail
+;*    gosub @CheckExit
+;*   pop dir
+; now x,y are positions of the exit on the map - assuming
+; the room started at RoomX, RoomY
+; Calc offsets within the room...
+;*    sub x,RoomX
+;*    sub y,RoomY
+; and shuffle over the room start so RoomX, RoomY become the top left
+; coords of the room
+;*    sub RoomX,x
+;*    sub RoomY,y
+;*    x=RoomX
+;*    y=RoomY
+
+;*    gosub PlaceRoomNoLink
+;*   pop size
+;*   pop y ; restore entrance door to this room
+;*   pop x
+;*  if result=false then @Fail
+;*  gosub @DigTunnelStep
+;*  return
+;
+;* .PlaceRoomNoLink
+; find data structure for room
+;*  result=true ; unless otherwise specified
+;*  gosub @GetRoomData
+;*  if result=false then @PlaceRoomFail
+; check if there is space on the grid. Note that the co-ordinates
+; specified will always represent the top left of the room.
+;*  add x4,c2 ; skip ll ptr
+;*  &xsize=RoomDefns(x4)
+;*  add x4,c2
+;*  &ysize=RoomDefns(x4)
+;*  add x4,c2
+;*  x=RoomX
+;*  y=RoomY
+
+;*  gosub @CheckSpace
+;*  if result=false then @Fail
+
+; nothing adverse found, so place the block...
+;*  gosub @AbsPlaceRoom
+;*  return
+;---
+;* .CheckSpace
+; check if there is space for a room of size xsize, ysize at x,y
+; check x+xsize,y+ysize is still on screen
+;*  if x>250 then @Fail ; negative
+;*  if y>250 then @Fail ; negative
+;*  if y<3 then @Fail
+;*  x1=x
+;*  add x1,xsize
+;*  if x1>ScreenXBlocks then @Fail
+;*  x1=y
+;*  add x1,ysize
+;*  if x1>ScreenYBlocks then @Fail
+
+; now check the actual map area it will cover...
+;*  push x
+;*  push y
+;  add x,c1
+;  add y,c1
+;*   gosub @CalcMapAddress
+;*  pop y
+;*  pop x
+; now x1 gives start position
+;*  LoopCounter2=ySize
+;*  sub LoopCounter2,c2 ; ignore edges of room
+;*  if LoopCounter2>240 then @CheckSpaceOk ; trap overflow
+
+;* .CheckSpaceYLoop
+;*  LoopCounter1=xSize
+;*  sub LoopCounter1,c2 ; ignore edges of room
+;*  if LoopCounter1>240 then @CheckSpaceOk ; trap overflow
+
+;*  x2=x1 ; save start of this row of blocks
+;* .CheckSpaceXLoop
+;*   &x3=Map(x1)
+;*   if x3<>0 then @PlaceRoomFail
+;*   add x1,c2
+;*   sub LoopCounter1,c1
+;*   if LoopCounter1<255 then CheckSpaceXLoop
+;*  x1=x2 ; restore x1 to start of current line
+;*  x5=ScreenXBlocksTimes2 ; word-based
+;*  add x1,x5
+;*  sub LoopCounter2,c1
+;*  if LoopCounter2<255 then CheckSpaceYLoop
+;* .CheckSpaceOk
+;*  return
+;---
+;* .AbsPlaceRoom
+;*  x1=8 ; skip over possible door info
+;*  add x4,x1
+;*  gosub @CalcMapAddress
+; now x1 gives start position
+;*  LoopCounter2=ySize
+
+;* .PlaceRoomYLoop
+;*  LoopCounter1=xSize
+;*  x2=x1 ; save start of this row of blocks
+;* .PlaceRoomXLoop
+;*   x3=RoomDefns(X4)
+;*   &Map(x1)=x3
+;*   add x4,c1
+;*   add x1,c2
+;*   sub LoopCounter1,c1
+;*   if LoopCounter1>0 then PlaceRoomXLoop
+
+;*  x1=x2 ; restore x1 to start of current line
+;*  x5=ScreenXBlocksTimes2
+;*  add x1,x5
+;*  sub LoopCounter2,c1
+;*  if LoopCounter2>0 then PlaceRoomYLoop
+;*  return
+;---
+;* .CalcMapAddress
+;*  x1=ScreenXBlocksTimes2
+;*  x2=y
+;*  gosub @MultX1X2
+;*  add x1,x
+;*  add x1,x * add on twice, because map table is word-based
+;*  return
+;---
+;* .MultX1X2
+; x1=x1*x2
+;*  x3=x1
+;*  if x2<2 then MultX1X2Ret
+;* .MultX1X2Loop
+;*  add x1,x3
+;*  sub x2,c1
+;*  if x2>1 then MultX1X2Loop
+;* .MultX1X2Ret
+;*  return
+;---
+.SignExtendX1
+; X1 contains a byte: sign-extend to a full word
+ x2=255
+ and x1,x2
+ if x1<128 then SignExtendRet
+ x2=65280 ; 65536-256
+ add x1,x2
+.SignExtendRet
+ return
+;---
+;* .InitSpriteTable
+;* ; clear sprite table
+;*  x1=0
+;* .IST1
+;*  SpriteTable(x1)=c0
+;*  add x1,c1
+;*  if x1<SpriteTableSize then IST1
+;* 
+;* code -
+
+; randomly distribute some monsters and sprites throughout the map...
+;*  PlayerSpriteOffset=65535
+;*  x=0
+;*  y=0
+;* .ISTLoop
+;*  random x1
+;* code +
+;*  x2=30 ; not bit 0, notice, to keep map ptr word-aligned
+;*  and x1,x2 ; limit size of step
+;*  add x,x1 ; add on a random amount
+;*  add x,c1 ; minimum step is 1
+;*  if x<ScreenXBlocks then ISTNotNextLine
+;*  x1=ScreenXBlocks
+;*  sub x,x1
+;*  add y,c1
+;* .ISTNotNextLine
+;*  gosub @CalcMapAddress
+;*  &x2=Map(x1)
+;*  if x2<>1 then @ISTNotVacant
+;* ; we have a vacant square, put a monster/object on it
+;*  v1=x
+;*  add v1,v1
+;*  add v1,v1
+;*  add v1,v1
+;*  add v1,v1
+;*  v2=y
+;*  add v2,v2
+;*  add v2,v2
+;*  add v2,v2
+;*  add v2,v2
+;*  v3=0
+;*  v4=0
+;* .TryObjectAgain
+;* code -
+;*  random v5
+;* code +
+;*  if v5<SpriteBottle then ISTNotObject
+;*  if v5>SpriteClub then ISTNotObject
+;*  goto ISTPlaceObject
+
+;* .ISTNotObject
+;*  if v5<180 then TryObjectAgain
+; player?
+;*  if PlayerSpriteOffset<>65535 then ISTNotPlayer
+;*  gosub @SetUpPlayer
+;*  goto ISTNotVacant
+
+;* .ISTNotPlayer
+;code -
+; random x1
+;code +
+; x2=15
+; and x1,x2
+;*  v5=22 ; floating eye
+; add v5,x1
+
+;* .ISTPlaceObject
+;*  gosub @MCSetUpNewSprite
+
+;* .ISTNotVacant
+;* code -
+;*  if y<ScreenYBlocks then @ISTLoop
+;* code +
+;*  return
+;---------------
+;* .SetUpPlayer
+;*  v5=0 ; player
+;*  gosub @MCSetUpNewSprite
+;* code -
+;* code +
+;*  &WordWS(WordPlayer1SpriteOffset)=v6
+;*  PlayerSpriteOffset=v6
+;*  &WordWS(WordScreenXPos)=v1
+;*  &WordWS(WordScreenYPos)=v2
+;*  return
+;---
+;* code -
+;* .SetUpNewSprite
+; Set up a sprite with v1=xpos, v2=ypos,
+; v3=xspeed, v4=yspeed, v5=object sprite block number.
+; Returns v6 as offset of new sprite within SpriteTable
+; and v7 as negative if we couldn't set up the sprite.
+;* code +
+;*  gosub @MCSetUpNewSprite
+;* code -
+;*  return
+;---
+;*  code +
+;* .DebugShowMap
+;*  gosub @MCMapBuildBackground
+;* code -
+;* code +
+;*  gosub @DisplayFrame
+;*  v1=5000
+;*  gosub @DelayV1
+;*  return
+;---
+.DebugWaitKey
+ gosub @MCHeroInput ;****
+ V1=ByteWS(ByteLastKeyPressed) ;*
+ if V1=13 then @MCCloseDown ;*
+ if v1<>32 then @DebugWaitKey
+ return
+;---
+;*.Pause
+; nice debugging code...
+;* gosub @CalcMapAddress
+;* x2=40
+;* &Map(x1)=x2
+;* gosub @DebugShowMap
+;* gosub @DebugWaitKey
+;* &Map(x1)=c0
+;* return
+;---
+;-------
+.DAMSSpecials
+* now do special cases for particular types of monsters...
+ v1=1 ; do mc specials unless otherwise set
+ &TempMovedSprite(AnimationOffset)=c0
+ &x1=TempMovedSprite(NameOffset)
+; make movement decision for monster of name x1
+ &x=TempMovedSprite(XPosOffset)
+ &y=TempMovedSprite(YPosOffset)
+ speed=TempMovedSprite(SpeedOffset)
+ if x1=0 then DAMSSPlayer
+ if x1<22 then damsRet
+ v1=0 ; don't do specials for other monsters
+ gosub @MakeMoveDecision
+ return
+
+.damsRet
+ return 
+
+.DAMSSPlayer
+ PlayerX=x
+ PlayerY=y
+ return
+;---
+.MakeMoveDecision
+; make monster move towards player. Monster is at (x,y), player at
+; (PlayerX,PlayerY). Speed is SPEED
+ x1=65535
+ if y>PlayerY then MMDGotY
+ x1=1
+ if y<PlayerY then MMDGotY
+ x1=0 ; i.e. no y offset
+
+.MMDGotY
+ x2=65535
+ if x>PlayerX then MMDGotX
+ x2=1
+ if x<PlayerX then MMDGotX
+ x2=0 ; i.e. no x offset
+
+.MMDGotX
+; x1=y direction, x2=x direction
+; Now calculate any offset to the direction to make the
+; npc move in semi-random directions
+
+; we have a table comprised of the 'next x,y' for each
+; calculated x,y pair.
+
+; combine x,y directions to give offset into table
+; by 4*y+x to give a unique code (see below)
+ x3=x1
+ add x3,x3
+ add x3,x3
+ add x3,x2
+; x3 is -5 to +5
+; now add on existing offset
+ x1=TempMovedSprite(AddDirOffset)
+ gosub @SignExtendX1
+
+ add x3,x1
+ if x3<6 then MMDInRange
+ if x3>32000 then MMDInRange ; 65530 then MMDInRange
+ x4=11
+ sub x3,x4
+
+.MMDInRange
+; now x3 is the new (internal) view of the direction in which the
+; monster wishes to move
+;
+;			0,-1=-4
+;	   -1,-1=-5	  | 		1,-1=-3
+;			  |
+;  -1,0=-1	----------+------------		1,0=1
+;			  |
+;	   -1,1=3	  |		1,1=5
+;			0,1=4
+
+; now use ConvertViewToXY table to calculate the actual x,y direction
+; of movement
+ if x3<6 then MMDOk
+ if x3>65530 then MMDOk
+; break ;****
+
+.MMDOk
+
+ add x3,x3 ; times 4 to give index into table with 2 words per entry
+ add x3,x3
+
+ x4=ConvertViewToXY
+ add x3,x4
+ &x2=List7(x3) ; get x speed
+
+ add x3,c2
+ &x1=List7(x3) ; get y speed
+ add x2,x2 ; *4 to increase speed
+ add x2,x2
+ add x1,x1 ; *4 to increase speed
+ add x1,x1
+
+ add x,x2
+ add y,x1
+ &TempMovedSprite(XSpeedOffset)=x2
+ &TempMovedSprite(YSpeedOffset)=x1
+; &TempMovedSprite(XPosOffset)=x
+; &TempMovedSprite(YposOffset)=y
+ return 
+; or x1,x2 ; merge to give combined x,y offsets
+; x2=ConvertXYToView
+; add x1,x2
+; x1=WorkSpace(x1)
+;; now x1=view
+
+;---
+; v1=4 ; sprite no.
+; v2=32 ; x
+; v3=16 ; y
+; gosub @MCSprite ;****

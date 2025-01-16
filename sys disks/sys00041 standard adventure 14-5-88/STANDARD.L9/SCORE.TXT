@@ -1,0 +1,66 @@
+; Standard adventure sources 14/5/88
+;
+; score code
+;
+; 14/5/88
+
+ begin
+
+.CalcScore
+; return X4=current score
+ x1=32 ; start of score table
+ x4=0
+
+.CalcScore1
+ x2=list7(x1)
+ if x2<128 then calcScoreNotNegative
+; convert negative 8 bit number to negative 16 bit
+ x3=65280
+ add x2,x3
+
+.calcScoreNotNegative
+ add x4,x2
+ add x1,c1
+ if x1<ScMaxPlus1 then CalcScore1
+
+ add x4,GeneralScoreAddition
+ return
+;---
+.SCORE
+ MESSAGE 2240 ; you score
+ 
+.PRINTSCORE
+ gosub CalcScore
+ IF X4<30000 THEN SCORE1 ; failsafe test to prevent negative score
+ message 2515 ; minus sign
+ x1=x4
+ x4=0
+ sub x4,x1
+
+.SCORE1
+ PRINT X4 ; score
+; M1=2249 ; message below lowest rating
+; X1=100 ; size of score categories (max score, 1000, has unique rating)
+;.SCORE2
+; SUB X4,X1
+; ADD M1,C1
+; IF X4<NEGATIVE THEN SCORE2
+; MESSAGE 2242 ; out of 1000 and are a 
+ m1=2242 ; out of 1000
+ goto @printM1dot
+;---
+.AddScoreMinus20
+ x2=Minus20
+ goto AddSCoreX2
+
+.AddScore20
+ x2=20
+ goto AddScoreX2
+
+.AddScore
+ x2=10
+
+.AddScoreX2
+ list7(x1)=x2
+ return
+;---

@@ -1,0 +1,281 @@
+05/12/89  Release 2.00
+
+		The following describes changes to CheckIt
+		      since the manual was printed.
+
+General
+
+A few issues of compatibility are discussed in this section.  Mostly,
+this text is purely informational; CheckIt will automatically take any
+action necessary to maintain compatibility with a particular PC.
+
+    DISK NAMES
+
+    CheckIt refers to the physical drives installed in your PC as "Drive 0,"
+    "Drive 1," etc.  Since you may not be familiar with these names, CheckIt
+    tries to determine the DOS names for these drives as well (i.e. A:, B:,
+    etc.).  The line below shows an example of how both a floppy and hard
+    disk would be represented on a typical system:
+
+        Floppy Drive 0 (A:)             Hard Drive 0 (C:-D:)
+
+    On rare occations, CheckIt may mis-identify the DOS names for the drive.
+    Since CheckIt does not use DOS drive names, all functions will still
+    work properly on the drive number being used.
+
+    THE HIMEM PROGRAM
+
+    On AT and 386 class PC's, the Microsoft program HIMEM allows access to
+    an additional 64K of standard DOS memory (for a total of 704K).  The
+    methods used to accomplish this make it unsafe for CheckIt to test
+    protected mode (in the System Board test) or extended memory (in the
+    Memory test).  CheckIt will automatically detect the presence of HIMEM
+    and skip these tests.
+
+    VIRTUAL 8086 MODE ON A '386
+
+    A number of multitasking and EMS emulator programs use the special
+    "Virtual 8086 Mode" feature of the 80386 processor.  In this mode, if
+    a program tries to access extended memory, the machine will lock up.
+
+    CheckIt looks for this and avoids the problem by not testing protected
+    mode (in the System Board test) or extended memory (in the Memory test).
+
+    COMPATIBILITY
+
+    CheckIt runs on most PC compatibles, and will probably run on yours.
+    Here is a partial list of the systems and equipement that this version
+    of CheckIt has been tested on and is fully compatible with:
+
+    PC Systems:
+	Amstrad PC
+	AST Premium 386/25
+	AT&T PC 6300
+	AT&T PC 6386 WGS
+	Compaq Portable I
+	Compaq Deskpro 286
+	Compaq Deskpro 386/20
+	CompuAdd Turbo 10
+	CompuAdd 286/12
+	CompuAdd 386/16
+	Epson Equity I+
+	Everex 386/33
+        IBM PC/XT/AT
+	IBM PS/2 Models 30, 50, 60, 70, and 80
+	Toshiba Portable T1000
+
+    Co-processors and Accelerator Cards:
+        Intel 8087/80287/80387 Math Co-processor
+	Orchid Tiny Turbo 286
+
+    Video Adapters:
+        MDA:  IBM Monochrome Display Adapter
+   Hercules:  Everex Evergraphics Plus
+	CGA:  IBM Color Graphics Adapter
+	EGA:  EGA 480
+       MCGA:  IBM (PS/2 Model 30)
+	VGA:  ATI Wonder 16-bit VGA adapter (On Compaq Deskpro 386/20)
+	      Compaq 16-bit VGA adapter (On Compaq Deskpro 286)
+              IBM (PS/2 Model 50, 60, 70, and 80)
+	      Video 7 Vega VGA adapter
+
+    DOS Versions:
+	AT&T DOS 2.11 and 3.10
+        PC-DOS and MS-DOS 2.00 to 3.30
+	Compaq DOS 2.00 to 3.31
+	Epson DOS 3.20
+
+    Miscellaneous
+	Microsoft Mouse
+	Logitech Mouse
+	Kraft Premium III Joystick
+
+    The following paragraph explains known problems with specific systems:
+
+    CheckIt will not test protected mode (in the System Board test) or 
+    extended memory (in the Memory test) on the AT&T PC 6300+ and HP Vectra PC.
+    All other functions work normally.  CheckIt automatically determines if
+    it is running on one of these machines and skips these tests.
+
+    HERCULES COMPATIBILITY
+
+    CheckIt will detect and support the Hercules Monochrome Graphics
+    Adapter (HGA) only when the MSHERC.COM program (on Disk #2) has
+    been loaded first.  To do this, insert Disk #2 and type "MSHERC"
+    from the DOS A> prompt before running CheckIt.
+
+
+The Tools Menu
+
+    HARD DISK FORMATTER
+
+    CheckIt will ONLY low-level format standard AT & 386 class PC hard disks
+    (17 sectors per track).
+
+    CAUTION:  NEVER USE THIS FUNCTION TO REFORMAT A SCSI OR ESDI DRIVE!!
+
+    Since this procedure will DESTROY ALL DATA ON YOUR HARD DISK, it is 
+    important that you read and understand all of Chapter 24 before trying
+    to low level format your drive.
+
+The Setup Menu
+
+    RAM LAYOUT
+
+    Defining a RAM board is probably the most difficult thing to do in
+    CheckIt.  To help with this process, a few common board layouts are
+    described below.
+
+	Most "Turbo XT" Style PC's with 1M memory
+        .............................................................
+        :             Name: XT MotherBrd                            :
+        :        Word Size:  8 Bits          Total RAM on this      :
+        :    Bank 0 on Top? Y                board:    640K         :
+        :  Parity on Right? Y                                       :
+        :                                                           :
+        :           Bank  Size  Bank  Size  Bank  Size  Bank  Size  :
+        : RAM Chips:   0  256K     4  None     8  None    12  None  :
+        :              1  256K     5  None     9  None    13  None  :
+        :              2   64K     6  None    10  None    14  None  :
+        :              3   64K     7  None    11  None    15  None  :
+        :                                                           :
+        : Start Address:      0K      Split Addressing? N           :
+        :                                                           :
+        :      Base Memory:      0K to    640K (000000h to 09FFFFh) :
+        :  Extended Memory:       M to       M (      h to       h) :
+        :...........................................................:
+
+	Most AT Style PC's with 1M memory
+        .............................................................
+        :             Name: AT MotherBrd                            :
+        :        Word Size: 16 Bits          Total RAM on this      :
+        :    Bank 0 on Top? Y                board:      1M         :
+        :  Parity on Right? Y                                       :
+        :                                                           :
+        :           Bank  Size  Bank  Size  Bank  Size  Bank  Size  :
+        : RAM Chips:   0  256K     4  None     8  None    12  None  :
+        :              1  256K     5  None     9  None    13  None  :
+        :              2  None     6  None    10  None    14  None  :
+        :              3  None     7  None    11  None    15  None  :
+        :                                                           :
+        : Start Address:      0K      Split Addressing? Y           :
+        :                                                           :
+        :      Base Memory:      0K to    640K (000000h to 09FFFFh) :
+        :  Extended Memory:  1.000M to  1.375M (100000h to 15FFFFh) :
+        :...........................................................:
+
+	Most 386 Style PC's with 1M memory
+        .............................................................
+        :             Name: 386 MotherBd                            :
+        :        Word Size: 32 Bits          Total RAM on this      :
+        :    Bank 0 on Top? Y                board:      1M         :
+        :  Parity on Right? Y                                       :
+        :                                                           :
+        :           Bank  Size  Bank  Size  Bank  Size  Bank  Size  :
+        : RAM Chips:   0  256K     4  None     8  None    12  None  :
+        :              1  None     5  None     9  None    13  None  :
+        :              2  None     6  None    10  None    14  None  :
+        :              3  None     7  None    11  None    15  None  :
+        :                                                           :
+        : Start Address:      0K      Split Addressing? N           :
+        :                                                           :
+        :      Base Memory:      0K to    640K (000000h to 0FFFFFh) :
+        :  Extended Memory:       M to       M (      h to       h) :
+        :...........................................................:
+	NOTE:  Many 386 PC's have a special 32 bit card that holds
+	memory.  In these cases, CheckIt's picture of the board will
+	often look different from your memory board.  To find a bad
+	chip, note the bank and chip number blinking on the RAM Locate
+	screen and find the corresponding chip on your memory board.
+	The physical location may be different but the bank and chip
+	numbers are the same.
+
+	Compaq Deskpro 286
+        .............................................................
+        :             Name: Compaq 286                              :
+        :        Word Size: 16 Bits          Total RAM on this      :
+        :    Bank 0 on Top? Y                board:    640K         :
+        :  Parity on Right? Y                                       :
+        :                                                           :
+        :           Bank  Size  Bank  Size  Bank  Size  Bank  Size  :
+        : RAM Chips:   0   64K     4  None     8  None    12  None  :
+        :              1  256K     5  None     9  None    13  None  :
+        :              2  None     6  None    10  None    14  None  :
+        :              3  None     7  None    11  None    15  None  :
+        :                                                           :
+        : Start Address:    640K      Split Addressing? Y           :
+        :                                                           :
+        :      Base Memory:      0K to    640K (000000h to 09FFFFh) :
+        :  Extended Memory:       M to       M (      h to       h) :
+        :...........................................................:
+	NOTE:  Bank 0 must be 64K chips.  Other banks can have either
+	256K or 64K chips.  Our example uses 256K chips.
+
+    IBM PS/2 Model 60
+	IBM PS/2 Model 60
+        .............................................................
+        :             Name: PS/2 Model 60                           :
+        :        Word Size: 16 Bits          Total RAM on this      :
+        :    Bank 0 on Top? Y                board:      1M         :
+        :  Parity on Right? Y                                       :
+        :                                                           :
+        :           Bank  Size  Bank  Size  Bank  Size  Bank  Size  :
+        : RAM Chips:   0  256K     4  None     8  None    12  None  :
+        :              1  256K     5  None     9  None    13  None  :
+        :              2  None     6  None    10  None    14  None  :
+        :              3  None     7  None    11  None    15  None  :
+        :                                                           :
+        : Start Address:      0K      Split Addressing? Y           :
+        :                                                           :
+        :      Base Memory:      0K to    640K (000000h to 09FFFFh) :
+        :  Extended Memory:  1.000M to  1.375M (100000h to 15FFFFh) :
+        :...........................................................:
+	NOTE:  PS/2 computers use SIMM modules.  That means that
+	an entire row (1/2 bank) must be replaced at a time. 
+	Individual chips can not be replaced.
+
+	IBM PC/XT (64K-256K) Motherboard
+        .............................................................
+        :             Name: IBM PC/XT                               :
+        :        Word Size:  8 Bits          Total RAM on this      :
+        :    Bank 0 on Top? Y                board:    256K         :
+        :  Parity on Right? Y                                       :
+        :                                                           :
+        :           Bank  Size  Bank  Size  Bank  Size  Bank  Size  :
+        : RAM Chips:   0   64K     4  None     8  None    12  None  :
+        :              1   64K     5  None     9  None    13  None  :
+        :              2   64K     6  None    10  None    14  None  :
+        :              3   64K     7  None    11  None    15  None  :
+        :                                                           :
+        : Start Address:      0K      Split Addressing? N           :
+        :                                                           :
+        :      Base Memory:      0K to    256K (000000h to 03FFFFh) :
+        :  Extended Memory:       M to       M (      h to       h) :
+        :...........................................................:
+	NOTE:  The parity is actually on the left but the data chips
+	are then numbered from 0-7 (i.e. "P 0 1 2 3 4 5 6 7").  In
+	this case, the best setting is to just get the parity 
+	visually wrong.
+
+	AST Combo Plus (as expansion for XT board above)
+        .............................................................
+        :             Name: AST ComboPlus                           :
+        :        Word Size:  8 Bits          Total RAM on this      :
+        :    Bank 0 on Top? Y                board:    256K         :
+        :  Parity on Right? Y                                       :
+        :                                                           :
+        :           Bank  Size  Bank  Size  Bank  Size  Bank  Size  :
+        : RAM Chips:   0   64K     4  None     8  None    12  None  :
+        :              1   64K     5  None     9  None    13  None  :
+        :              2   64K     6  None    10  None    14  None  :
+        :              3   64K     7  None    11  None    15  None  :
+        :                                                           :
+        : Start Address:    256K      Split Addressing? N           :
+        :                                                           :
+        :      Base Memory:    256K to    512K (040000h to 07FFFFh) :
+        :  Extended Memory:       M to       M (      h to       h) :
+        :...........................................................:
+	NOTE:  The banks are numbered starting at 1 instead of 0.
+
+    See Chapter 4 for more hints on defining memory boards.
+   

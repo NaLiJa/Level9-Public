@@ -1,0 +1,1808 @@
+; MENU.TXT
+;
+; Copyright (C) 1988 Level 9 Computing
+;
+; M.J.Austin 7-8-88
+;
+const
+ MenuMinX=16
+ MenuMinY=32
+ MenuMaxX=160
+
+ begin
+
+;::::::::::::::::::::::::
+.EntryNumbertoPtr
+; Takes V1 as entry number, 
+; and returns with l1 being a pointer to the start of the message.
+ l1=18		; 9th ptr
+ &l1=MenuTable(l1)	; Get start of ptr to words
+ Sub V1,c1		; Entry number always 1 too big
+ Add V1,V1		; double V1 for table use
+ Add l1,V1		; Add message Number to l0
+ &l1=MenuTable(l1)	; this should now hold the start of the message
+
+ Return		; bye bye
+;::::::::::::::::::::::::
+
+.DoMenu
+; first ensure both frames have same display...
+ v1=ByteWS(ByteTrueJoystickStatus)
+ x2=64
+ and v1,x2
+ if v1<>0 then @DoMenu ; right mouse button is still down - wait for release
+ gosub @EqualiseFrames
+ MouseX=32
+ MouseY=64 ; place mouse within menu area
+ MinMouseX=MenuMinX
+ MaxMouseX=200
+ MinMouseY=MenuMinY
+ MaxMouseY=160
+ VBLInitialised=true
+ MouseOn=true
+
+ HighlightedLine=1
+ CurrentMenu=2 ; 0 is not present.
+ FirstLine=1
+
+.DoMenuLoop
+ if CurrentMenu=0 then @HeroLoop
+ gosub @DisplayCurrentMenu
+ gosub @DisplayTextLine
+ gosub @DisplayFrame
+ gosub @WaitForFrame
+
+;>>code -
+ gosub @MakeMenuSelection
+;>>code +
+ if SelectedLine=0 then NoSelection
+ gosub @HandleSelection
+.NoSelection
+ gosub @MCHeroInput
+ V1=ByteWS(ByteLastKeyPressed)
+ if V1=13 then @MCCloseDown
+ if v1=32 then @HeroLoop ; space -> close down menu
+ v1=ByteWS(ByteTrueJoystickStatus)
+ x2=64
+ and v1,x2
+ if v1<>0 then @MenuBackToHero ; right mouse button -> close down menu
+; gosub @WaitForFrame ;*
+; gosub @LimitFrameRate
+; v1=MenuDelay
+; gosub @DelayV1
+ goto DoMenuLoop
+
+.MenuBackToHero
+; wait for both mouse buttons to be released, then rejoin game
+ gosub @WaitForButtons
+ VBLInitialised=true ; sometimes cleared by wait routines.
+ goto @HeroLoop
+;----
+.WaitForButtons
+; wait for both mouse buttons to be released
+ v1=ByteWS(ByteTrueJoystickStatus)
+ x2=192 ; either mouse button
+ and v1,x2
+ if v1<>0 then WaitForButtons ; wait for both mouse buttons to be released
+ return
+
+;---
+.DisplayCurrentMenu
+; Display CurrentMenu
+; 3 bytes per entry
+ gosub @DoFirstMenuLine ; clear screen, set up Line etc.
+ &l0=MenuTable(CurrentMenu) ; start with verbs table
+;>>code -
+.DM1
+
+ V1=MenuTable(l0)
+ if V1=255 then DisplaymenuEnd
+ add l0,c3 ; get message number offset for this entry
+ V1=MenuTable(l0)
+ l1=500 ; base of messages ;100
+ add l1,V1
+
+;::::::::::::::::::::::::
+
+ l2=500				; Offset to menu stuff
+ Add V1,l2			; ..so add it on to entry number
+ Gosub @EntryNumbertoPtr	; ..go get pointer.
+
+;::::::::::::::::::::::::
+
+ wielded=0 ;*****
+ magic=0 ;*****
+ gosub @PrintMenuLineL1 ; handles highlighted line etc., increments Line.
+ add l0,c1 ; on to next entry
+ goto DM1
+
+.DisplayMenuEnd
+ NumEntries=Line
+ SUB NumEntries,c1
+;>>code +
+ return
+
+;---
+.GetObject
+; display inventory/whatever, using linked list starting with LL(L2)
+ HighlightedLine=1
+
+.GetObjectLoop
+ gosub @PrintInv
+ gosub @DisplayTextLine
+ gosub @DisplayFrame
+ gosub @MCHeroInput
+;>>code -
+ gosub MakeMenuSelection
+;>>code +
+ gosub @WaitForFrame
+ gosub @LimitFrameRate
+; v1=MenuDelay
+; gosub @Delay1
+ v1=ByteWS(ByteTrueJoystickStatus)
+ x2=64
+ and v1,x2
+ if v1<>0 then GOHigher ; right mouse button -> close down menu
+
+ if SelectedLine=0 then GetObjectLoop
+ HighLightedLine=1 ; reset for higher menu level
+ return
+.GOHigher
+ HighlightedLine=1
+ SelectedLine=1
+ return
+;---
+;>>code -
+.MakeMenuSelection
+; called from interpreted mode
+ SelectedLine=0
+
+
+cif useMouse
+; mouse-type handler...
+ V1=ByteWS(Bytetruejoystickstatus)
+ if MouseX<MenuMinX then MMSMouse2
+ if MouseX>MenuMaxX then MMSMouse2
+; calculate which line SHOULD be highlighted.
+
+ HighlightedLine=MouseY
+ sub HighlightedLine,TopMargin ; offset in pixels
+; /8 to give offset in lines
+ asr HighlightedLine
+ asr HighlightedLine
+ asr HighlightedLine
+; HL is now offset from start of menu, in terms of text lines
+ add HighlightedLine,FirstLine
+.MMSMouse2
+ goto @MMSEnd ; check for any necessary scroll.
+cend
+
+cif UseJoystick
+; now Joystick type handler...
+.MMS1
+ V1=ByteWS(Bytetruejoystickstatus)
+ if V1<>1 then NotUp
+ if HighlightedLine=1 then NotUp
+ if RepeatCount>0 then @JoystickDelay
+ RepeatCount=1
+ sub HighLightedLine,c1
+ goto @MMSEnd
+
+.NotUp
+ if V1<>2 then NotDown
+ if HighlightedLine=NumEntries then NotDown
+ if RepeatCount>0 then @JoystickDelay
+ RepeatCount=1
+ add HighLightedLine,c1
+ goto @MMSEnd
+
+.NotDown
+ if v1<>8 then NotRight
+ if RepeatCount>0 then @JoystickDelay
+ RepeatCount=1
+ x1=5
+ add HighlightedLine,x1
+ if HighLightedLine<NumEntries then NoLimitRight
+ HighlightedLine=NumEntries
+.NoLimitRight
+ goto MMSEnd
+
+.NotRight
+ if v1<>4 then @NotLeft
+ if RepeatCount>0 then @JoystickDelay
+ RepeatCount=1
+ x1=5
+ sub HighLightedLine,x1
+ if highlightedLine>32000 then LimitLeft
+ if HighLightedLine<>0 then NoLimitLeft
+.LimitLeft
+ HighlightedLine=1
+.NoLimitLeft
+cend ; end of joystick-type handler
+
+
+.MMSEnd
+; check if we need to scroll the window
+ if HighlightedLine>FirstLine then MMSTopOk
+ if FirstLine<2 then MMSTopOk ; prevent FirstLine going negative
+ sub FirstLine,c1
+;;not for mouse. goto @MMSEnd ; check again for large movements up or down
+
+.MMSTopOk
+ x1=MenuHeight
+ add x1,FirstLine ; first line NOT displayed
+ if HighlightedLine<x1 then MMSBottomOk
+ if HighlightedLine>32768 then MMSBottomOk ; exclude negative
+ sub x1,c1
+ if x1=NumEntries then MMSBottomOk
+ if x1>NumEntries then MMSBottomOk
+
+ add FirstLine,c1
+;;not for mouse. goto MMSTopOk
+
+.MMSBottomOk
+.NotLeft
+ if V1<>128 then NotButton
+
+; x1=NumEntries
+; sub x1,FirstLine ; first line NOT displayed
+; sub x1,c2
+ if HighlightedLine>NumEntries then NotButton
+
+ SelectedLine=HighLightedLine
+; wait for joystick to be released to prevent selecting first item 
+; on next menu by accident
+.waitrelease
+ gosub @WaitForJoystick ;  return
+ V1=ByteWS(Bytetruejoystickstatus)
+ if v1=128 then waitrelease
+ return ;  goto JDRet
+
+.NotButton
+; no joystick input, so clear delay flag
+ RepeatCount=0
+
+.NotJoystick
+ return
+;-
+.JoystickDelay
+; stop joystick movements being too rapid
+ add RepeatCount,c1
+ if RepeatCount<5 then JDRet
+ RepeatCount=0
+.JDRet
+ return
+;---
+ ;>>code +
+
+.RemoveFromLL
+; remove Entry LL(ObjectInfo)
+; (Previous entry in chain was LL(PreviousObjectInfo))
+ &x7=LL(ObjectInfo)
+ &LL(PreviousObjectInfo)=x7
+; and add to the start of the free space list.
+ &LL(ObjectInfo)=LLFree
+ &LLFree=ObjectInfo
+ return
+;---
+.InitRangedWeapons
+; set up names of ranged weapons
+;*****
+; initial "free gift" weapon is a bow...
+;
+; add to player inventory
+
+; l0=InvNameOffset
+; x1=LLRangedWeapons
+; add L0,x1 ; LLFree
+; x1=68 ;&*&*& cheat with wand of death &*&*& 35 ; bow
+; &LL(L0)=x1
+; gosub @AddToPlayerInv
+
+; l0=LLRangedWeapons
+; and add a wand of digging
+ x2=InvNameOffset 
+ add x2,LLFree
+ x1=WandPolymorph
+ &LL(x2)=x1
+ gosub @AddToPlayerInv
+ gosub @AddRangedWeapon
+
+ x2=InvNameOffset 
+ add x2,LLFree
+ x1=WandDigging ;65 ; wand of digging
+ &LL(x2)=x1
+ gosub @AddToPlayerInv
+ gosub @AddRangedWeapon
+
+
+ x2=InvNameOffset 
+ add x2,LLFree
+ x1=WandDeath ; 68 ; wand of death
+ &LL(x2)=x1
+ gosub @AddToPlayerInv
+;
+; now add to range weapons list
+ GOSUB @AddRangedWeapon
+ v1=RWWieldedOffset
+ &v2=ll(LLRangedWeapons)
+ add v1,v2
+ wielded=5
+ LL(V1)=wielded				; set (wielded) extension message
+
+
+
+
+ ByteWs(ByteCurrentWeapon)=c0		; set up missile type
+ ByteWs(ByteSourceWeapon)=x1		; set up source weapon
+ return
+;
+; Add Ranged Weapons For Testing...
+;
+; x1=60
+; gosub @AddRangedWeapon
+; x1=61
+; gosub @AddRangedWeapon
+; x1=62
+; gosub @AddRangedWeapon
+; x1=63
+; gosub @AddRangedWeapon
+; x1=64
+; gosub @AddRangedWeapon
+; x1=65
+; gosub @AddRangedWeapon
+; x1=66
+; gosub @AddRangedWeapon
+; x1=67
+; gosub @AddRangedWeapon
+; x1=68
+; gosub @AddRangedWeapon
+; x1=69
+; gosub @AddRangedWeapon
+; x1=70
+; gosub @AddRangedWeapon
+; x1=71
+; gosub @AddRangedWeapon
+; x1=72
+; gosub @AddRangedWeapon
+; x1=73
+; gosub @AddRangedWeapon
+; x1=74
+; fall through...
+;---
+.AddRangedWeapon
+; add ranged weapon with name x1
+ L0=LLRangedWeapons
+ v1=RWNameOffset
+ add v1,LLFree
+ &LL(V1)=x1				; set name of weapon (for menu)
+;
+; find type of sprite to be used by missile
+ v1=x1
+ add v1,v1
+ add v1,v1				; table of 4-byte entries
+ x2=statisticoffset
+ add v1,x2
+ add v1,c3
+ x2=list7(v1)				; x2=missile sprite type
+ v1=RWTypeOffset
+ add v1,LLFree
+ LL(V1)=x2				; set type of weapon (for sprite)
+;
+ v1=RWWieldedOffset
+ add v1,LLFree
+ LL(v1)=c0				; make sure it's not wielded yet
+;
+ v1=InvCursedOffset
+ add v1,LLFree
+ LL(v1)=c0				; DO NOT curse ranged weapons
+;
+ v1=InvMagicOffset
+ add v1,LLFree
+ LL(v1)=c0				; range weapons are not magic
+;
+ goto addtoll
+;*****
+;
+.AddToPlayerInv
+; Add LL(LLFree) to the inventory chain: LL(PlayerInv)
+ L0=LLPlayerInv
+; drop through to AddToLL
+;
+.AddToLL
+; add LL(LLFree) to LL(L0)
+ &l1=LL(L0)
+ &l2=LL(LLFree)
+; save next item in free space chain
+ if l2=0 then NoLLSpace
+ &LL(LLFree)=l1 ; insert entry in LL chain
+ &LL(L0)=LLFree
+ LLFree=L2 ; remove entry from free space chain
+ return
+;---
+.NoLLSpace
+; break ;*******
+;*****
+; ;>>code -
+;  prs " No LL Space. "
+; ;>>code +
+; gosub @DisplayFrame
+; gosub @LongDelay
+; goto @RestartHero
+ m1=757					; "can't carry any more"
+ if LLOverflowReported=true then NLLS1
+ gosub @AddMessageToOutputBuffer
+.NLLS1
+ LLOverflowReported=true
+ return
+;---
+.InitLL
+; clear flags in LL table such as wielded/cursed items etc.
+ l0=0
+.clearLL
+ &LL(l0)=c0
+ add l0,c2
+ if l0<LLTableSize then ClearLL
+;*****
+;
+ L2=LLEntrySize
+ L0=0 ; first entry pointer
+ L1=LLEntrySize ; second entry pointer
+.InitLL1
+ &LL(L0)=L1
+ add L0,L2
+ add L1,L2
+ if L1<LLTableSize then InitLL1
+
+; the initial pointers for the LL occupy the first
+; few bytes of the LL (and therefore overlap with what would
+; otherwise by the first entry). Therefore make free space
+; point after this point:
+; &LLFree=LL(LLPlayerInv)
+; &LL(LLPlayerInv)=c0
+; &LLFree=LL(LLRangedWeapons)
+; &LL(LLRangedWeapons)=c0 ; no ranged weapons yet
+;; and initialise level save area...
+; x2=1 ; level number to save
+;.InitLLLevelSave
+; &x1=LL(LLFree)
+; &LL(LLFree)=c0
+; LLFree=x1
+; add x2,c1
+; if x2<LLMaxLevelSave then InitLLLevelSave
+
+; initialise null-length lists...
+ x4=0
+ x1=LLEntrySize
+.InitLLLoop
+ &LL(x4)=c0
+ add x4,x1
+ if x4<LLLevelSaveSize then InitLLLoop ;  LLLevelSaveSize=320 ; (LLMaxLevelSize+2)*LLEntrySize
+ LLFree=x4
+
+ goto @InitRangedWeapons
+;----
+.PrintInv
+; print contents of Linked list which starts with LL(L2)
+ gosub @DoFirstMenuLine
+;>>code -
+
+;::::::::::::::::::::::::
+ V1=499 ; verbs-1
+ add V1,Verb
+ Gosub @EntryNumbertoPtr
+;::::::::::::::::::::::::
+
+ wielded=0 ;*****
+ magic=0 ;*****
+ gosub @PrintMenuLineL1
+ ObjectInfo=L2
+;>>code +
+ &L0=LL(L2)
+;>>code -
+; PreviousObjectInfo will be overwritten before it may be needed 
+; FirstLine is the first line currently displayed in menu
+; scan through objects till we reach it...
+.PrintInvScan1
+ if l0=0 then @PrintInvEnd
+ if Line>FirstLine then PrintInv1
+ L1=InvNameOffset
+ add L1,L0
+;>>code +
+ &L1=LL(L1) ; get object type
+ &L0=LL(L0)
+;>>code -
+ add Line,c1
+ goto PrintInvScan1
+;
+; now display the objects...
+.PrintInv1
+ if L0=0 then @PrintInvEnd
+ x1=MenuHeight
+ add x1,FirstLine ; first line NOT displayed
+ L1=InvNameOffset
+ add L1,L0
+;>>code +
+ &L1=LL(L1) ; get object type
+;*****
+ wielded=InvWieldedOffset
+ add wielded,l0
+ wielded=LL(wielded) ; get extended message (i.e. wielded etc.)
+ magic=InvMagicOffset
+ add magic,l0
+ x8=x1
+ x1=LL(magic)
+ gosub @SignExtendX1
+ magic=x1
+ x1=x8
+;*****
+;>>code -
+;*****
+ if Line<>HighlightedLine then PrintInv2
+ PreviousObjectInfo=ObjectInfo
+.PrintInv2
+ if Line>HighlightedLine then PrintInv20
+ ObjectInfo=L0 ; preserve the object the user MAY select
+.PrintInv20
+;*****
+ if FirstLine=0 then PrintInv1a
+ if Line=x1 then PrintInv3
+.PrintInv1a
+ if Line>x1 then PrintInv3
+
+;::::::::::::::::::::::::
+ m1=l1
+ gosub @ism1discovered		; handle unidentified objects
+ v1=m1				; get the var to pass
+ Gosub @EntryNumbertoPtr	; and get da ptr in l1
+;::::::::::::::::::::::::
+
+ gosub @PrintMenuLineL1
+ sub line,c1
+;
+.PrintInv3
+ add Line,c1
+;>>code +
+ &L0=LL(L0)
+;>>code -
+ goto @PrintInv1
+;
+.PrintInvEnd
+;>>code +
+ NumEntries=Line
+ SUB NumEntries,c1
+ return
+;>>code -
+;---
+;
+;::::::::::::::::::::::::
+
+;**********
+;* GPrint *
+;**********
+;* Routine which prints a line of text starting at addr l1
+;* The co-ordinates are not handled by this routine
+
+.GPrint
+ V1=Menutable(l1)		* V1 is char used by OSWRCH
+ If V1=0 then EndGPrint		* Is it end of line?
+ Gosub @MCOSWRCHV1		* .. nope.. so splat 1st char out
+; &x1=WORDWS(WordCursorXpos)	* Get current X co-ord
+; V1=8				* Width of a character
+; Add x1,V1			* One character along
+; &WORDWS(WordCursorXpos)=x1	* Get current X co-ord
+ Add l1,c1			* Add 1 to location to get chracter from
+ Goto GPrint			* ... then go back to start
+
+.EndGPrint
+ Return
+
+;::::::::::::::::::::::::
+
+
+.PrintMenuLineL1
+ ByteWS(ByteInvertFlag)=c0
+ if Line<>HighLightedLine then PML1
+ ByteWS(ByteInvertFlag)=c1 ; set up mc to print inverted text
+
+.PML1
+;code -
+;::::::::::::::::::::::::
+ Gosub @GPrint
+;::::::::::::::::::::::::
+;code +
+ m1=735
+ add m1,magic
+;code -
+;::::::::::::::::::::::::
+ V1=m1				; pass var
+ Gosub @EntryNumbertoPtr	; ..go get ptr in l1
+ Gosub @GPrint 			; extended message for magic offset
+;::::::::::::::::::::::::
+;code +
+ m1=720
+ add m1,wielded
+;code -
+;::::::::::::::::::::::::
+ V1=m1				; pass var
+ Gosub @EntryNumbertoPtr	; ..go get ptr in l1
+ Gosub @GPrint 			; extended message for worn
+;::::::::::::::::::::::::
+; message 598 ; cr
+;code +
+;>>code +
+ gosub @DoCr
+;>>code -
+ add line,c1
+ ByteWS(ByteInvertFlag)=c0
+ return
+;---
+ ;>>code +
+; for wands and scrolls etc, show their full name if their use 
+; has been discovered. m1=object/message number
+.ism1discovered
+ if m1<minring then imdret
+ if m1>maxpotion then imdret
+ x2=discoveryoffsetminus40	; start of table-minring
+ add x2,m1
+ x2=list3(x2)		; x2=0 if object use is known
+ if x2=0 then imdret
+ m1=x2			; change to dummy name
+.imdret
+ return
+;---
+.CursorTopLeft
+ LeftMargin=MenuMinX ; 0 ;*****32
+ TopMargin=MenuMinY ; 32 ;*****64
+ &WordWs(WordCursorXPos)=LeftMargin
+ &WordWs(WordCursorYPos)=TopMargin
+ return
+;---
+.DoCr
+ &V1=WordWs(WordCursorYPos)
+ V2=8
+ add V1,V2
+ &WordWs(WordCursorYPos)=V1
+ &WordWs(WordCursorXPos)=LeftMargin
+ return
+;---
+.DoFirstMenuLine
+;; gosub @MCClearScreen
+ gosub @CursorTopLeft
+ v1=MenuPixelWidth ; x size
+ v2=MenuPixelHeight ; y size
+ gosub @MCClearRectangle
+
+;; gosub @CursorTopLeft
+ Line=1 ; Back is first line, 2 is first generated one.
+ return
+;---
+.HandleSelection
+ &HS0=MenuTable(CurrentMenu)
+;>>code -
+; given SelectedLine, CurrentMenu, take the appropriate action
+ HS1=SelectedLine
+ sub HS1,c1 ; give offset within menu
+; multiply by 4 and add (size of each entry in MenuTable)
+; to give position of the selection in MenuTable
+
+ add HS1,HS1
+ add HS1,HS1
+ add HS0,HS1
+; MenuTable(HS0) tells us what to do
+ V1=MenuTable(HS0)
+ if V1=0 then DoJump
+
+ if V1<>2 then NotChangeMenu
+ HighlightedLine=1
+ V1=1
+ add V1,HS0
+ CurrentMenu=MenuTable(V1)
+ goto @HandleSelectionEnd
+
+.NotChangeMenu
+ if V1<>1 then NotGetObject
+; get object/other item from linked list (e.g. spell) first
+ v1=2
+ add v1,HS0
+ L2=MenuTable(V1) ; get LL number to use in selection
+
+;>>code +
+  Verb=HighlightedLine
+  gosub @GetObject
+;>>code -
+ if SelectedLine=1 then @HandleSelectionEnd ; "BACK" instead of object
+; LL(ObjectInfo) is object to act upon
+
+.NotGetObject
+.DoJump
+ V1=1 ; extract which jump entry to use from MenuTable.
+ add V1,HS0
+ V1=MenuTable(V1)
+code -
+ jump @JumpTable V1 ; dummy comment!
+
+.JumpTable
+ data @Null,@Quit,@Examine,@Drop,@Wield,@Wear ;
+ data @Range,@Eat,@Drink,@System,@DisplayMap ;
+ data @Restart,@Wish ;
+
+.Null
+code +
+ goto @HandleSelectionEnd
+;-----
+code -
+.Restart
+code +
+  goto @NewLevel ;*****RestartGame
+code -
+
+.Quit
+code +
+  goto @MCCloseDown
+code -
+;---
+;=====
+; Seperate Menu selection used by "Scroll of Wishing"
+;
+.Wish
+code +
+ v5=10					; Food is object 10
+ if SelectedLine=1 then WishForV5
+ v5=12
+ add v5,SelectedLine			; Remaining objects are 14 onwards
+;
+.WishForV5
+; set up args: v1=xpos, v2=ypos, v3=xspeed, v4=yspeed
+ v1=playerx
+ v2=playery
+ v3=0 ; xspeed
+ v4=0 ; yspeed
+ x1=16
+ add v1,x1				; starting at right of player...
+ gosub @findvacantsquare		; ...find nearest vacant square
+ if x1=true then WishOk
+;
+; No vacant square found, so put object directly on player
+ v1=playerx
+ v2=playery
+;
+.WishOk
+ gosub @GenerateObject			; Generate an object of type v5
+ CurrentMenu=0				; Leave Menus
+ goto @HandleSelectionEnd
+;=====
+;---
+code -
+.Examine
+code +
+ m1=InvNameOffset
+ add m1,ObjectInfo
+ &m1=LL(m1) ; name of object from inventory
+;
+;*****
+; once scrolls have been read, their use is known to the player...
+ if m1<minscroll then notexamscroll
+ if m1>maxscroll then notexamscroll
+; lose the scroll from the inventory
+ gosub @RemoveFromLL
+ x1=m1
+ gosub @discoveruse			; use of scroll is now known
+ x2=minscroll
+ sub x1,x2
+ m1=800
+ add m1,x1				; default examine message
+code -
+ jump @ScrollJump x1			; do the specific wand routine
+;
+.ScrollJump
+ data @wishing		; 80
+ data @enchantarmour	; 81
+ data @destroyarmour	; 82
+ data @enchantweapon	; 83
+ data @destroyweapon	; 84
+ data @removecurse	; 85
+ data @teleportme	; 86
+ data @identify		; 87
+ data @firescroll	; 88
+ data @blankscroll	; 89
+ data @dispelmagic	; 90
+ data @blackhand	; 91
+.blankscroll
+code +
+;
+; return here from scroll routines, preferably with message m1
+.doneexaminescroll
+ gosub @AddMessageToOutputBuffer
+ goto examineend
+;
+; not examine scroll, so just display object name for now
+.NotExamScroll
+;
+;=====
+ Gosub @printllObject
+;
+; reveal cursed objects
+ x1=InvCursedOffset
+ add x1,ObjectInfo
+ x1=LL(x1)
+ x8=x1					; save byte for poison test
+ x2=cursemask
+ and x1,x2
+ if x1=0 then examinenotcursed
+ m1=759
+ gosub @AddMessageToOutputBuffer	; "It looks cursed"
+;
+; reveal poisoned food
+.examinenotcursed
+ x2=poisonmask
+ and x8,x2
+ if x8=0 then examinenotpoisoned	; not poisoned
+ m1=760
+ gosub @AddMessageToOutputBuffer	; "It smells funny"
+.examinenotpoisoned
+;=====
+;
+.examineend
+ ;>>code -
+ goto @HandleSelectionEnd
+;---
+; special scroll code. on entry, m1 contains default "examine scroll" 
+; message. modify this if neccessary.
+;---
+code -
+.wishing	; 80
+code +
+ CurrentMenu=8				; switch to "wishing" menu
+ goto @doneexaminescroll
+;---
+; enchant any armour worn
+code -
+.enchantarmour	; 81
+code +
+ x7=1					; wield body armour type
+ gosub @enchantx7			; enchant body armour?
+ if x6=true then enchantedarmour
+ x7=2					; wield accessory armour type
+ gosub @enchantx7			; enchant accessory armour?
+ if x6=true then enchantedarmour
+ m1=820					; "no wielded armour"
+.enchantedarmour
+ gosub @CalcAcWc			; recalc ac & wc
+ goto @doneexaminescroll
+;---
+; destroy any armour worn
+code -
+.destroyarmour	; 82
+code +
+ x8=false				; even destroy cursed items
+ gosub destroyarmour1
+ goto @doneexaminescroll
+;---
+; used as a subroutine, because it is used by Nymph.
+; on entry: x8=true if we should check if cursed before destroying
+.destroyarmour1
+ x7=1					; wield body armour type
+ gosub @destroyx7			; destroy body armour?
+ if x6=true then destroyedarmour
+ x7=2					; wield accessory armour type
+ gosub @destroyx7			; destroy accessory armour?
+ if x6=true then destroyedarmour
+ m1=820					; "no wielded armour"
+.destroyedarmour
+ gosub @CalcAcWc			; recalc ac & wc
+ return
+;---
+code -
+.enchantweapon	; 83
+code +
+ x7=3					; wield weapon type
+ gosub enchantx7			; enchant first weapon wielded
+ if x6=true then enchantedweapon
+ m1=820					; "no wielded weapon"
+.enchantedweapon
+ gosub @CalcAcWc			; recalc ac & wc
+ goto @doneexaminescroll
+;---
+code -
+.destroyweapon	; 84
+code +
+ x8=false				; even destroy cursed items
+ x7=3					; wield body weapon type
+ gosub @destroyx7			; destroy weapon?
+ if x6=true then destroyedweapon
+ m1=820					; "no wielded weapon"
+.destroyedweapon
+ gosub @CalcAcWc			; recalc ac & wc
+ goto @doneexaminescroll
+;---
+; enchant first item with wield byte x7
+; x6 true if all went well
+.enchantx7
+ x6=false
+ x3=LLPlayerInv
+.enchant1
+ &x4=LL(x3)
+ if x4=0 then @enchantend
+ x1=InvWieldedOffset
+ add x1,x4
+ x1=LL(x1)				; get wielded status
+ if x1<>x7 then notenchant		; wrong wield type
+;
+; increase magic adjustment
+ x1=InvMagicOffset
+ add x1,x4
+ x2=LL(x1)
+ add x2,c1
+ if x2<256 then newmagicoffset
+ x5=256
+ sub x2,x5				; handle magic gone +ve
+ if x2<6 then newmagicoffset
+ x2=5					; max +5
+.newmagicoffset
+ LL(x1)=x2
+ x6=true				; weapon enchanted
+ goto enchantend
+;
+.notenchant
+ x3=x4 					; previous entry
+ goto @enchant1				; not last entry
+.enchantend
+ return
+;---
+; destroy first item with wield byte x7
+; on entry: set x8=true if we should check if cursed before destroying
+; on exit: x6 true if all went well
+.destroyx7
+ x6=false
+ x3=LLPlayerInv
+.destroy1
+ &x4=LL(x3)
+ if x4=0 then @destroyend
+ x1=InvWieldedOffset
+ add x1,x4
+ x1=LL(x1)				; get wielded status
+ if x1<>x7 then notdestroy		; wrong wield type
+;
+ if x8=false then donttestcursed
+;
+; Get cursed status
+ x1=InvCursedOffset
+ add x1,x4
+ x1=LL(x1)
+ x2=cursemask
+ and x1,x2
+ if x1<>0 then notdestroy		; don't destroy - it's cursed!
+;
+; destroy object
+.donttestcursed
+ ObjectInfo=x4				; current pointer
+ PreviousObjectInfo=x3			; last pointer
+ gosub @RemoveFromLL
+ x6=true				; weapon destroyed
+ goto destroyend
+;
+.notdestroy
+ x3=x4 					; previous entry
+ goto @destroy1				; not last entry
+.destroyend
+ return
+;---
+; NB: Remove Curse ALSO Dispels Magic!
+code -
+.removecurse	; 85
+code +
+ x1=InvCursedOffset
+ x3=LLEntrySize
+.removec1
+ x2=ll(x1)
+ x4=uncursemask
+ and x2,x4				; mask off cursed bit
+ ll(x1)=x2
+.dontrc
+ add x1,x3
+ if x1<LLTableSize then removec1
+; Fall through...
+;---
+code -
+.dispelmagic	; 90
+code +
+ x1=InvMagicOffset
+ x3=LLEntrySize
+.dispm1
+ x2=ll(x1)
+ if x2=0 then dontdm
+ ll(x1)=c0
+.dontdm
+ add x1,x3
+ if x1<LLTableSize then dispm1
+ gosub @CalcAcWc			; recalc ac & wc
+ goto @doneexaminescroll
+;---
+code -
+.teleportme	; 86
+code +
+ gosub teleportme1
+ goto @doneexaminescroll
+;---
+;=====
+; this is a subroutine because it used for the teleport ring
+; as well as the teleport scroll...
+.teleportme1
+ x8=ringteleportc
+ gosub @testringworn
+ if x2=0 then notcontrolled
+ x1=ringteleportc
+ gosub @discoveruse
+;
+; user is wearing teleport control ring, so allow new position to 
+; be chosen...
+ m1=764					; teleport control activated
+ gosub @AddMessageToOutputBuffer
+ gosub choosepos			; v1,v2=new sprite pos
+ goto teleportme2
+;
+; do a random teleport...
+.notcontrolled
+ gosub @getrandompos			; v1,v2=random sprite pos
+;
+; now that we have the x,y destination, do the user teleport.
+.teleportme2
+ playerx=v1
+ playery=v2
+ goto @newplayerpos
+;---
+; allow player to scroll the map around and select a new pos for 
+; e.g. teleport control ring
+; returns new x,y sprite position in v1 and v2
+.choosepos
+ teleporttimer=99			; countdown timer
+ &teleportX=WordWS(WordScreenXPos)
+ &teleportY=WordWS(WordScreenYPos)
+.cploop
+ gosub @MCHeroInput
+ gosub @AlmostAllHero
+;
+ x1=100					; clear rectangle
+ &WordWs(WordCursorXPos)=x1		; in middle of screen
+ x1=80
+ &WordWs(WordCursorYPos)=x1
+ v1=44
+ v2=24
+ gosub @MCClearRectangle
+ x1=100
+ &WordWS(WordCursorXPos)=x1
+ x1=88
+ &WordWS(WordCursorYPos)=x1
+ v1=teleporttimer
+ gosub @MyPrintV1			; display countdown timer
+;
+ gosub @DisplayFrame
+ gosub @WaitForFrame
+ gosub @LimitFrameRate
+ x1=ByteWS(Bytetruejoystickstatus)
+ v2=32					; move in steps of 32
+;
+; up ?
+ v1=x1
+ and v1,c1
+ if V1=0 then cpNotUp
+ if teleportY<topboundary then cpNotUp
+ sub teleportY,v2
+;
+; down ?
+.cpNotUp
+ v1=x1
+ and v1,c2
+ if V1=0 then cpNotDown
+ if teleportY>bottomboundary then cpNotDown
+ add teleportY,v2
+;
+; right?
+.cpNotDown
+ v1=x1
+ x2=8
+ and v1,x2
+ if v1=0 then cpNotRight
+ if teleportX>rightboundary then cpNotRight
+ add teleportX,v2
+;
+; left ?
+.cpNotRight
+ v1=x1
+ and v1,c4
+ if v1=0 then cpNotLeft
+ if teleportX<leftboundary then cpNotLeft
+ sub teleportX,v2
+;
+; handle countdown timer
+.cpNotLeft
+ sub teleporttimer,c1
+ if teleporttimer<65000 then @cpDoneJoystick
+; countdown has timed out, so check to see if the new position is 
+; vacant...
+ v1=teleportx
+ v2=teleporty			; set up v1,v2 as window pos
+ x1=midscreenx
+ add v1,x1			; adjust to central player pos
+ x1=midscreeny
+ add v2,x1			; adjust to central player pos
+ gosub @findvacantsquare
+ if x1=false then @choosepos	; position was not vacant, so retry
+; a vacant position has been selected, so return with the position 
+; in v1,v2
+ playerx=v1
+ playery=v2
+;
+; set up new player position from playerx,playery for machine code use 
+.newplayerpos
+ x1=xposoffset
+ add x1,PlayerSpriteOffset
+ &SpriteTable(x1)=playerx		; set new x pos
+ x1=playerx
+ x2=midscreenx
+ sub x1,x2				; get top left of screen
+ &WordWS(WordScreenXPos)=x1		; for map window
+ x1=yposoffset
+ add x1,PlayerSpriteOffset
+ &SpriteTable(x1)=playery		; set new y pos
+ x1=playery
+ x2=midscreeny
+ sub x1,x2				; get top left of screen
+ &WordWS(WordScreenYPos)=x1		; for map window
+ return
+;
+; update new screen position
+.cpdonejoystick
+ &WordWS(WordScreenXPos)=teleportX
+ &WordWS(WordScreenYPos)=teleportY
+ goto @cploop
+;---
+.AlmostAllHero
+; call main routines for normal Hero display, except for the movement 
+; code. this allows player movement to be handled from acode
+; Note that most of these routines corrupt a3-a5, so should
+; do a code-, code+ to reset them if you want to do
+; any acode processing in-between calls.
+ gosub @CyclicSpecials
+ gosub @MCBuildBackground
+ gosub @MCDisplayDestroyedWalls
+ gosub @MCDisplayAllSprites
+ gosub @MCTrimEdges
+ gosub @DisplayTextLine
+ gosub @MCDisplayUpperTextLine
+ gosub @MCDoALlTimers
+ code -
+ code +
+ return
+;
+;=====
+;---
+code -
+.identify	; 87
+code +
+ x1=discoveryoffset
+.ScrollDiscoverLoop
+ list3(x1)=c0
+ add x1,c1
+ if x1<DiscoveryEnd then ScrollDiscoverLoop
+ goto @doneexaminescroll
+;---
+code -
+.firescroll	; 88
+code +
+ firescrollflag=true			; set on fire when return 
+ goto @doneexaminescroll		; from menu
+;---
+code -
+.blackhand	; 91
+code +
+ blackhandflag=true
+ goto @doneexaminescroll
+;---
+; object x1 has just been used, and will now be referred to by its 
+; true name (i.e. "wand of fire" instead of "runed wand")
+; x1 is preserved. x2 and x3 are corrupted.
+.discoveruse
+ if x1<minring then duret
+ if x1>maxpotion then duret
+ x2=discoveryoffsetminus40	; start of table-minring
+ add x2,x1
+ list3(x2)=c0		; set flag for object use discovered
+.duret
+ return
+code -
+;*****
+
+.Drop
+code +
+;
+;*****
+ v5=InvWieldedOffset
+ add v5,ObjectInfo
+ v5=LL(V5)				; wielded?
+ if v5=0 then dropnotcursed
+;
+; if wielded, make sure it's not cursed before dropping
+ v5=InvCursedOffset
+ add v5,ObjectInfo
+ v5=LL(V5)				; cursed?
+ x1=cursemask
+ and v5,x1				; test curse bit
+ if v5=0 then dropnotcursed
+ m1=754
+ goto @AddMessageToOutputBuffer		; "cursed!"
+;
+.dropnotcursed
+ x8=InvNameOffset
+ add x8,ObjectInfo
+ &x8=LL(x8)				; name of object from inventory
+;
+; convert object name into sprite number
+.freespritefordrop
+ x1=rangeoffset
+ x2=0					; x2 is category counter
+.convertobjecttosprite
+ x3=list7(x1)				; x3 is beginning of category range
+ add x1,c1
+ x4=list7(x1)				; x4 is number in this range
+ add x1,c1
+ if x8<x3 then objectnotincategory	; object is below this category
+ add x3,x4
+ if x8<x3 then foundspriteforobject	; object is in this category
+.objectnotincategory
+ add x2,c1				; try next category
+ if x2<23 then convertobjecttosprite
+code -
+ prs " can't find sprite "
+code +
+ gosub @displayframe
+ gosub @longdelay
+ return
+.foundspriteforobject
+;
+; set up args: v1=xpos, v2=ypos, v3=xspeed, v4=yspeed, v5=sprite num
+ v1=playerx
+ v2=playery
+ v3=0 ; xspeed
+ v4=0 ; yspeed
+ v5=x2					; v5 is sprite number
+;
+ x1=16
+ add v1,x1				; starting at right of player...
+ gosub @findvacantsquare		; ...find nearest vacant square
+ if x1=false then @dropret		; tough cookie!
+ gosub @MCSetUpNewSprite		; display the sprite
+ x1=nameoffset
+ add x1,v6				; find name offset of sprite.
+ &SpriteTable(x1)=x8			; reset true name of object.
+;
+ v5=InvCursedOffset
+ add v5,ObjectInfo
+ v5=LL(v5)
+ x1=CursedOffset
+ add x1,v6				; reset curse/poison flags
+ SpriteTable(x1)=v5
+;
+ v5=InvMagicOffset
+ add v5,ObjectInfo
+ v5=LL(v5)
+ x1=MagicOffset
+ add x1,v6				; reset magic adjustment
+ SpriteTable(x1)=v5
+;
+ m1=750					; "you have just dropped"
+ gosub @AddMessageToOutputBuffer	; <object name>
+ Gosub @printllObject
+;
+; was sprite really created? (i.e. enough free sprites)
+ if v7<65000 then okspritedropped
+ m1=758					; "turns to dust"
+ gosub @AddMessageToOutputBuffer
+.okspritedropped
+;
+; ring removed and dropped?
+ if x8<minring then notdropring
+ if x8>maxring then notdropring
+ v5=InvWieldedOffset
+ add v5,ObjectInfo
+ x1=LL(v5)
+ if x1=0 then notdropring		; was not wearing ring
+ x2=ringtableminus40
+ add x2,x8
+ list3(x2)=c0				; clear flag for ring removed
+.notdropring
+;
+.removefromlists
+ gosub @RemoveFromLL			; lose entry from inventory
+ ObjectInfo=LLRangedWeapons
+ x1=x8
+ gosub @DestroyEntry			; and maybe from ranged list
+;
+; if object destroyed was wielded, make sure we can't fire
+ if x2<>5 then dropret			; range wield type is 5
+ ByteWs(ByteSourceWeapon)=c0
+;
+.dropret
+ gosub @CalcAcWc			; recalc ac & wc
+ ;>>code -
+ goto @HandleSelectionEnd
+ ;>>code +
+;---
+; Add object at LL(ObjectInfo) to the textline in the form: 
+; NAME, +/- MAGIC , DOT
+.PrintLLObject
+ v5=InvNameOffset
+ add v5,ObjectInfo
+ &m1=LL(v5)
+; gosub @AddMessageToOutputBuffer	; <object name>
+ gosub @ism1discovered ; show full name only if object use is known
+ V1=m1				; pass var
+ Gosub @EntryNumbertoPtr	; ..go get ptr in l1
+ Gosub @GPrintBuffer 			; extended message for magic offset
+
+ v5=InvMagicOffset
+ add v5,ObjectInfo
+ x1=LL(v5)
+ gosub @SignExtendX1
+ m1=735
+ add m1,x1				; <magic offset>
+; gosub @AddMessageToOutputBUffer
+ V1=m1				; pass var
+ Gosub @EntryNumbertoPtr	; ..go get ptr in l1
+ Gosub @GPrintBuffer 			; extended message for magic offset
+
+ m1=599					; .
+; goto @AddMessageToOutputBuffer
+ V1=m1				; pass var
+ Gosub @EntryNumbertoPtr	; ..go get ptr in l1
+ Gosub @GPrintBuffer 			; extended message for magic offset
+ return
+;---
+code -
+.Wear
+.Wield
+code +
+ x1=InvNameOffset
+ add x1,ObjectInfo
+ &x1=LL(x1)			; x1 = name of object from inventory
+ x3=LLPlayerInv
+ gosub @removealreadywielded	; remove same objects already wielded
+ if m1>750 then @wieldretm1	; object of same type is cursed
+;
+ x3=LLPlayerInv			; used by @unwield
+;
+; wear body armour ?
+ if x1>maxarmour then notbodyarmour
+ wielded=1			; wield body armour type
+ gosub @unwield			; can only wear one item at a time
+ goto wieldok
+;
+; wear accessory armour ?
+.notbodyarmour
+ if x1>maxarmourA then notaccarmour
+ m1=702				; ok to wield
+ wielded=2			; wield accessory armour type
+ goto wieldok			; can wear many items
+;
+; wield hand weapon ?
+.notaccarmour
+ if x1>maxhand then nothandweapon
+ wielded=3			; wield hand weapon type
+ gosub @unwield			; can only wear one item at a time
+ goto wieldok
+;
+.nothandweapon
+; wear ring ?
+.noaccarmour
+ if x1<minring then notwearring
+ if x1>maxring then notwearring
+ x2=ringtableminus40
+ add x2,x1
+ x8=255
+ list3(x2)=x8			; set decay timer for ring
+ gosub @discoveruse		; identified when worn
+ m1=704				; ok to wield
+ wielded=4			; wield ring type
+ goto wieldok			; can wear many rings
+;
+.notwearring
+ m1=751				; "can't wield that"
+;
+.wieldok
+; scroll message m1
+ gosub @AddMessageToOutputBuffer
+ if m1>750 then @wieldret	; message was error - don't wield
+;
+; scroll object name
+ Gosub @printllObject
+;
+; now add extended message for wielded/worn items
+.wieldnewitem
+ v1=InvWieldedOffset
+ add v1,ObjectInfo
+ LL(V1)=wielded				; set (worn/wielded) status
+;
+; is it cursed?
+ v1=InvCursedOffset
+ add v1,ObjectInfo
+ v1=LL(v1)
+ x1=cursemask
+ and v1,x1				; test curse bit
+ if v1=0 then wieldret			; not cursed
+ m1=753
+;
+.wieldretm1
+ gosub @AddMessageToOutputBuffer	; cursed!
+; 
+.wieldret
+ gosub @CalcAcWc			; recalc ac & wc
+ ;>>code -
+ goto @HandleSelectionEnd
+ ;>>code +
+;---
+; a new item is about to be wielded, so "unwield" the old one.
+; on entry, x3 contains linked list type (e.g. LLPlayerInv)
+; on exit if the old item is cursed, then m1=760+wield. 
+; otherwise, m1 contains 700+wield ("you are now wielding..." etc.)
+.unwield
+ &x1=LL(x3)
+ if x1=0 then @unwieldend
+ x7=InvWieldedOffset
+ add x7,x1
+ x2=ll(x7)
+ if x2<>wielded then dontunwield
+;
+; found item wielded, but is it cursed?
+ x4=InvCursedOffset
+ add x4,x1
+ x2=ll(x4)
+ x4=cursemask
+ and x2,x4				; test curse bit
+ if x2=0 then wieldednotcursed
+; can't remove other item wielded because it's cursed!
+ m1=760
+ add m1,wielded
+ return
+;
+; not cursed, so "unwield" item
+.wieldednotcursed
+ ll(x7)=c0
+.dontunwield
+ x3=x1 					; previous entry
+ goto @unwield
+.unwieldend
+ m1=700
+ add m1,wielded				; "you are now wielding..."
+ return
+;---
+; test if an object of same name x1 is already wielded. this is used to 
+; avoid >1 of each item being worn (i.e. two helmets is rather silly!).
+; however, to allow for weapons of same type but different magic 
+; adjustments to be wielded, the weapon already wielded is "unwielded"
+; to make way for the new one.
+; on entry, x3 contains linked list type (e.g. LLPlayerInv)
+; on exit, m1 contains 752 if couldn't "unwield" existing weapon
+; (e.g. cursed), or 0 if all went well
+.removealreadywielded
+ m1=0
+.raw1
+ &x2=LL(x3)
+ if x2=0 then @notawend
+ x4=InvNameOffset
+ add x4,x2
+ &x4=LL(x4)				; get name
+ if x4<>x1 then notaw			; different name
+;
+; found item of same name. is it wielded?
+ x7=InvWieldedOffset
+ add x7,x2
+ x4=LL(x7)
+ if x4=0 then notaw			; not wielded
+;
+; item of same name is wielded. is it cursed?
+ x4=InvCursedOffset
+ add x4,x2
+ x4=ll(x4)
+ x5=cursemask
+ and x4,x5				; test curse bit
+ if x4=0 then rawnotcursed
+; can't remove other item wielded because it's cursed!
+ m1=752					; existing one is cursed
+ goto notaw
+;
+.rawnotcursed
+ LL(x7)=c0				; unwield item
+ return
+.notaw
+ x3=x2 					; previous entry
+ goto @raw1				; not last entry
+.notawend
+ return
+;---
+; DESTROY the first item in LL with name x1.
+; this is normally used to destroy items in the ranged weapons list 
+; when they are removed from the inventory.
+; note that the routine to remove the item from the inventory must
+; test for curses etc., because this routine doesn't!
+; on entry, ObjectInfo contains linked list type (e.g. LLPlayerInv)
+.DestroyEntry
+ PreviousObjectInfo=ObjectInfo
+ &ObjectInfo=LL(PreviousObjectInfo)
+ if ObjectInfo=0 then @DestroyEntryEnd
+ x2=InvNameOffset
+ add x2,ObjectInfo
+ &x2=LL(x2)				; get name
+ if x2<>x1 then NotDestroyEntry		; different name
+;
+ x2=InvWieldedOffset
+ add x2,ObjectInfo
+ x2=LL(x2)				; get wielded stat (for use
+; Remove the entry...			; in .drop)
+ Goto @RemoveFromLL
+;
+.NotDestroyEntry
+ Goto @DestroyEntry			; not last entry
+.DestroyEntryEnd
+ x2=0					; clear "wielded" flag
+ return
+code -
+;*****
+
+.Range
+code +
+ v5=RWTypeOffset
+ add v5,ObjectInfo
+ v5=LL(V5)
+ ByteWS(ByteCurrentWeapon)=v5
+;*****
+; the source of the weapon is now used to determine the effect on 
+; collision (the sprite number returned from M/C was not versatile 
+; enough).
+; the M/C concerning missiles has been modified to set the sprite's 
+; SourceWeaponOffset to the source weapon.
+ ;>>code +
+ v5=RWNameOffset
+ add v5,ObjectInfo
+ &v5=LL(V5)
+ ByteWS(ByteSourceWeapon)=v5
+;
+; add extended (wielded) message to menu line
+ wielded=5
+ x3=LLRangedWeapons
+ gosub @unwield				; "unwield" previous ranged weapon
+ v5=RWWieldedOffset
+ add v5,ObjectInfo
+ LL(V5)=wielded
+;
+ m1=705
+ gosub @AddMessageToOutputBuffer	; "your range weapon is"
+ m1=ByteWS(ByteSourceWeapon)
+ gosub @AddMessageToOutputBuffer	; <range weapon>
+ m1=599 ; dot
+ gosub @AddMessageToOutputBuffer
+;
+ ;>>code -
+;*****
+ goto @HandleSelectionEnd
+
+;---
+code -
+.DisplayMap
+code +
+ gosub @EqualiseFrames
+.DisplayMap1
+ gosub @MCMapBuildBackground
+ code - ; reset registers corrupted by build...
+ code +
+
+ gosub @DisplayFrame
+ gosub @WaitForButtons ; wait for buttons to be released
+
+ VBLInitialised=false
+.DMLoop
+ v1=ByteWS(ByteTrueJoystickStatus)
+ x2=192 ; either mouse button
+ and v1,x2
+ if v1<>0 then @MenuBackToHero ; either mouse button->back to game.
+ gosub @MCOsrdch
+ if v1=0 then DMLoop
+ goto @MenuBackToHero
+code -
+;---
+;=====
+.Drink
+.Eat
+code +
+ v5=InvNameOffset
+ add v5,ObjectInfo
+ &v5=LL(v5)				; name of object from inventory
+ if v5<minpotion then @nonedible
+ if v5>maxpotion then notpotion
+;
+; object is a potion...
+ gosub @RemoveFromLL			; lose the potion from inventory
+ x1=v5
+ gosub @discoveruse			; use of potion is now known
+ x2=minpotion
+ sub x1,x2
+ m1=850
+ add m1,x1				; default message
+code -
+ jump @PotionJump x1			; do the specific potion routine
+;
+.PotionJump
+ data @restorestrength	;
+ data @booze		;
+ data @confusion	;
+ data @healing		; fruit juice same as healing
+ data @invisibilitypot	;
+ data @healing		;
+ data @superhealing	;
+ data @restorestrength	; instant healing same as restore strength
+ data @paralysis	;
+ data @poison		;
+ data @gainstrength	;
+ data @speedpot		;
+ data @gainlevel	;
+ data @heroism		;
+ data @superheroism	;
+ data @slowness		;
+code +
+;
+.notpotion
+ if v5>maxfood then @nonedible
+;
+; object is a food type...
+.edible
+ gosub @RemoveFromLL			; remove from inventory
+; now, work out its energy value
+ add v5,v5
+ add v5,v5
+ x2=statisticoffset
+ add x2,v5
+ x3=list7(x2)				; x3 = energy value
+;
+; is food poisoned?
+ v5=InvCursedOffset
+ add v5,ObjectInfo
+ x1=LL(v5)
+ x2=poisonmask
+ and x1,x2
+ m1=761					; you now feel much better
+ if x1=0 then addenergy			; food is not poisoned
+;
+; food is poisoned...
+ x8=ringpoison
+ gosub @TestRingWorn
+ if x2<>0 then addenergy		; wearing poison protect ring!
+ x1=ringpoison
+ gosub @discoveruse
+;
+; no protection against poison, so make the energy value negative...
+ x1=x3
+ x3=0
+ sub x3,x1
+ m1=762					; the food was poisoned!
+;
+; add (or subtract) energy value x3 to player's hit points
+.addenergy
+ x1=x3
+ gosub @increasehitpoints
+;
+; also return here from potion routines, preferably with message m1
+.donepotion
+.eatret
+ gosub @AddMessageToOutputBuffer
+ goto @HandleSelectionEnd
+;
+; object is not edible...
+.nonedible
+ m1=763					; you cannot eat or drink that
+ goto @eatret
+;---
+; seperate potion routines...
+;
+ code -
+.restorestrength
+ code +
+ gosub @resethitpoints			; restore full hit points
+ goto @donepotion
+;---
+ code -
+.booze
+ code +
+ BoozeTimer=100				; coded in SpecialMovements
+ goto @donepotion
+;---
+ code -
+.confusion
+ code +
+ ConfusionTimer=100			; coded in SpecialMovements
+ goto @donepotion
+;---
+ code -
+.invisibilitypot
+ code +
+ invisibilitytimer=100			; coded in SpecialPlayerSprite
+ goto @donepotion
+;---
+ code -
+.healing
+ code +
+ x1=100
+.healx1
+ gosub @increasehitpoints		; add 100 to hit points
+ goto @donepotion
+;---
+ code -
+.superhealing
+ code +
+ x1=200
+ goto healx1				; add 200 to hit points
+;---
+ code -
+.paralysis
+ code +
+ ParalysisTimer=100			; coded in SpecialMovements
+ goto @donepotion
+;---
+ code -
+.poison
+ code +
+ x8=ringpoison
+ gosub @TestRingWorn
+ if x2<>0 then @donepotion		; wearing poison protect ring!
+ x1=100
+ gosub @decreasehitpoints		; sub 100 from hit points
+ goto @donepotion
+;---
+ code -
+.gainstrength
+ code +
+ x1=50
+ goto @healx1				; add x1 to hit points
+;---
+ code -
+.speedpot
+ code +
+ SpeedTimer=100				; coded in SpecialMovements
+ goto @donepotion
+;---
+ code -
+.gainlevel
+ code +
+ gosub @addxp				; add 1 to xp level
+ m1=862					; dummy message
+ goto @donepotion
+;---
+ code -
+.heroism
+ code +
+ heroismvalue=5				; add 5 at regular intervals
+.heroism1
+ heroismtimer=100			; coded in specialactivate
+ goto @donepotion
+;---
+ code -
+.superheroism
+ code +
+ heroismvalue=10			; add 10 at regular intervals
+ goto heroism1
+;---
+ code -
+.slowness
+ code +
+ SlowTimer=100				; coded in SpecialMovements
+ goto @donepotion
+;=====
+;----
+code -
+.system
+code +
+.HandleSelectionEnd
+; NB: If we came here from DROP, please note that ObjectInfo and 
+; PreviousObjectInfo will have been corrupted!
+;>>code +
+ return
+;---

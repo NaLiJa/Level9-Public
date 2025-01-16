@@ -1,0 +1,440 @@
+; STANDARD.TXT
+;
+; Some useful routines for animated games - mostly input handling
+;
+; Mike Austin. 3rd May 1990
+;
+; There is a sample mouse-based cursor movement routine at
+; the end of this file.
+;
+const
+ SmallMouse=3 ; minimum mouse movement emulated as a joystick response
+ NegSmallMouse=65533 ; minimum mouse movement emulated as a joystick response
+ JoyFLeft=128
+ JoyFRight=64
+
+var
+
+begin
+;-------------------
+; S   select
+; G   start [go]
+; P   pause
+; F   right Fire
+; W   win
+; L   lose
+; Q   quit [panic]
+;
+.sGetControls
+
+ &x1=ListConfig(cfPulseTimer)
+ if x1<>c0 then NoPulseToClear
+ gosub @ResetIOgameWinLose
+ x1=65535
+ &ListConfig(cfPulseTimer)=x1
+.NoPulseToClear
+
+ gosub @GetControls
+; 
+ LeftKey=x4
+ RightKey=x2
+ UpKey=x1
+ DownKey=x3
+ XSpeed=x5
+ YSpeed=x6
+ if x7=0 then NoWantedDir
+ WantedDirection=x7
+; 
+.NoWantedDir
+
+; PlayerSX=x5*2,PlayerSY=x6*2
+; and for directions, returns:
+;	x1
+;   x4       x2
+;       x3
+; Non-zero means trying to move in that direction
+; and x5=x offset (single pixel movement), signed
+;     x6=y offset (single pixel movement), signed
+;     x7=direction number in standard adventure format
+ gosub @KeyScan ; check for key 'press' from keyboard buffer,
+; returns in v1/v2 in same format as MCOsrdch:
+; i.e. v1 is ascii code, v2 is scan code.
+ if v2=103 then @nwdJustCursorKey ; keypad 7           *** Pete 
+ if v2=104 then @nwdJustCursorKey ; keypad 8           *** Pete 
+ if v2=105 then @nwdJustCursorKey ; keypad 9           *** Pete 
+ if v2=106 then @nwdJustCursorKey ; keypad 4           *** Pete 
+ if v2=108 then @nwdJustCursorKey ; keypad 6           *** Pete 
+ if v2=109 then @nwdJustCursorKey ; keypad 1           *** Pete 
+ if v2=110 then @nwdJustCursorKey ; keypad 2           *** Pete 
+ if v2=111 then @nwdJustCursorKey ; keypad 3           *** Pete 
+ if v2=72  then @nwdJustCursorKey ; keypad Up Arrow    *** Pete 
+ if v2=75  then @nwdJustCursorKey  ; keypad Left Arrow  *** Pete 
+ if v2=77  then @nwdJustCursorKey  ; keypad Down Arrow  *** Pete 
+ if v2=109 then @nwdJustCursorKey  ; keypad Right Arrow *** Pete 
+.nwdNotCursorKey                  ;                    *** Pete 
+ ch=v1                            ;                    *** Pete 
+ if v1=13  then @RegisterFireKey  ;                    *** Pete 
+ if v1=32  then @RegisterFireKey
+ if v1=53  then @RegisterFireKey
+ if GameOver<>false then IgnoreQuitButtons ; GMJ 21.02.91
+ if v1=81  then @Draw            ; "Q"   [Quit, NOT "P" for panic, 
+ if v1=113 then @Draw            ; "q"   because it's "pause"]. 
+ if v1=87  then @Win             ; "W"
+ if v1=119 then @Win             ; "w"
+ if v1=76  then @Lose            ; "L"
+ if v1=108 then @Lose            ; "l"
+.IgnoreQuitButtons ; GMJ 21.02.91
+ if v1=71  then @GotKeyboard     ; "G"   [Go, NOT "S" for start
+ if v1=103 then @GotKeyboard     ; "g"   because it's SELECT]
+ if v1=83  then @GotKeyboard     ; "S"
+ if v1=115 then @GotKeyboard     ; "s"
+;
+ if v1=49 then @TestScreenOne        ; "1"
+ if v1=50 then @TestScreenTwo        ; "2"
+ if v1=55 then @ChooseEasyLevel      ; "7"
+ if v1=56 then @ChooseMediumLevel    ; "8"
+ if v1=57 then @ChooseDifficultLevel ; "9"
+;
+;; if ch<>0 then GotKeyboard
+;; gosub @GetButtonAscii
+;; ch=v1
+;; if ch=81  then @Draw              ;PANIC hardware button
+;; if ch<>71  then @nwdJustCursorKey ;START hardware button
+.GotKeyboard
+ return 
+.nwdJustCursorKey                ;                    *** Pete 
+ ch=c0                           ;                    *** Pete 
+ v1=c0
+ return                          ;                    *** Pete 
+; 
+;-----------------
+; 
+.CheckFireKey
+; may be called from VBL - so save everything carefully!
+; FireKeyChange is reset when GetControls is called,
+; or may be reset elsewhere in the user program, if required.
+ push v1
+ push v2
+ push x1
+;
+; Left (primary) fire button?
+  FireKey=0
+  gosub @GetLeftFireButton ;returns x1=c0
+  v1=107 ; check for fire (5)
+  gosub @MCKeyDown
+  add x1,v1
+  v1=57    ; check for (left) fire (space)
+  gosub @MCKeyDown
+  add x1,v1
+  v1=33 ; check for (right) fire (F)
+  gosub @MCKeyDown
+  add x1,v1
+  v1=76    ; check for fire on some PC keyboards
+  gosub @MCKeyDown
+  add x1,v1
+  v1=ByteWS(ByteJoystickStatus)
+  v2=JoyFLeft ; Left mouse button (bit 7)
+  and v1,v2
+  add x1,v1
+  FireKey=x1
+  gosub GDFireKey
+  LastFireKey=FireKey
+;
+; SELECT button? (secondary fire)
+  FireKey2=0
+  gosub @GetRightFireButton ;returns x1=c0
+  v1=31 ; check for select (S)
+  gosub @MCKeyDown
+  add x1,v1
+  v1=ByteWS(ByteJoystickStatus)
+  v2=JoyFRight ; Right mouse button (bit 6)
+  and v1,v2
+  add x1,v1
+  FireKey2=x1
+  gosub GDFireKey2
+  LastFireKey2=FireKey2
+;
+ pop x1
+ pop v2
+ pop v1
+ return
+;------------
+.GDFireKey
+  if FireKey<2 then GDGotFireKey
+.RegisterFireKey
+  FireKey=1
+.GDGotFireKey
+  if FireKey=LastFireKey then GDNoFireChange
+  FireKeyChange=1
+.GDNoFireChange
+ return
+;------------
+.GDFireKey2
+  if FireKey2<2 then GDGotFireKey2
+.RegisterFireKey2
+  FireKey2=1
+.GDGotFireKey2
+  if FireKey2=LastFireKey2 then GDNoFireChange2
+  FireKeyChange2=1
+.GDNoFireChange2
+ return
+;----------
+.KeyScan
+ gosub @MCOsrdch
+ if v1=32 then KeyScan ;suppress unbuffered keystrokes
+;; if v2 = 1 then @EscapeKey ;Escape - quit current game
+ if v1 = 65 then @ControlC  ; A (abandon) - Quit to DOS
+ if v1 = 97 then @ControlC  ; a (abandon) - Quit to DOS
+
+;These keys map onto the sensor emulation, and will probably cause
+;physical games to go wrong...
+; if v1=66 then FirstTune ; *********
+; if v1=67 then NextTune ; *********
+
+ if v2=25 then KSPauseLoop ; 'p' or 'P'
+
+ if v1<>0 then UsingKeyboard
+ gosub @GetButtonAscii
+ v2=0
+
+.UsingKeyboard
+ return
+;---------------
+.FirstTune
+ NextMusic=100
+ return
+;-----
+.NextTune
+ add NextMusic,c2
+ return
+;------
+.KSPauseLoop
+; wait for user to press a key, or joystick fire button.
+ gosub @GetControls
+ if FireKey<>0 then KSPL2
+ gosub @MCOsrdch
+ if v2=0 then KSPauseLoop
+.KSPL2
+ return
+;--------
+.GetControls
+; look at kbd/joystick/mouse and return
+; dir as new movement direction in standard adventure format
+; and FireKey=0 if not pressed, 1 if pressed.
+; and FireKeyChange=1 if pressed/released this turn
+
+; and for directions, returns:
+;	x1
+;   x4       x2
+;       x3
+; Non-zero means trying to move in that direction
+; and x5=x offset (single pixel movement), signed
+;     x6=y offset (single pixel movement), signed
+;     x7=direction number in standard adventure format
+;          i.e.          1
+;                     8     2
+;                    7       3
+;                     6     4
+;                        5
+ FireKeyChange=0
+ FireKeyChange2=0 ; Change by GMJ 20.02.91 (for the 3rd time)
+ gosub @CheckFireKey
+ &v5=WordWS(WordMouseXDistance)
+ &v6=WordWS(WordMouseYDistance)
+
+ code -
+  gosub @GDDirections
+  x5=0 ; sx
+  x6=0 ; sh
+  x7=0 ; direction
+  if x1=0 then GDNoUp
+  x1=1
+  add x6,c1  ; sh+=1
+  x7=1 ; north(1)
+.GDNoUp
+  if x2=0 then GDNoRight
+  x2=1
+  add x5,c1  ; sx+=1
+  if x7=0 then GDNotNE
+  x7=2 ; NE
+  goto GDNoRight
+
+.GDNotNE
+  x7=3 ; E
+
+.GDNoRight
+  if x3=0 then GDNoDown
+  x3=1	     ; -1
+  sub x6,c1  ; sh-=1
+  if x7=0 then GDNotSE
+  x7=4 ; SE
+  goto GDNoDown
+ 
+.GDNotSE
+  x7=5 ; S=5
+
+.GDNoDown
+  if x4=0 then GDNoLeft
+  x4=65535   ; -1
+  sub x5,c1  ; sx-=1
+  if x7=0 then GDNoSW
+  x7=6 ; SW
+  goto GDNoLeft
+.GDNoSW
+  x7=7 ; W
+
+.GDNoLeft
+  if x6<>1 then GDNoNW ; up?
+  if x5<>65535 then GDNoNW ; left?
+  x7=8 ; NW
+
+.GDNoNW
+
+
+ code +
+; returns:
+;	x1
+;   x4       x2
+;       x3
+; Non-zero means trying to move in that direction
+; and x5=x offset (single pixel movement), signed
+;     x6=y offset (single pixel movement), signed
+ return
+;-----------
+ code -
+.GDKeyDown
+; INT MODE
+ code +
+ gosub @MCKeyDown
+ code -
+ return
+;------
+.GDDirections
+; INT MODE. Entry: &v5=WordWS(MouseX), &v6=WordWS(MouseY)
+; produce x1=up key state, x2=right key state, x3=down key state
+; x4=left key state.
+; 0=not-pressed, non-zero means pressed
+
+; up?
+ v1=104 ; keypad 8
+ gosub GDKeyDown
+ x1=v1 ; if v1<>0, key is pressed
+ v1=72 ; cursor up (PC)
+ gosub GDKeyDown
+ add x1,v1 ; if v1<>0, key is pressed
+ if v6<32767 then gddMouseY1 ; positive mouse?
+ if v6>NegSmallMouse then gddMouseY1
+ x1=1
+.gddMouseY1
+
+
+; right?
+ v1=77 ; cursor right
+ gosub GDKeyDown
+ x2=v1 ; if v1<>0, key is pressed
+ v1=108 ; keypad 6
+ gosub GDKeyDown
+ add x2,v1 ; if v1<>0, key is pressed
+ if v5>32767 then gddMouseX1
+ if v5<SmallMouse then gddMouseX1
+ x2=1
+.gddMouseX1
+
+; down?
+ v1=110 ; keypad 2
+ gosub GDKeyDown
+ x3=v1 ; if v1<>0, key is pressed
+ v1=80 ; cursor down
+ gosub GDKeyDown
+ add x3,v1 ; if v1<>0, key is pressed
+ if v6>32767 then gddMouseY2
+ if v6<SmallMouse then gddMouseY2
+ x3=1
+.gddMouseY2
+
+; left?
+ v1=106 ; keypad 4
+ gosub GDKeyDown
+ x4=v1 ; if v1<>0, key is pressed
+ v1=75 ; cursor left
+ gosub GDKeyDown
+ add x4,v1 ; if v1<>0, key is pressed
+ if v5<32767 then gddMouseX2
+ if v5>NegSmallMouse then gddMouseX2
+ x4=1
+.gddMouseX2
+
+; now tests for diagonal keys
+
+ v1=73 ; keypad 9
+ gosub @GDKeyDown
+ add x1,v1 ; up state
+ add x2,v1 ; right state
+ v1=105 ; keypad 9
+ gosub @GDKeyDown
+ add x1,v1 ; up state
+ add x2,v1 ; right state
+
+ v1=81 ; keypad 3
+ gosub @GDKeyDown
+ add x2,v1 ; right state
+ add x3,v1 ; down state
+ v1=111 ; keypad 3
+ gosub @GDKeyDown
+ add x2,v1 ; right state
+ add x3,v1 ; down state
+
+ v1=79 ; keypad 1
+ gosub @GDKeyDown
+ add x3,v1 ; down state
+ add x4,v1 ; left state
+ v1=109 ; keypad 1
+ gosub @GDKeyDown
+ add x3,v1 ; down state
+ add x4,v1 ; left state
+
+ v1=71  ; keypad 7
+ gosub @GDKeyDown
+ add x4,v1 ; left state
+ add x1,v1 ; up state
+ v1=103 ; keypad 7
+ gosub @GDKeyDown
+ add x4,v1 ; left state
+ add x1,v1 ; up state
+
+
+ code +
+ v3=ByteWS(ByteJoystickStatus)
+ v4=JoyU
+ and v4,v3
+ add x1,v4
+ v4=JoyR
+ and v4,v3
+ add x2,v4
+ v4=JoyD
+ and v4,v3
+ add x3,v4
+ v4=JoyL
+ and v4,v3
+ add x4,v4
+ code -
+
+ return
+;-------
+; &X1=WordWS(WordMouseXDistance) ; signed distance mouse has moved l/r 
+; &X2=WordWS(WordMouseYDistance) ; signed distance mouse has moved u/d 
+; &WordWS(WordMouseXDistance)=c0 
+; &WordWS(WordMouseYDistance)=c0 
+; add CursorX,X1 
+; sub CursorH,X2 
+; or x1,x2 ; did mouse move in either direction?
+; if x1>0 then @mgcRepositionCursor
+;; 
+;
+;
+; JoyL=4   ;  "   "   "     "     Left 
+; JoyR=8   ;  "   "   "     "     Right
+; JoyF=192 ;  "   "   "  Joystick/Mouse buttons (fire is bit6)
+; 
+ code +
+ return

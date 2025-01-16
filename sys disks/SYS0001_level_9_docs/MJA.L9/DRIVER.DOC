@@ -1,0 +1,53 @@
+0660103030566
+1
+2Level 9 Computing#Adventure System
+9[....................................................]
+âDRIVERROUTINES
+Ä     
+     TheLevel9Driverprovidesastandardinterfacebetween
+programsandthemachinesonwhichtheyarerun.Therearetwo
+entrypoints,atthestartofthedrivercode.Thefirstisthe
+mainentrypointforcallingtheroutineslistedbelow.Itis
+enteredwithHL(Z80),YX(6502),orA0(68000)settopointtoa
+parameterblockasspecifiedbelow.Eachasterixcorrespondstoa
+byteintheparameterblock.Theroutinetocallisspecifiedby
+thenumberinA(6502andZ80)orD0.b(68000).Allregistersare
+preservedbythedriver.
+
+ÅA    Name                ArgstoRoutine          Results
+
+Ä0    Initialisemachine-calledongamestart
+1    Calculatechecksum  ****                 *
+startendvalue
+2    Oswrch              *
+3    Osrdch(nowait)                             *asciicode
+4    InputLine                                   ****sp0
+5    Filesave           ****                 *0=ok1=error
+6    Fileload           **   **                 *0=ok1=error
+                         startend
+7    Settextmode
+8    ResetMulti-task
+9    ReturntoOS
+11   Chainnextprogram
+15   Setupmemorypaging
+
+16  Cleargraphicswindow
+17   Line                *    *    **   **   **   **
+                         col  opt  X1   Y1   X2   Y2
+18   Fill                *    *    **   **
+                         col opt  X    Y
+19   Chgcol              *    *
+                         col  col
+20   Finishpicture
+
+     Allco-ordinatesareona10240(x)*16384(y)grid.
+
+     
+     Systemswhichdonotimplementparticularcodesshouldtake
+noaction.Ifreturnsareexpectedfromnon-implementedfunctions,
+binaryzeroesshouldbereturned
+
+     AtDRIVER+3isasnoozeentrywhichstepstothenexttask
+(multi-taskingsystemsonly,othersshouldhaveaRETinstruction
+here).
+

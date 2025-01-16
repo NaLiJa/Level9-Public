@@ -1,0 +1,86 @@
+; AAVars.txt
+;
+; M.J.Austin Nov 1988
+;
+; Copyright (C) 1988 Level 9 Computing
+;
+ var
+ c4
+ PrintX PrintY  
+ LeftMargin ; margin for printing code.
+ TopMargin
+ FirstLine
+ xsize ysize zsize
+ size
+ ObjectNumber
+ Header
+ ObjectNumberType
+ MinXZH MinCompressed MinAnimation MinCell
+ MinRaster
+ AniViewMode ; 0 for script/1 for preview
+ AA CC EE ; ACB words
+ opcode num SP z h ACBHeader
+ dx1 dx2 dx3 dx4 dx5 dx6 dx7
+ dresult
+ Cursor ; "animation" object used for current cursor 
+ CursorACB ; ACB used for current cursor 
+ dv1 dv2 dv3 dv4 dv5 dv6
+ CurrentStore ; for z-sorting sprites on output
+ RasterOffset
+ c16 c32
+ ACBStart ; now a variable so that BuildAndDisplayFrame can 
+; be used for room animation only
+ FireKey FireKeyChange LastFireKey
+ FireKey2 FireKeyChange2 LastFireKey2
+ LeftKey RightKey UpKey DownKey XSpeed YSpeed
+ m1 m2
+ TextBoxDisplayed TextBoxWidth
+ result
+ C0 C1 C2 C3 ; 
+ C5 C7 C9 ;
+ C6 C8 ; "Constants" with corresponding values
+ x y
+ FrameCount DisplayedFrameCount
+ FirstAsciiInFont
+ FontHeight ; character height, in pixels
+ Won
+ GameOver
+ RepeatScroll ; countdown timer for TriggerScroll
+; text printing vars...
+ ForegroundColour
+ BackgroundColour ; (0-16),   
+ BorderColour
+ CurrentDO
+ CurrentPrintRaster
+ UpdateACBs ; false if acbs are to be frozen for a while,
+; e.g. whilst displaying menu
+ NextMusic ; contains next music
+ ScrollXDir ScrollYDir
+ ScreenX ScreenY
+ WantedDirection ; mainly for compatability with walkabout code.
+ CurrentScreen
+ cursory
+ CursorX CursorZ ; position of people
+ CursorSpeed TimeHeld
+ KeyHeld MaxCursorSpeed
+ StructureFile ; set to either TownStructures or IdentikitStructures
+ lastTunePlayed
+ GameOverTimer
+ ACBEnd
+ ACBSearchStart
+ PlotScreenType ; set before plotting a raster. 
+; 0=send tyo both screens, 1=send to player screen, 
+; 2=send to non-player screen. 
+ ACBScreenType ; set before setting up an ACB. 
+; 0=send tyo both screens, 1=send to player screen, 
+; 2=send to non-player screen. 
+ TestScreen ; 0=PC uses both screens, 1=ST emulates player screen, 
+; 2=ST emulates non-player screen. 
+ ScreenTwoBufferPtr ; list pointer into DrawObject info for 
+; second screen
+
+
+;=========== Mike20Mar1991 ===================
+ MusicOn
+ SoundOn
+;=========== Mike20Mar1991 ===================

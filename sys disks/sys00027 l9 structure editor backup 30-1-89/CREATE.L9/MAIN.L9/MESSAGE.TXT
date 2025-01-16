@@ -1,0 +1,120 @@
+; Text file for Hero
+[1:object 1]
+[2:object 2]
+[4:object 4]
+[8:object 8]
+[10:potion]
+
+[11:object 11]
+[12:object 12]
+[13:object 13]
+[14:sparkling potion]
+[15:two-handed sword]
+[16:mithril shield]
+[17:gold ring]
+[18:runed wand]
+[19:magic scroll]
+[20:pot of gold]
+[21:heavy club]
+[22:object 22]
+[23:object 23]
+[24:object 24]
+[25:object 25]
+[26:object 26]
+[27:object 27]
+[28:object 28]
+[29:object 29]
+[30:object 30]
+[31:object 31]
+[32:object 32]
+[33:object 33]
+[34:object 34]
+[35:object 35]
+[36:object 36]
+[37:object 37]
+[38:object 38]
+[39:object 39]
+
+[40:fireball]
+[41:digging fireball]
+[42:explosive fireball]
+
+
+[100:Filename? ]
+[101:%X Size? ]
+[102:%Y Size? ]
+[103:%Starting Cell Number? ]
+[104:Object number: ]
+[105:x ] ; for xsize by ysize display
+
+;;[196:/ / / / / / / / / / / / / / / / / / / / ]
+[196:/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_]
+
+[197:/ ]
+[198:%]
+[199:. ]
+
+[500:Choose Sprite. ]
+[501:Edit Object. ]
+
+; object types for status display:
+[600:]
+[601:raster]
+[602:xzh]
+[603:animat]
+[604:cmprsd]
+[605:cell]
+
+; annotation for coordinates...
+[610:x ]
+[611:h ]
+[612:z ]
+;
+; Help Message...
+[1000:
+Level 9 Structure Editor%
+____(C) 1988 Level 9% %
+z,x,c,v,b: xzh,raster,ani,comp,cell%
+.__________Change Object Number%
+7,9________Dec/Inc Object number%
+4,6,2,8____Scroll Raster Objects%
+cursors____Change raster size%
+r__________Set up a new raster%
+i__________Import a neo screen%
+Undo_______Save everything%
+f1-f10_____'teleport' facility%
+D__________Delete current object%
+d__________Delete current item%
+Esc/Tab____Edit items in xzh objects%
+p__________Preview animation%
+Right butt Change z coord%
+m__________Toggle Magnify window% %]
+[1001:_changes since last save:%
+Leave Editor?%]
+
+[1002:all changes will be lost. Sure?%]
+
+; configuration dialog...
+[1010:%do you want to change the current configuration? ]
+[1011:%press one of the following:%
+ 1..add new objects%
+ 2..remove objects%
+ 3..find/remove unused cells%
+ 4..scrunch objects together%]
+
+[1012:%add objects before which present object? ]
+[1013:%how many objects to add? ]
+[1014:%Structure buffer currently uses ]
+
+[1020:% Start of range for raster (destination) objects: "]
+[1021:% End of range for xzh objects: "]
+[1022:Make maps utility. This allows you to copy the floor%
+plan for a range of xzh 'rooms' into a range of%"
+(empty) raster objects. This allows the collision detection%"
+to be modified, and the floor pointers added.% "
+Start of range for xzh objects:]
+[1023% This option will ask for a range of objects. It%]
+deletes all objects within that range which are not used%]
+by other objects.%]
+;
+

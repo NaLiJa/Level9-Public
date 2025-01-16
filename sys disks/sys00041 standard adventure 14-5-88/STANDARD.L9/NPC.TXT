@@ -1,0 +1,2100 @@
+; Standard Adventure source, copyright (C) 1988 Level 9 Computing.
+;
+; taken from Lancelot source 14/5/88
+;
+; NPC.TXT, the non-player character control logic for the game. This 
+; copes with NPC racetracks, queued commands and how they decide 
+; what to do. As the philosophy of Level 9's is to treat NPCs and 
+; the user as being as equal as possible, the code to cope with 
+; actual NPC actions should be the same as that for player actions, 
+; and found elsewhere.     
+;
+; Late changes:
+;
+;>>mike 26/3/88 - two changes to DOIWantFollowNoun1 to
+; permit NPCs to match the HICURRENTPOS of their follow target
+;
+;>>mike 27/3/88
+;>>mike 28/3/88 - changes to .KILL, .Follow, .GdFollow, .GdKill
+;  		  need EP=TRUE at start of .ATTACK (AVERB.TXT)
+;		  ISOBJECTALIVE in averb.txt
+;		  removed NOTreasureInRoom
+;		  and change at start of .ABSNewLocation
+;		  merged 3600-3602, removed 3603,3604
+;
+CONST
+;
+BEGIN
+;
+.setupuser
+ actor=user
+ gosub @setuproom
+ gosub @setACTORATTRIBUTES
+ gosub @initfifo
+ goto @healactor
+;---
+.MAINLOOP
+ STACK
+ forceprinting=false ; just in case!
+;>>removed by L2 anythingprintedthisturn=false
+ gosub @tickclock
+;
+; now the player's turn...
+ gosub @setupuser
+;
+;>>mike 28/3/88  x4=npcptroffset
+;>>mike 28/3/88  add x4,actorattributes
+;>>mike 28/3/88  x1=npccurrent(x4) ; number of current command
+;>>mike 28/3/88  if x1=0 then ml2 ; ACTOR has no queued commands
+;
+; ACTOR is in the middle of a goal-directed command,
+; so obey it!
+ gosub @executeanyorders
+ if executeprocessed=true then @mainloopnpc
+
+;;.ml2
+; now do the more general ideas, such as
+; 'follow someone unless I have something better to do'
+ verb=0
+ commandfinished=false
+ gosub @doiwantfollow
+ if FatalError=true then getFromUser ;>>mike 27/3/88
+;>>mike 26/3/88 if fatalerror=false then ml3
+;>>mike 26/3/88 gosub @stopfollowing
+
+;;.ml3
+;>>mike 28/3/88  if executeprocessed=false then followok
+;>>mike 28/3/88  gosub @savelist9
+;>>mike 28/3/88  gosub @checkforescape ;checkkbd
+;>>mike 28/3/88  gosub @restorelist9
+
+;;.followok
+ if executeprocessed=true then @mainloopnpc ; it has been done
+
+.getfromuser
+ stack
+ descriptionmode=normaldescriptionmode
+
+;>>L2 x1=attentionoffset
+;>>L2 add x1,actorattributes
+;>>L2 npccurrent(x1)=c0 ; reset attention flag
+ wanttoprintand=0
+ GOSUB @GETCOMMAND ; GET ACTOR COMMAND FROM KEYBOARD
+ lastwordprinted=0
+ cif allowcheat
+  if cheatmode<>2 then DontDisplayCommand
+  prs " user command verb="
+  print verb
+  prs " noun1="
+  print noun1
+  prs " prep=" 
+  print prep
+  prs " noun2="
+  print noun2
+
+.DontDisplayCommand
+ cend
+
+
+;
+; immediately after entering first command,
+; display the first picture, with border
+; if picture1displayed=true then gcnotpic1
+; x1=1
+; gosub @waitpic ; display picture 1 at 0,0
+;
+;.gcnotpic1
+;>>removed by L2 anythingprintedthisturn=false
+;<< gosub readclock ;*
+;<< timeoflastinput=value ;*
+ if verb=isay then mlsay
+ gosub @againVERBvarsAREverbVARS
+
+ if verb>maxdirection then movenosarc
+ gosub @stopfollowing ; prevent player being dragged back by follow.
+ add numexplicitmoves,c1
+ if numexplicitmoves<>30 then movenosarc
+ message 2128 ; would you prefer to use GO instead?
+
+.movenosarc
+ GOSUB @PRESENTMULTIPLE ; EXECUTE ACTOR COMMAND
+
+.mlsay
+ if verb<>isay then @mainloop
+; say by-passes normal presentmultiple, so npcs
+; will not move unless we activate them now.
+ goto MainLoopNpc1 ; not stored command or follow, so skip interrupt check
+ 
+.mainloopnpc
+ gosub @savelist9
+ gosub @checkforescape ;checkkbd;>>mike 28/3/88 
+ gosub @restorelist9;>>mike 28/3/88 
+ if result=true then @getfromuser ; clears stack etc.;>>mike 28/3/88 
+
+.MainLoopNpc1
+ GOSUB @NPCACTIONS
+
+ GOTO @MAINLOOP
+;---
+;;.checkkbd
+;;; return result=true if a break key has been pressed
+;;; check for escape key from user
+;; if actor<>user then cfefalse
+;; gosub @osrdch ; get char in x1
+;; if x1<>0 then maybeinterrupt
+;; goto cfefalse
+;---
+;.osrdch
+; gosub savelist9
+; x1=3 ; osrdch
+; list9(0)=x1
+; driver
+; x1=list9(1)
+; goto restorelist9
+;---
+.checkforescape
+ if actor<>user then cfefalse
+ gosub @osrdch ; get char in x1
+ if x1<>0 then maybeinterrupt
+
+;>>l2; is attention flag set?
+;>>l2 x1=attentionoffset
+;>>l2 add x1,actorattributes
+;>>l2 x2=npccurrent(x1)
+;>>l2 npccurrent(x1)=c0 ; reset it
+;>>l2 if x2<>0 then maybeinterrupt
+;
+.cfefalse
+ result=false
+ return
+
+.maybeinterrupt
+; if anythingprintedthisturn=false then cfefalse
+ message 2203 ; do you want to carry on?
+ gosub @yesorno
+ if result=true then cfefalse
+ gosub @stop ; kill action
+
+;;.cfetrue
+ goto @returnTrue
+;---
+.savelist9
+ npclist9save0=list9(0)
+ npclist9save1=list9(1)
+ npclist9save2=list9(2)
+ npclist9save3=list9(3)
+ npclist9save4=list9(4)
+ npclist9save5=list9(5)
+ npclist9save6=list9(6)
+ return
+;---
+.restorelist9
+ list9(0)=npclist9save0
+ list9(1)=npclist9save1
+ list9(2)=npclist9save2
+ list9(3)=npclist9save3
+ list9(4)=npclist9save4
+ list9(5)=npclist9save5
+ list9(6)=npclist9save6
+ return
+;---
+.setcommandfinished
+; no command waiting - so give up
+ commandfinished=true
+;
+.epfalse
+ executeprocessed=false
+ return
+;---
+.eptrue
+ executeprocessed=true
+ return
+;---
+.racetrackgotonoun12gc
+; note: compiler crashes if 'racetrackgotonoun12getcurrent' is used!
+ gosub @npcgetcurrent ; get x1=current action in npcstack
+;
+;;.racetrackgotonoun12
+; current position of racetrack for ACTOR is (NOUN1,NOUN2)
+; NPCs current stack entry is npcstack(x1)
+; write value back to it
+ gosub getMessageNumber; value=noun1; gosub @valuetimes256; add value,noun2
+
+.racetrackgotovalue
+; current position of racetrack for ACTOR is VALUE.
+; NPCs current stack entry is npcstack(x1)
+; write value back to it
+ valueSave=value
+ index=x1
+ x2=4 ; offset of noun2 in npcstack
+ add x2,index
+ npcstack(x2)=value
+ x2=npcstack(x2) ; low byte
+ sub value,x2
+ x1=value
+ x2=256
+ gosub @x1divx2
+ x2=3 ; offset of noun1 in npcstack
+ add x2,index
+ npcstack(x2)=x1
+ value=ValueSave
+ return
+;---
+.doobeyracetrack
+; ACTOR is currently on a racetrack, 
+; execute the next instruction
+; return executeprocessed if anything active done
+; NOUN1 gives the high byte of the offset within list5
+; and noun2 has low byte of offset of current instruction
+; within list5
+ gosub getMessageNumber ; value=noun1, gosub @valuetimes256, add value,noun2
+.DOORTNoun1
+; now value is offset of current racetrack instruction
+; within list5
+
+ cif allowcheat
+  if cheatmode<>2 then doortnotdebug1
+  prs "[rt at "
+  print value
+
+.doortnotdebug1
+ cend
+
+
+ verb=list5(value)
+ add value,c1
+ prep=list5(value)
+ add value,c1
+ noun1=list5(value)
+ add value,c1
+ noun2=list5(value)
+ add value,c1
+
+ cif allowcheat
+  if cheatmode<>2 then doortnotdebug
+  prs " actor="
+  print actor
+  prs " command="
+  gosub @debugshowcommand
+
+.doortnotdebug
+ cend
+ if verb=0 then @eptrue
+ gosub @npcgetcurrent ; set up x1=current actor command in npcstack
+ gosub racetrackgotovalue ; set up new current address
+
+ executeprocessed=false
+ if verb=rtConditional then doRtConditional
+ if verb=rtActorVaryMessage then doRtActorVaryMessage
+ if verb=RtActorSingleMessage then DoRtActorSingleMessage
+; if verb=racetracksay then racetrackobeysay
+ if verb=racetrackmessage then racetrackobeymessage
+ if verb=racetrackgoto then racetrackobeygoto
+ if verb=racetrackgosub then racetrackobeygosub
+ if verb=racetrackreturn then racetrackobeyreturn
+ if noun1<mincollective then @singlepushfifo
+ if noun1>maxcollective then @singlepushfifo
+ gosub @initfifo
+ gosub @setupgdaccess ; push on appropriate order (two parts to command)
+ goto @linkonfifocommandqueue
+;---
+.DoRtConditional
+; only execute next instruction if NOUN1 is present
+; ValueSave=value
+ object=noun1
+ gosub CheckIfPresent
+; value=ValueSave
+ if result=true then doortNoun1
+ x1=4
+ add value,x1 ; skip conditional instruction
+;;.DRTC1
+ gosub @npcgetcurrent ; get x1=current action in npcstack
+ gosub racetrackgotovalue
+ goto doortNoun1
+;---
+.DoRtActorSingleMessage
+ gosub PrintActor
+ gosub RacetrackObeyMessage
+ goto EpTrue
+;---
+.DoRtActorVaryMessage
+ gosub PrintActor
+ gosub GetMessageNumber
+ gosub @specialrtMessage
+ goto VaryMessageDot
+;---
+.racetrackobeymessage
+ gosub GetMessageNumber
+ gosub @specialrtmessage
+ goto @printM1dot
+;---
+.GetMessageNumber
+ value=noun1
+ gosub @valuetimes256
+ add value,noun2
+ m1=value
+ return
+;---
+;.racetrackobeysay
+; value=noun1
+; gosub @valuetimes256
+; add value,noun2
+; m1=value
+; goto @actorsays
+;---
+.racetrackobeygoto
+ gosub @racetrackgotonoun12gc
+ goto @doobeyracetrack
+;---
+.racetrackobeygosub
+ verb=obeyracetrack
+ goto @singlepushfifo
+;----
+.racetrackobeyreturn
+;>>mike 2/4/88 gosub @intelligentpop
+ goto @setcommandfinished ; remove 'obey command' on command queue
+;---
+;.racetrackgoplace
+; verb=igdgo
+; goto @singlepushfifo
+;-
+.executeanyorders
+ commandfinished=false ; set if can't do anything more at present,
+ FatalError=false ;>>added for L2 - probably permament
+; but want to try again with same command next turn.
+ gosub abseao
+ if FatalError=true then ReportProblem ;>>mike 8/2/88
+ if commandfinished=true then @intelligentpop
+ if executeprocessed=false then @executeanyorders
+.eaoret
+ return
+;
+;---
+.getcurrentcommand
+ gosub @npcgetcurrent ; set up x1=position in npcstack
+; of current command
+ add x1,c1
+ verb=npcstack(x1)
+ add x1,c1
+ prep=npcstack(x1)
+ add x1,c1
+ noun1=npcstack(x1)
+ add x1,c1
+ noun2=npcstack(x1)
+ goto @eptrue
+;---
+;----
+.abseao
+; if there are any orders pending for ACTOR,
+; may as well carry one of them out...
+ gosub @getcurrentcommand
+ ProblemObject=noun1
+
+
+ cif allowcheat
+  if cheatmode<>2 then abseaonotdebug ;>>
+  prs "eao: " ;>>
+  print actor ;>>
+  message space ;>>
+  gosub @debugshowcommand ;>>
+
+.abseaonotdebug
+ cend
+
+
+;>>mike 28/3/88  if actor<>user then usernocheck
+;>>mike 28/3/88 ; verb is current command - can it be interrupted?
+;>>mike 28/3/88  gosub @savelist9
+;>>mike 28/3/88  gosub @checkforescape ;checkkbd
+;>>mike 28/3/88  gosub @restorelist9
+;>>mike 28/3/88  if result=true then @getfromuser ; clears stack etc.
+;>>mike 28/3/88 
+;>>mike 28/3/88 .usernocheck
+ if verb=0 then @setcommandfinished ; nothing pending
+.eaoverb
+ if verb>15 then eaonotdir
+ gosub @move
+ CommandFinished=true ;>>mike 26/3/88
+; executeProcessed will be set here if anything happened
+ return ;>>mike 26/3/88
+;>>mike 26/3/88 goto @setcommandfinished
+
+.eaonotdir
+ if verb=obeyracetrack then @doobeyracetrack
+ if verb=IReportProblem then GDReportProblem
+ noun1isgd=false
+ if verb=ikill then @eaonotgdnoun1 ; collective
+ if verb=ifollow then @gdfollow ;eaonotcollective
+ if verb=igdgo then @gdgo
+ if noun1<mincollective then eaonotcollective
+ if noun1>maxcollective then eaonotcollective
+ noun1isgd=true
+ gosub @gdnoun1
+ if noun1=nullobject then @epfalse ; reached end of range
+
+.eaonotcollective
+ object=noun1
+ if verb=ifollow then @gdfollow
+ if verb=igdgo then @gdgo
+ if verb=igdfind then @gdfind
+ if verb=igoout then @gdgoout
+ if verb=iwaitforperson then @gdwaitforperson
+ if verb=iwaitforperiod then @gdwaitforperiod
+ if verb=ireturnobject then @returnobject
+ if noun1=nullobject then eaononoun1
+; check if noun1 is present
+ gosub @selectobjectpos
+ if verb=itell then eaononoun2
+
+ gosub @checkifaccessible
+ if result=true then eaononoun1
+
+ gosub npcneedsobject
+ if executeprocessed=true then @eaoret
+
+.eaononoun1
+ if noun2=nullobject then eaononoun2
+; only acceptable if noun2 is carried...
+ if prep<>with then eaochecknotcarried
+ if verb=igive then eaochecknotcarried
+; lots of commands - like "kill knight with axe" - must
+; be carrying noun2 for the command to be obeyed.
+ x1=currentpos(noun2)
+ hisearchpos=nouncarried ; force object to be carried
+ if x1<>actor then needsnoun2
+ x1=hicurrentpos(noun2)
+ if x1<>0 then eaononoun2
+.needsnoun2
+ object=noun2
+ gosub npcneedsobject
+ if executeprocessed=true then @eaoret ; must do verb next turn
+ goto eaononoun2
+
+.eaochecknotcarried
+; commands like "put xx in cabinet" where noun2
+; cannot be carried
+ object=noun2
+ gosub @checkifpresent
+ hisearchpos=nonspecific
+ if result=false then needsnoun2
+
+.eaononoun2
+;>>mike 28/3/88 if verb=ikill then eaonotgdnoun1
+ if noun1isgd=true then eaonotgdnoun1
+ commandfinished=true ; once-only verb, or not understood.
+
+.eaonotgdnoun1
+; ok, so call the verb!
+ gosub @preactorcr
+ if verb=iwait then @shortwait
+ if verb=ikill then @gdkill
+ goto @callverb
+;-------
+.calcinitialpos
+; for object x1
+; return x1=initial lo pos, x2=hi initial pos for object x1
+; where is initial position?
+ add x1,x1
+ x2=objectstart(x1)  ; hi initial pos
+ add x1,c1
+ x3=objectstart(x1) ; lo initial pos
+ x1=x2
+ x2=16
+ goto @x1modx2
+;---
+.calcinitialroom
+ gosub calcinitialpos ; for object x1
+; x2=hi initial pos, x1=lo initialpos
+ if x1=0 then calcinitret ; object is in room x3
+ x1=x3
+ goto calcinitialroom
+
+.calcinitret
+.npcneedsobjectret
+ return
+;---
+.npcneedsobject
+; ACTOR tried to reference OBJECT, but it was not
+; accessible in way HISEARCHPOS
+; (the command which attempted the access is still on the stack)
+ cif allowcheat
+  if cheatmode<>2 then nno1
+  message cr
+  prs "[("
+  x1=actor
+  print x1
+  prs ") "
+  gosub @printTHEobjectx1
+  prs " is trying to find "
+  gosub @printTHEobject
+  prs " ("
+  print object
+  prs ")]"
+  message cr
+
+.nno1
+ cend
+
+
+ noun1=object ; for benefit of take etc.
+; commandfinished=false ; for safety only
+ gosub @makelocal
+ if executeprocessed=true then npcneedsobjectret
+; if commandfinished=true then npcneedsobjectret ; can't find - abort
+; didn't follow, so although we were in the same room
+; the verb handler must need the object to be carried
+; here, commandfinished=false
+ if hisearchpos<>nonspecific then nrotake 
+ commandfinished=true ; abort
+ return
+;---
+.returnobject
+; always called with causing command on stack
+; npc needs to find noun1=object
+ if actor=user then @objectnothere ; for security only
+ if noun1>maxmoveable then @epfalse
+ x1=object
+ gosub calcinitialpos
+; x3=lo pos, x1=hipos where object starts
+ x2=currentpos(object)
+ if x3<>x2 then ro1a
+ x2=hicurrentpos(object)
+ if x2=x1 then @setcommandfinished ;intelligentpop ; already at original pos
+
+.ro1a
+ gosub @makelocal
+ if executeprocessed=true then @roret ; still searching for it
+; OBJECT is in actor's current room
+; ACTOR takes OBJECT
+ pos=actor
+ hipos=nonspecific
+ gosub @checkobjectpos
+ if result=true then nrogotobject
+
+.nrotake
+ noun1=object
+ noun2=nullobject
+;>>special to gnome m1=3190 ; I'll take that!
+ objectsave=object
+;>>special to gnome gosub @varysayM1dot
+ verb=itake
+ noun2=nullobject
+ prep=0
+ object=noun1
+ goto @take ; gosub, return
+
+.nrogotobject
+; ACTOR is in the process of returning NOUN1
+; to its initial position
+; where is initial position?
+ x1=noun1
+ gosub @calcinitialroom
+; OBJECT should go to pos x1, hi pos x2
+ if room=x3 then returnobject3 ; we are in the right room!
+; move towards room x3
+ dest=x3
+ goto @gdfollowdest
+;
+.returnobject3
+ if verb<>ireturnobject then roret
+; put it back!
+ commandfinished=true ; kill 'recover' command
+ x1=object
+ add x1,x1
+ x2=objectstart(x1)
+ add x1,c1
+ x3=objectstart(x1)
+; x3=lo initial pos, x2=hi initial pos
+ x1=x2
+ x2=16
+ gosub @x1modx2
+; x1=hi initial pos, x3=lo initial pos
+ verb=idrop
+ noun2=nullobject
+ prep=0
+ if x1=0 then @callverb
+ verb=iwear
+ if x1=worn then @callverb
+ verb=iput
+ noun2=x3
+ prep=x1
+ goto @callverb
+;---
+.makelocal
+ gosub @getobjectposx2
+; now x2=room where OBJECT is
+ executeprocessed=false
+ if x2=room then makelocalhere ; take it!
+ dest=x2
+ gosub @gdfollowdest
+ executeprocessed=true ; but don't want to waste time.
+
+.makelocalhere
+.roret
+ return
+;---
+.chooserandomdirection
+; return VERB=POSSIBLE ranomd direction from ROOM
+; There is no guarantee whatsoever that it will be possible
+;
+ x2=maxdirection
+ gosub @randomx1modx2
+ dir=x1
+ if dir=0 then crdend
+
+ if room<minsynthroomminus1 then crdnotsynth ; assume it is possible on grid
+ if dir<9 then crdend ; most horiz moves ok on grid
+
+.crdnotsynth
+ from=room
+ gosub @checkexit ; exit room x1 x2 x3 ; from dir status dest
+ if dest=0 then chooserandomdirection
+
+.crdend
+ verb=dir
+.crdret
+.dontwantfollow
+;;.noattack
+ executeprocessed=false
+;;.oidret
+ return
+;---
+.followdead
+ fatalerror=true
+;>>mike 28/3/88 executeprocessed=false
+;>>mike 28/3/88 commandfinished=true
+ object=noun1
+;;.objectisdead
+ if actor<>user then ReportProblem ;>>oidret
+.printdead
+ verb=iam
+ gosub @printOBJECTverb
+ m1=3560 ; dead
+ goto @printM1dot
+;---
+;>>mike 26/3/88.targetishere
+; commandfinished=true
+; goto @epfalse
+;---
+;>>mike 28/3/88.gdfollowcantfind
+;>>mike 28/3/88 executeprocessed=false
+;>>mike 28/3/88 fatalerror=true
+;>>mike 28/3/88 m1=2048 ; i can't find 
+;>>mike 28/3/88 gosub @errorm1
+;>>mike 28/3/88 object=noun1
+;>>mike 28/3/88 gosub @printTHEobject2
+;>>mike 28/3/88 gosub @printdot
+;>>mike 28/3/88 goto @ReportProblem ;>> goto @epfalse
+;---
+.gdfollowdoesntexist
+ gosub ReportProblem ;>> return
+ executeprocessed=true
+ return
+;---
+.doiwantfollow
+; follow someone if appropriate
+; return executeprocessed=true if we have followed
+;>>mike 28/3/88 executeprocessed=true	
+ x1=followoffset
+ add x1,actorattributes
+ noun1=npccurrent(x1)
+.doiwantfollownoun1
+ fatalerror=false
+ if noun1=0 then dontwantfollow
+ x1=currentpos(noun1) ; where is follow target?
+ if x1=0 then gdfollowdoesntexist ; object destroyed (?)
+;>>mike 26/3/88 if x1=room then targetishere
+; target is not here
+ verb=ifollow
+ commandfinished=false
+ ProblemObject=noun1 ;>>mike 4/3/88
+ gosub gdfollow
+; consider stopping follow....
+;>>mike 26/3/88 if fatalerror=true then @stopfollowing ; some problem
+;;.diwfret
+;;.sufret
+.gdfindRet
+ return
+;---
+.setupfind
+ gosub @stopfollowing
+
+ verb=igdfind
+ itword=noun1
+ goto SinglePushFifo ;>>mike 28/3/88 (used by user only)
+;>>mike 28/3/88 gosub @npcpushfifo
+;>>mike 28/3/88 gosub @linkonfifocommandqueue
+;>>mike 28/3/88 gosub gdfind
+;>>mike 28/3/88 if commandfinished=false then sufret
+;>>mike 28/3/88 goto @intelligentpop
+;---
+.gdfind
+ x4=noun1 ; character to follow
+ x6=room
+ gosub @setuproomx4 ; return ROOM=position of x4
+ if x6<>room then gdfollowobject
+
+ cif AllowBoat
+  x1=hicurrentpos(noun1) ;>>added for Lancelot boat
+  x2=hicurrentpos(actor) ;>>added for Lancelot boat
+  if x1=x2 then @FollowFinished ;>>added for Lancelot boat
+  gosub @MaybeBoat ;>>added for Lancelot boat
+  if executeProcessed=true then gdfindRet ;>>added for Lancelot boat
+ cend
+
+ goto @followfinished
+;---
+.gdfollow
+; ACTOR is following noun1
+;
+; this code is now shared with GO from gdfollowdest onwards
+ cif allowcheat
+  if cheatmode<>2 then gdfollownotdebug
+  prs "actor "
+  print actor
+  prs " is trying to follow "
+  print noun1
+  message cr
+.gdfollownotdebug
+ cend
+
+ fatalerror=false
+ x4=noun1 ; character to follow
+ x6=room
+ gosub @setuproomx4 ; return ROOM=position of x4
+ if x6<>room then gdfollownothere
+
+ cif AllowBoat
+.MaybeBoat
+; get into boat if here
+ x1=hicurrentpos(noun1)
+ x2=hicurrentpos(actor)
+ if x1=x2 then BoatFalse
+; get in or out!
+ object=currentpos(noun1)
+ gosub CheckIfPresent
+ if result=false then BoatFalse
+
+ x2=hicurrentpos(actor)
+ prep=ipin
+ if x2=0 then Boat1 ; get in!
+ prep=ipout
+.Boat1
+ verb=istand
+ noun1=currentpos(noun1)
+ goto @callverb
+
+.BoatFalse
+ cend
+
+
+ goto @epfalse ; both here, so can't follow at present
+
+.gdfollownothere
+ if noun1>maxNpc then gdfollowobject ;>>mike 6/2/88 - was Maxpeople
+ object=noun1
+ gosub @isobjectalive
+ if result=false then @followdead
+
+.gdfollowobject
+ dest=room ; destination room just calculated by setuproomx4
+ noun1=room
+ room=x6 ; restore saved source room
+; drop through to  gdfollowdest
+;
+.gdfollowdest
+ if actor<>user then gdfd1
+ DestToDescribeExitsIn=dest
+
+.gdfd1
+ gosub @canactormove
+ if result=false then @epfalse
+; if not already set up, change descriptionmode to ibrief
+ if descriptionmode<>iverbose then gdfdnotv
+ descriptionmode=ibrief
+
+.gdfdnotv
+ x1=dest
+ x6=room
+ if room=dest then @followfinished
+
+; x6 is source room - compare all rooms with source, in case both
+; source and destination are in the same complex
+ gosub @tracex1tosynth
+ if dest=0 then gdgoerror ; can't find
+ if processed=true then @gdfollowgoin
+; now x1=synth room in which the destination is based
+; store it away in synthdest
+ synthdest=x1
+ if x1=room then @gdgoin2 ; am outside the complex containing dest
+
+; now trace source room through to synth room
+ x1=room
+ x6=dest ; compare all rooms with destination in case both
+; source and destination are in the same complex
+ gosub @tracex1tosynth
+ if dest=0 then gdgoerror
+ if processed=true then @gdgoout
+; now x1=synth room in which the source is based
+;
+ if synthdest=dest then followdifferentcomplex ; go just outside complex
+ if x1<>synthdest then followdifferentcomplex
+
+
+ cif allowcheat
+  if cheatmode=0 then gdgonodebug
+  prs "Bug!! - no match during tracex1tosynth. " ;*
+.gdgonodebug
+ cend
+
+ goto @gdgoout ; bug!!!! - should
+; have been matched on one tracex1tosynth or the other
+; because they are both in the same complex.
+; The only likely explanation is that there are multiple,
+; non-connecting paths to the exit.
+;
+.followdifferentcomplex
+; source and destination are NOT in the same complex.
+; Therefore, go out.
+ if room<minsynthroomminus1 then @gdgoout
+;
+ destnoun1=noun1
+ room=synthdest
+ gosub @getxy ; of destination
+ noun1=x ; destination x
+ noun2=y ; destination y
+ gosub @setuproom ; for npc to move again
+ gosub @getxy ; current co-ordinate
+ goto @gdgoxy
+;---
+.CantGoThere
+.gdgoerror
+ if actor<>user then ReportProblem ;>>gdgoerr1
+ fatalerror=true
+ message 3605 ; can't find my way
+ message dot
+ goto followfinished
+
+.followfinished
+.followjustfinished ; just moved + therefore arrived at dest.
+; no descriptions on, so now have to print room we have arrived at
+ commandfinished=true ; terminate command
+ if actor<>user then ffret
+ if descriptionmode<>inone then ffret
+ descriptionmode=normaldescriptionmode
+.GdReportProblemRet
+ return
+;---
+.ReportProblem
+; tell the NPC to go back to the player and report the problem
+ if actor=user then GdRPEnd
+; is NPC obedient?
+ x1=npccurrent(actorAttributes)
+ if x1<>user then SetCOmmandFinished
+
+ noun1=ProblemObject
+ if room=currentUserRoom then GDReportProblem1 ; also pops the command
+
+ gosub IntelligentPop
+ verb=ireportProblem
+ noun2=problemObject ; save problem object for report
+ prep=0
+ fatalerror=false
+ commandfinished=false
+ executeprocessed=true
+ goto SinglePushFIFO ; gosub, return
+;---
+.GDReportProblem
+ noun1=user
+ gosub GDFollow
+ noun1=noun2 ; set up problem object for report
+ if executeProcessed=False then GdReportProblem1
+ commandfinished=false
+ return ; still on the way
+
+.GdReportProblem1
+ FatalError=false ; we've sorted it!
+ gosub PrintActor
+ m1=3180 ; sorry! I couldn't do what you asked
+ if noun1<>nullobject then GdReportProblem2
+.gdGeneralProblem
+ m1=3180 ; sorry! I couldn't do what you asked
+ gosub VaryMessageDot
+ goto GdReportProblem3
+
+.gdReportProblem2
+ if verb=0 then gdGeneralProblem
+ if noun1=user then gdGeneralProblem
+
+ m1=3190 ; I couldn't do what you asked with
+ gosub PrintM1 ;&&&
+ object=noun1 ;&&
+ gosub PrintTheObject ;&&
+ m1=quote ;&&
+ gosub Printm1 ;&&
+ gosub PrintDot ;&&
+
+.GdReportProblem3
+.GdRPEnd
+ gosub IntelligentPop ;>>NPCPOP
+ goto SetCommandFinished
+
+;---
+.gdfollowgoin
+; am on a goal-directed go/follow
+; tracing along the OUT pointers from dest has come across
+; the current location. The last move was in direction DIR,
+; from room FROM,
+; reverse direction....
+ x1=dir
+ add x1,startreversaltable
+ dir=list5(x1)
+ gosub @preactorcr
+ verb=dir
+ gosub @move ;callverb
+ if commandfinished=true then ffret ;>>>>>>>> special to gnome
+ if FatalError=True then @gdgoerror ;>>mike 14/2/88
+
+ if room=noun1 then followjustfinished ; reached destination
+.ffret
+ return
+;---
+.gdgoin2
+; are being asked to go 'IN' when in a grid location
+ dir=ivin
+ gosub @preactorcr
+ verb=dir
+ gosub @move ;callverb
+ if executeProcessed=false then @Gdgoerror ;>>mike 9/2/88
+ processed=true
+ if room=noun1 then followjustfinished ; reached destination
+ return
+;---
+.gdgoout
+ if room>minsynthroomminus1 then followjustfinished ; we must have arrived
+; go outwards in current complex
+ x1=room
+ gosub @getfloorpointer ; in x2 for room x1
+;;.gdgoout2
+ verb=list5(x2)
+ gosub @preactorcr
+ gdgoroomsave=room
+ gosub @move ;callverb
+; see if we have arrived
+ processed=true
+ if room=gdgoroomsave then @followfinished
+ if room=noun1 then followjustfinished ; YUP!
+ return ;nope!
+;---
+.getfloorpointer
+; return (x2)=in direction, (x2+1)=out direction
+; for room x1
+; where are pointers for this room?
+ x2=startfloorpointers
+ add x2,x1
+;;.gfpret
+ return
+;---
+.gdgo
+ dest=noun1
+ ProblemObject=NullObject ;>>Mike 4/3/88 - go to a Room num, not an object
+ goto @gdfollowdest
+;---
+;.increaseboredom
+;; increment the boredom counter for all npcs...
+; x1=boredomoffset ; entry for npc #0
+; x3=npcentrysize
+;
+;.ana1
+; x2=npccurrent(x1)
+; add x2,c1
+; npccurrent(x1)=x2
+; add x1,x3 ; skip on to next entry
+; if x1<npctablesizeplus8 then ana1
+; return
+;---
+.npcactions
+ message cr
+
+; make things happen in the current room,
+; and in one other inhabited room.
+;
+;; first of all, increment the boredom counter for all npcs...
+; gosub increaseboredom
+
+;>>removed for L2 lastuserroom=lastroom
+; activationsremaining=maxactivations
+;; do npc movement for the room where the user is NOW
+ actor=user
+ gosub @setuproom
+ currentuserroom=room
+; gosub npcactionsroom
+;
+; if againverb>maxdirection then npcanotmove
+;; user has just moved, so give the npcs in the room he was
+;; just in a crack of the whip (possibly literally!)
+; room=lastuserroom
+; if room=0 then npcanotmove
+; gosub npcactionsroom
+; if activationsremaining>negative then npcaend
+;
+;.npcanotmove
+; now go through all npcs to see which are getting impatient.
+; For each npc, we have npccurrent(boredomoffset) which
+; gives the number of turns since it was last activated
+; And npcinitial(patienceoffset) which gives the number of
+; turns it is prepared to wait.
+ actor=2
+.npcaloop
+ if actor=user then npcanoneedtoactivate
+ gosub @setACTORATTRIBUTES
+;>>l2; has a high-priority event happened - i.e. is attention flag set?
+;>>l2 x1=attentionoffset
+;>>l2 add x1,actorattributes
+;>>l2 x2=npccurrent(x1)
+;>>l2 if x2=0 then npcaloop1
+; have had a high-priority interruption - verb
+; handlers may want to take this into account when
+; deciding what to do - so pass attention flag to them,
+; then clear it anyway when they've had their chance
+;>>l2 loopactor=actor ; save actor * why is this necessary?
+;>>l2 gosub npcaactivate
+;>>l2 actor=loopactor
+;>>l2 gosub @setACTORATTRIBUTES
+;>>l2 x1=attentionoffset
+;>>l2 add x1,actorattributes
+;>>l2 npccurrent(x1)=c0 ; clear attention flag
+;>>l2 return
+
+;;.npcaloop1
+; is npc inactive?
+ x1=npccurrent(actorattributes)
+
+ cif AllowCheat
+  if cheatMode<2 then nalNoCheat1
+  if CheatMode>32000 then nalNoCheat1
+  prs " actor=";*
+  print actor ;*
+  prs ". " ;*
+  print x1 ;*
+  message space ;*
+.nalNoCheat1
+ cend
+
+; if x1<128 then npcaLoopActivate
+ if x1<64 then npcaLoopActivate
+;; if x1<128 then npcaNoNeedToActivate ; failsafe
+ gosub SetupRoom
+;; if Room=CurrentUserRoom then Activateit
+
+ cif AllowCheat
+  if cheatMode<2 then nalNoCheat2
+  if CheatMode>32000 then nalNoCheat2
+  prs " room=" ;*
+  print room ;*
+  prs " cur=" ;*
+  print CurrentUserRoom ;*
+.nalNoCheat2
+ cend
+
+ x1=npccurrent(actorAttributes)
+ if room<>CurrentUserRoom then npcANoNeedToActivate
+;;.ActivateIt
+ npccurrent(actorAttributes)=c0 ; make it permamently active.
+ goto npcaactivate ; activate it immediately for quick response
+
+.npcaLoopActivate
+; now see if npc is bored enough to activate itself
+; x1=boredomoffset
+; add x1,actorattributes
+; x1=npccurrent(x1)
+; x2=patienceoffset
+; add x2,actorattributes
+; x2=npcinitial(x2)
+;; now x1=number of turns actor has been waiting
+;; and x2=number of turns it is prepared to wait
+; if x1<x2 then npcanoneedtoactivate
+
+;>>mike 6/4/88 room=currentpos(actor)
+ gosub SetupRoom ;>>mike 18/4/88
+ if room=0 then npcanoneedtoactivate ; dead or whatever
+; gosub calcnpctime ; check time
+; if x1>250 then npcaend ; out of time!
+.npcaactivate
+; sub activationsremaining,c1
+; if activationsremaining>negative then npcaend
+ gosub activatenpc
+.npcanoneedtoactivate
+ add actor,c1
+ if actor<maxnpcplus1 then npcaloop
+
+.npcaend
+
+ actor=user
+ gosub @setuproom
+ gosub @setACTORATTRIBUTES
+ goto @initfifo
+;---
+;>>mike 28/3/88.npcactionsroom
+;>>mike 28/3/88 NoTreasureInRoom=false ; first greedy npc will check
+;>>mike 28/3/88 if room=0 then npcaret
+;>>mike 28/3/88 roomtoactivate=room
+;>>mike 28/3/88 ACTOR=minnpc
+;>>mike 28/3/88.anothernpc1
+;>>mike 28/3/88 room=roomtoactivate
+;>>mike 28/3/88 object=actor
+;>>mike 28/3/88 gosub @checkifpresent
+;>>mike 28/3/88 if result=false then npcar1
+;>>mike 28/3/88; any time to activate it this turn?
+;>>mike 28/3/88 sub activationsremaining,c1
+;>>mike 28/3/88 if activationsremaining>negative then npcaret
+;>>mike 28/3/88 gosub activatenpc
+;>>mike 28/3/88.npcar1
+;>>mike 28/3/88 add ACTOR,c1
+;>>mike 28/3/88 if ACTOR<maxnpcplus1 then anothernpc1
+;>>mike 28/3/88.npcaret
+;>>mike 28/3/88 return
+;---
+.healactor
+ x1=HitPointOffset
+ add x1,ActorAttributes
+ x2=npcinitial(x1)
+ x3=npccurrent(x1)
+ if x3<x2 then HealActor1
+ return
+
+.HealActor1
+; actor is injured - heal him
+; x4=4 ; rate of healing offset
+; add x4,ActorAttributes
+; x4=npcInitial(x4) ; x4 becomes amount to heal per turn
+ x4=10 ; add on some health
+ add x3,x4
+ if x3>x2 then HealActor2
+ npccurrent(x1)=x3
+ return
+
+.HealActor2
+ npccurrent(x1)=x2 ; set to max hit points
+ return
+;---
+.ACTIVATENPC
+; ACTOR is a living NPC
+; who may or may not be within sight of the player,
+; so make it do something
+ cif allowcheat
+  if cheatmode<2 then noactivateinfo
+  if CheatMode=NullValue then noActivateInfo
+  message cr
+  prs "activating "
+  print actor
+  prs "("
+  add forceprinting,c1
+   gosub @printactor
+  sub forceprinting,c1
+  prs "). "
+.noactivateinfo
+ cend
+
+ gosub @initfifo
+ gosub absactivatenpc
+ goto @linkonfifocommandqueue
+;---
+.absactivatenpc
+;>>mike 9/5/88 gosub @setuproom
+ GOSUB @setACTORATTRIBUTES
+; reset boredom counter
+; x1=boredomoffset
+; add x1,actorattributes
+; x2=npccurrent(x1)
+; if x2=0 then aanret ; already activated this turn
+; npccurrent(x1)=c0
+;
+ x1=hitpointoffset
+ add x1,actorattributes
+ x1=npccurrent(x1)
+ if x1=0 then aanret ; dead!
+
+ verb=0
+ noun1=nullobject
+ noun2=nullobject
+ prep=0
+; ACTORATTRIBUTES REMAINS SET UP THROUGHOUT PROCESSING OF THE NPC
+;
+; reduce hatred of current enemy
+ x1=hatredoffset
+ add x1,actorattributes
+ x2=npccurrent(x1)
+ if x2=0 then annohate
+ sub x2,c1
+ npccurrent(x1)=x2
+.annohate
+ gosub healactor
+;
+ processed=false
+ gosub @specialactivatenpc
+ if processed=true then aanret
+ if verb<>0 then @eaoverb ; do it immediately
+
+ gosub decisioncode
+ if executeprocessed=true then npcret
+; don't want to do any of the useful possibilities - consider random things
+;
+; maybe it could move?
+ gosub @CanActorMove
+ if result=false then npcm1
+ random x1
+ if x1>200 then @npcmove
+
+.npcm1
+; nothing else for it, so consider singing of gold...
+ random x1
+ if x1>160 then @npcgoldsinging
+
+.npcret
+.aanret
+.DecisionCodeRet
+.npcmoveret
+ RETURN
+;---
+.decisioncode
+ gosub @amiincombat ; gives result=true if currently fighting someone
+ if result=true then @defendMyself
+; check for other actions
+;
+; any orders waiting? (either from previous happenings,
+; or from the npc's master)
+; (taken out of loop below to avoid variable conflicts etc.
+; Probably possible to re-insert with a little thought -
+; but only saves one variable)
+;
+
+
+ gosub @npcgetcurrent ; get stack pointer x1 for actor
+ add x1,c1
+ orderwaiting=npcstack(x1) ; 0 if none
+; another form of orders is following someone...
+ if orderwaiting<>0 then decidenotfollow
+ gosub @checknullaction
+ if orderwaiting<>0 then decidenotfollow
+ goto DNF1		 ;>>mike 29/3/88
+
+.decideNotFollow	 ;>>mike 29/3/88
+; try executing current orders if obedient enough
+ x1=obedienceOffset	 ;>>mike 29/3/88
+ add x1,ActorAttributes  ;>>mike 29/3/88
+ x1=npcInitial(x1) 	 ;>>mike 29/3/88
+ if x1=255 then DNF0	 ;>>mike 29/3/88
+ random x2	 	 ;>>mike 29/3/88
+ if x2>x1 then DNF1	 ;>>mike 29/3/88
+.DNF0			 ;>>mike 29/3/88
+ gosub @ExecuteAnyOrders ;>>mike 29/3/88
+ if executeProcessed=true then DecisionCodeRet ;>>mike 29/3/88
+
+.DNF1
+ x1=followoffset
+ add x1,actorattributes
+ x1=npcCurrent(x1)
+ if x1<>0 then @DoIWantFollow ;>>mike 29/3/88
+;
+ goto @epfalse
+
+; if result=false then decidenotcombat
+; X1=CURRENTPOS(NOUN1) ; but is the enemy here?
+; IF X1=ROOM THEN @defendmyself ; yes - so have to attack or run away
+; no - so only chase it if nothing better to do
+;
+; now some high priority events, such as on-going combat...
+;
+;;.decidenotcombat
+; now decide on other (pseudo-random) things to do
+;
+;>>mike 29/3/88 x6=0 ; item with biggest margin
+;>>mike 29/3/88 x5=0 ; current biggest margin
+;>>mike 29/3/88;; x1=greedoffset ; first of the characteristics
+;>>mike 29/3/88;; if NoTreasureInRoom=false then decideloop
+;>>mike 29/3/88; no treasure in here, so no point in NPC wanting some!
+;>>mike 29/3/88; x1=aggressionoffset ; greedoffset+1
+;>>mike 29/3/88 x1=obedienceoffset
+;>>mike 29/3/88.decideloop
+;>>mike 29/3/88 x2=actorattributes
+;>>mike 29/3/88 add x2,x1
+;>>mike 29/3/88 x2=npcinitial(x2)
+;>>mike 29/3/88 if x2=255 then decideloopalways ; special case - always do this actio
+;>>mike 29/3/88 random x3
+;>>mike 29/3/88 sub x2,x3
+;>>mike 29/3/88 if x2>negative then decideloop2 ; doesn't want to do it at all!
+;>>mike 29/3/88; x2 is margin by which npc wants to do this thing
+;>>mike 29/3/88 if x2<x4 then decideloop2 ; smaller than biggest margin so far
+;>>mike 29/3/88.decideloopalways
+;>>mike 29/3/88 x5=x2 ; set up new biggest margin
+;>>mike 29/3/88 x6=x1 ; set up new item
+;>>mike 29/3/88.decideloop2
+;>>mike 29/3/88 add x1,c1
+;>>mike 29/3/88 if x1<obedienceoffset then decideloop
+;>>mike 29/3/88; only go up to obedienceoffset if there
+;>>mike 29/3/88; are some orders waiting - otherwise obedient creatures
+;>>mike 29/3/88; would become zombies when they had no orders to obey
+;>>mike 29/3/88;
+;>>mike 29/3/88 if x1<>obedienceoffset then decideloopnotobedience
+;>>mike 29/3/88 if orderwaiting=0 then decideloopnotobedience ; nothing to do!
+;>>mike 29/3/88 if cheatmode=false then decideloop ; see if obedient!
+;>>mike 29/3/88 x2=255 ; completely obedient in cheat mode
+;>>mike 29/3/88 goto decideloopalways
+;>>mike 29/3/88
+;>>mike 29/3/88.decideloopnotobedience
+;>>mike 29/3/88; now x6 is item with biggest margin
+;>>mike 29/3/88;; if x6=greedoffset then @doiwanttreasure
+;>>mike 29/3/88;; if x6=aggressionoffset then @doiwantattack
+;>>mike 29/3/88; if x6=timidityoffset then @runaway
+;>>mike 29/3/88 if x6=obedienceoffset then eitherordersorfollow
+;>>mike 29/3/88;
+;>>mike 29/3/88.lTwoNoOrders
+;>>mike 29/3/88 executeprocessed=false ; allow random things to happen
+;>>mike 29/3/88;
+;>>mike 29/3/88 return
+;>>mike 29/3/88;---
+;>>mike 29/3/88.eitherordersorfollow
+;>>mike 29/3/88 if orderwaiting=ifollow then @doiwantfollow ;following, but no orders
+;>>mike 29/3/88 goto @executeanyorders
+;---
+;;.npcanothermove
+;;; do we want another attempt at moving? Decide randomly
+;;; (this cuts execution time, and breaks iloops)
+;; random x1
+;; if x1<60 then npcmoveret
+
+.npcmove
+; move npc ACTOR in a random direction
+; we have already done gosub @canactormove
+; if result=false then npcmoveret
+ gosub @canactorrandommove
+ if result=false then npcmoveret
+;
+; ok, do a random direction
+ gosub @chooserandomdirection
+ if verb=0 then npcmoveret
+ noun1=nullobject
+ noun2=nullobject
+ prep=0
+ gosub @callverb ; move the npc, describing as appropriate
+ FatalError=false
+ goto EpTrue
+;
+;---
+.NPCGOLDSINGING
+; random messages said by NPC
+; most characters pick a random one of three
+; messages within a block, offset from start by NPC number
+;>>mike 30/3/88 if descriptionmode<>iverbose then npcret
+;>>mike 30/3/88 if room<>currentuserroom then npcret
+;>>mike 30/3/88 gosub @setuproom ;?? why is this necessary?
+
+;;>>Not Needed in Gnome. if lightinroom=true then gs1
+; m1=2177 ; you hear some noises...
+; goto gs2
+;
+;.gs1
+;>>mike 30/3/88 x1=actor
+;>>mike 30/3/88 GOSUB @printTHEobjectx1 ; uses m2 only
+;>>mike 3/4/88 gosub @PrintActor ;>>mike 30/3/88
+; find message base from npcinitial
+ x4=goldsingingoffset
+ add x4,actorattributes
+ value=npcinitial(x4)
+ gosub @valuetimes256
+ add x4,c1
+ x2=npcinitial(x4)
+ add value,x2
+ if value=0 then @eptrue ;>>mike 3/4/88
+ gosub @PrintActor ;>>mike 3/4/88
+ m1=value
+;;.gs2
+ goto @varymessagedot
+;---
+;;.varyactorsays
+;; gosub @getvarym1
+; drop through to npcsays
+;
+;.actorsays
+;; ACTOR  M1
+; X1=ACTOR
+;.npcx1says
+; if lightinroom=true then ns1
+; m2=3746 ; a voice in the dark says....
+; gosub @printM2
+; goto ns2
+;
+;.ns1
+; verb=isay
+; m1save=m1
+; GOSUB @printACTORverb
+; m1=space
+; gosub @printM1
+; m1=m1save
+;
+;.ns2
+; gosub @printQUOTE
+; gosub @printM1
+; gosub @printQUOTE
+; return
+;
+; print 'a male (female) voice in the distance shouts "something".'
+; Or print the person shouting if nearby..
+;;.varyactorshouts
+;;gosub @getvarym1
+;;
+;;.actorshouts
+;; if descriptionmode<>iverbose then asret
+;; forceprinting=true ; even distant things are printed during 'shout'
+;; m1save=m1
+;; if room=currentuserroom then actorshoutshere
+;; x1=actor
+;; gosub @conjugatex1
+;;; now result=pronoun offset for actor
+;; m1=3736 ; start of 'a male voice shouts' type thing
+;; add m1,result ; (0..7)
+;; gosub @printM1
+;; goto ash1
+;;
+;;.actorshoutshere
+;; lastwordprinted=0 ; force printing name (*why is this needed)
+;; verb=ishout
+;; gosub @printACTORverb
+;;
+;;.ash1
+;; message space
+;; message quote
+;; m1=m1save
+;; gosub @printM1dot ; what actor shouts.
+;; message quote 
+;; message space
+;; forceprinting=false
+;;.asret
+;; return
+;---
+;
+.initnpcs
+; first zero all npccurrent entries
+; x1=0
+;.initnpc1
+; npccurrent(x1)=c0
+; add x1,c1
+; if x1<npctablesizetozero then initnpc1
+; now copy appropriate data from npcinitial into npccurrent
+; x4=11 ; 19 ; user attributes+hitpointoffset requires npcentrysize=8
+ x4=8 ; start of entry for user
+; x2=npcentrysize
+.initnpc2
+ x1=npcinitial(x4)
+ npccurrent(x4)=x1
+ add x4,c3 ; move on to hit point entry
+ x1=npcinitial(x4)
+ npccurrent(x4)=x1
+ x1=5 ; NpcEntrySize-HitPointOffset
+; add x4,x2
+ add x4,x1
+ if x4<npctablesize then initnpc2
+; drop through to initnpcstack (which will set up chain pointers)
+;;.initnpcstack
+; set up all entries to be on the free space chain
+ x1=npcstackbase ; (starting with dummy entry 0)
+ x2=npcstackentrysize
+ x3=1 ; entry number of NEXT entry
+.initnpcstack1
+ npcstack(x1)=x3 ; point to next entry in table
+ add x1,x2
+ add x3,c1
+ if x3<maxnpcentries then initnpcstack1
+ x1=npcstackbase
+ npcstack(x1)=c0 ; unlink demo pointer from chain 
+ freespaceptr=2 ; number of current stack entry
+
+; and set up pointers for npccurrent of the default
+; actions for each npc
+ ACTOR=1
+.ins1
+ gosub @setACTORATTRIBUTES
+ x1=npcptroffset
+ add x1,actorattributes
+ npccurrent(x1)=c0 ; default to no action
+ add ACTOR,c1
+ if ACTOR<maxnpcplus1 then ins1
+ goto @specialinitnpcs
+;---
+.MakeObjectASlave
+ gosub MakeObjectObedient
+ x1=followOffset
+ add x1,x4
+ npccurrent(x1)=c1 ; user
+ return
+;---
+.makeobjectobedient
+; make OBJECT obedient to USER
+ gosub @setX4toOBJECTATTRIBUTES
+ x1=masteroffset
+ add x1,x4
+ npccurrent(x1)=c1 ; user
+ return
+;---
+.follow
+; set up npccurrent(npc attributes + 1)= person to follow
+;>>mike 28/3/88 if actor<>user then follownotuser
+;>>mike 6/2/88 if noun1>maxpeople then @setupfind
+;
+;
+;>>mike 28/3/88.follownotuser
+;
+ x1=followoffset
+ add x1,ACTORATTRIBUTES
+ npccurrent(x1)=noun1
+;>>mike 28/3/88 gosub @doiwantfollownoun1 ;<<<gosub doiwantfollownoun1
+;>>mike 28/3/88 if fatalerror=true then @stopfollowing
+;;.followret
+ return
+;---
+
+.npcpusherror
+; no free space left!
+ cif AllowCheat
+  gosub @debugshowstack
+ cend
+; and normal stack overflow recovery code...
+ freespaceptr=x2
+ message 3600 ; a voice in the distance shouts, "a stack error"
+ gosub @initnpcs ; clear all stack, enemies etc. (positions unchanged)
+ goto @getfromuser ; clears acode stack
+;---
+.initfifo
+; initialise a temporary fifo chain
+; this is linked to the command queue for ACTOR when it has been
+; completed
+; This allows new commands to be added as the
+; next thing for the NPC to do, but
+; the block of commands given will be executed in the
+; order given
+ gosub @setACTORATTRIBUTES ; this maybe prevents bugs
+ initfifoactor=actor
+ if lastunlinkedcommand=0 then initfifook
+
+ cif allowcheat
+  if cheatmode=0 then lulnodebug
+  prs "err2: lastunlinked command=" ;*
+  print lastunlinkedcommand ;*
+  prs ".] " ;*
+.lulnodebug
+ cend
+
+ lastunlinkedcommand=0 ; pointer to block of last command given
+
+.initfifook
+ commandstolink=freespaceptr ; pointer to first command given
+ return
+;---
+.linkonfifocommandqueue
+; link on the queue which has been built up.
+; The first command to be executed is at COMMANDSTOLINK
+; and the last is at lastunlinkedcommand
+ gosub @setACTORATTRIBUTES ;* maybe avoids bugs?
+
+
+ cif allowcheat
+  if actor=initfifoactor then lifcq1
+  if cheatmode=0 then lifcq1
+  message cr ;*
+  prs "[err1:" ;*
+  print actor ;*
+  prs "/" ;*
+  print initfifoactor ;*
+  prs "]" ;*
+  message cr ;*
+
+.lifcq1
+ cend
+
+ if lastunlinkedcommand=0 then lofcqret
+ x1=npcptroffset
+ add x1,ACTORATTRIBUTES
+ x4=npccurrent(x1)
+; now x4=number of current stack entry
+ npccurrent(x1)=commandstolink
+ x1=lastunlinkedcommand
+ gosub npcgetoffset ; of number x1, returns in x1
+; now x1=offset in npcstack of last command to link
+ npcstack(x1)=x4 ; link to what used to be current actor command
+ lastunlinkedcommand=0
+.lofcqret
+ return
+;---
+.singlepushfifo
+; do a complete fifo push, without the extra facility
+; of being able to give multiple commands which
+; are executed in the order they were given
+ gosub @initfifo
+ gosub npcpushfifo
+ goto @linkonfifocommandqueue
+;---
+.npcpushfifo
+; for npc ACTOR, add a new action to the end of its 'pending
+; action' queue, such that it will be the last to be executed.
+; i.e. FIFO
+;
+; find some free space
+ if lastunlinkedcommand=0 then npffirstcommand
+ x1=lastunlinkedcommand
+ gosub npcgetoffset
+ npcstack(x1)=freespaceptr ; link on new command
+ if lastunlinkedcommand<highwater then npffirstcommand ;*
+ highwater=lastunlinkedcommand ;*
+
+.npffirstcommand
+ lastunlinkedcommand=freespaceptr
+
+; and push command in...
+; and make freespace ptr crawl along its linked list
+ x1=freespaceptr
+ gosub npcgetoffset ; find npcstack offset in x1, from x1=number
+; now x1=position in npcstack of free space
+;
+ x3=npcstack(x1) ; move along freespace chain
+ if x3=0 then npcpusherror ; no free space!
+ freespaceptr=x3
+; x1=offset in npcstack of new current command
+;
+ npcstack(x1)=c0 ; this is last command in chain
+ add x1,c1
+ npcstack(x1)=verb
+ add x1,c1
+ npcstack(x1)=prep
+ add x1,c1
+ npcstack(x1)=noun1
+ add x1,c1
+ npcstack(x1)=noun2
+ return
+;---
+.npcgetcurrent
+; return x1=block for current action of ACTOR
+ x1=npcptroffset
+ add x1,ACTORATTRIBUTES
+ x1=npccurrent(x1)
+.npcgetoffset
+; given x1=number of stack entry
+; return x1=offset in npcstack 
+; and multiply by npcstackentrysize (5)
+ x2=x1
+ add x1,x1
+ add x1,x1
+ add x1,x2
+ x2=npcstackbase
+ add x1,x2
+ return
+;---
+.intelligentpop
+; pop off current command. If it had a goal directed
+; noun1, pop off both parts of it.
+ gosub @npcgetcurrent
+ x2=3 ; offset for noun1
+ add x1,x2
+ x2=npcstack(x1) ; x2=noun1
+ if x2<mincollective then npcpop
+ if x2>maxcollective then npcpop
+ gosub npcpop
+; drop through to npcpop for second part of gd command
+
+.npcpop
+; Only use this if you are sure you know what you are doing -
+; normally use intelligentpop
+
+; npc is to stop doing its current action, and climb to next
+; on its chain. The top action (the default one) is never deleted
+;
+; return x3=0 if pop error occured
+ gosub @npcgetcurrent
+ x2=npcstack(x1) ; number of command to execute after this one
+; and add this element as the current element in the free space chain
+ x4=npcptroffset
+ add x4,actorattributes
+ x3=npccurrent(x4)
+ if x3=0 then npcpoperror ; no current command on stack
+ npccurrent(x4)=x2 ; make element above it current action for npc
+
+ npcstack(x1)=freespaceptr
+ freespaceptr=x3
+;;.gogetret
+.npcpoperror
+ return
+;---
+.commandstop
+ gosub @done
+
+.stop
+; cancel all ACTOR's current command queue
+ gosub @setACTORATTRIBUTES ; just in case!
+.stop1
+ gosub npcpop
+ if x3<>0 then stop1 ; more to come
+ if actor<>user then @done ;>>mike 8/2/88
+ gosub stopfollowing
+;>>mike 8/2/88 if actor<>user then @done
+; gosub checkkbd ; security only
+; if result=true then getfromuser ; clears stack etc.
+ goto @abscancelinput ; gosub, return
+;---
+.stopfollowing
+ gosub @setACTORATTRIBUTES
+ x1=followoffset
+ add x1,actorattributes
+ npccurrent(x1)=c0 ; stop following
+ return
+;---
+;---
+.preactorcr
+ if actor<>user then pacret
+ message cr
+.pacret
+ return
+;---
+;-------
+;---
+.tracex1tosynth
+; trace from room x1 back to the synthesised room number
+; return x1=synth room number
+; if any room=x6 on the way, return with processed=true
+; and dir=direction of last move
+; before we encountered x6
+ processed=false
+ if x1=x6 then txtsfound
+ if x1>minsynthroomminus1 then txtsret
+
+ cif AllowCheat
+  if cheatMode<>2 then NotTXCheat
+  print x1
+  message space
+.NotTXCheat
+ cend
+
+ gosub @getfloorpointer ; in x2 for room x1
+ dir=list5(x2)
+ from=x1
+ gosub @checkexit ; exit x1 x3 x4 x5 ; room dir status dest
+ if dest=0 then txtsret ; in for safety only
+ x1=dest
+ goto @tracex1tosynth
+;---
+.txtsfound
+; have found a match with x6
+; i.e. both source and dest for the move are in
+; the same complex
+ processed=true
+.txtsret
+ return
+;---
+ cif allowcheat
+
+.debugshowstack ;*
+  message cr
+  prs "Command queues are: (return to stop, space to step if looping)"
+  actor=1
+.debugstack1
+  message cr
+  object=actor
+  forceprinting=true
+  gosub @printTHEobject
+  message colon
+  gosub @setACTORATTRIBUTES
+  gosub @npcgetcurrent ; set up x1=position in npcstack
+.debugstack2
+; of current command
+  x2=npcstack(x1) ; pointer to next
+  add x1,c1
+  verb=npcstack(x1)
+  add x1,c1
+  prep=npcstack(x1)
+  add x1,c1
+  noun1=npcstack(x1)
+  add x1,c1
+  noun2=npcstack(x1)
+ 
+  if verb=0 then debugstack3
+  gosub debugshowcommand
+  x1=x2
+  gosub @npcgetoffset ; transform x1 from entry number to offset in stack.
+  goto debugstack2
+ 
+.debugstack3
+  add actor,c1
+  if actor<maxpeoplePlus1 then debugstack1
+;;.debugstackret
+  forceprinting=false
+  actor=user
+  return
+;---
+.debugshowcommand
+  if verb=0 then dssnoverb ; end of queue for this actor
+  if verb>200 then dssnoverb ; funny verb
+  m1=50 ; start of verbs
+  add m1,verb
+  message m1
+.dssnoverb
+  prs "("
+  print verb
+  prs ") "
+;
+  if prep=0 then dssnoprep
+  if verb>200 then dssnoprep
+  m1=1600
+  add m1,prep
+  message m1
+.dssnoprep
+  prs "("
+  print prep
+  prs ") "
+
+  if noun1=nullobject then dssnonoun1
+  if noun1=0 then dssnonoun1
+  if verb>200 then dssnonoun1
+  m1=300
+  add m1,noun1
+  message m1
+.dssnonoun1
+  prs "("
+  print noun1
+  prs ") "
+
+  if noun2=nullobject then dssnonoun2
+  if noun2=0 then dssnonoun2
+  if verb>200 then dssnonoun2
+  m1=300
+  add m1,noun2
+  message m1
+.dssnonoun2
+  prs "("
+  print noun2
+  prs "), "
+  return
+
+
+
+ cend
+
+
+;---
+;---
+;>>mike 28/3/88.gdkilldead
+;>>Mike 28/3/88; object=noun1 here.
+;>>Mike 28/3/88 commandfinished=true
+;>>Mike 28/3/88 goto @printdead ; object is dead (gosub,return)
+;---
+.gdkill
+; am in the middle of killing noun1
+; is target dead?
+;>>mike 6/2/88 if noun1>maxpeople then @silly ;<<gdsilly
+ if noun1>maxNpc then @Silly ;>>mike 6/2/88
+ object=noun1
+ gosub @setX4toOBJECTATTRIBUTES
+ x1=hitpointoffset
+ add x1,x4
+ x1=npccurrent(x1)
+ commandFinished=true
+ if x1=0 then @PrintDead ; target is dead
+ x1=currentpos(noun1)
+ if x1=0 then gdKillRet ; target is otherwise absent
+;
+;>>Mike 28/3/88 executeprocessed=true
+;>>Mike 28/3/88 object=noun1
+;>>Mike 28/3/88 gosub @checkifpresent
+;>>Mike 28/3/88; x1=currentpos(noun1)
+;>>Mike 28/3/88 verb=iattack
+;>>Mike 28/3/88 gosub @preactorcr
+;>>Mike 28/3/88 if result=true then @callverb
+;
+; current enemy is not here.
+;>>Mike 28/3/88 gosub @doiwantfollownoun1 ; chase enemy
+;>>Mike 28/3/88 if executeprocessed=false then gdkillret ; couldn't follow - so abort
+;>>Mike 28/3/88 if fatalerror=true then ReportProblem ;gdkillret
+;>>Mike 28/3/88 commandfinished=false ; still have to kill it!
+ gosub @doiwantFollowNoun1 ; chase enemy ;>>Mike 28/3/88
+ commandFinished=false ; still have to kill it. >>Mike 30/4/88
+ if executeProcessed=true then gdKillRet ;>>Mike 28/3/88
+ verb=iattack
+ goto @callverb
+;---
+;---
+.kill
+; initiate a goal-directed kill
+ if actor<>user then gdkill
+;>>mike 28/3/88 if noun1>maxNpc then @silly ;>>mike 6/2/88
+;>>mike 28/3/88  object=noun1
+;>>mike 28/3/88 gosub @npcpushfifo
+;>>mike 28/3/88 gosub @linkonfifocommandqueue
+;<<< gosub done
+ gosub @IsObjectAlive ;>>mike 28/3/88
+ if result=false then @PrintDead ;>>mike 28/3/88
+ goto @singlePushFifo ;>>mike 28/3/88
+;>>mike 28/3/88 goto @executeanyorders
+;---
+;---
+.amiincombat
+; return result=true if actor is in combat at present
+; and noun1=current enemy
+ result=false
+ NOUN1=NPCCURRENT(ACTORATTRIBUTES)
+; current enemy - is it fighting anyone ?
+ IF NOUN1=0 THEN aicret
+; is it angry enough to keep on attacking current enemy?
+; x1=hatredoffset
+; add x1,actorattributes
+; x2=npccurrent(x1)
+; if x2<5 then aicret
+ goto @returnTrue
+;---
+.defendmyself
+; come here when we know that npc is in battle
+ object=noun1
+ gosub @checkifpresent
+ if result=true then incombat
+; current enemy is not here.
+ x1=currentpos(object)
+ if x1<>0 then @doiwantfollownoun1 ; at the moment, always chases enemy
+; lose agression
+ x1=EnemyOffset
+ add x1,ActorAttributes
+ npccurrent(x1)=c0
+.aicret
+.gdkillRet
+ return
+;---
+;;.diwattackanyonenew
+; is there anyone else (i.e. orc) here to attack?
+; noun1=user
+; object=noun1
+; gosub @checkifpresent
+; if result=false then @noattack
+;; how aggressive is actor?
+; random x1
+;; x1=random 0..255
+; x2=aggressionoffset
+; add x2,actorattributes
+; x2=npcinitial(x2)
+;; x2=aggression %ge
+;; x1=random 'feelings' - if between 0 and aggression, charge!
+; if x1>x2 then @noattack ; not this time, thankyou
+;; want attack
+;; initiate an attack
+; x4=actorattributes
+; gosub @increasehatred ; make attacker hate (orc) a bit
+; m1=3330 ; a player! lets kill it! and sim.
+; gosub @varysayM1dot
+; wanttoprintand=x1 ; we always attack player now, so this is safe
+; goto definiteattack
+
+.incombat
+; either run away or attack
+; x1=timidityoffset
+; add x1,actorattributes
+; x2=npcinitial(x1)
+; random x1
+; if x1<x2 then runaway
+;;.definiteattack
+ if noun1<>user then definiteattack1 ; no shout for attacking others
+ random x1
+ if x1>100 then definiteattack1
+ if descriptionmode<>iverbose then definiteattack1
+ wanttoprintand=actor
+
+.definiteattack1
+ verb=iattack
+; ACTOR wants to attack NOUN1
+ goto @callverb
+;---
+;;.runaway
+;;; ACTOR is scared (Ahh..)
+;; gosub @canactormove
+;; if result=false then @crdret
+;; gosub @canactorrandommove
+;; if result=false then @crdret
+;; gosub @chooserandomdirection
+;; if verb=0 then @crdret
+;; prep=0
+;; noun1=nullobject
+;; noun2=nullobject
+;; goto @callverb
+;---
+;---
+;;.doiwanttreasure
+;;; how greedy is npc?
+;; if NoTreasureInRoom=true then @diwtret
+;;;
+;;; drop through to take it...
+;;;
+;; gosub gdfindtreasure
+;; if object=0 then @diwtret
+;;
+;;.gdtaketreasure
+;; noun1=object
+;; verb=itake
+;; goto @take
+;---
+;;.gdfindtreasure
+;;; is there any treasure lying around?
+;;; first on ground, then carried by other npcs (i.e. to steal!)
+;; if NoTreasureInRoom=true then gdnotreasure ; for speed
+;; searchpos=room
+;; hisearchpos=0
+;;
+;;.gdfindtreasuresearchpos
+;;; find any treasure at (hisearchpos,searchpos)
+;;; and return NoTreasureinroom=true if there
+;;; and OBJECT as the treasure found
+;; searchdepth=250
+;; gosub @initgetobj
+;;
+;;.gdfindtreasure1
+;; x1=maxtreasure ; max object to find
+;; gosub @getnextobjx1
+;; if object=0 then gdnotreasure ; none found
+;; if object=actor then gdfindtreasure1
+;; if object<mintreasure then gdfindtreasure1
+;;;not needed if object>maxtreasure then gdfindtreasure1
+;;; got some treasure!
+;;; don't want it if it is carried by actor
+;; pos=actor
+;; hipos=nonspecific
+;; gosub @checkobjectpos
+;; if result=true then gdfindtreasure1
+;;; got it, so return!
+;; return
+;;
+;;.gdnotreasure
+;; NoTreasureInRoom=true
+;; return
+;
+;---
+;----
+;;.doiwantattack
+; for npcs.
+; does actor want to start attacking anyone?
+; if so, return verb and noun1
+; gosub @amiincombat
+; if result=true then @defendmyself
+; random x1
+; if x1<160 then @diwattackanyonenew ; - may attack
+
+;;.diwaret
+;; return ; don't start new combar
+;---
+;---
+;.GetTerrainType
+;; get terrain type in X1 for Room X1
+; x2=minSynthRoom
+; sub x1,x2
+; if x1>negative then gtt0
+; x1=terraintable(x1)
+; return
+;
+;.gtt0
+; x1=0
+; return
+;---
+
+;

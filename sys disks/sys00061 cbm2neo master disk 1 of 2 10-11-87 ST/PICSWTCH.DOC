@@ -1,0 +1,83 @@
+"PicSwitch" ST Picture Viewer/Converter
+(c)1986 John Brochu
+
+Version: 0.5
+Public domain: March 31, 1986
+
+FOR COLOR SYSTEMS ONLY
+
+------------------------------------------------------------------------------
+ext    reads:                             writes:
+------------------------------------------------------------------------------
+NEO    NeoChrome                      =>  DEGAS lo-rez
+NEO    NeoChrome "Snapshot"           =>  DEGAS med-rez
+PI1    DEGAS lo-rez color             =>  NeoChrome
+PI2          med-rez color
+PI3          monochrome               =>  DEGAS med-rez
+IFF    Amiga IFF Deluxe Paint         =>  NeoChrome, DEGAS lo-rez
+MAC    MacIntosh MacPaint             =>  DEGAS med-rez
+------------------------------------------------------------------------------
+
+To load a picture, select the file from the GEM ITEM SELECTOR by
+double-clicking on its filename.  To change the directory path, type in the new
+pathname on the top line of the ITEM SELECTOR and click inside the directory
+window.  To get the directory of a different disk, change disks and click on
+the directory bar just above the directory window.
+
+PicSwitch is fully error-trapped (I think!) using alert boxes.  You are given
+the option on common errors to [Retry] the error or [Cancel].  Selecting
+[Cancel] will send you back to the file selector.
+
+The program determines the picture's format solely from the filename extender.
+Be sure to use the correct extender as listed above.  IFF pics are the only
+ones that are checked for proper format.  DEGAS pics (.PI1 - .PI3) are checked
+to be sure the actual picture resolution matches the extender.  If it does not,
+you are given the option of viewing it anyway, or aborting.
+
+With any picture displayed on the screen, you can view the command list by
+pressing HELP, exit to the file selector by pressing UNDO (or the right mouse
+button), or [S]ave the picture in a new format.
+
+The following commands are also available for IFF pics...
+   *  [1]-[5] or [SPACE]:
+         'Pulls out' the selected bit-plane from the screen image.  (Amiga
+         lo-rez 320x200 32-color IFF pics are the only format supported in
+         this version of PicSwitch.  Since the ST can only display 16
+         colors (4-bit planes) at a time, one plane must be taken out of
+         the screen image.)  Most pics look best with the default setting
+         (planes 2-5 displayed).
+   *  [R],[G],[B]:
+         Red, Green, Blue touch-up.  Boosts the selected color up a notch.
+   *  [Return]:
+         Restores the default settings.
+
+For MacPaint documents, the screen can be scrolled over the picture using the
+mouse.  Pressing [S] will allow you to save the displayed portion of the
+document in DEGAS med-rez format.  (MacPaint documents are 576x720 pixels.)
+
+[NOTE: If the file was downloaded with a modem on a non-Mac computer, there may
+be an extra 128-byte "MacBinary" header at the beginning of the file.  If this
+is the case, PicSwitch automatically adjusts for the longer header.]
+
+PicSwitch also allows you to view DEGAS (and NeoChrome) hi-rez monochrome
+pictures normally only viewable on the Atari SM124 monochrome monitor, and you
+can permanently convert these to med-rez if you wish.
+
+Finally (for now anyway) you can view and convert screens saved with the Atari
+"Snapshot" program (found in the AtariDevelopers' sig) from medium or hi-rez
+NeoChrome to med-rez DEGAS so that you can touch them up with Tom Hudson's
+DEGAS package.
+
+If you don't have access to Mac or Amiga pics, plenty of great artwork can be
+found on the sigs here on CIS and also in the DELPHI "MicroManiac" computer art
+sig.  If you find any good pics you'd like to share, upload them here!  If
+possible, please retain the original artists name on the converted picture.
+
+This version of PicSwitch is in the public domain.  Distribute it freely.
+
+Any comments, suggestions for enhancement, or problems should be sent to me
+here or via EasyPlex.  Enjoy!
+
+                         -John Brochu [70376,1235]
+
+xxxxxxxx

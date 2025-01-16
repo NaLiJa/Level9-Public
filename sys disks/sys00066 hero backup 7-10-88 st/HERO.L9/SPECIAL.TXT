@@ -1,0 +1,1501 @@
+; Special.txt
+;
+; Special cases for ADEPT
+;
+; Copyright (C) 1988 Level 9 Computing
+;
+; M.J.Austin 7-8-88
+;
+ begin
+;---
+.FGSpecialsMovedSprite
+; TempFixedSprite=20
+; PermFixedSprite=20
+; TempMovedSprite=22
+; PermMovedSprite=23
+; the above give the sprite control blocks for the two sprites
+; involved in a collision.
+; MovedSPrite is guaranteed to have been the one that moved so as
+; to cause the collision.
+; V1=PermMovedSprite(TypeOffset)
+; if V1<>PlayerType then fgsmsNotPlayer
+
+.fgsmsNotPlayer
+ return
+;---
+.BGSpecials
+ x5=PermMovedSprite(TypeOffset)
+ x1=MonsterMask
+ and x1,x5
+ if x1=0 then BGSpecialsNotBlocked
+ gosub @MonsterBlocked
+
+.BGSpecialsNotBlocked
+ return
+;---
+.DAMSSpecials
+* now do special cases for particular types of monsters...
+ v1=1 ; do mc specials unless otherwise set
+ &TempMovedSprite(AnimationOffset)=c0
+ &actor=TempMovedSprite(NameOffset)
+; make movement decision for monster of name ACTOR
+ &x=TempMovedSprite(XPosOffset)
+ &y=TempMovedSprite(YPosOffset)
+ speed=TempMovedSprite(SpeedOffset)
+
+ gosub @SpecialActivate
+ if v1=0 then DAMSRet ; processed
+
+ if actor=user then DAMSSPlayer
+ if actor<22 then damsRet
+;*****
+; object numbers can now be greater than 22. hence, we must test 
+; the type of sprite rather than the name, otherwise some objects will 
+; be treated as monsters.
+ x1=PermMovedSprite(TypeOffset)
+ if x1=ObjectType then damsret 
+;*****
+ v1=0 ; don't do specials for other monsters
+ gosub @MakeMoveDecision
+
+; and animate the monster...
+ x1=TempMovedSprite(StageOffset)
+ x2=PermMovedSprite(NumAnimationOffset)
+ add x1,c1
+ if x1<x2 then DAMSAnimate1
+ x1=0
+.DAMSAnimate1
+ TempMovedSprite(StageOffset)=x1
+ return
+
+.damsRet
+ return 
+
+.DAMSSPlayer
+ PlayerX=x
+ PlayerY=y
+ return
+;---
+.MakeMoveDecision
+; make monster move towards player. Monster is at (x,y), player at
+; (PlayerX,PlayerY). Speed is SPEED
+ gosub @MonsterNotBlocked
+
+;*****
+; Handle player invisibility
+ x8=ringinvis
+ gosub @TestRingWorn
+ if x2=0 then playernotinvis
+ return ;&*&*&*&*&
+; gosub @BlockSprite
+; goto @MonsterBlocked
+.playernotinvis
+;
+; Handle monsters runing away (after stealing something)
+ x1=TempMovedSprite(RunAwayOffset)
+ if x1=0 then @dontretreat		; not retreating
+ if x1>65000 then @dontretreat		; (just in case!)
+ sub x1,c1
+ TempMovedSprite(RunAwayOffset)=x1	; dec retreat timer
+;
+; Now handle the retreat directions...
+ x1=65535
+ if y<PlayerY then RetreatMMDGotY
+ x1=1
+ if y>PlayerY then RetreatMMDGotY
+.recalcrndy
+ code -
+ random x1
+ code +
+ and x1,c3
+ if x1=3 then recalcrndy
+ sub x1,c1				; random -1,0,1
+;
+.RetreatMMDGotY
+ x2=65535
+ if x<PlayerX then @MMDGotX
+ x2=1
+ if x>PlayerX then @MMDGotX
+.recalcrndx
+ code -
+ random x2
+ code +
+ and x2,c3
+ if x2=3 then recalcrndx
+ sub x2,c1				; random -1,0,1
+ goto MMDGotX
+;
+.dontretreat
+;*****
+
+ x1=65535
+ if y>PlayerY then MMDGotY
+ x1=1
+ if y<PlayerY then MMDGotY
+ x1=0 ; i.e. no y offset
+
+.MMDGotY
+ x2=65535
+ if x>PlayerX then MMDGotX
+ x2=1
+ if x<PlayerX then MMDGotX
+ x2=0 ; i.e. no x offset
+
+.MMDGotX
+; x1=y direction, x2=x direction
+; Now calculate any offset to the direction to make the
+; npc move in semi-random directions
+
+; we have a table comprised of the 'next x,y' for each
+; calculated x,y pair.
+
+; combine x,y directions to give offset into table
+; by 4*y+x to give a unique code (see below)
+ x3=x1
+ add x3,x3
+ add x3,x3
+ add x3,x2
+; x3 is -5 to +5
+; now add on existing offset
+ x1=TempMovedSprite(AddDirOffset)
+  gosub @SignExtendX1 ; corrupts x2
+
+ add x3,x1
+ if x3<6 then MMDInRange
+ if x3>32000 then MMDInRange ; 65530 then MMDInRange
+ x4=11
+ sub x3,x4
+
+.MMDInRange
+; now x3 is the new (internal) view of the direction in which the
+; monster wishes to move
+;
+;			0,-1=-4
+;	   -1,-1=-5	  | 		1,-1=-3
+;			  |
+;  -1,0=-1	----------+------------		1,0=1
+;			  |
+;	   -1,1=3	  |		1,1=5
+;			0,1=4
+
+; convert internal view to conventional (adventure-type) view
+; for display purposes
+ x4=ConvertViewToView
+ add x4,x3
+ x4=List7(x4)
+ TempMovedSprite(ViewOffset)=x4
+
+; now use ConvertViewToXY table to calculate the actual x,y direction
+; of movement
+
+ add x3,x3 ; times 4 to give index into table with 2 words per entry
+ add x3,x3
+
+ x4=ConvertViewToXY
+ add x3,x4
+ &x2=List7(x3) ; get x speed
+
+ add x3,c2
+ &x1=List7(x3) ; get y speed
+
+;*****
+; is the monster cursed with slowness?
+ x3=TempMovedSprite(SlowCounterOffset)
+ if x3=0 then monstermovesfast
+ sub x3,c1					; decrement slow duration
+ TempMovedSprite(SlowCounterOffset)=x3
+ goto @movemonster				; speed*1
+;
+; When returning to full speed, it is neccessary to set the x,y pos 
+; to a multiple of their movement speed, otherwise the monsters get 
+; stuck!
+.monstermovesfast
+ add x2,x2					; demon uses speed*2
+ add x1,x1
+ x4=65534					; hence no bit 0.
+ if actor=demon then movethemonster
+ add x2,x2					; monsters use speed*4
+ add x1,x1
+ x4=65532					; hence no bits 0 & 1.
+;
+; are we retreating?
+ x3=TempMovedSprite(RunAwayOffset)
+ if x3=0 then MoveTheMonster			; not retreating
+ if x3>65000 then MoveTheMonster		; (just in case!)
+ add x2,x2					; retreat uses speed*8
+ add x1,x1
+ x4=65528					; hence no bits 0,1,2.
+;
+.movethemonster
+ &x3=TempMovedSprite(XPosOffset)
+ and x3,x4
+ &TempMovedSprite(XposOffset)=x3
+ &x3=TempMovedSprite(YPosOffset)
+ and x3,x4
+; special case to add 4 to sprite pos when moving in multiples of 8
+; (this is to position the sprite correctly)
+ if x4>65528 then movelessthan8
+ add x3,c4
+.movelessthan8
+ &TempMovedSprite(YposOffset)=x3
+.movemonster
+;*****
+
+ add x,x2
+ add y,x1
+ &TempMovedSprite(XSpeedOffset)=x2
+ &TempMovedSprite(YSpeedOffset)=x1
+; &TempMovedSprite(XPosOffset)=x
+; &TempMovedSprite(YposOffset)=y
+ return 
+; or x1,x2 ; merge to give combined x,y offsets
+; x2=ConvertXYToView
+; add x1,x2
+; x1=WorkSpace(x1)
+;; now x1=view
+;---
+; v1=4 ; sprite no.
+; v2=32 ; x
+; v3=16 ; y
+; gosub @MCSprite ;****
+;---
+.InitSpriteTable
+; clear sprite table
+ x1=0
+.IST1
+ SpriteTable(x1)=c0
+ add x1,c1
+ if x1<SpriteTableSize then IST1
+
+code -
+
+; randomly distribute some monsters and sprites throughout the map...
+ PlayerSpriteOffset=65535
+ x=0
+ y=0
+.ISTLoop
+ random x1
+code +
+ x2=30 ; not bit 0, notice, to keep map ptr word-aligned
+ and x1,x2 ; limit size of step
+ add x,x1 ; add on a random amount
+ add x,c1 ; minimum step is 1
+ if x<ScreenXBlocks then ISTNotNextLine
+ x1=ScreenXBlocks
+ sub x,x1
+ add y,c1
+.ISTNotNextLine
+ gosub @CalcMapAddress
+ &x2=Map(x1)
+ if x2<>1 then @ISTNotVacant
+; we have a vacant square, put a monster/object on it
+ gosub @convertparams ;*****
+.TryObjectAgain
+code -
+ random v5
+code +
+ if v5<Bottle then ISTNotObject
+ if v5>Club then ISTNotObject
+ goto @ISTPlaceObject
+
+.ISTNotObject
+ if v5<240 then TryObjectAgain ;**180
+; player?
+ if PlayerSpriteOffset<>65535 then ISTNotPlayer
+ gosub @SetUpPlayer
+ goto @ISTNotVacant
+
+.ISTNotPlayer
+ v5=22 ; floating eye
+code -
+ random x1
+code +
+ x2=15
+ and x1,x2
+ add v5,x1 ; randomize monster type
+.ISTPlaceObject
+;
+;*****
+; place sprite type v5 on the map at pos v1,v2
+ if v5<Bottle then ISTNotSpecialObj
+ if v5>Club then ISTNotSpecialObj
+;
+; place an object on the map
+ v5=ring ;*********** test rings ***************
+ gosub @generateobject
+ goto ISTNotVacant
+;
+; place a monster on the map
+.ISTNotSpecialObj
+ gosub @generatemonster
+
+.ISTNotVacant
+code -
+ if y<ScreenYBlocks then @ISTLoop
+code +
+ return
+;---
+.convertparams
+ v1=x
+ add v1,v1
+ add v1,v1
+ add v1,v1
+ add v1,v1
+ v2=y
+ add v2,v2
+ add v2,v2
+ add v2,v2
+ add v2,v2
+ sub v2,c4			; correct y position
+ v3=0
+ v4=0
+ return
+;---
+; place an object of sprite type v5 at pos v1,v2 and give it 
+; a name depending on it's object category.
+.generateobject
+ gosub @MCSetUpNewSprite
+;
+; get range of objects in the category for this sprite
+ add v5,v5			; table is made up of paired bytes.
+ x1=rangeoffset
+ add v5,x1			; add the offset into the table
+ x3=list7(v5)			; number of first object in this category.
+ add v5,c1
+ x2=list7(v5)			; number of objects in this category.
+;
+; ************************************************************************
+; * NB: x2 can be reduced for early levels, so as to prevent "advanced"  *
+; * objects appearing until a later level is reached.			 *
+; ************************************************************************
+;
+; now find a random number 0<=x1<=x2
+ gosub @randomx1modx2
+;
+; now add the random "range" to the number of first object in category
+ add x1,x3
+;
+; now set the true name of the object in the sprite workspace
+; (on exit from MCSetUpNewSprite (above), v6 is sprite table offset)
+ x2=nameoffset
+ add x2,v6			; find name offset of sprite.
+ &SpriteTable(x2)=x1		; set true name of object.
+ x3=0
+ if x1>maxhand then setmagic	; not magic armour/weapon
+;
+; shall we curse the object?
+ x2=5
+ gosub @randomx1modx2
+ if x1<>1 then addmagic			; lucky!
+ x2=cursedoffset
+ add x2,v6				; NB: This overwrites other bytes 
+ x1=cursemask				; in "curse" byte.
+ SpriteTable(x2)=x1			; unlucky!
+;
+; choose a magic adjustment for armour/weapon
+.addmagic
+ x2=10
+ gosub @randomx1modx2
+ x3=x1
+ x2=251
+ add x3,x2
+ if x3<256 then setmagic
+ x2=256
+ sub x3,x2			; 8 bit random number from -5 to +5
+.setmagic
+ x2=magicoffset
+ add x2,v6			; find magic offset of sprite.
+ SpriteTable(x2)=x3		; set magic weapon adjustment.
+;
+; choose amount of gold pieces?
+ if x1<>gold then notchoosegold
+.choosewealth			; also used when creating some monsters
+ x2=127
+ gosub @randomx1modx2
+ x3=127
+ add x3,x1
+ x2=WealthOffset
+ add x2,v6
+ &SpriteTable(x2)=x3		; choose 127 to 254 gold pieces
+.notchoosegold
+;
+ return
+;---
+; place a monster of sprite type v5 at pos v1,v2 and set up any 
+; special offsets (e.g weath)
+.generatemonster
+ gosub @MCSetUpNewSprite
+ if v5=Leprechaun then choosewealth	; (see gold pieces code above)
+ return
+;---
+.randomx1modx2 ; return random x1.. 0<=x1<=x2
+; (a random count is used here, because using random x1 produced 
+; predictable results for each object category.)
+ add randomcount,c1
+ if randomcount<256 then randomcountmodx2
+ randomcount=0
+;
+.randomcountmodx2
+ x1=randomcount
+.x1modx2 ; return remainder of division
+ if x2=0 then dividebyzero
+.mod1
+ if x1<x2 then x1modx2ret
+ sub x1,x2
+ goto mod1
+.dividebyzero
+ code -
+ prs " div by zero "
+ code +
+ gosub @displayframe
+ gosub @longdelay
+.x1modx2ret
+ return
+;*****
+;---------------
+.SetUpPlayer
+ v5=0 ; player
+ gosub @MCSetUpNewSprite
+code -
+code +
+ &WordWS(WordPlayer1SpriteOffset)=v6
+ PlayerSpriteOffset=v6
+ &WordWS(WordScreenXPos)=v1
+ &WordWS(WordScreenYPos)=v2
+ x1=NameOffset
+ add x1,v6
+ x2=user
+ &SpriteTable(x1)=x2 ; set up player's name
+;*****
+; set data pointers for when sprite is invisible
+ PlayerHiDataPtr=InvisLoDataPtr
+ PlayerLoDataPtr=InvisHiDataPtr
+;*****
+ return
+;---------
+.FGSpecials
+; TempFixedSprite=20
+; PermFixedSprite=21
+; TempMovedSprite=22
+; PermMovedSprite=23
+; the above give the sprite control blocks for the two sprites
+; involved in a collision.
+;
+; xspeedOffset=4 YSpeedOffset=6
+; XPosOffset=8   YPosOffset=10
+; NameOffset=24
+; HitPointOffset=26
+;
+;
+;.MCDestroyTempMoved
+;.MCDestroyTempFixed
+;
+; return: V1 false if no need to collision detect this
+; sprite with other possibilities. You must do this
+; if the moved sprite was destroyed
+; &TempMovedSprite(XSpeedOffset)=c0
+; &TempMovedSprite(YSpeedOffset)=c0
+; &TempFixedSprite(XSpeedOffset)=c0
+; &TempFixedSprite(YSpeedOffset)=c0
+ x5=PermMovedSprite(TypeOffset)
+ x6=PermFixedSprite(TypeOffset)
+
+ if x5<>PlayerType then @FGSpecialNotPlayer
+ x1=MonsterMask
+ and x1,x6
+ if x1=0 then FGSpecialNotFight
+.FGSFighting
+; land a blow
+ gosub @BlockSprite
+ gosub @LandABlow
+
+.FGSNotDestroyed
+; change graphics to reflect attack
+ &x1=PermMovedSprite(FightAnimationOffset)
+ &TempMovedSprite(AnimationOffset)=x1
+ gosub @MCReCalcSpriteGraphics ; update the pointers for new pic
+ goto @FGSpecialsStop ; regardless of whether or not anything destroyed
+
+.FGSpecialNotFight
+ V1=PermFixedSprite(TypeOffset)
+ if V1<>ObjectType then @FGSNotObject
+
+; An object is about to be picked up...
+ &v1=TempFixedSprite(NameOffset)
+ m1=v1
+;*****
+; Gold pieces are treated as specials
+ if v1<>gold then @notaddgold
+ &x1=TempFixedSprite(WealthOffset)
+ add goldpieces,x1	; add to tally
+ v1=x1
+ gosub @AddNumberToOutputBuffer	; add v1 to scrolling textline
+ m1=gold
+ gosub @AddMessageToOutputBuffer
+ m1=599			; dot
+ gosub @AddMessageToOutputBuffer
+ goto @destroynewobject	; don't add gold to inventory
+;---
+.notaddgold
+; set up LL(LLFree) from the object the player is picking up.
+ L0=InvNameOffset
+ add L0,LLFree
+ &LL(L0)=v1		; record object type
+;
+ x1=v1
+ add x1,x1
+ add x1,x1
+ x2=statisticoffset
+ add x2,x1
+ x1=list7(x2)		; v1 = strength of object
+ l0=InvStrOffset
+ add l0,LLFree
+ LL(l0)=x1		; set strength
+;
+ L0=InvWieldedOffset
+ add L0,LLFree
+ LL(L0)=c0		; make sure it's not wielded yet
+;
+; shall we curse the object?
+ L0=InvCursedOffset
+ add L0,LLFree
+ v2=TempFixedSprite(CursedOffset)
+ LL(L0)=v2		; add cursed bit (if any)
+;
+ L0=InvMagicOffset
+ add L0,LLFree
+ v2=TempFixedSprite(MagicOffset)
+ LL(L0)=v2		; add magic offset (if any)
+;
+ ObjectInfo=LLFree	; save for @PrintLLObject (beleow)
+ gosub @AddToPlayerInv
+;---
+; now add object v1 to any other menus
+ if v1<minrange then notrangeweapon ; not range weapon or wand
+ if v1>maxwand then notrangeweapon ; ditto
+ if v1>maxring then okrangeweapon ; between minwand...maxwand
+ if v1>maxrange then notrangeweapon ; NOT (between minrange...maxrange)
+.okrangeweapon
+ x1=v1
+ gosub @AddRangedWeapon
+.notrangeweapon
+;*****
+.scrollnewobject
+ Gosub @PrintLLObject
+.destroynewobject
+ gosub @MCDestroyTempFixed ; destroy the object
+
+.FGSNotObject
+
+.FGSpecialNotPlayer
+
+; monster?
+ x1=MonsterMask
+ and x1,x5
+ if x1=0 then FGSNotMonster
+ if x6<>PlayerType then @FGSNotAttackPlayer
+code -
+ random x1
+code +
+ if x1>5 then @FGSFighting
+ m1=601 ; ouch!
+ gosub @AddMessageToOutputBuffer
+ goto @FGSFighting
+
+.FGSNotAttackPlayer
+ x1=MonsterMask
+ and x1,x6
+ if x1=0 then FGSNotBlocked
+.FGSBlocked
+ gosub @BlockSprite ; prevent monsters climbing over each other
+ gosub @MonsterBlocked
+
+.FGSNotBlocked
+; monster colliding with something else - ignore at present
+ gosub @MonsterNotBlocked ;** should do on EVERY successful move
+ goto @FGSpecialsOk ; check for other collisions
+
+; Missile?
+.FGSNotMonster
+ x1=MissileMask
+ and x1,x5
+ if x1=0 then @FGSNotMissile
+;
+;*****
+; Has missile hit player?
+ &x1=TempMovedSprite(NameOffset)
+; For some reason, missile 8 has the player collision bit set, 
+; although it should not collide with the player!
+ if x1=8 then notmonstermissile
+ x1=PlayerMask
+ and x1,x6
+ if x1<>0 then @NotRangeMissile		; a hit - damage the player
+.notmonstermissile
+;*****
+;
+ x1=MonsterMask
+ and x1,x6
+ if x1=0 then @FGSpecialsOk
+ gosub @MCSpecialCheck
+ if v1<>0 then @FGSNotMissile
+; missile REALLY did hit it
+;
+;*****
+; missiles are treated specially because there are 18 of them in all, 
+; each having different effects.
+ x1=TempMovedSprite(SourceWeaponOffset) ; x1=missile SOURCE object
+;
+; Wand?
+ if x1<minwand then notwandmissile
+ if x1>maxwand then notwandmissile
+.ZapWand				; also called from @SpecialMissile
+ gosub @discoveruse			; use of wand is now known
+ x2=minwand
+ sub x1,x2
+ code -
+ jump @WandJump x1			; do the specific wand routine
+ code +					; and then return to @missile
+;
+; Range weapon?
+.notwandmissile
+ if x1<minrange then notrangemissile
+ if x1>maxrange then notrangemissile
+ goto @missile				; normal damage for stars etc.
+;
+; Source is not wand or range weapon, so must either be generated by...
+; 1. M/C (off-shoot from exploding missile)
+; 2. Magic weapon (e.g. wand of dynamite)
+; 3. A monster
+; 4. The player before any special weapons are owned (if this is allowed!)
+.notrangemissile
+ gosub @landablow			; use built-in sprite damage
+ goto @donemissile
+;
+ code -
+.WandJump
+ data @createmonster	; 60
+ data @dmissile		; 61 magic missile
+ data @slowmonster	; 62
+ data @polymorph	; 63
+ data @teleport		; 64
+ data @digging		; 65
+ data @dmissile		; 66 fire missile
+ data @dmissile		; 67 ice missile
+ data @dmissile		; 68 death
+ data @exorcism		; 69
+ data @cloning		; 70
+ data @dynamite		; 71
+ data @dmissile		; 72 fire storm
+ data @shieldwand	; 73
+ data @revealtraps	; 74
+;
+.dmissile		; no special code for missile
+ code +
+;
+; damage the target using the missile statistic table damage...
+.missile
+ x1=TempMovedSprite(SourceWeaponOffset) ; x1=missile SOURCE object
+ add x1,x1
+ add x1,x1
+ x2=statisticoffset
+ add x1,x2
+ x1=list7(x1)				; x2=missile "special" damage
+ gosub @dodamagex1
+;
+.donemissile
+;*****
+;
+; was what we hit destroyed?
+ &x1=TempFixedSprite(HitPointOffset)
+ if x1=0 then MissileDestroyed
+ gosub @StartExplosion
+
+.MissileDestroyed
+ &x1=TempMovedSprite(NameOffset)
+ if x1=6 then FGSBigExp1 ;*****
+ if x1<>8 then NotBigExplosion
+code -
+ random x1
+code +
+ if x1>5 then FGSBigExp1
+ m1=602 ; wow!
+ gosub @AddMessageToOutputBuffer
+
+.FGSBigExp1
+ gosub @StartBigExplosion
+
+.NotBigExplosion
+; for missiles, an explosion is also started where the OTHER sprite was.
+
+ if x1=5 then FGSLittleExp1 ;*****	; no text for player-colliding
+ if x1=6 then FGSLittleExp1 ;*****	; missiles
+code -
+ random x1
+code +
+ if x1>5 then FGSLittleExp1
+ m1=603 ; got him!
+ gosub @AddMessageToOutputBuffer
+
+.FGSLittleExp1
+ gosub @MCDestroyTempMoved
+ goto @FGSpecialsStop
+
+.FGSNotMissile
+
+; by default, scan for further collisions
+.FGSpecialsOk
+ v1=true ; continue with cd
+ return
+;---
+.FGSpecialsStop
+ v1=false
+ return
+;
+;*****
+; Special routines for wand missiles
+;
+; NB: These routines are either called from FGSMissileHit where 
+; a real missile is used, or from SpecialMissile where no missile 
+; is used. You must return to @Missile if the routine was called from
+; FGSMissileHit.
+;
+ code -
+.createmonster				; on entry, v1,v1=player x,y
+ code +
+ &x1=WordWS(WordFreeSprites)
+ if x1<SpriteAllowance then @missile	; safe limit when creating monsters
+ gosub @findvacantsquare		; find a vacant square
+ if x1=false then @missile		; tough cookie!
+; Now bung a random monster in it...
+ v5=22					; floating eye
+ code -
+ random x1
+code +
+ x2=15
+ and x1,x2
+ add v5,x1				; randomize monster type
+ goto @generatemonster
+;---
+ code -
+.slowmonster
+ code +
+ x1=100
+ TempFixedSprite(SlowCounterOffset)=x1	; set countdown time for slowness
+ goto @missile
+;---
+; change monster into a random object
+.polymorphagain
+ code -
+.polymorph
+ random v5
+ code +
+ x1=31
+ and v5,x1
+ if v5<Bottle then polymorphagain
+ if v5>Club then polymorphagain
+ &TempFixedSprite(HitPointOffset)=c0	; destroy "old" monster
+ &v1=TempFixedSprite(XPosOffset)	; monster x
+ &v2=TempFixedSprite(YPosOffset)	; monster y
+ v3=0					; speed=0
+ v4=0
+ gosub @generateobject			; change monster to object
+ goto @missile
+;---
+ code -
+.teleport
+ code +
+ gosub getrandompos
+ &TempFixedSprite(HitPointOffset)=c0	; destroy "old" monster
+; Now reposition the "new" monster...
+ &v5=TempFixedSprite(NameOffset)
+ gosub @MCSetUpNewSprite
+ goto @missile
+;---
+; get a random sprite position in v1,v2 for use with teleport
+.getrandompos
+ code -
+; 2 random elements are used for each ordinate, since one proved
+; inadequate...
+ random v1
+ random v2				; x,y ranges from 0...255
+ random x1
+ random x2
+ code +
+ add v1,v1
+ add v2,v2				; 0...512 even aligned
+ add v1,x1
+ add v2,x2				; 0...768
+ x1=16
+ add v1,x1
+ add v2,x1				; 16...784
+ gosub @findvacantsquare		; find a vacant square
+ if x1=false then getrandompos		; try again...
+ return
+;---
+; digging (null - simply used from mcode to set identify flag)
+ code -
+.digging
+ code +
+ return
+;---
+; destroy ghosts
+ code -
+.exorcism
+ code +
+ &x1=TempFixedSprite(NameOffset)
+ if x1<>ghost then targetnotghost
+ &TempFixedSprite(HitPointOffset)=c0	; destroy ghost
+.targetnotghost
+ goto @missile
+;---
+ code -
+.cloning
+ code +
+ &x1=WordWS(WordFreeSprites)
+ if x1<SpriteAllowance then @missile	; safe limit when creating monsters
+ &v1=TempMovedSprite(XPosOffset) 	; v1 is x pos of missile
+ &v2=TempMovedSprite(YPosOffset)	; v2 is y pos of missile
+ gosub @findvacantsquare		; find a vacant square
+ if x1=false then @missile		; tough cookie!
+; Now clone the monster...
+ &v5=TempFixedSprite(NameOffset)
+ gosub @generatemonster
+ goto @missile
+;---
+ code -
+.dynamite				; on entry, v1,v1=player x,y
+ code +
+; destroy wand from both inventory & ranged weapons list
+ v3=0					; xspeed
+ v4=1					; yspeed (to trigger collision)
+ v5=6					; player-colliding exp missile
+ gosub @MCSetUpNewSprite
+ x2=SourceWeaponOffset
+ add x2,v6
+ x1=255
+ SpriteTable(x2)=x1			; missile source type="monster"
+ x1=71					; dynamite wand number
+ ObjectInfo=LLPlayerInv			; destroy from inventory
+ gosub @DestroyEntry
+ ObjectInfo=LLRangedWeapons		; destroy from ranged list
+ gosub @DestroyEntry
+ ByteWs(ByteSourceWeapon)=c0		; no longer current weapon
+ return
+;---
+ code -
+.shieldwand
+ code +
+; destroy wand from both inventory & ranged weapons list
+ playershieldcounter=100		; set countdown time for shield
+ x1=73					; protection wand number
+ ObjectInfo=LLPlayerInv			; destroy from inventory
+ gosub @DestroyEntry
+ ObjectInfo=LLRangedWeapons		; destroy from ranged list
+ gosub @DestroyEntry
+ ByteWs(ByteSourceWeapon)=c0		; no longer current weapon
+ return
+;---
+; Graham 01/09/88. The game contains no traps as yet...
+;
+ code -
+.revealtraps
+ code +
+ goto @missile
+;---
+; Find a totally vacant square as close as possible to "sprite-scale"
+; co-ordinates V1,V2.
+; On exit, x1=TRUE if vacant square is found within a range of +/- 4
+; squares.
+; 
+.findvacantsquare
+; divide x,y pos by 16 to get map square pos
+ add v1,v1
+ add v1,v1
+ add v1,v1
+ add v1,v1				; * 16 to move to high byte
+ &list3(spareword)=v1			; store word
+ x5=list3(spareword)			; read high byte
+ add v2,v2
+ add v2,v2
+ add v2,v2
+ add v2,v2				; * 16 to move to high byte
+ &list3(spareword)=v2			; store word
+ x6=list3(spareword)			; read high byte
+;
+ VacancyType=1				; first, search for room floor type
+ gosub FindVacancy
+ VacancyType=0
+ if x1=false then FindVacancy		; last resort, search outside map
+ return
+;
+; find the nearest vacant square...
+.FindVacancy
+ minsearch=0				; -ve range for square search
+ maxsearch=0				; +ve range for square search
+.nextsearch
+  yoffset=minsearch			; vertical search
+.nextyoffset
+   xoffset=minsearch			; horizontal search
+.nextxoffset
+    x=x5
+    y=x6				; centralise x,y
+    add x,xoffset			; add x pos offset
+    if x>ScreenXBlocksM1 then NotVacant	; out of map range
+    add y,yoffset			; add y pos offset
+    if y>ScreenYBlocksM1 then NotVacant	; out of map range
+    gosub @CalcMapAddress
+    &x2=Map(x1)				; get square value
+; if square is vacant, then test for any sprites already there...
+    if x2=VacancyType then @testforsprites
+; no vacant square found if returned here, so try another...
+.NotVacant
+   if maxsearch<1 then testallrows	; test all squares at first...
+   if yoffset=minsearch then testallrows
+   if yoffset=maxsearch then testallrows
+   if xoffset=maxsearch then nextrow
+   xoffset=maxsearch			; ...then just test border squares
+   goto @nextxoffset
+.testallrows
+   if xoffset=maxsearch then nextrow	; end of x search. step down y
+   add xoffset,c1
+   goto @nextxoffset
+.nextrow
+  if yoffset=maxsearch then nextrange	; end of y search. enlarge range
+  add yoffset,c1
+  goto @nextyoffset
+.nextrange
+ sub minsearch,c1			; enlarge -ve range
+ add maxsearch,c1			; enlarge +ve range
+ if maxsearch<6 then @nextsearch	; test -5 to +5
+ x1=false				; search failed
+ return
+;
+; vacant map square found. now test for any LIVING sprites already here...
+.testforsprites
+ gosub @convertparams			; convert map x,y to sprite v1,v2
+; (MUST preserve v1 v2 v3 v4 v5 X5 X6)
+ x1=0					; offset counter into SpriteTable
+.testspritepos
+ x4=hitpointoffset
+ add x4,x1
+ &x4=SpriteTable(x4)			; x4=hit points of sprite
+ if x4=0 then @spriteposok		; no hit points - not living
+ x4=xposoffset
+ add x4,x1
+ &x2=SpriteTable(x4)			; x2=test sprite x pos
+ add x4,c2
+ &x3=SpriteTable(x4)			; x3=test sprite y pos
+ x4=16					; width/depth of all sprites
+;
+; test x collision...
+ x7=x2					; x7=new sprite x pos
+ sub x7,x4
+ sub x7,v1
+ if x7<32000 then spriteposok		; test sprite is left of new one
+ x7=x2
+ add x7,x4
+ sub x7,v1
+ if x7>32000 then spriteposok		; test sprite is right of new one
+;
+; sprite is within x range, so test y collision...
+ x7=x3					; x7=new sprite y pos
+ sub x7,x4
+ sub x7,v2
+ if x7<32000 then spriteposok		; test sprite is above new one
+ x7=x3
+ add x7,x4
+ sub x7,v2
+ if x7<32000 then @NotVacant		; test sprite is NOT on below
+;
+.spriteposok
+; now test the next sprite...
+ x2=48
+ add x1,x2
+ if x1<SpriteTableSize then @testspritepos
+ x1=true				; search was successful!
+ return
+;---
+; This routine handles all the special cases when the fire button is 
+; pressed, but a missile is not desired.
+; Such cases are used for "create monster" and "shield" wands etc.
+.SpecialMissile
+ v1=PlayerX				; x,y is required by many of 
+ v2=PlayerY				; the Special Missile routines
+ x1=ByteWs(ByteSpecialMissile)
+;
+; Wand?
+ if x1<minwand then NotSpecialWand
+ if x1<minscroll then @ZapWand		; uses same jumblock as FGSpecial
+;
+.NotSpecialwand
+ return
+;---
+; Called every turn of the main loop. Handle any specials for rings 
+; worn...
+.RingSpecials
+ add ringtimer,c1			; interval timer for hunger etc.
+ x8=MinRing
+.RSLoop
+ gosub @TestRingWorn			; is ring x8 worn?
+ if x2<>0 then callring			; ring worn, so call its routine
+.RSNextRing
+ add x8,c1
+ if x8<MaxRingPlus1 then RSLoop
+ return
+;
+; Do jump to ring routine specified by ring x8.
+; All routines MUST preserve x6 and x8
+.CallRing
+ x1=x8
+ x2=MinRing
+ sub x1,x2				; first ring is 0
+ code -
+ jump RingJump x1
+;
+; many rings are handled elsewhere, hence they use nullring here...
+.RingJump
+ data @nullring				; adjornment does nothing
+ data @teleportation			;
+ data @regeneration			;
+ data @hunger				;
+ data @nullring				; poison protection
+ data @nullring				; fire resistance
+ data @nullring				; cold resistance
+ data @nullring				; increase damage
+ data @nullring				; protection
+ data @nullring				; teleport control
+ data @hunger				; leech same as hunger for now
+ data @invisibility			;
+ data @nullring				; strength
+ data @nullring				; undead protection
+;
+.nullring
+ code +
+ goto @RSNextRing
+;
+; Test to see if ring x8 is worn. return x2<>0 if worn
+.TestRingWorn
+ x2=RingTableMinus40
+ add x2,x8
+ x2=List3(x2)
+ return
+;
+; Specific ring routines called from RingJump table.
+; Return to RSNextRing in all cases.
+;
+ code -
+.Teleportation
+ code +
+ x1=255
+ and x1,ringtimer
+ if x1<>0 then teleportationret		; teleport every 256 moves
+ gosub @TeleportMe1			; see menu.txt (teleport scroll)
+.teleportationret
+ goto @RSNextRing
+;---
+ code -
+.regeneration
+ code +
+ x1=3
+ and x1,ringtimer
+ if x1<>0 then regenret			; every 4 turns
+ x1=1
+ gosub @increasehitpoints		; add 1 to hit points
+.regenret
+ goto @RSNextRing
+;---
+ code -
+.hunger
+ code +
+ x1=3
+ and x1,ringtimer
+ if x1<>0 then hungerret		; every 4 turns
+ x1=1
+ gosub @decreasehitpoints		; sub 1 from hit points
+.hungerret
+ goto @RSNextRing
+;---
+ code -
+.invisibility
+ code +
+ &v6=WordWS(WordPlayer1SpriteOffset)
+ v1=DataPtrOffset
+ add v1,v6				; v1=hi word
+ v2=LoDataPtrOffset
+ add v2,v6				; v2=lo word
+ x1=7
+ and x1,ringtimer
+;
+; show invisible sprite on frame 0
+ if x1<>0 then solidsprite
+ &PlayerHiDataPtr=SpriteTable(v1)
+ &PlayerLoDataPtr=SpriteTable(v2)	; save old sprite data ptr
+
+;&*&*&*
+ &ArmourClass=SpriteTable(v1)
+ &WeaponClass=SpriteTable(v2)
+;&*&*&*&
+
+ x1=InvisLoDataPtr
+ &SpriteTable(v1)=x1
+ x1=InvisHiDataPtr
+ &SpriteTable(v2)=x1			; set to invis. sprite
+ goto invisret
+;
+; show solid sprite on frame 1
+.solidsprite
+ if x1<>1 then invisret
+ &SpriteTable(v1)=PlayerHiDataPtr
+ &SpriteTable(v2)=PlayerLoDataPtr	; restore old sprite data ptr
+;
+.invisret
+ goto @RSNextRing
+;---
+; add x1 to player hit points
+.increasehitpoints
+ &v6=WordWS(WordPlayer1SpriteOffset)
+ v1=hitpointoffset
+ add v1,v6
+ &v2=SpriteTable(v1)			; v2=player hit points
+ add v2,x1				; add x1 increment
+ if v2>MaxPlayerHitPoints then ihpret	; don't go over max hp
+ &SpriteTable(v1)=v2
+.ihpret
+ return
+;---
+; sub x1 from player hit points
+.decreasehitpoints
+ &v6=WordWS(WordPlayer1SpriteOffset)
+ v1=hitpointoffset
+ add v1,v6
+ &v2=SpriteTable(v1)			; v2=player hit points
+ sub v2,x1				; sub x1 decrement
+ if v2=0 then dhpdead			; zero - dead
+ if v2>MaxPlayerHitPoints then dhpdead	; underflow - dead
+ &SpriteTable(v1)=v2
+ return
+;
+;******************************************************************
+;* Player is killed by energy drain. Unsure what to do here -     *
+;* can't call dodamagedestroy, since Perm/TempFixedSprite not set *
+;* up...							  *
+;******************************************************************
+.dhpdead
+ code -
+ prs "DEAD IN DECREASEHITPOINTS "
+ code +
+ gosub @DisplayFrame
+ gosub @LongDelay
+ return
+;---
+;*****
+;
+.BlockSprite
+ &TempMovedSprite(XSpeedOffset)=c0 ; monsters blocked by everything
+ &TempMovedSprite(YSpeedOffset)=c0
+ &x1=WordWs(WordXPosSave)
+ &TempMovedSprite(XPosOffset)=x1
+ &x1=WordWs(WordYPosSave)
+ &TempMovedSprite(YPosOffset)=x1
+ return
+;---
+.MonsterBlocked
+ x1=TempMovedSprite(AddDirOffset)
+ gosub @SignExtendX1
+ x2=NextAddDirTableOffset
+ add x2,x1
+ x1=list7(x2)
+ TempMovedSprite(AddDirOffset)=x1
+ TempMovedSprite(DistanceOffset)=c0
+ return
+;---
+.MonsterNotBlocked
+; sprite can move ok - add to distance travelled, and
+; if AddDirOffset is set, eventually stop moving in that direction
+ x1=TempMovedSprite(DistanceOffset)
+ add x1,c1
+ TempMovedSprite(DistanceOffset)=x1
+ x2=TempMovedSprite(AddDirOffset)
+ if x2=0 then MonsterNotBlockedRet
+ if x1>8 then @MonsterBlocked ; max distance monster can move
+; in a direction not directly towards the player without reconsidering
+
+.MonsterNotBlockedRet
+ return
+
+;*****
+.LandABlow
+ x1=TempMovedSprite(TimeToNextBlowOffset)
+ sub x1,c1
+ if x1<250 then FGSFighting1
+;
+; monster hitting user?
+ &x1=TempFixedSprite(NameOffset)
+ if x1<>user then targetisnotuser
+ gosub @SpecialCombat			; any special cases before hit?
+ gosub @doesmonsterhit			; will monster hit or miss?
+ if x1=false then FGSFighting1		; missed!
+.targetisnotuser
+;
+; do damage to fixed sprite
+ &x1=TempMovedSprite(BlowStrengthOffset)
+;
+; user hitting monster?
+ &x2=TempMovedSprite(NameOffset)
+ if x2<>user then attackerisnotuser	; add to damage if user 
+ gosub @adjustuserstrength		; is using a weapon
+.attackerisnotuser
+;
+ gosub @DoDamageX1
+ x1=PermMovedSprite(TimeBetweenBlowsOffset)
+;
+.FGSFighting1
+ TempMovedSprite(TimeToNextBlowOffset)=x1
+ return
+;---
+; Special combat routines for stealing things etc.
+.SpecialCombat
+;
+ &x1=TempMovedSprite(NameOffset)	; name of attacker
+ if x1<>leprechaun then @sahnotleprechaun
+ if goldpieces=0 then @sahnotleprechaun	; nothing worth stealing!
+ x1=TempMovedSprite(RunAwayOffset)
+ if x1<>0 then @sahnotleprechaun	; retreating (has just attacked)
+ code -
+ random x1
+ code +
+ x3=x1					; preserve x1 for later
+ x2=15
+ and x1,x2
+ add x1,x2
+ TempMovedSprite(RunAwayOffset)=x1	; retreat for x1 moves
+ x1=x3					; recover x1
+ x2=127
+ and x1,x2
+ add x1,x2
+ if x1<GoldPieces then oktosteal
+ x1=GoldPieces
+.oktosteal
+ sub GoldPieces,x1			; steal 127-254 gold pieces
+ &x2=TempMovedSprite(WealthOffset)
+ add x2,x1
+ &TempMovedSprite(WealthOffset)=x2	; add to wealth
+ m1=1000
+ goto @AddMessageToOutputBuffer		; "your purse feels lighter"
+.sahnotleprechaun
+;
+ &x1=TempMovedSprite(NameOffset)	; name of attacker
+ if x1<>Nymph then sahnotnymph
+ x1=TempMovedSprite(RunAwayOffset)
+ if x1<>0 then sahnotNymph		; retreating (has just attacked)
+ x8=true				; don't charm cursed armour
+ gosub @DestroyArmour1
+ if m1=820 then sahnotnymph		; no armour wielded to charm off!
+ code -
+ random x1
+ code +
+ x2=15
+ and x1,x2
+ add x1,x2
+ TempMovedSprite(RunAwayOffset)=x1	; retreat for x1 moves
+ m1=1001
+ goto @AddMessageToOutputBuffer		; "nymph charms off your armour"
+.sahnotnymph
+;
+.sahret
+ return
+;---
+; Monster is about to hit user. Work out the probability of 
+; a hit or miss, and return x1=TRUE if it's a hit.
+.DoesMonsterHit
+;
+; Wand of protection being used?
+ if playershieldcounter=0 then nomagicshield
+ if playershieldcounter<65000 then @PreventHit	; Yes - Prevent all hits
+.nomagicshield
+;
+; Roll a hit dice and see if it "beats" the armour class...
+ code -
+ random x2
+ code +
+ x3=15
+ and x2,x3				; hit dice 0-15
+ sub x2,ArmourClass
+ if x2>65000 then AllowHit		; it's a hit!
+;
+.PreventHit
+ x1=false
+ return
+;
+.AllowHit
+ x1=true
+ return
+;---
+; User is hitting a monster. Adjust strength x1 for weapons used etc.
+.adjustuserstrength
+;
+ if blackhandflag=false then noblackhand
+ blackhandflag=true
+ x1=255					; target is as good as dead!
+ goto @ausret
+.noblackhand
+;
+ x2=weaponclass
+ add x2,x2
+ add x2,x2
+ add x2,weaponclass			; weaponclass*5 is more realistic
+;
+ add x1,x2				; Sprite Strength + 5WC
+;
+.ausret
+ return
+;---
+; calc both ArmourClass and WeaponClass
+.CalcACWC
+ gosub CalcWeaponClass
+;---
+; Return ArmourClass=Armour class (0 is invincible)
+.CalcArmourClass
+ ArmourClass=InitialArmourClass
+ x7=1
+ gosub @calcstrength			; x5=total str body armour
+ sub ArmourClass,x5
+ x7=2
+ gosub @calcstrength			; x5=total str accessory armour
+ sub ArmourClass,x5
+ if ArmourClass<65000 then CACRet	; (in case of underflow)
+ ArmourClass=0
+.CACRet
+ return
+;---
+; return WeaponClass=weapon class (greater x8 means more weapon strength)
+.CalcWeaponClass
+ x7=3
+ gosub @calcstrength			; x5=total str weapons
+ WeaponClass=x5
+ if WeaponClass<65000 then CWCRet	; (in case of "magic" underflow)
+ WeaponClass=0
+.CWCRet
+ return
+;---
+; calc x5 as total strength of objects with wielded type x7
+.calcstrength
+ x5=0
+ x3=LLPlayerInv
+.calcstrength1
+ &x4=LL(x3)
+ if x4=0 then @calcstrengthend
+ x1=InvWieldedOffset
+ add x1,x4
+ x1=LL(x1)				; get wielded status
+ if x1<>x7 then @csnotwieldtype		; now correct wield type
+;
+; we are wielding armour. add strength
+ x1=InvStrOffset
+ add x1,x4
+ x1=LL(x1)
+ add x5,x1				; add strength
+;
+; add magic adjustment (if any)
+ x1=InvMagicOffset
+ add x1,x4
+ x1=LL(x1)
+ gosub @signextendx1
+ add x5,x1				; add magic adjustment
+;
+.csnotwieldtype
+ x3=x4 					; previous entry
+ goto @calcstrength1			; not last entry
+.calcstrengthend
+ return
+;---
+.SpecialActivate
+; TempMovedSprite (of name ACTOR) has just been activated.
+; position x,y; speed
+; Return v1=0 if it is not to move normally.
+;
+ if actor<>user then @notactivateuser
+;
+; any scrolls to be activated which couldn't be handled from 
+; the menu?
+; fire scroll...
+ if firescrollflag=false then nofirescroll
+ firescrollflag=0
+ v1=playerx
+ v2=playery
+ v3=0					; xspeed
+ v4=1					; yspeed (to trigger collision)
+ v5=6					; player-colliding exp missile
+ gosub @MCSetUpNewSprite
+ x2=SourceWeaponOffset
+ add x2,v6
+ x1=255
+ SpriteTable(x2)=x1			; missile source type="monster"
+ return
+.nofirescroll
+;
+; magic shield?
+ if playershieldcounter=0 then @activateret
+ if playershieldcounter>65000 then @activateret	; (just in case!)
+ sub playershieldcounter,c1
+ x1=playershieldcounter
+ and x1,c3
+ if x1<>0 then @activateret		; pulsing shield
+ v1=playerx
+ v2=playery
+ v3=0					; xspeed
+ v4=0					; yspeed
+ v5=3					; sprite no. for explosion
+ goto @MCStartBigExplosion
+;
+.notactivateuser
+;---
+ if actor<>demon then @notactivatedemon
+;
+; Did the fire demon have a curry last night?
+ code -
+ random x1
+ code +
+ if x1>48 then @activateret		; Fire demon did not have a curry
+;
+; Fire demon DID have a curry last night, so start shitting fireballs...
+ &v3=TempMovedSprite(XSpeedOffset)
+ &v4=TempMovedSprite(YSpeedOffset)	; Get x,y speed of demon
+ x1=v3
+ add x1,v4
+ if x1=0 then @activateret		; No movement, so no fireballs
+;
+; Position the missile AHEAD of the demon...
+ &v1=TempMovedSprite(XPosOffset)
+ &v2=TempMovedSprite(YPosOffset)	; Get x,y of demon
+ add v1,v3				; Start the fireball ahead
+ add v2,v4				; of the demon
+;
+; Now work out the x,y speed of the missile, bearing in mind that 
+; the demon may be moving at slow-speed if cursed.
+ if v3=0 then NoDemonXSpeed
+ if v3>65000 then DemonXSpeedNeg
+ v3=12					; X speed is +12
+ goto NoDemonXSpeed
+.DemonXSpeedNeg
+ v3=65524				; X speed is -12
+.NoDemonXSpeed
+;
+ if v4=0 then NoDemonYSpeed
+ if v4>65000 then DemonYSpeedNeg
+ v4=12					; Y speed is +12
+ goto NoDemonYSpeed
+.DemonYSpeedNeg
+ v4=65524				; Y speed is -12
+.NoDemonYSpeed
+;
+; Away we go...
+ v5=5					; player-colliding missile
+ goto @MCSetUpNewSprite
+;
+.notactivatedemon
+.activateret
+;*****
+;
+ return
+;---

@@ -1,0 +1,325 @@
+********************************************************************
+*  Macro definitions for Lattice C interface library               *
+********************************************************************
+*                                        Last Changed    28 FEB 86 *
+********************************************************************
+*
+        XREF    CALLVDI,VDIPB
+*
+* Offsets of arrays within parameter block
+*
+COPB    EQU     0       Control array
+IIPB    EQU     4       Input array
+PIPB    EQU     8       Points in array
+IOPB    EQU     12      Output array
+POPB    EQU     16      Points out array
+*
+* Sizes of arrays in bytes
+*
+COS     EQU      12*2
+IIS     EQU     256*2
+PIS     EQU     256*2
+IOS     EQU     256*2
+POS     EQU     256*2
+*
+* Flags set to 1 if we must replace the standard values
+*
+COPBS   SET     0       Control array
+IIPBS   SET     0       Input array
+PIPBS   SET     0       Points in array
+IOPBS   SET     0       Output array
+POPBS   SET     0       Points out array
+*
+* Offsets of the actual arrays from the base pointer
+*
+COAR    EQU     44       Control array
+IIAR    EQU     COAR+COS Input array
+PIAR    EQU     IIAR+IIS Points in array
+IOAR    EQU     PIAR+PIS Output array
+POAR    EQU     IOAR+IOS Points out array
+*
+* Other macro variables
+*
+ARGPTR  SET     0       Offset for arguments
+EXIT    SET     0       1 if work to be done after call
+LEND1   SET     0       1 if string length contained in D1
+*
+*******************************************************************
+* LIBFNV  name,args      Set up entry Point for 'void' function   *
+*******************************************************************
+*
+LIBFNV  MACRO
+        IFNE   NARG-2
+        FAIL
+        ENDC
+        XDEF   \1
+\1      INIT   \2
+        ENDM
+*
+*******************************************************************
+* LIBFNR  name,args     Set up entry Point for 'long' function    *
+*                       It may need to do more work than LIBFNV   *
+*******************************************************************
+*
+LIBFNR  MACRO
+        IFNE    NARG-2
+        FAIL
+        ENDC
+        XDEF    \1
+\1      INIT    \2
+        ENDM
+*
+*************************************************
+* INIT  argcount        Set up initial call     *
+*************************************************
+*
+INIT    MACRO
+ARGPTR  SET     4*\1
+        LEA.L   VDIPB,A0
+        ENDM
+*
+*************************************************************************
+* LONG                  Move past argument                              *
+* LONG  array           Place argument (array) in parameter block slot  *
+* LONG  array,offset    Place argument in offset in specified array     *
+*************************************************************************
+*
+LONG    MACRO
+        IFEQ    NARG-1
+        MOVE.L  ARGPTR(SP),\1PB(A0)
+\1PBS   SET     1
+EXIT    SET     1
+        ENDC
+        IFEQ    NARG-2
+        MOVE.L  ARGPTR(SP),\2*2+\1AR(A0)
+        ENDC
+ARGPTR  SET     ARGPTR-4
+        ENDM
+*
+**********************************************************************
+* WORD  array,offset    Place argument in offset in specified array  *
+**********************************************************************
+*
+WORD    MACRO
+        IFNE    NARG-2
+        FAIL
+        ENDC
+        MOVE.W  ARGPTR+2(SP),\2*2+\1AR(A0)
+ARGPTR  SET     ARGPTR-4
+        ENDM
+*
+***********************************************************************
+* LPOINTW   array,offset    array[offset] = *(&value)                 *
+* LPOINTW   name            remember stack offset to put result there *
+***********************************************************************
+*
+LPOINTW MACRO
+        IFEQ    NARG-2
+        MOVEA.L ARGPTR(SP),A1
+        MOVE.W  (A1),\2*2+\1AR(A0)
+        ENDC
+        IFEQ    NARG-1
+\1      SET     ARGPTR
+EXIT    SET     1
+        ENDC
+ARGPTR  SET     ARGPTR-4
+        ENDM
+*
+**********************************************************
+* LABEL name     Set a label for this argument offset    *
+**********************************************************
+*
+LABEL   MACRO
+\1      SET     ARGPTR
+        ENDM
+*
+********************************************************************
+* SETPTS  inp,ii Set the number of input points and size of intin. *
+********************************************************************
+*
+SETPTS  MACRO
+        IFNE    NARG-2
+        FAIL
+        ENDC
+        SETA    CO,1,\1
+        SETA    CO,3,\2
+        ENDM
+*
+**********************************************************
+* SETA  array,offset,value    Set specified array slot.  *
+**********************************************************
+*
+SETA    MACRO
+        IFNE    NARG-3
+        FAIL
+        ENDC
+        IFEQ    \3
+        CLR.W   \2*2+\1AR(A0)
+        ENDC
+        IFNE    \3
+        MOVE.W  #\3,\2*2+\1AR(A0)
+        ENDC
+        ENDM
+*
+*****************************************
+* CALLW name,code    Call the function  *
+*****************************************
+*
+CALLW   MACRO
+        IFNE    NARG-2
+        FAIL
+        ENDC
+        MOVE.W  #\2,COAR(A0)
+        JSR     CALLVDI
+        IFNE    EXIT
+        LEA.L   VDIPB,A0             Reload address register
+EXIT    SET     0         
+        ENDC
+        RESTORE II
+        RESTORE PI
+        RESTORE IO
+        RESTORE PO
+        ENDM
+*
+**********************************************
+* RESTORE array -- Service macro for above   *
+**********************************************
+*
+RESTORE MACRO
+        IFNE    \1PBS
+        LEA.L   \1AR(A0),A1
+        MOVE.L  A1,\1PB(A0)
+\1PBS   SET     0
+        ENDC
+        ENDM
+*
+*******************************************************************
+* SPOINTW array,offset,name   Place short result back into output *
+*******************************************************************
+*
+SPOINTW MACRO
+        IFNE    NARG-3
+        FAIL
+        ENDC
+        MOVE.L  \3(SP),A1             Point to destination
+        MOVE.W  \2*2+\1AR(A0),(A1)    Move back result
+        ENDM
+*
+******************************************************************
+* SPOINTL array,offset,name   Place long result back into output *
+******************************************************************
+*
+SPOINTL MACRO
+        IFNE    NARG-3
+        FAIL
+        ENDC
+        MOVE.L  \3(SP),A1             Point to destination
+        MOVE.L  \2*2+\1AR(A0),(A1)    Move back result
+        ENDM
+*
+*********************************************************************
+* SETEXIT     Ensure A0 is loaded with Pointer to Params after call *
+*********************************************************************
+*
+SETEXIT  MACRO
+EXIT   SET   1
+         ENDM
+*
+***********************************************************************
+* COPYW   array,offset,length,name,off,direction       Array copying  *
+***********************************************************************
+*
+COPYW  MACRO
+       IFNE    NARG-6
+       FAIL
+       ENDC
+LEND1  SET     0                     Because we're destroying D1
+       MOVE.W  #\3-1,D1              Count
+       MOVE.L  \4(SP),A1             Pointer to destination
+       LEA.L   \5*2(A1),A1           Add in offset
+       MOVE.L  A2,-(SP)              Save A2
+       LEA.L   \2*2+\1AR(A0),A2      A2 is now source pointer
+       IFC     \6,'BACK'
+C\@    MOVE.W  (A2)+,(A1)+           Put Values into user array
+       DBRA    D1,C\@
+       ENDC
+       IFC     \6,'FROM'
+C\@    MOVE.W  (A1)+,(A2)+           Get Values from user array
+       DBRA    D1,C\@
+       ENDC
+       MOVE.L  (SP)+,A2              Restore A2
+       ENDM
+*
+***********************************************************************
+* COPYWA  array,offset,length,name,off                                *
+*             Copy alternate elements of source array to destination  *
+***********************************************************************
+*
+COPYWA MACRO
+       IFNE    NARG-5
+       FAIL
+       ENDC
+LEND1  SET     0                     Because we're destroying D1
+       MOVEQ.L #0,D1                 Zero D1
+       MOVE.W  #\3-1,D1              Count
+       MOVE.L  \4(SP),A1             Pointer to destination
+       LEA.L   \5*2(A1),A1           Add in offset
+       MOVE.L  A2,-(SP)              Save A2
+       LEA.L   \2*2+\1AR(A0),A2      A2 is now source pointer
+C\@    MOVE.W  (A2)+,(A1)+           Put Values into user array
+       TST.W   (A2)+                 Skip source element
+       DBRA    D1,C\@                Back for next item
+       MOVE.L  (SP)+,A2              Restore A2
+       ENDM
+*
+*******************************************************************
+* STRLEN array,offset,stringptr  array[offset] = length of string *
+*******************************************************************
+*
+STRLEN  MACRO
+        MOVEQ.L #-1,D1                Initialise D1
+        MOVEA.L \3(SP),A1             Pointer to string
+S\@     ADDQ.L  #1,D1
+        TST.B   (A1)+                 Is it a 0
+        BNE.S   S\@
+        MOVE.W  D1,\2*2+\1AR(A0)      Store result
+LEND1   SET     1                     Indicates length in D1
+        ENDM
+*
+***************************************************************************
+* STRCPY array,offset,string   Copy each byte of the string into a word   *
+*                              of array. Relies on length being in D1     *
+***************************************************************************
+*
+STRCPY  MACRO
+        IFEQ    LEND1
+        FAIL
+        ENDC
+LEND1   SET     0
+        MOVEQ.L #0,D0                 Initialise D0
+        MOVE.L  \3(SP),A1             Pointer to string
+        MOVE.L  A2,-(SP)              Save A2
+        LEA.L   2*\2+\1AR(A0),A2      A2 pointer to offset array
+SC\@    MOVE.B  (A1)+,D0              Get a char
+        MOVE.W  D0,(A2)+              Move 16 bits into destination array
+        DBRA    D1,SC\@               Go Back for next byte
+        MOVE.L  (SP)+,A2              Restore A2
+        ENDM
+*
+****************************************************************
+* RETURN                Perform return sequence                *
+* RETURN array,offset   Transfer array[offset] to a register   *
+*                       (if necessary) and return              *
+****************************************************************
+*
+RETURN  MACRO
+        IFEQ    NARG-2
+        MOVE.W  \2*2+\1AR(A0),D0
+        ENDC
+        EXT.L   D0
+        RTS
+        ENDM
+*
+**************************
+*   End of Macros File   *
+**************************

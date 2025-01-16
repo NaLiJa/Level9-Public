@@ -1,0 +1,101 @@
+06601090305800
+1
+2
+F0110030
+9[...................................................................]011
+€
+AllinstructionsCopyright(C)Level9Computing
+
+DATEreplacewithtodaysdate.e.g."27th.September1988."
+GAMENAMEthenameofthegame.e.g."KnightOrc"
+
+
+€DATE.
+
+ˆGAMENAMEmasterfortheCommodoreAmiga
+€
+ThemasterfortheAmigaversionofGAMENAMEissuppliedonanordinary
+Amigadisk.Thediscisnotprotected.
+
+TorunGAMENAMEswitchonthemachineandinsertkickstart(onsome
+machinesthisisnotnecessary).Whenaskedtoinsert"Workbench"insert
+thegamedisk.
+
+Tocopythediskbootthemachinewith"Workbench"thenusethe
+Workbenchpull-downmenuoptionstoinitializeanewmasterdisk,then
+copythediskbydraggingthesourcedisciconoverthedestinationdisc
+icon.
+
+€DATE.
+
+ˆGAMENAMEfortheIBMPCandPCcompatibles€
+
+ThemasterforthePCversionofGAMENAMEissuppliedonan
+ordinarydouble-sided40-track51/4"PCdisc.Thediscisnot
+protected.
+
+TorunGAMENAMEbootyourPCwithMS-DOSversion2or3.Insert
+theGAMENAMEdisk.Ifyoubootedfromaharddiscselectthefloppy
+withˆA:€.TypeˆMENU
+€
+Tocopythediskusetheprogramˆdiskcopy€onthePCsystemdisk.On
+amachinewithonefloppydrivetype:
+ˆdiskcopya:a:€
+Onamachinewithtwofloppydrivestype:
+ˆdiskcopya:b:€
+Thenfollowthepromptsdisplayedbythecopyprogram.
+
+€DATE.
+
+ˆGAMENAMEdiscmasterfortheMAC€
+
+ThemasterfortheAPPLeMACversionofGAMENAMEissuppliedon
+anordinarysingle-sideddisc.
+
+TorunGAMENAME,boottheMACsystem,theninserttheGAMENAMEdisc
+andclickontheapplication-icon"GAMENAME".WhenrunningunderMulti-
+Finderdonottrytorunanyotherprogramsatthesametime.
+
+Thedischastobesingle-sidedtobereadablebyearlyversionsof
+theMAC.TheMACcannotproducesector-by-sectorcopiesofdiscs,
+sothefollowingistherecommendedmethodforproducingidentical
+copiesoftheGAMENAMEdisconasingle-drivesystem:
+
+1.Insertablankdiscandwhenrequested(theMACsays"Thisdisk
+isunreadable"),formatitone-sidedandleavethedisk-
+nameas"Untitled".Ifthediscisalreadyformattedwhenitsdisc-
+iconappearsclickonthat,thenselect"Erasedisc"fromthepull-
+downmenu.
+
+2.Onceinitialized,typealt-E,toejectthedisc.(altisthekeywith
+four-circles).InserttheGAMENAMEmaster.
+
+3.Dragthe"GAMENAME"disc-iconoverthe"Untitled"disc-icon,MAC
+theconfirmswith"Areyousureyouwanttocompletelyreplacethe
+contentsof...".clickon'OK'.
+
+4.Oncethecopyiscomplete,usethegrabber-barofthe"Untitled"disk
+windowtomoveitswindowtoexactlycoverthe"GAMENAME"window.
+
+5.Dragthe"GAMENAME"disk-icontotheWastebasket(thisalsocloses
+itswindow).
+
+6.Clickonthe"Untitled"disk-iconandrenameit(Justtypethenew
+namefollowedbyENTER)as"GAMENAME".
+
+7.Typealt-Etoejectthedisc,thenwrite-protectit.
+
+€DATE.
+
+ˆGAMENAMEmasterfortheAtariST€
+
+ThemasterfortheAtariSTversionofGAMENAMEissuppliedonan
+ordinarysingle-sided,80track,10sectordisc.Thediscisnot
+protected.
+
+TorunGAMENAMEinsertthediskindriveA:andpressRESET.
+
+Tocopythediskuseanydisccopierwhichcancopysingle-sided80-
+track10-sectordiscs.Alternativelyformatablankdiskwitha
+10-sectorsingle-sidedformatterthencopythediscfile-by-file.
+

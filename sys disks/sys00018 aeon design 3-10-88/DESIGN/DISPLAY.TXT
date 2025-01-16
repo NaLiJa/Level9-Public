@@ -1,0 +1,172 @@
+
+
+            AEON DISPLAY. COPYRIGHT (C) 1988. LEVEL 9 
+            ----------------------------------------- 
+
+The game is played on a full screen display, with the hero moved 
+by the joystick, buttons A and B using whatever are carried in his 
+left and right hands, SELECT switching to a possessions screen and 
+RESTART displaying the current 8 letter "position code" and giving 
+the option to start anew. Other actions are initiated by walking 
+over objects shown on the screen, or bumping into them. 
+
+The action display is shown below (characters represent 4*8 pixels): 
+
+ +-------+-----------------------------------------------+-------+ 
+ |       |                                               |       |  
+ | <32>  |                      <192>                    |  <32> | 
+ |       |                                           ^   |       |  
+ |       |                                           64  |       | 
+ |       |                                           v   |       |  
+ |       |                                               |       | 
+ |       |  ^                                            |       |  
+ |       | 128              +----------------------------+       | 
+ |       |  v               |                            |       |  
+ |       |                +-+                            |       | 
+ |    .  |                |             balcony      ^   |  .    |  
+ |   /|  |              +-+         (in some rooms)  64  |  |\   |   
+ |  / |  |              |                            v   |  | \  | ^ 
+ |  | |  |            +-+                                |  | |  |208 
+ |  | |  |            |                  XXXX            |  | |  | v 
+ |  | |  +----------+-+------------------XXXX------------+  | |  |  
+ |  | |  /                               XXXX            \  | |  |  
+ |  | | /  XXXXXX              monster > XXXX             \ | |  | 
+ |  | |/   XXXXXX   player     sprite    XXXX        ^     \| |  |  
+ |  | /    XXXXXX < sprite     48*16     XXXX        80     \ |  | 
+ |  |/     XXXXXX   48*24                            v       \|  |  
+ |  /      XXXXXX                                             \  | 
+ | /       XXXXXX                                              \ |  
+ |/                                                             \| 
+ |                                     door                      |  
+ +================================'------------'=================+  
+ |                                                               | ^ 
+ | l.hand   armour   health    head    wealth   dungeon   r.hand | 32
+ |          class             +level             level           | v
+ +---------------------------------------------------------------+  
+
+STATUS BAR. The bottom of the screen shows a left hand and a right 
+hand, each cupping the object held. Armour class is indicated by a 
+helmet and a number, health by a partly-filled bar, wealth a bag of 
+gold and a number, and dungeon level by a dragon head and a number. 
+In the middle is the head of the chosen character (wizard, warrior 
+or jester), with a short name and a number for the hero's current 
+current experience level (e.g 9.85 would show that he was 9th level 
+and well on the way to 10th). 
+
+
+SPRITE NUMBERS. We plan to move the player and three other sprites, 
+presumably enemies. Plus a few missiles in flight (though we will 
+only let people fire one "arrow" at once). 
+
+
+SPRITES are typically 48*24 (player) or 48*16 (humanoid creatures), 
+though e.g a thrust sword will extend further. This size means the 
+player and two enemies can usually be along side without flicker 
+(other baddies will try to keep clear and line up a missile attack).  
+ 
+Humanoid sprites are displayed "Double Dragon" fashion - facing 
+diagonally, even if the creature moves orthoganally. (This takes 
+only 40% as much ROM as holding all eight views, and avoids the 
+rather boring view from directly behind.) Animals, on the other 
+hand, will simply be shown from the side - facing left or right. 
+
+The player sprite shows the current armour and weapons. If the 
+player has a shield in his left hand, a sword in his right hand and 
+owns a helmet, this is what will be seen. (The sprite data is built 
+up, identikit fashion, as the object screen is left). 
+
+The aim is for people and monsters to look solid and realistic. 
+
+We will, however, ignore such realism when it seems right to do so. 
+When the player fires a bow, the animated sequence of him stringing 
+and firing an arrow will not show the shield he may be carrying (it 
+would look odd). 
+
+
+SPRITES IN RAM. There seems enough RAM for 14 animation frames in 
+each of the two directions. We would like to allow for two types of 
+enemies on screen at once, so this might give us 6 frames for the 
+player and 4 for each monster. This is not enough to do full 
+animation, but fortunately we do not need to... When the player 
+walks, for example, his head and upper body need not change - they 
+just move sideways, with a one-or-two pixel dip at the low point of 
+each stride - so, if his legs are replaced on a 5-frame cycle, this 
+is the equivalent of only 2 whole frames. 
+
+We will try to ensure that sprite data is ready before use. If a 
+group of orcs are about to enter stage right, the program will try 
+to pre-load appropriate sprite data. Likewise, if the player goes 
+near a bean stalk, there should be a second or two to get the 
+"climbing sequence" ready before it is needed. 
+
+If creatures wade through water or vegetation, their legs need not 
+be sho those rippling water and flickering 
+flame effects that you either love or hate, but that are good for 
+attracting attention on "auto-play" mode. 
+
+Each backdrop is built up from a (relatively) limited selection of 
+previously-drawn tiles, in the usual way when trying to decorate a 
+lot of rooms with limited graphics data. But, in addition, we have 
+quite clever compression routines which should allow us to insert 
+a number of unique graphics without the cost being too great. 
+
+
+BACKGROUND OBJEC those rippling water and flickering 
+flame effects that you either love or hate, but that are good for 
+attracting attention on "auto-play" mode. 
+
+Each backdrop is built up from a (relatively) limited selection of 
+previously-drawn tiles, in the usual way when trying to decorate a 
+lot of rooms with limited graphics data. But, in addition, we have 
+quite clever compression routines which should allow us to insert 
+a number of unique graphics without the cost being too great. 
+
+
+BACKGROUND OBJECTS. All the sprites are needed for creatures, so 
+static objects are drawn onto the background. This includes the 
+magic items, weapons and treasures that you can pick up. (If they 
+are dropped again, the program tries to ensure that they "land" on 
+a clear patch of floor, away from nearby scenery which might use a 
+conflicting palette.)
+ 
+Background graphics are also used for things like opening doors, 
+growing beanstalks, and probably "thought bubbles" which give clues. 
+
+When you walk over something to pick it up, nearby sprites are 
+temporarily "switched off" and a black window opened by successively 
+changing the background palettes to black. A large picture of the 
+object is displayed in this window for long enough to recognise it. 
+
+
+POSSESSIONS SCREEN. Press SELECT to toggle between the action 
+display and the possessions screen. On this, the joystick moves an 
+eye pointer among the objects you own - an enlarged view of the 
+current object being seen at the top right. Press A or B to switch 
+the current object with whatever is held in that hand. Or, if the 
+eye is moved to an icon on the bottom line, press A or B to give, 
+eat or drop whatever is in that hand. 
+
+The possessions display is below (characters represent 8*16 pixels): 
+
+                    <96>           <160> 
+               +-----------+------------------+ 
+               |           | .   .   .   .   .|  
+               |    big    |                  |  
+             ^ |  picture  | .   .   .   .   .|  
+           128 |    of     |     (objects)    |  
+             v |  current  | .   .   .   .   .| ^
+               |  object   |                  |208
+               |           | *   @   .   .   .| v
+               +-----------+                  |  
+             ^ |           | /   /   /   O   *| 
+            80 | NAME OF   |                  |  
+             v | THE GAME  |  give  eat  drop | 
+               |           |                  |  
+               +==============================+ ^ 
+               |lh ac health level gold dgn rh| 32
+               +------------------------------+ v 
+
+The status bar is the same as that on the action display. And the 
+give eat and drop icons are possibly a head and shoulders picture 
+of an anonymous person, an open mouth and an arrow pointing to the 
+ground, respectively. 

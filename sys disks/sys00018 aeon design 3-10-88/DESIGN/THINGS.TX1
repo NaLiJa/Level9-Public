@@ -1,0 +1,72 @@
+            AEON THINGS. COPYRIGHT (C) 1988. LEVEL 9 
+            ---------------------------------------- 
+
+ORDINARY OBJECTS are those carried among the hero's possessions or 
+dropped on the ground. They are plotted directly on the background, 
+rather than using any of the limited number of sprites. 
+
+As they have to go on the floor, modifying the background, ordinary 
+objects use limited colours to avoid attribute clashes (probably 
+monochrome). And as they have to be (typically 8*8 or 8*16) to be 
+in scale with the people, no attempt is made to distinguish between 
+the objects of a type - e.g all potion bottles look alike. 
+
+This does not matter because, when an object is picked up, or 
+chosen on the possessions screen, an enlarged picture is shown to 
+make its function clear. E.g a ring of sight has a gem like an eye, 
+and a wand of lightning is shown with a jagged spark at the tip. 
+These icons are reused wherever possible: if there were a potion of 
+lightning resistance, it would be labelled with the same jagged 
+spark - but crossed out. 
+
+
+OBJECT TYPE  TO USE        NOTES
+
+Axe          Hold and use  Weapon. Also best for cutting obstacles. 
+Spear        Hold and use  Long, thrusting weapon. 
+Sword        Hold and use  Slashing weapon.
+Bow          Hold and use  Range weapon. One arrow in air at once. 
+
+Armour       Own           Best armour carried adds to defence.
+Helmet       Own           Best helmet carried adds to defence. 
+Shield       Hold          "Use" to raise it. Blocks attack if hit. 
+
+Potion       Drink         Vanishes when used. Acts on player. 
+Ring         Hold          Act on player. 
+Scroll       Hold and use  Vanishes when used. Casts any spell. 
+Wand         Hold and use  Range weapon. Smokes if used when dead. 
+
+
+OBJECT TYPE  PICTURE        LABELLED ON BIG PICTURE   
+
+Axe          Axe            +number. Weapons good against specific 
+Spear        Long rod       creatures include a crossed out picture 
+Sword        Sword          of these.
+Bow          Bow 
+
+Armour       Breastplate    +number. Armour good against specific 
+Helmet       Helmet         dangers (e.g fire) include a crossed 
+Shield       Shield         out picture of these. 
+
+Potion       Round flask    Icon on the flask label. 
+Ring         Circle + blob  Icon beside the ring.
+Scroll       2 Swiss rolls  Icon on part-unrolled top end. 
+Wand         Short rod      Icon emerging from wand end. 
+
+Icons are combined from a deliberately limited vocabulary. E.g the 
+big piarrow 
+  Water: blue drop 
+
+              +-----------+                  |  
+               |           | /    /    O    * | 
+               | NAME OF   |                  |  
+               | THE GAME  | give  eat  drop  | 
+               |           |                  |  
+               +==============================+ ^ 
+               | hand health level gold  hand | 32
+               +------------------------------+ v 
+
+The status bar is the same as that on the action display. And the 
+givarrow 
+  Water: blue drop 
+

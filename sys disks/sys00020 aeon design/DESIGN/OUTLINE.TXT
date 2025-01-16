@@ -1,0 +1,169 @@
+        AEON DESIGN OUTLINE. COPYRIGHT (C) 1988. LEVEL 9 
+        ------------------------------------------------ 
+
+Aeon combines the fast action and simple joystick control of arcade 
+games with the rich puzzles and scenery of fantasy adventures. 
+
+
+DISPLAY & CONTROLS. Aeon has two displays, for action and for your 
+possessions. Press space, both mouse buttons or fire slowly to 
+switch between them: 
+
+1. Action display. Aeon has an aerial 3D view, similar to "Double 
+Dragon", with large sprites (64 by 32) and animated backgrounds.
+
+The player can be moved about by: 
+* keys (2 keys use what is in his left and right hands respectively). 
+* mouse (mouse buttons " " " " " " " " " "). 
+* joystick (fire button uses the object in the current hand). 
+
+Walk over things to pick them up; walk into things to push them; 
+press the button of a hand holding a weapon to fight; etc. 
+
+2. The possessions display shows all your possessions, and action 
+pauses until you return to the game. A pointer is moved about 
+about among them, in the same way as the player is moved on the 
+action screen, and a window at the top left shows an enlarged view 
+of whichever object it points at. 
+
+To hold an object, move the pointer over it and press a key or mouse 
+button to hold it in the corresponding hand. (When using the joystick, 
+press fire to hold the current object in the current hand - or move 
+the pointer over a hand and press fire to change current hand). 
+
+To give, eat or drop something held, move the pointer to the icons at 
+the bottom of the screen and press a key, button or fire. 
+
+Restart (on either display) invites you to save your position SAVE 
+position. Confirm your decision (by selecting yes/no) if you want to 
+start a new game. On starting, in place of choosing a new character 
+you can choose to restore a previously SAVEd position. 
+
+
+SUGGESTED START SEQUENCE: 
+* Title screen with castle: dragon flies from right; breathes fire 
+  on castle and dives into smoke; turns and flies right with 
+  something glinting in its talons; castle burns. 
+* Close-up of crown held by dragon. 
+* Long shot of dragon flying into cave at top of mountain, hero 
+  meanwhile shakes fist and runs to and enters a lower cave. 
+* Selection screen. Use joystick etc to select between knight, 
+  wizard, jester and restore box. 
+* Game starts, with you controlling your chosen character. 
+
+
+PLOT SUMMARY. Climb the mountain to regain the head dragon's crown. 
+The mountain has nine levels, each starting on a city was splendidly decorated. But the dragons 
+do not appreciate architecture and nowadays there is little effort 
+for any work except mining. 
+
+The only export is magic gems, but major imports are more varied. 
+
+Some food has to be imported to supplement that grown underground 
+(fungi,roots,garbage worms,fish etc) and to provide occasional 
+luxuries for the trolls. The dragons consume large numbers of live 
+animals too. 
+
+Life expectancy is low, so slaves and criminals are bought to keep 
+up  themes are based around the four alchemical elements, as 
+appropriate for the dragon in charge: 
+9: Fire. Maze of Fire: Master Dragon's Realm. 
+8: Air. Mist and Smoke. 
+7: Water. Flooded Tunnels: Underwater Travel, Weed, Fish. 
+6: Earth. Necropolis. 
+5: Fire. Volcanic Crater, Fire Crevasses. 
+4: Air. Ventillation, Wind Machinery, Flags.  
+3: Water. Fish Lakes, Canals, Waterfalls. 
+2: Earth. Underground Farms: Mushrooms, Animal Pens, Mines.   
+1: Fire. Entrance Halls: Torches, Flame Jets. 
+
+The player rises in experience level and gains magic items and 
+armour/weapons to complete the game. Excess items can be sold, and 
+required ones bought, at the shops owned by the bird people.
+
+
+OBSTACLES. Creatures include humanoids, birds, dragons, and other 
+suitable cave inhabitants. Most monsters will look left or right 
+and will mainly approach horizontally. "Racetracks" will be used so 
+monsters can move purposefully, though some will be random to avoid 
+too much regularity. They will become harder to defeat, and will use 
+more magic, as the mountain is ascended. Magic items and better 
+armour/weapons will be available to assist the player.
+
+There will also be large, fixed 'guardians' which will be partly 
+animated. e.g. for a dragon, only the head might move. Physical 
+obstacles, such as crevices, trapdoors and lava pools will restrict 
+the motion of the player and monsters. And there will also be 
+adventure-type puzzles, which will be kept simple at first as some 
+players may never have played a real adventure game. 
+
+
+COMMUNICATION BY PICTURES. Aeon is an adventure entirely without 
+words. Graphic sequences replace all messages. For example:
+
+* When an object is collected, or when an interesting static 
+  object (scenery) is approached, a large picture of it will be 
+  displayed for a few seconds. This picture will often be labelled 
+  graphically. For example, a potion of strength might have a 
+  picture of a muscled arm, a fire resistance potion might have a 
+  flame crossed out. Tunes/sound effects and animation may be also 
+  be useful to emphasise the point.
+
+* Suppose a creature wants something - for example a troll demanding 
+  payment for crossing a troll bridge. A thought bubble will appear 
+  above the troll when the player approaches - in cartoon fashion - 
+  showing what is required.
+
+
+EXAMPLE PUZZLES: 
+
+* A beanstalk which must be watered. When it has grown sufficiently, 
+  the player can climb it to gain access to an exit high up in the 
+  wall. A thou spider will awake. The spider (which was previously 
+  just a black, hairy shape at the top of the screen) will open its 
+  eyes, twitch its legs, and the screen will fade to black...
+
+* Buttons/levers which open doors, pits in the floors etc. For 
+  example, several exits might be opened, allowing monsters to 
+  escape. Opening the appropriate pit in the floor would dispose of 
+  them neatly.
+
+* Some rooms will contain balconies or ledges. This gives the 
+  potential for the player to sneak up a spider will awake. The spider (which was previously 
+  just a black, hairy shape at the top of the screen) will open its 
+  eyes, twitch its legs, and the screen will fade to black...
+
+* Buttons/levers which open doors, pits in the floors etc. For 
+  example, several exits might be opened, allowing monsters to 
+  escape. Opening the appropriate pit in the floor would dispose of 
+  them neatly.
+
+* Some rooms will contain balconies or ledges. This gives the 
+  potential for the player to sneak up above a guardian, and push a 
+  pile of rocks down on top of them.
+
+* Similarly, there might be a sniper on a balcony. Any attempt to 
+  cross the room they're defending would result in a hail of arrows. 
+  Find another route to the balcony first to scare off the sniper.
+
+* When escaping from a lair, by means of a rope bridge, the 
+  bridge could be cut to prevent pursuit.
+
+* A statue with a missing eye. When it is approached, a close-up 
+  is shown of the head. A gem-shaped eye is clearly missing. If the 
+  player approaches with the gem in hand, and uses it, the statue 
+  changes shape and releases the sword that it clasps.
+
+* A phoenix egg could be found in a firey area. If this is placed 
+  in a suitable nearby nest, the phoenix is reborn in a blaze of 
+  fire. A suitable reward would be given to the player.
+
+
+SAVE/RESTORE. Selecting RESTART on the possessions screen gives 
+you have the option to quit and save your position. 
+
+If you do so, the hero is shown returning to the shop at the start 
+of the current level. All his 'ordinary' possessions are sold (a 
+shopkeeper wheels on a barrow-load of money & exchanges it for 
+the hero's goods). Only special items are recorded in the save 
+code, but others may be repurchased when the game is next played.

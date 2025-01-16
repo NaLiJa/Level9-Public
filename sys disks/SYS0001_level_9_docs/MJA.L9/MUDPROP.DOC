@@ -1,0 +1,135 @@
+0660103030566
+1Multi-User GamesHardware
+2Copyright (C) 1985page #Level 9 Computing
+9[....................................................]
+‰Proposal for Multi-User Game Hardware€
+
+Thesystemwillbebasedaroundthe68000seriesofmicros.This
+hasbeenchosenbecauseitisfast,andreadilyavailable.Italso
+givesthepotentialforeasierspin-offgamesontomicrossuchas
+theAtariST/QL/Macintoshetc.
+
+Level9currentlyhasitssingleusergamesrunningonthe68000.
+TheconversionfromZ80to68000codewascompletedin10days.
+
+ˆNotesonthe68000family€
+
+Thetwoversionsofthe68000mostcommonlyusedarethe68000and
+68010.ThefiguresinAppendixAshowtheyareroughlyaspowerful
+astheVAX11/750.
+The68020isverymuchmorepowerful.ThefiguresinAppendixA
+showittobeabout4timesmorepowerfulthantheVAX11/750.
+
+ˆHardware€
+
+Thehardwareistobesplitintotwomainsections-gamecontrol
+andtelephoneinterfacing.Thisapproachhastwomainadvantages:
+
+     1)Moreprocessingpowerisfreedforrunningthegame
+     2)Theexpensivemodemsmaybesharedbetweenseveralgames.
+Forexample,the68000computerproposedherecouldbeinterfaced
+totheVaxcurrentlyusedforMUD.Alternatively,newmodemscould
+bepurchasedforfutureuse.
+
+Manydifferent68000systemsarecurrentlyavailable,withmore
+appearingeveryweek.Ofthese,somearehomemicroswithlimited
+expansion.Thehigherperformancesystemsalmostalwaysusethe
+VMEbusforconnectingextramemoryandotherperipherals.One
+suchsystemistheTorchTripleXmicro.Givenhereisanexample
+ofhowthiscouldbeusedtoimplementamulti-usergame.
+
+ˆEntry-LevelSystem
+€
+TorchTripleX(withWinchester,1MbyteRAM,modemandX25link)
+at#3995plusabout#1000perextramegabyteofRAMneeded.The
+XXXmaybeupgradedtoa68020processorbyapluginboard
+costingafurther#1000.
+TheX25linkallowsPSSuserseasyaccesstothegame.Manyusers
+maybesupportedinthisway,dependingonthespeedofPSSline
+used.
+The68020willroughlydoubletheprocessingspeedofthesystem.
+
+ˆFurtherExpansion€
+
+Theadditionofmodemsisclearlyvitalforafullsystem.The
+onlyproblemistoconnectthemodemstothecomputer.Aserial
+portforeachmodemisneeded,andmaybeprovidedinoneoftwo
+ways:
+
+1)Viathebuilt-inVMEbus.Thisissimplebutratherexpensive
+duetothehighcostofVMEcards(about#1200foraboardwith
+fourserialports)
+
+2)Onanothercomputersystem,connectedtothe68000viaafast
+datalink(e.g.aparallelport).Thereareanumberofsuitable
+racksystemsavailablee.g.Apple,IBMPC,80-Bus.Ofthese,the
+80-Bussystem(producedbyGemini)ischeapest,atabout#30per
+serialport.
+
+Acomplete80-bussystem,providing64serialportsis:
+
+     CPU,PSU,rack,caseetc.about#1000
+     16Quadserialboardsat#125each=#2000
+-----
+Totalsystem#3000
+-----
+
+Thisisasmallcostcomparedwiththemodemsrequired(forfixed
+speed,say64at#125each=#8000.Forspeed-switching,64at
+about#225each=#14400)
+
+ˆNewGames€
+
+OneoftheimportantadvantagesoftheTripleXisthatithasa
+hardwareDMAEthernetcontroller,givingtransferrateof10MBit/S
+withoutaffectingthe68000significantly.
+
+Whennewgamesaretobeaddedtothesystem,theycanbelinked
+together,andtothemodemsbythissystem.Thisalsogivesaway
+ofimprovingtheperformanceofeachindividualgamebysplitting
+itbetweenseveralcomputers.(Forexample,asimpledivision
+wouldbeforonecomputertohandletextoutputandinputparsing,
+whilstanotherprocessesthemaingame).
+
+
+
+ˆAppendixA-pMBvalues€
+
+Themostaccuratewayofassessingthespeedofmicroprocessorsis
+generallyfelttobethepmBvalue(processortomemory
+bandwidth).Theybasicallymeasurehowquicklythemicrocan
+processdatastoredinmemory.ThepmBfiguresareshowninmore
+detailintheGuardianarticleattached.
+
+     pMB            Computer
+
+     0.6       Spectrum(not0.88duetoscreenmemoryaccesses)
+     3.9      8MHz68000systems(e.g.TorchXXX)
+     4.0       VAX11/750
+     8.316.6Mhz68000
+     25.0      20MHzT414TransputerrunningwithordinaryRAM
+     33.4      16.6Mhz68020
+
+Notes:
+
+1)Mosthomemicros(e.g.AtariST,Spectrum)usethesameblock
+ofmemoryfortheCPUandgraphics.Asthegraphicsmemoryis
+beingcontinuallydisplayed,therecanbetimeswhenitisnot
+availablethetheprocessor.ThisaffectstheZ80morethanthe
+68000,butcanbesignificant.
+
+Moreexpensivecomputers(e.g.TorchXXX)haveseparatevideo
+memory,sotheCPUrunsatfullspeed.
+
+2)Computerswithextensiveoperatingsystems,suchastheVax
+willbesloweddownbybackgroundhousekeepingtasksofno
+relevancetothegame.
+
+3)The68020isaboutfourtimesasfastasthe68000.Thisisdue
+toits32bitdatabus,and16.6MHzclockspeed.
+
+4)Boththe68020andVaxwillactuallybefasterthansuggested
+bythefigures,duetotheirinstrucioncacheandpipelining
+techniques(whicharenotallowedforinthepMBvaluesbutwhich
+speedexecutionsignificantly)
+

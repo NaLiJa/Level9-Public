@@ -1,0 +1,13 @@
+ var
+ x1 x2
+
+ BEGIN
+ x2=1
+.loop
+ prs " x2= " ;****
+ print x2 ;******
+ message x2
+ input x1 x1 x1 x1
+ x1=1
+ add x2,x1
+ goto loop

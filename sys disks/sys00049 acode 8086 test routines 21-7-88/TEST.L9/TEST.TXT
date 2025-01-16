@@ -1,0 +1,82 @@
+table
+ list1=1
+
+var
+ a b c d e f g x1 d1 d2 d3
+
+begin
+.Again
+ prs " start of acode: "
+
+ input x1 x1 x1 x1
+ a=12345
+ c=1
+
+ code +
+
+; push a
+
+; &list1(b)=a
+; &f=list1(2)
+; &g=list1(b)
+ code -
+
+ gosub dumplist
+
+ code +
+; pop b
+
+; list1(0)=a
+; b= 2000
+;&list1(4)=b
+
+; a=250
+; list1(c)=a
+; d=list1(3)
+; e=list1(c)
+
+ b=4
+ & list1(b)=a
+ &f = list1(2)
+ &g = list1(b)
+
+ code -
+
+ gosub dumplist
+
+ goto @Again
+
+;-----
+
+.dumplist
+ prs " contents of list 1 are: "
+ d1=0
+.Tloop2
+ d2=list1(d1)
+ print d2
+ prs " "
+ d3=1
+ add d1,d3
+ if d1<20 then Tloop2
+
+ prs " a= "
+ print a
+ prs " b= "
+ print b
+ prs " c= "
+ print c
+ prs " d="
+ print d
+ prs " e="
+ print e
+ prs " f="
+ print f
+ prs " g="
+ print g
+ prs " x1 = "
+ print x1
+ input x1 x1 x1 x1
+ return
+
+; goto @Again
+

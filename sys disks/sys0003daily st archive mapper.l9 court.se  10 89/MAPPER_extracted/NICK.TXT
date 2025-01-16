@@ -1,0 +1,8 @@
+
+ v1=240 ;11110000 ;*
+ and v1,CurrentSquare ;*
+ if v1<>240 then TD00 ;*
+ v1=15 ;00001111 ;*
+ and CurrentSquare,v1 ;*
+.TD00 ;*
+

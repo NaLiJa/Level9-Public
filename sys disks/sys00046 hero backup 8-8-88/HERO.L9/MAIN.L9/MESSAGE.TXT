@@ -1,0 +1,50 @@
+; Text file for Hero
+[1:object 1]
+[2:object 2]
+[4:object 4]
+[8:object 8]
+[10:potion]
+
+[14:sparkling potion]
+[15:two-handed sword]
+[16:mithril shield]
+[17:gold ring]
+[18:runed wand]
+[19:magic scroll]
+[20:pot of gold]
+[21:heavy club]
+
+[40:fireball]
+[41:digging fireball]
+[42:explosive fireball]
+
+
+; menu text...
+[100:back]
+[101:inventory]
+[102:examine]
+[103:drop]
+[104:wield]
+[105:range]
+[106:eat]
+[107:system]
+
+[120:back]
+[121:save]
+[122:load]
+[123:map]
+[124:restart]
+[125:quit]
+
+[198:%]
+[199:. ]
+[200:Welcome to Hero, from Level 9 Computing. ]
+[201:Ouch! ]
+[202:Wowee! ]
+[203:Got him! ]
+[204:You now feel MUCH better. ]
+[205:Your hands twitch. ]
+[206:Your weapon glows. ]
+[207:You are now wielding the]
+[208:You have found a ]
+

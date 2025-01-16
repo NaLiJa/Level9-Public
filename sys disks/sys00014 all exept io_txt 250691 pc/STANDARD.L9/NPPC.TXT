@@ -1,0 +1,1282 @@
+;NPPC.TXT Copyright (C) 1991 Level 9 Computing. Subroutines for 
+; Crystal Maze. Nick Austin December 1990
+; 
+;Interface for GetMessage and SendMessage bits of NPPC
+;  communication software.
+;
+; Lists required: 20 21 22 23
+;
+;* AllocateTSRlists    ;Once-only call to initialise NPPC tsr
+;* SetTSRlistPointers  ;Reset list pointers, must be done before
+;                      ;reading/writing ListString()
+;* SetTeamNamePointers ;Set ListString() to point to the TeamName
+;* ReceiveMessage      ;Receive a message
+;* TransmitMessage     ;Send a message
+;* VBL                 ;Fifty/Sixty hertz interrupt
+;* CheckForHeartBeat
+
+;...sconst table var:0:
+const
+  ListWordsNum=20  ;List number e.g. 13 (136 bytes long)
+  ListStringNum=21 ;List number e.g. 21 (30 bytes long
+  ListRegsNum=22   ;List number e.g. 22 (10 bytes long)
+  ListConfigNum=23 ;Contains config data & a copy of transmitted version of ListWords
+
+                   ;offsets for list 11...
+  ListTeamHi=52    ;(list 13)
+  ListTeamLo=54
+  ListWordsHi=80   ;=ListWordsNum * 4
+  ListWordsLo=82
+  ListStringHi=84  ;=ListStringNum * 4
+  ListStringLo=86
+  ListRegsHi=88    ;=ListRegsNum * 4
+  ListRegsLo=90
+  ListConfigHi=92
+  ListConfigLo=94
+
+  ListConfigSize=512
+  ListWordsSize=60
+  ListStringSize=30
+  ListRegsSize=10
+
+                   ;Message types receivable...
+  mtHeartBeat=0           ;in play state: Send mtAckHeartBeat
+  mtAcknowledge=7         ;in play state: ignore
+  mtGameAllocated=9       ;in play state: send mtLogSysError
+  mtTeamAllocated=10      ;in play state: send mtLogSysError
+  mtPrintCertificate=26   ;in play state: ignore
+  mtGoToIdle=30           ;in play state: ABORT THE GAME
+  mtDefaultName=35        ;in play state: ignore
+                ;Message types transmittable...
+  mtAckHeartBeat=1        ;reply to mtHeartBeat
+  mtLogSysEvent=2         ;report serious errors
+  mtUserStatus=3          ;in play state: do not send
+  mtLoginTeam=6           ;in play state: do not send
+  mtAllocateGame=8        ;in play state: do not send
+  mtWhichGame=11          ;in play state: do not send
+  mtGameResult=12         ;mark end of game
+  mtNoShow=18             ;in play state: do not send
+  mtOptionGameSelected=32 ;in play state: do not send
+  mtCrystalDomeResult=33  ;in play state: do not send
+  mtGetDefaultName=34     ;in play state: do not send
+
+                ;User_status_type (from NET_UTIL.H)
+  gsIDLE=0
+  gsALERT=1
+  gsACTIVE=2
+  gsPLAY=3
+  gsDISPATCH=4
+  gsOFFLINE=5
+  gsPRINTER=6
+
+                ;Offsets into ConfigList()
+                ;Config list address is miConfigHi,miConfigLo. Each
+                ;overlay must set one of its list pointers as part
+                ;of the overlay initialisation. i.e.
+                ;    &list11(84)=miConfigHi  ;set list21
+                ;    &list11(86)=miConfigLo
+                ;...
+                ;    miTerminalId=List21(cfTerminalId)
+                ;
+                ;The first 40 bytes of this list are DESTROYED whenever
+                ;a message is sent or received
+  cfTempAbortOrNot=0            ;0=ABORTED 1=SUCCESS
+  cfTempAcknowledge=2           ;0=SUCCESS 1=FAIL 2=DUP TEAM NAME 3=DUP TEAM ID
+  cfTempBestGameMessage=4       ;
+  cfTempCrystalsWon=6           ;
+  cfTempCrystalDomeScore=8      ;
+  cfTempCrystalScore=10         ;
+  cfTempDelaySeconds=12         ;
+  cfTempDifficulty=14           ;0=EASY 1=MEDIUM 2=HARD
+  cfTempEncouragingMsgNum=16    ;
+  cfTempFrom=18                 ;
+  cfTempGameId=20               ;
+  cfTempMessageClass=22         ;
+  cfTempNumOfCertificates=24    ;
+  cfTempResult=26               ;
+  cfTempRouteMessageNumber=28   ;
+  cfTempTeamId=30               ;
+  cfTempTime=32                 ;
+  cfTempUserStatus=34           ;0=IDLE 1=ALERT 2=ACTIVE 3=PLAY 4=DISPATCH
+  cfTempWorstGameMessage=36     ;
+  cfTempComingFrom=38           ;
+  cfTempGoingTo=40              ;
+  cfTempCTUleft=42              ;
+  cfTempOriginalCTU=44          ;
+  cfTempNumberOfGames=46        ;
+  cfTempState=48                ;for Go_To_State message
+  ;50 future expansion
+  ;58 future expansion
+
+                    ;Remaining word entries remain valid acrosss
+                    ;all overlays...
+;Environment..................
+  cfNPPCloaded=60               ;Set once Alert subgame has initialised
+                                ;the NPPC system
+  cfDualScreen=62               ;non-zero if two VGA screens
+  cfCardReaderPresent=64        ;non-zero if push/motorised card reader
+  cfIOcardPresent=66            ;non-zero if IOCARD.EXE loaded
+  cfCellPoolSize=68             ;about 1600
+  cfOverlayFunction=70          ;0=Go to Idle, 1=Go to Dispatch
+  ;72 future expansion
+  ;74 future expansion
+  ;76 future expansion
+  ;78 future expansion
+
+;Loaded from disk configuration...
+  cfNPPCtimeoutValue=80         ;idle/alert/dispatch... for network failure
+  cfRetryTimeoutValue=82        ;can't find network
+  cfPlayNoComms=294             ;active/play. 4 minutes
+
+  cfIOmaskWhenCellInUseLo=128   ;IO bit mask for card inserted
+  cfIOmaskWhenCellInUseHi=130
+  cfIOmaskWhenGamePlayLo=132    ;IO bit mask for game started
+  cfIOmaskWhenGamePlayHi=134
+  cfIOmaskWinPulseLo=136        ;IO bit mask for game win
+  cfIOmaskWinPulseHi=138
+  cfIOmaskLosePulseLo=140       ;IO bit mask for game lose
+  cfIOmaskLosePulseHi=142
+  cfInputMaskStartLo=144        ;IO bit mask for Green button
+  cfInputMaskStartHi=146
+  cfInputMaskStopLo=148         ;IO bit mask for Red button
+  cfInputMaskStopHi=150
+  cfInputMaskSelectLo=152       ;IO bit mask for Blue button
+  cfInputMaskSelectHi=154
+  cfInputMaskLeftFireLo=156     ;IO bit mask for White button 1
+  cfInputMaskLeftFireHi=158
+  cfInputMaskRightFireLo=160    ;IO bit mask for White button 2
+  cfInputMaskRightFireHi=162
+
+  cfTerminalID=164              ;Our gamestation unique network ID
+  cfCellID=166                  ;Our gamestation unique cell number
+  cfSupervisorTest=280          ;0=ButtonsOnly, else game-specific test.
+  cfDispatchTimeout=282         ;30 seconds. For Acknowledge & GameAllocated
+
+  cfWinPulseLength=168          ;seconds for IOmaskWinPulse
+  cfLosePulseLength=170         ;seconds for IOmaskLosePulse
+
+  cfInputMaskSensor1Lo=172      ;IO bit mask for Sensor 1
+  cfInputMaskSensor2Lo=176      ;IO bit mask for Sensor 2
+  cfInputMaskSensor3Lo=180      ;IO bit mask for Sensor 3
+  cfInputMaskSensor4Lo=184      ;IO bit mask for Sensor 4
+  cfNoShowLength=188            ;Seconds for NO SHOW
+  cfMapDisplayTime=264          ;Seconds for display of route message
+
+;Parameters from Dispatch/Alert to Game...
+  cfDifficulty=190
+  cfCrystalsWon=192
+  cfPlayTeamID=194
+  cfOriginalCTU=196
+  cfRemainingCTU=198            ;Time left until team enter dome
+  cfNumberOfGames=200           ;number of games played previously
+  cfSpecialCard=202             ;0=player card
+  cfGameScore=204               ;(signed)
+  cfAbortReason=206             ;0=Online/NoNet 1=GoToIdle 2=GoToOffline
+  cfGameRTC=208                 ;in seconds
+  cfLastWhichGame=262           ;ID of player in DOME
+  cfGameTime=278                ;Time taken to play game
+
+;Internal values....
+  cfNetworkFailed=210           ;non-zero if problems with network
+  cfMapTimer=212
+  cfAlertTimer=214
+  cfNoCommsTimer=216
+  cfPulseTimer=218
+  cfIdleTimer=220
+  cfIdleMessage=222             ;Pointer to "help" message
+  cfDispatchTimer1=224
+  cfDispatchTimer2=226
+  ;228 future expansion
+  ;230 future expansion
+  ;232 future expansion
+  ;234 future expansion
+  ;236 future expansion
+  ;238 future expansion
+  ;240 future expansion
+  ;242 future expansion
+
+  cfInputMaskSensor5Lo=244      ;IO bit mask for Sensor 5
+  cfInputMaskSensor6Lo=248      ;IO bit mask for Sensor 6
+  cfInputMaskSensor7Lo=252      ;IO bit mask for Sensor 7
+  cfInputMaskSensor8Lo=256      ;IO bit mask for Sensor 8
+  cfControlCaction=260          ;0=normal closedown. 1=fatal error
+
+  cfCardInReader=266            ;Card still in reader
+  cfLastCardStatus=268
+
+  cfEffectsAllowed=270          ;INSTALL.BIN options. 1=Effects
+  cfSoundSampleHandle=272       ;65535=no sample, else file handle
+  cfSoundSampleOddEven=274      ;0=odd 16K, 1=even 16K bytes.
+  cfSoundSampleLength=276       ;0..16384 bytes
+  cfPrinterOffline=284          ;0=no printer,printer online.
+  
+  cfAutoModeEnable=286          ;0=normal game. Auto: 1=next game. 2=all games
+  cfAutoTimer=288
+  cfAutoKeyPress=290            ;0=normal. 1=simulate START on next timeout
+  cfTestSoundSystem=292         ;0=normal. 1=continuous
+
+  ;296..512 reserved for future expansion
+
+     ;Values returned by GetCardReaderChangeCode...
+   cPlayerCard=1   ;player card inserted
+   cEngineerCard=2 ;engineer card inserted
+   cCardRemoved=3  ;previous card removed
+   cBadCard=10     ;parity/crc error
+   cNoData=11      ;no interrupts
+
+table
+
+var
+  miVBLticks                ;used by interrupt routine... Do not touch
+
+  Spare1 Spare2 ;; Unused variables.. kept for compatability
+                ;; so overlays still talk to each other.
+
+;Parameters/results for message passing...
+  mpStatus              ;0=ok, others: see JRM doc
+  mpMessageType         ;0..36 (One of mtHeartBeat,mtDefaultName etc.)
+
+;READ ONLY Values to stuff in list pointers...
+  miConfigListHi miConfigListLo ;Config data & parameters
+  miStringListHi miStringListLo ;20/30 character parameter
+  miRegsListHi   miRegsListLo   ;10 bytes for 8086 registers: AX BC CX DX BP
+
+  miLastStatus                  ;Last HeartBeat response
+  miAborted                     ;Reason game quit. 0=Aborted, 1=ok
+
+;Global variables
+  ch    ; Input character (or converted button equivalent) 
+;...e
+
+;
+;================================================================= 
+;                       MAIN ROUTINES 
+;================================================================= 
+
+begin
+
+ code+
+
+;...sAllocateTSRlists:0:
+;============================================================
+
+.AllocateTSRlists
+       ;Allocate 10 bytes for register passing (needed for all
+       ;"MCsoftInterrupt" calls)
+       ;Also allocate 68 bytes needed for the NPPC comms TSR.
+
+  &miConfigListHi=longws(HiLongFreeWorkspace)
+  &miConfigListLo=longws(LoLongFreeWorkspace)
+  &list11(ListConfigHi)=miConfigListHi
+  &list11(ListConfigLo)=miConfigListLo
+
+  v1=ListConfigSize ;about 290 bytes used, but round up for future expansion
+  gosub @vMCreserveMemory
+
+  x1=0
+.ClearListConfig
+  &ListConfig(x1)=c0
+  add x1,c2
+  if x1<ListConfigSize then ClearListConfig
+
+  &miStringListHi=longws(HiLongFreeWorkspace)
+  &miStringListLo=longws(LoLongFreeWorkspace)
+  &list11(ListStringHi)=miStringListHi
+  &list11(ListStringLo)=miStringListLo
+
+  v1 = ListStringSize ;size of strings
+  gosub @vMCreserveMemory
+
+  &miRegsListHi=longws(HiLongFreeWorkspace)
+  &miRegsListLo=longws(LoLongFreeWorkspace)
+  &list11(ListRegsHi)=miRegsListHi
+  &list11(ListRegsLo)=miRegsListLo
+
+  v1 = ListRegsSize ;space for 5 registers
+  gosub @vMCreserveMemory
+
+  &x1=longws(HiLongFreeWorkspace)
+  &list11(ListTeamHi)=x1
+  &x1=longws(LoLongFreeWorkspace)
+  &list11(ListTeamLo)=x1
+
+  v1 = ListStringSize         ;30 bytes for Team_Name
+  gosub @vMCreserveMemory
+
+  &ListConfig(cfTerminalID)=c1
+
+ cif NotPC
+  gosub @SetTeamNamePointers
+
+  x1=84  ;'T'
+  ListString(0)=x1
+  x1=101 ;'e'
+  ListString(1)=x1
+  x1=97  ;'a'
+  ListString(2)=x1
+  x1=109 ;'m'
+  ListString(3)=x1
+  x1=32  ;' '
+  ListString(4)=x1
+  x1=78  ;'N'
+  ListString(5)=x1
+  x1=97  ;'a'
+  ListString(6)=x1
+  x1=109 ;'m'
+  ListString(7)=x1
+  x1=101 ;'e'
+  ListString(8)=x1
+  x1=32  ;' '
+  ListString(9)=x1
+  x1=49  ;'1'
+  ListString(10)=x1
+  x1=50  ;'2
+  ListString(11)=x1
+  x1=51  ;'3'
+  ListString(12)=x1
+  x1=52  ;'4'
+  ListString(13)=x1
+  x1=53  ;'5'
+  ListString(14)=x1
+  x1=54  ;'6'
+  ListString(15)=x1
+  x1=55  ;'7'
+  ListString(16)=x1
+  x1=56  ;'8
+  ListString(17)=x1
+  x1=57  ;'9'
+  ListString(18)=x1
+  x1=32  ;' '
+  ListString(19)=x1
+  x1=49  ;'1'
+  ListString(20)=x1
+  x1=50  ;'2
+  ListString(21)=x1
+  x1=51  ;'3'
+  ListString(22)=x1
+  x1=52  ;'4'
+  ListString(23)=x1
+  x1=53  ;'5'
+  ListString(24)=x1
+  x1=54  ;'6'
+  ListString(25)=x1
+  x1=55  ;'7'
+  ListString(26)=x1
+  x1=56  ;'8
+  ListString(27)=x1
+  x1=57  ;'9'
+  ListString(28)=x1
+  x1=0   ;terminator
+  ListString(29)=x1
+
+;  miAbortOrNot=c0  ;Initialially "ABORTED" in case game prematurely exits
+;  miCrystalsWon=c5 ;score from previous games
+;  miDifficulty=c0  ;easy
+;  miTeamId=c5      ;current team
+ cend ;ST only
+
+  gosub @SetTSRlistPointers
+
+  &ListConfig(cfNPPCloaded)=c0
+  &ListConfig(cfCardReaderPresent)=c0
+  &ListConfig(cfIOcardPresent)=c0
+  miLastStatus = 65535 ;Last HeartBeat response
+  return
+;...e
+
+;...sSetNoCommsTimeout:0:
+.SetNoCommsTimeout
+  &x1=ListConfig(cfNetworkFailed)
+  if x1<>c0 then lSmallTimeout
+  &x1=ListConfig(cfNPPCtimeoutValue)
+  &ListConfig(cfNoCommsTimer)=x1
+  return
+.lSmallTimeout
+  &x1=ListConfig(cfRetryTimeoutValue)
+  &ListConfig(cfNoCommsTimer)=x1
+  return
+;...e
+
+;...sSetTSRlistPointers:0:
+;============================================================
+
+.SetListWords
+  &list11(ListWordsHi)=miConfigListHi ;List 20
+  &list11(ListWordsLo)=miConfigListLo
+  return
+
+;----------------------------/-------------------------------
+
+.SetListRegs
+  &list11(ListRegsHi)=miRegsListHi   ;List 22
+  &list11(ListRegsLo)=miRegsListLo
+  return
+
+;------------------------------------------------------------
+
+.SetlistString
+  &list11(ListStringHi)=miStringListHi ;List 21
+  &list11(ListStringLo)=miStringListLo
+  return
+
+;------------------------------------------------------------
+
+.SetTSRlistPointers
+       ;Call to reset list pointers;
+       ;(MCcallSoftInterrupt corrupts these pointers)
+
+  gosub SetListRegs
+  gosub SetListString
+  gosub SetListWords
+  return
+
+;...e
+;...sSetTeamNamePointers:0:
+.SetTeamNamePointers
+       ;Call to set list pointers
+       ;(MCcallSoftInterrupt corrupts these pointers)
+       ;Returns: ListString() contains team name
+  return
+;...e
+
+;...sClearListString:0:
+.ClearListString
+  x1=c0
+.lClear
+  v1=32 ;ascii space
+  ListString(x1)=v1
+  add x1,c1
+  if x1<ListStringSize then lClear
+  return
+;...e
+
+;...sReverseListWords ReverseListRegs:0:
+       ;Compiled word based list operations are hi byte first
+       ;(This makes data files PC & ST/AMIGA portable)
+       ;
+       ;TSR parameter passing is Lo byte first, so these
+       ;routines reverse the parameter order for both
+       ;arguments and results.
+
+ cif PC
+
+.ReverseListWords
+  x1=0
+.LreverseListW
+  x2=ListWords(x1)
+  add x1,c1
+  x3=ListWords(x1)
+  ListWords(x1)=x2
+  sub x1,c1
+  ListWords(x1)=x3
+  add x1,c2
+  if x1<ListWordsSize then LreverseListW
+  return
+
+.ReverseListRegs
+  x1=0
+.LreverseListR
+  x2=ListRegs(x1)
+  add x1,c1
+  x3=ListRegs(x1)
+  ListRegs(x1)=x2
+  sub x1,c1
+  ListRegs(x1)=x3
+  add x1,c2
+  if x1<ListRegsSize then LreverseListR
+  return
+
+ cend ;PC only
+;...e
+
+;...sCommsIdentify:0:
+;============================================================
+
+ cif PC
+       ;Returns one of the three asciiz strings stored
+       ;in the "Comms" TSR.
+
+;;;;;.CommsIdentify
+       ;x1=0  returns List 23 ptr = TSR name
+       ;x1=1  returns List 23 ptr = TSR date
+       ;x1=2  returns List 23 ptr = TSR version
+
+  gosub @SetTSRlistPointers
+
+  V1 = 128              ;Interrupt number
+  V2 = ListWordsNum     ;DS:SI
+  V3 = ListStringNum    ;ES:DI
+  V4 = ListRegsNum      ;AX,BX,CX,DX,BP
+  ListRegs(c0) = c0     ;Function 0 - version
+  ListRegs(c1) = x1     ;Sub function x1
+
+  gosub @ReverseListRegs
+  gosub @MCcallSoftInterrupt     ;Execute INT 80h
+
+  &x1=list11(ListWordsHi)        ;List 20 ds:si
+  push x1
+  &x1=list11(ListWordsLo)
+  push x1
+
+  gosub @SetTSRlistPointers
+
+  pop x1                         ;Return ds:si as ListString()
+  &list11(ListStringLo)=x1
+  pop x1
+  &list11(ListStringHi)=x1
+
+  return
+
+ cend ;PC only
+;...e
+
+;...sCommsInitialise:0:
+;============================================================
+
+.CommsInitialise
+    ;Initialise with 20 KBytes buffer
+    ;
+    ;Owing to an undocumented feature of the peer-to-peer
+    ;software DO NOT return to the DOS command line
+    ;without calling CommsCloseDown.
+
+  gosub @SetNoCommsTimeout
+  gosub @SetTSRlistPointers
+
+ cif PC
+  &x1=ListConfig(cfNPPCloaded)
+  if x1=c0 then DontInitialise
+
+  V1 = 128               ;Interrupt number
+  V2 = ListWordsNum      ;DS:SI
+  V3 = ListStringNum     ;ES:DI
+  V4 = ListRegsNum       ;AX,BX,CX,DX,BP
+  ListRegs(c0) = c1      ;Function 1 - Initialise
+  ListRegs(c1) = c0      ;Sub function 0
+  x1 = 5000
+  &ListRegs(c2)= x1      ;Buffer Size (in bytes)
+
+  gosub ReverseListRegs
+  gosub MCcallSoftInterrupt ;Execute INT 80h
+  gosub @SetTSRlistPointers
+  gosub ReverseListRegs
+
+  &x1 = ListRegs(c0)     ;return code
+ cend ;PC only
+
+ cif NotPC
+  x1=0                   ;return code
+ cend ;ST only
+
+  return
+.DontInitialise
+  x1=0                   ;return code
+  return
+;...e
+
+;...sReceiveMessage:0:
+;============================================================
+
+.ReceiveMessage
+       ;Receive a message
+       ;Returns mpStatus=0 and parameters in named 'mp...' variables
+
+ cif PC
+  &x1=ListConfig(cfNPPCloaded)
+  if x1=c0 then @lNoRX  ;Running stand-alone?
+
+  gosub SetTSRlistPointers
+
+  V1 = 128              ;Interrupt number
+  V2 = ListWordsNum     ;DS:SI
+  V3 = ListStringNum    ;ES:DI
+  V4 = ListRegsNum      ;AX,BX,CX,DX,BP
+  ListRegs(c0) = c2     ;Function 2
+  ListRegs(c1) = c0     ;Sub function 0, receive
+
+  gosub ReverseListWords
+  gosub ReverseListRegs
+  gosub @MCcallSoftInterrupt ;Execute INT 80h
+
+;Returns ES:DI = ListWords = ReceivedParameterBlock (inside TSR)
+
+  gosub @SetListRegs
+  gosub ReverseListRegs   ;Get register ax:status
+
+;Integer args returned from TSR are placed at DS:SI,
+;which is set to ListWords[]
+
+  x1=0
+.CopyReceivedParms
+  v1=ListWords(x1)
+  add x1,c1
+  v2=ListWords(x1)
+  ListConfig(x1)=v1
+  sub x1,c1
+  ListConfig(x1)=v2
+  add x1,c2
+  if x1<ListWordsSize then CopyReceivedParms
+
+  &mpStatus                 = ListRegs(0) ;Register AX
+;       0 (NET SUCCESS)              Message Received
+;       5 (NET NPPC NOT INITIALISED) NPPC not yet initialised
+;       7 (NET NO MESSAGE)           No Message available
+;       9 (NET MESSAGE TYPE INVALID) Invalid message received
+  &mpMessageType            = ListRegs(2) ;Register BX
+;       0 HeartBeat
+;       7 Acknowledge
+;       9 GameAllocated
+;      10 TeamAllocated
+;      30 GoToIdle
+;      26 PrintCertificate
+;      35 DefaultName
+
+     ;When receiving mtTeamAllocated, mtPrintCertificate (Dome
+     ;only) or mtDefaultName (Login only) returns ListString()
+     ;as the team name.
+     ;In PLAY state the IDLE/ALERT/DISPATCH acode program makes
+     ;a copy of the team name. Access it via subroutine
+     ;"SetTeamNamePointers."
+
+     ;Finally: "ReceiveMessage" is called regularly so I can use it to
+     ;check that the NPPC software is alive:
+     ;
+     ;The NPPC layer in the Central Controller builds a list to match
+     ;terminal ID's with the network cards identity. If (when) the CC is
+     ;rebooted this list is lost, but is rebuilt as messages are received
+     ;by the CC.
+     ;
+     ;If a gamestation stops getting heartbeats then I assume the CC was
+     ;rebooted, so I send it a message to ensure I am on its ID list.
+
+  &x1=ListConfig(cfNoCommsTimer)
+  if x1<>0 then @CommsTick               ;Still alive?
+
+      ;Timeout
+
+  mpMessageType                 = mtAckHeartBeat
+  &x1 = ListConfig(cfTerminalId)
+  &ListConfig(cfTempFrom)       = x1
+  &ListConfig(cfTempUserStatus) = miLastStatus
+  gosub @SpecialTransmitMessage
+
+  mpStatus=32775      	;flag for no message received
+  goto @CommsTick
+ 
+.lNoRX
+  mpStatus=32775      	;flag for no message received
+.CommsOK
+  gosub @SetNoCommsTimeout
+.CommsTick
+
+ cend ;PC only
+
+ cif NotPC
+  mpStatus=32775        ;flag for no message received
+ cend ;ST
+
+     ;Handle 'Go_To_Offline' message
+  if mpStatus<>0 then NotOffline
+  if mpMessageType<>30 then NotOffline
+  &ListConfig(cfAbortReason)=c1   ;GoToIdle
+  &x1=ListConfig(cfTempState)     ;Requested 'state' to enter
+  if x1<>gsOFFLINE then NotOffline
+  &ListConfig(cfNPPCloaded)=c0    ;shut up network
+  &ListConfig(cfAbortReason)=c2   ;Terminated by Admin Terminal
+.NotOffline
+
+    ;Save route info display time
+  if mpStatus<>0 then NotGameAllocated
+  if mpmessageType<>9 then NotGameAllocated
+  &x1=listConfig(cfTempDelaySeconds)
+  if x1<2 then NotGameAllocated
+  if x1>60 then NotGameAllocated
+  &ListConfig(cfMapDisplayTime)=x1
+.NotGameAllocated
+
+  return
+;...e
+
+;...sTransmitMessage:0:
+;============================================================
+
+.TransmitMessage
+       ;Send a message
+       ;Args: mpMessageType and in named 'mp..' variables
+
+ cif PC
+
+  &x1=ListConfig(cfNPPCloaded)
+  if x1=c0 then @DontTX
+
+  if mpMessageType<>mtAckHeartBeat then NotHeartBeatReply
+  &miLastStatus = ListConfig(cfTempUserStatus)
+  gosub @SetNoCommsTimeout       ;Heartbeat sent -- so reset timer
+;For Crystal Dome...
+  if miLastStatus=gsOFFLINE then NotHeartBeatReply ;offline
+  &x1=ListConfig(cfPrinterOffline)
+  if x1=0 then NotHeartBeatReply ;No printer or Printer online
+  x1=gsPRINTER                   ;FileExchange
+  &ListConfig(cfTempUserStatus)=x1
+.NotHeartBeatReply
+
+  gosub SetTSRlistPointers
+
+  &ListRegs(2)   = mpMessageType
+;                   7 Acknowledge
+;                   1:AckHeartBeat
+;                   2:LogSystemEvent
+;                   3:UserStatus
+;                   6:LoginTeam
+;                   8:AllocateGame
+;                   11:WhichGame
+;                   12:GameResult
+;                   18:NoShow
+;                   32:OptionGameSelected
+;                   33:CrystalDomeResult
+;                   34:GetDefaultName
+
+     ;For Login game when sending message mtLoginTeam,
+     ;also need to set ListString() to the team name entered
+     ;by the player.
+
+  V1 = 128             ;Interrupt number
+  V2 = ListWordsNum    ;List number e.g. 20 (38 bytes long)
+  V3 = ListStringNum   ;List number e.g. 21 (30 bytes long
+  V4 = ListRegsNum     ;List number e.g. 22 (10 bytes long)
+  x1=3
+  ListRegs(c0) = x1    ;Function 3
+  ListRegs(c1) = c0    ;Sub function 0, transmit
+
+  gosub ReverseListWords
+  gosub ReverseListRegs	
+  gosub @MCcallSoftInterrupt
+  gosub SetTSRlistPointers
+  gosub ReverseListRegs
+  gosub ReverseListWords
+
+  &mpStatus = ListRegs(0)  
+;           0 (NET SUCCESS)                 - Message Sent
+;           4 (NET GENERAL ERROR)           - General Send error
+;           5 (NET NPPC NOT INITIALISED)    - NPPC not yet initialised
+;           6 (NET NO TERMINAL TO SEND TO)  - That terminal has gone down
+;           8 (NET NOT ENOUGH BUFFER SPACE) - Not enough buffer left for message 
+;           9 (NET MESSAGE TYPE INVALID)    - Invalid message type supplied
+
+ cend ;PC only
+
+  &ListConfig(cfNetworkFailed)=mpStatus
+  gosub @SetNoCommsTimeout
+
+ cif NotPC
+  mpStatus=0
+ cend ;ST only
+
+  return
+
+.DontTX
+  mpStatus=0
+  &ListConfig(cfNetworkFailed)=c0
+  return
+;...e
+
+;...sCommsCloseDown:0:
+;============================================================
+
+ cif PC
+.CommsCloseDown
+    ;Terminate NPPC software
+
+  &WordWS(WordTextBufferOffset)=c0
+  code-
+  prs "Close Down..."
+  code+
+  return
+
+  &x1=ListConfig(cfNPPCloaded)
+  if x1=c0 then @DontCloseNPPC
+
+  gosub SetTSRlistPointers
+
+  V1 = 128              ;Interrupt number
+  V2 = ListWordsNum     ;DS:SI
+  V3 = ListStringNum    ;ES:DI
+  V4 = ListRegsNum      ;AX,BX,CX,DX,BP
+  x1=4
+  ListRegs(c0) = x1     ;Function 4 - Terminate
+  ListRegs(c1) = c0     ;Sub function 0
+
+  gosub ReverseListRegs
+  gosub MCcallSoftInterrupt ;Execute INT 80h
+  gosub @SetTSRlistPointers
+  gosub ReverseListRegs
+
+  &x1 = ListRegs(c0)    ;return code
+
+  if x1<>0 then CantClosedown
+
+.DontCloseNPPC
+ return
+
+.CantClosedown
+  &WordWS(WordTextBufferOffset)=c0
+ code-
+  prs "NPPC.EXE Old version. - Reboot "
+ code+
+.InfiniteLoop
+  goto InfiniteLoop
+  cend ;PC omly
+;...e
+
+;...sVBL:0:
+;============================================================
+
+.VBL
+     ;Sixty/Seventy hertz interrupt
+
+  push x1
+
+  add miVBLticks,c1
+  if miVBLticks<60 then @Lvbl
+
+  &x1=ListConfig(cfAlertTimer)
+  if x1=c0 then NoAlertTick
+  sub x1,c1
+  &ListConfig(cfAlertTimer)=x1
+.NoAlertTick
+
+  &x1=ListConfig(cfIdleTimer)
+  if x1=c0 then NoIdleTick
+  sub x1,c1
+  &ListConfig(cfIdleTimer)=x1
+.NoIdleTick
+
+  &x1=ListConfig(cfGameRTC)
+  if x1=65535 then NoGameTick
+  add x1,c1
+  &ListConfig(cfGameRTC)=x1
+.NoGameTick
+
+  &x1=ListConfig(cfDispatchTimer1)
+  if x1=65535 then NoDispatch1
+  if x1=0 then NoDispatch1
+  sub x1,c1
+  &ListConfig(cfDispatchTimer1)=x1
+.NoDispatch1
+
+  &x1=ListConfig(cfDispatchTimer2)
+  if x1=65535 then NoDispatch2
+  if x1=0 then NoDispatch2
+  sub x1,c1
+  &ListConfig(cfDispatchTimer2)=x1
+.NoDispatch2
+
+  &x1=ListConfig(cfNoCommsTimer)
+  if x1=0 then NoCommsTick
+  sub x1,c1             ;Check CC still alive
+  &ListConfig(cfNoCommsTimer)=x1
+.NoCommsTick
+
+  &x1=ListConfig(cfMapTimer)
+  if x1=65535 then NoMapTick
+  if x1=c0    then NoMapTick
+  sub x1,c1
+  &ListConfig(cfMapTimer)=x1
+.NoMapTick
+
+  &x1=ListConfig(cfPulseTimer)
+  if x1=65535 then NoPulseTimer
+  if x1=c0    then NoPulseTimer
+  sub x1,c1
+  &ListConfig(cfPulseTimer)=x1
+.NoPulseTimer
+
+  &x1=ListConfig(cfAutoTimer)
+  if x1=65535 then NoAutoTimer
+  if x1=c0    then NoAutoTimer
+  sub x1,c1
+  &ListConfig(cfAutoTimer)=x1
+.NoAutoTimer
+
+  &x1=ListConfig(cfAutoKeyPress)
+  if x1=65535 then NoAutoKeyPress
+  if x1=c0    then NoAutoKeyPress
+  sub x1,c1
+  &ListConfig(cfAutoKeyPress)=x1
+.NoAutoKeyPress
+
+ cif PC
+  miVBLticks=c0
+ cend ;PC
+
+.Lvbl
+  pop x1
+  gosub @SpecialVBL
+  return
+;...e
+
+;...sErrorHandler:0:
+;============================================================
+
+;An example of an Error Handler routine...
+
+;;   ;Perhaps ought to log some error codes to a local file...
+;;
+;;.ErrorHandler
+;;  push x1
+;;  &x1=WordWS(WordCursorXpos)
+;;  push x1
+;;  &x1=WordWS(WordCursorYpos)
+;;  push x1
+;;  &x1=WordWS(WordTextBufferOffset)
+;;  push x1
+;;
+;;  &WordWS(WordCursorXpos)=c0
+;;  &WordWS(WordCursorYpos)=c0
+;;  &WordWS(WordtextBufferOffset)=c0
+;;
+;; cif PC
+;;  V1=0
+;;  gosub @vMCenableTextBuffer
+;; cend ;PC
+;;
+;;  &x1=WordWS(WordErrorNumber)
+;; code-
+;; cif NotPC
+;;  prs " Error"
+;; cend
+;;  prs " Code "
+;;  print x1
+;;  prs " "
+;;  message 5 ;newline
+;; code+
+;;
+;; cif NotPC
+;;.LerrorWait1
+;;  gosub @vMCosrdch
+;;  if v1<>0 then LerrorWait1 ;Flush keyboard
+;;
+;;.LerrorWait2
+;;  gosub @vMCosrdch
+;;  if v1=0 then LerrorWait2  ;Wait for key press
+;; cend ;ST
+;;
+;;  pop x1
+;;  &WordWS(WordTextBufferOffset)=x1
+;;  pop x1
+;;  &WordWS(WordCursorYpos)=x1
+;;  pop x1
+;;  &WordWS(WordCursorXpos)=x1
+;;  pop x1
+;;  return
+;...e
+
+;...sGameStationAbort:0:
+;============================================================
+
+ cif PC
+
+.GameStationAbort
+  gosub @vMCOsrdch
+  if V2=0 then GameStationAbort
+
+  gosub @CommsCloseDown
+
+  goto @vMCCloseDown
+
+ cend ;PC
+;...e
+
+;...sCheckForHeartBeat:0:
+.CheckForHeartBeat
+  &x1=ListConfig(cfControlCaction)
+  if x1<>0 then NotPlay ;running Dispatch/Alert
+
+  gosub @GetReaderChangeV1
+  if V1=cEngineerCard then @lEngineerAbort
+
+  &x1=ListConfig(cfTerminalID)
+  if x1=36 then NotPlay
+
+  gosub @ReceiveMessage
+  if mpStatus=0 then @lCheckHeartbeatRX
+
+.NotPlay
+  return
+
+.lCheckHeartbeatRX
+; Possibile message types are:
+;       0 HeartBeat        - reply
+;       7 Acknowledge      - ignore
+;       9 GameAllocated    - reply with system error
+;      10 TeamAllocated    - reply with system error
+;      30 GoToIdle         - ABORT THE GAME
+;      26 PrintCertificate - ignore
+;      35 DefaultName      - ignore
+
+  if mpMessageType=0  then @lHeartBeatReply ;HeartBeat     - reply
+  if mpMessageType=10 then @lReceived10     ;TeamAllocated - what?
+  if mpMessageType=30 then @lRemoteAbort    ;GoToIdle
+  goto @CheckForHeartBeat
+
+.lReceived10 ;TeamAllocatedMessage
+  mpMessageType=mtLogSysEvent
+  &x1=ListConfig(cfTerminalID)
+  &ListConfig(cfTempFrom) = x1
+  gosub @SetListString
+  gosub @ClearListString
+  x1=80 ;'P'
+  ListString(c0)=x1
+  x1=76 ;'L'
+  ListString(c1)=x1
+  x1=65 ;'A'
+  ListString(c2)=x1
+  x1=89 ;'Y'
+  ListString(c3)=x1
+  x1=32 ;' '
+  ListString(4)=x1
+  x1=83 ;'S'
+  ListString(5)=x1
+  x1=84 ;'T'
+  ListString(6)=x1
+  x1=65 ;'A'
+  ListString(7)=x1
+  x1=84 ;'T'
+  ListString(8)=x1
+  x1=69 ;'E'
+  ListString(9)=x1
+  x1=58 ;':'
+  ListString(10)=x1
+  x1=32 ;' '
+  ListString(11)=x1
+  x1=77 ;'M'
+  ListString(12)=x1
+  x1=83 ;'S'
+  ListString(13)=x1
+  x1=71 ;'G'
+  ListString(14)=x1
+  x1=32 ;' '
+  ListString(15)=x1
+  x1=49 ;'1'
+  ListString(16)=x1
+  x1=48 ;'0'
+  ListString(17)=x1
+  x1=32 ;' '
+  ListString(18)=x1
+  x1=73 ;'I'
+  ListString(19)=x1
+  x1=71 ;'G'
+  ListString(20)=x1
+  x1=78 ;'N'
+  ListString(21)=x1
+  x1=79 ;'O'
+  ListString(22)=x1
+  x1=82 ;'R'
+  ListString(23)=x1
+  x1=69 ;'E'
+  ListString(24)=x1
+  x1=68 ;'D'
+  ListString(25)=x1
+  ListString(26)=c0
+  gosub @SpecialTransmitMessage
+  goto @CheckForHeartBeat
+
+.lHeartBeatReply
+  mpMessageType = mtAckHeartBeat
+  &x1=ListConfig(cfTerminalID)
+  &ListConfig(cfTempFrom) = x1
+  &ListConfig(cfTempUserStatus) = miLastStatus ;Repeat previous response
+  gosub @SpecialTransmitMessage
+  goto @CheckForHeartBeat
+
+.lRemoteAbort
+; cfAbortReason alread set by ReceiveMessage
+
+  mpMessageType = mtLogSysEvent
+  &x1=ListConfig(cfTerminalID)
+  &ListConfig(cfTempFrom) = x1
+  gosub @SetListString
+  gosub @ClearListString
+  x1=80 ;'P'
+  ListString(c0)=x1
+  x1=76 ;'L'
+  ListString(c1)=x1
+  x1=65 ;'A'
+  ListString(c2)=x1
+  x1=89 ;'Y'
+  ListString(c3)=x1
+  x1=32 ;' '
+  ListString(4)=x1
+  x1=65 ;'A'
+  ListString(5)=x1
+  x1=66 ;'B'
+  ListString(6)=x1
+  x1=79 ;'O'
+  ListString(7)=x1
+  x1=82 ;'R'
+  ListString(8)=x1
+  x1=84 ;'T'
+  ListString(9)=x1
+  x1=69 ;'E'
+  ListString(10)=x1
+  x1=68 ;'D'
+  ListString(11)=x1
+  x1=32 ;' '
+  ListString(12)=x1
+  x1=66 ;'B'
+  ListString(13)=x1
+  x1=89 ;'Y'
+  ListString(14)=x1
+  x1=32 ;' '
+  ListString(15)=x1
+  x1=71 ;'G'
+  ListString(16)=x1
+  x1=79 ;'O'
+  ListString(17)=x1
+  x1=45 ;'-'
+  ListString(18)=x1
+  x1=84 ;'T'
+  ListString(19)=x1
+  x1=79 ;'O'
+  ListString(20)=x1
+  x1=32 ;' '
+  ListString(21)=x1
+  &x1=ListConfig(cfTempState)
+  v1=7
+  and x1,v1
+  v1=48 ;'0'
+  add x1,v1
+  ListString(22)=x1
+  ListString(23)=c0
+  gosub @SpecialTransmitMessage
+  goto @MazeGameExit
+
+.lEngineerAbort
+  x1=1
+  &ListConfig(cfAbortReason)=x1 ;Pretent GoToIdle
+
+  mpMessageType = mtLogSysEvent
+  &x1=ListConfig(cfTerminalID)
+  &ListConfig(cfTempFrom) = x1
+  gosub @SetListString
+  gosub @ClearListString
+  x1=80 ;'P'
+  ListString(c0)=x1
+  x1=76 ;'L'
+  ListString(c1)=x1
+  x1=65 ;'A'
+  ListString(c2)=x1
+  x1=89 ;'Y'
+  ListString(c3)=x1
+  x1=32 ;' '
+  ListString(4)=x1
+  x1=65 ;'A'
+  ListString(5)=x1
+  x1=66 ;'B'
+  ListString(6)=x1
+  x1=79 ;'O'
+  ListString(7)=x1
+  x1=82 ;'R'
+  ListString(8)=x1
+  x1=84 ;'T'
+  ListString(9)=x1
+  x1=69 ;'E'
+  ListString(10)=x1
+  x1=68 ;'D'
+  ListString(11)=x1
+  x1=32 ;' '
+  ListString(12)=x1
+  x1=66 ;'B'
+  ListString(13)=x1
+  x1=89 ;'Y'
+  ListString(14)=x1
+  x1=32 ;' '
+  ListString(15)=x1
+  x1=69 ;'E'
+  ListString(16)=x1
+  x1=78 ;'N'
+  ListString(17)=x1
+  x1=71 ;'G'
+  ListString(18)=x1
+  x1=73 ;'I'
+  ListString(19)=x1
+  x1=78 ;'N'
+  ListString(20)=x1
+  x1=69 ;'E'
+  ListString(21)=x1
+  x1=69 ;'E'
+  ListString(22)=x1
+  x1=82 ;'R'
+  ListString(23)=x1
+  ListString(24)=c0
+  gosub @SpecialTransmitMessage
+  goto @MazeGameExit
+
+.ControlC
+  &x1=ListConfig(cfControlCaction)
+  if x1<>c0 then @StopWithoutError
+
+  mpMessageType = mtLogSysEvent
+  &x1=ListConfig(cfTerminalID)
+  &ListConfig(cfTempFrom) = x1
+  gosub @SetListString
+  gosub @ClearListString
+  x1=80 ;'P'
+  ListString(c0)=x1
+  x1=76 ;'L'
+  ListString(c1)=x1
+  x1=65 ;'A'
+  ListString(c2)=x1
+  x1=89 ;'Y'
+  ListString(c3)=x1
+  x1=32 ;' '
+  ListString(4)=x1
+  x1=65 ;'A'
+  ListString(5)=x1
+  x1=66 ;'B'
+  ListString(6)=x1
+  x1=79 ;'O'
+  ListString(7)=x1
+  x1=82 ;'R'
+  ListString(8)=x1
+  x1=84 ;'T'
+  ListString(9)=x1
+  x1=69 ;'E'
+  ListString(10)=x1
+  x1=68 ;'D'
+  ListString(11)=x1
+  x1=32 ;' '
+  ListString(12)=x1
+  x1=66 ;'B'
+  ListString(13)=x1
+  x1=89 ;'Y'
+  ListString(14)=x1
+  x1=32 ;' '
+  ListString(15)=x1
+  x1=75 ;'K'
+  ListString(16)=x1
+  x1=69 ;'E'
+  ListString(17)=x1
+  x1=89 ;'Y'
+  ListString(18)=x1
+  x1=66 ;'B'
+  ListString(19)=x1
+  x1=79 ;'O'
+  ListString(20)=x1
+  x1=65 ;'A'
+  ListString(21)=x1
+  x1=82 ;'R'
+  ListString(22)=x1
+  x1=68 ;'D'
+  ListString(23)=x1
+  ListString(24)=c0
+  gosub @SpecialTransmitMessage
+
+.StopWithoutError
+   cif PC
+  gosub @CommsCloseDown ;Stop NPPC
+  goto @vMCcloseDown    ;Return to DOS
+   cend ;PC	
+
+  goto @closeDown       ;Reset palette
+;...e

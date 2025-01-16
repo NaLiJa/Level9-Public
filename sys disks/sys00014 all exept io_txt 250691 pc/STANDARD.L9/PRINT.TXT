@@ -1,0 +1,465 @@
+; PRINT.TXT for Crystal Maze. Copyright (C)1990 Level 9 Computing Ltd
+; 
+; Mike Austin (July 1990) and Pete Austin (December 1990). 
+; 
+;          Machine code routines for "sprite printing"... 
+; 
+; mcSetPreloadPalette (81) 
+;   only useful for reduced-color machines like IBM CGA
+; mcCopyScreenToBuffer (82)
+;   Copies the logical screen back to the buffer screen, thus adding
+;   any sprites on a semi-permament basis. Note though, that any
+;   insert/remove activity will corrupt these added sprites. Also
+;   the added sprites do not obey the 3D rules, so may give peculiar 
+;   effects
+; mcPasteCell (87)
+;   v1=destination cell, 
+;   v2=source cell,
+;   v3,v4=x,y offset of source relative to destination (signed words)
+; mcRasterHandler (83)
+;   v1=destination raster,
+;   v2=clear colour or source raster,
+;   v5=0 for "clear to colour", or v5=2 for "copy raster". 
+; mcSetPrintRaster (84)
+;   v1=raster to print onto from now on. Must be in memory. 
+; mcSetPrintFont (85)
+;   v1=list number, 
+;   v2=offset, 
+;   v3=CGA palette code (mono machines only)
+; mcRasterPrintCharacter (86) 
+;   v1/v2=x/y pos, 
+;   v3=ascii code, 
+;   v4=foreground colour 0-16 (16 means "punch through") 
+;   v5=background colour 0-16 (16 means "punch through") 
+;   v1/v2 are returned as the x/y pos after the character has been 
+;   printed (may be unchanged if character was clipped off). 
+; 
+;----------------------------------------------------------------- 
+; 
+; Format of font header (same as PC, of course) is:
+;0  .w Offset of "Information"
+;2  .w Offset of "width table"
+;4  .w offset of "font definition"
+;
+; "Information" table contains:
+;  .b Version. Ignored at present
+;  .b SystemWorkspace (0) To allow us to tell if we've done initialise
+;  .b First Ascii char
+;  .b Last Ascii char
+;  .b character width(pixels) divided down to give bytes
+;  .b character height (pixels) 
+;  .b Number of bit-planes. Normally 1
+;  .b Non-zero if compressed (?)
+; 
+;----------------------------------------------------------------- 
+;
+const
+ TextBufferNumber=24 ; where characters are put by MESSAGE commands
+ FontListNumber=26
+; LoLongTextBufferOffset=166
+; ArcBigWindowRaster=840
+; ArcBigWindowDO=50
+; 
+table
+; FontList=26
+; 
+begin
+; 
+;----------------------------------------------------------------- 
+; 
+; Print message M1 at current text cursor position... 
+; 
+ code - 
+.iMessageM1
+ gosub @iStartPrintToBuffer
+ message m1
+ goto @iEndPrinting 
+; 
+;----------------------------------------------------------------- 
+; 
+; Call this before doing a series of message commands 
+; 
+.iStartPrinting
+.iStartPrintToBuffer
+ v1=0				;1=buffers, 2=Logical, 4=Physical
+ code +
+ gosub @mcEnableTextBuffer	;Select output destination
+ &WordWS(WordTextBufferOffset)=c2 ; Initialise buffer pointer 
+; all future text printing
+; to this offset within list TextBuffer(), please
+;          /* Parameters:
+;                 V1 = destination raster
+;                 V2 = source raster or clear color
+;                 V5 = 2; /+ copy raster +/ 0=clear to colour
+ code -
+ message DotCR ; Force upper case and purge buffer
+ code +
+  &WordWS(WordTextBufferOffset)=c2 ; Re-initialise buffer pointer 
+ code -
+ return
+; 
+;----------------------------------------------------------------- 
+; 
+; Call this after doing a series of message commands... 
+; 
+.iEndPrinting
+ gosub @iEndPrintToBuffer
+ PrintX=LeftMargin
+ PrintY=TopMargin
+ goto @iPrintBufferedText ; copy from buffer onto raster.
+; 
+; With a border...
+; 
+code +
+.EndPrintingWithBorder
+ gosub @EndPrintToBuffer
+;
+push ForegroundColour
+ ForegroundColour=BorderColour
+ sub LeftMargin,c1   ;Left border image
+ sub TextBoxWidth,c1
+ PrintY=1
+ gosub EPWBprint
+ add LeftMargin,c2   ;Right border image
+ add TextBoxWidth,c2
+ PrintY=1
+ gosub EPWBprint
+ sub LeftMargin,c1   ;Top border image
+ sub TextBoxWidth,c1
+ PrintY=0
+ gosub EPWBprint
+ PrintY=2
+ gosub EPWBprint
+pop ForegroundColour ;Main image -- original text colour
+ PrintY=1
+;
+.EPWBprint
+ PrintX=LeftMargin
+ add PrintY,TopMargin
+code -
+ gosub @iPrintBufferedText ; copy from buffer onto raster.
+code +
+ return
+code -
+; 
+;----------------------------------------------------------------- 
+; 
+; Called from menu etc. where several messages are to be put
+; into one text box
+; 
+.iDisplayBufferedText
+.iPrintBufferedText 
+ if v7>5 then pbtSomethingToPrint 
+; 
+; If obviously too few characters in the buffer, don't print 
+; anything. The threshold is slightly higher than the ideal (2), 
+; because stray spaces, carriage returns etc. tend to get shoved
+; out from time to time.
+; 
+  TextBoxDisplayed=0 ; reset flag to indicate no text printed
+  return 
+; 
+.pbtSomethingToPrint
+ v1=PrintX ; x pos
+ v2=PrintY ; y pos
+;v3 is the current ascii character 
+ v4=ForegroundColour 
+ v5=BackGroundColour 
+ v6=FontHeight ;copy into a variable int mode can access
+; 
+ code +
+  &x6=FontList(2) ; get offset of width table
+ code -
+ sub x6,FirstAsciiInFont ; so FontList(x6+v3) is width for char v3
+ x1=2 ; position in buffer
+ goto RasterPrintXLoop
+; 
+.RasterPrintYLoop 
+ v1=LeftMargin ; x position ; left margin
+; 
+.RasterPrintXLoop
+ v3=TextBuffer(x1) ; ascii code
+ add x1,c1 ; step on to next character in buffer
+ if v3=0  then @rplNextChar          ; ignore nulls 
+ if v3=96 then @rplPrintCR           ;'`' (next to BS)
+ if v3=32 then rplCheckWordWrap      ; space 
+ if v3<>13 then rplPrintOrdinaryChar ; CR 
+; 
+.rplCheckWordWrap 
+; check if next word to be printed will fit on this line
+ v3=32 ; convert cr, control codes to spaces
+ x2=x1
+ x4=0 ; cumulative width so far
+.rplcwwNextChar
+ x3=TextBuffer(x2)
+ if x3<33 then rplcwwEndOfWord ; space,cr,end of message
+ if x3=96 then rplcwwEndOfWord ; "`"
+ add x3,x6 ; offset of width table
+ x3=FontList(x3)
+ add x4,x3 ; add on width
+.rplNextChar 
+ add x2,c1 ; next char
+ goto rplcwwNextChar
+
+.rplcwwEndOfWord 
+; x4 is cumulative width in pixels of next word to be printed
+ add x4,v1 ; add on to current x position
+ if x4<TextBoxWidth then rplPrintOrdinaryChar
+.rplPrintCR
+ add v2,v6 ;FontHeight ; y position
+ goto @RasterPrintYLoop
+
+.rplPrintOrdinaryChar 
+ cif ForceUpperCase
+  if v3<97  then rplPrintOrdinaryCharA ; 'a'
+  if v3>122 then rplPrintOrdinaryCharA ; 'z'
+  x4=32
+  sub v3,x4 ; convert it to upper case
+ .rplPrintOrdinaryCharA
+ cend ; ForceUpperCase
+; 
+ if v3>31 then rplLegalCharacter 
+ v3=120 ; 32 ; Space 
+.rplLegalCharacter 
+; 
+ code +
+  gosub @mcRasterPrintCharacter
+; v1=x pos v2=y pos, v3=ascii code, v4=foreground colour (0..16)
+; v5=background colour (0..16). Returns v1=x,v2=y pos after print
+ code -
+ if x1<v7 then @RasterPrintXLoop 
+ PrintX=v1
+ PrintY=v2
+ TextBoxDisplayed=CurrentDO
+ return
+; 
+;----------------------------------------------------------------- 
+; 
+; Stop printing into the text buffer, and return v7 as the offset
+; within it. Any offset >2 indicates that something has been
+; printed.
+; 
+.iEndPrintToBuffer
+ message cr ; ensure buffer is flushed
+ code +
+ &v7=WordWS(WordTextBufferOffset)
+ &WordWS(WordTextBufferOffset)=c0 ;redirect printing NOT to list17
+ code -
+ sub v7,c2 ;; c1
+ return
+; 
+;----------------------------------------------------------------- 
+; 
+; Prepare to print into text raster CurrentPrintRaster, clearing 
+; it to BackgroundColour in readiness... 
+; 
+ code +
+.SetUpCurrentPrintRaster
+ push v1 
+  v1=CurrentPrintRaster 
+  gosub @SetUpPrintRasterV1 
+ pop v1 
+ return 
+; 
+; Prepare to print into text raster V1, clearing it to 
+; BackgroundColour in readiness... 
+; 
+.SetUpPrintRaster
+.SetUpPrintRasterV1 
+ RasterOffset=0
+ &WordWS(WordRasterOffset)=c0 ; zero the "raster offset" 
+ push v1 ; changed by mcSetPrintRaster?
+ push v7 
+  gosub @mcSetPrintRaster
+ pop v7 
+ pop v1
+ goto @ClearPrintRasterV1 
+; 
+;----------------------------------------------------------------- 
+; 
+; Clear CurrentPrintRaster to BackgroundColour... 
+; 
+.ClearCurrentPrintRaster
+ push v1 
+  v1=CurrentPrintRaster 
+  gosub @ClearPrintRasterV1 
+ pop v1 
+ return 
+; 
+; Clear print raster V1 to BackgroundColour...  
+; 
+.ClearPrintRasterV1 
+ RasterOffset=0
+ &WordWS(WordRasterOffset)=c0 ; zero the "raster offset" 
+; clear raster v1 before printing onto it... 
+ v2=BackgroundColour ; clear colour 
+ v5=0                ; means "clear to" 
+ push v1 ; changed?
+  gosub @mcRasterHandler
+ pop v1
+ return 
+; 
+;----------------------------------------------------------------- 
+; 
+;;.CopyFilename
+;;; from IntroTables(v1) to list17(8)
+;; v2=8
+;;.CF2
+;; v3=IntroTables(v1)
+;; list17(v2)=v3
+;; add v1,c1
+;; add v2,c1
+;; if v3<>0 then CF2
+;; return
+; 
+;----------------------------------------------------------------- 
+; 
+.AllocateAndLoadFont
+ gosub AllocateFont 
+ gosub @LoadFont 
+ return 
+; 
+.AllocateFont
+ &x1=longws(HiLongFreeWorkspace)
+ &list11(96)=x1 ; set up list24 - used for text print buffer
+ &x1=longws(LOLongFreeWorkspace)
+ &list11(98)=x1 ; set up list24
+ v1=1024 ; reserve space for list 24 - used for text print buffer
+; Big enough for 13 lines, 40 characters across
+ gosub @mcReserveMemory
+ &x1=longws(HiLongFreeWorkspace)
+ &list11(104)=x1 ; set up list26
+ &x1=longws(LOLongFreeWorkspace)
+ &list11(106)=x1 ; set up list26
+ v1=4000 ; 2048 ; reserve space for list 26 - used for font file
+ gosub @mcReserveMemory
+ return 
+; 
+.LoadFont 
+ &v1=IntroTables(28) ; offset of filename within IntroTables
+; from IntroTables(v1) to list17(8)
+ gosub @CopyFilename
+ v1=FontListNumber
+ v2=0
+ gosub @mcLoadFile ; at v2 bytes into listv1()
+ v1=FontListNumber
+ v2=0
+ v3=0
+ gosub @mcSetPrintFont
+; v1=list number, v2=offset, v3=CGA palette code (mono machines only)
+; 
+ &x1=FontList(0)
+ add x1,c2
+ FirstAsciiInFont=FontList(x1)
+ add x1,c3
+ FontHeight=FontList(x1)
+ return
+; 
+;----------------------------------------------------------------- 
+; 
+;;.DoNotePadMessage
+;; v1=NotepadRaster ; =1726 (use 430 to display)
+;;; flag display system to show this box
+;; TextBoxDisplayed=430 ; reset flag to indicate no text printed
+;;.DoTextWindow
+;;; text raster is number 1725
+;; v1=CurrentPrintRaster ; =1725 (use 431 to display)
+;;; flag display system to show this box
+;;; TextBoxDisplayed=ArcBigWindowDO
+;; TextBoxWidth=DefaultTextWidth ; 224in Grange Arcades. ; width of main window box
+;;
+;;.BoxMessageM1
+;;; print message m1 into text raster v1, clearing it to white first
+;; gosub @SetupPrintRaster
+;; PrintX=LeftMargin
+;; PrintY=TopMargin
+;; code -
+;;  gosub @iMessageM1
+;; code +
+;; return
+; 
+;================================================================= 
+;   "COMPILED" MODE ENTRY POINTS TO INTERPRETED PRINT ROUTINES 
+;================================================================= 
+; 
+.MessageM1
+ code - 
+ gosub @iMessageM1
+ code + 
+ return 
+; 
+.EndPrinting
+ code - 
+ gosub @iEndPrinting
+ code + 
+ return 
+; 
+.DisplayBufferedText
+ code - 
+ gosub @iDisplayBufferedText
+ code + 
+ return 
+; 
+.StartPrinting
+ code - 
+ gosub @iStartPrinting
+ code + 
+ return 
+; 
+.StartPrintToBuffer
+ code - 
+ gosub @iStartPrintToBuffer
+ code + 
+ return 
+; 
+.EndPrintToBuffer
+ code - 
+ gosub @iEndPrintToBuffer
+ code + 
+ return 
+; 
+;;================================================================= 
+;       "OLD-STYLE" PRINTING ROUTINES: moved here by Pete 
+;================================================================= 
+; 
+; Set up pointer for "old-style" text printing. Normally, you won't 
+; use this now - use raster printing instead. 
+; 
+.SetUpTextPtr
+; &x1=List11(72) ; list 18's ptr
+; &LongWS(HiLongTextScreenBase)=x1
+; &x1=List11(74)
+; &LongWS(LoLongTextScreenBase)=x1
+ &x1=LongWS(HiLongLogicalBase)    ;*******************************
+ &LongWS(HiLongTextScreenBase)=x1 ;*******************************
+ &x1=LongWS(LoLongLogicalBase)    ;*******************************
+ &LongWS(LoLongTextScreenBase)=x1 ;*******************************
+ return
+; 
+;----------------------------------------------------------------- 
+; 
+; Set up pointer for "old-style" text printing. Normally, you won't 
+; use this now - use raster printing instead. 
+; 
+.SetUpLogicalTextPtr
+ &x1=LongWS(HiLongLogicalBase)
+ &LongWS(HiLongTextScreenBase)=x1
+ &x1=LongWS(LoLongLogicalBase)
+ &LongWS(LoLongTextScreenBase)=x1
+ return
+; 
+;----------------------------------------------------------------- 
+; 
+; Set up pointer for "old-style" text printing. Normally, you won't 
+; use this now - use raster printing instead. 
+; 
+.SetUpPhysicalTextPtr
+ cif PC
+  v1=7                      
+  gosub @mcEnableTextBuffer 
+ cend ; PC
+ &x1=LongWS(HiLongPhysicalBase)
+ &LongWS(HiLongTextScreenBase)=x1
+ &x1=LongWS(LoLongPhysicalBase)
+ &LongWS(LoLongTextScreenBase)=x1
+ return

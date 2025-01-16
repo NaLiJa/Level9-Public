@@ -1,0 +1,622 @@
+  OPT C+,N-
+* comment out this label when you want debugging off
+debuggingon 
+  JMP doapicture
+
+***************************************************************************
+***                   							***
+***                Digitised Picture Compression                        ***
+***									***
+***************************************************************************
+
+
+* This is the DECOMPRESSION END. This code fits into the DRIVER, and 
+* loads, decompresses and displays a high resoltion digitised picture
+* onto the Atari ST screen.
+*
+*                                             Lars Nielsen December 1987
+*
+* The pictures must already have been compressed using the correct format.
+* There are stages as follows:
+* 1) Load picture to memory (optional - can read straight from disk)
+* 2) Prepare a line of numbers from the Huffman coded data. Each number
+*    is a index into the Markov Likelyhood Matrix (see Compression notes)
+*    and effectivel;y copdes the pixel's value from the previous one.
+* 3) Map the coded pixels to real colours (0-15).
+* 4) Insert the pixels onto the screen, preserving any pixels that are not
+*    directly overwrtitten. Any line length may be used.
+* REPEAT (2)-(4) for all the lines of the image.
+
+* Extra data needed, as well as the Hufmann encoded data we need:
+* Huffman Tree - each entry is 2 words, first a "pointer" (i.e. offset) to
+*                the left hand 0 branch, and then a "pointer" to the right
+*                hand 1 branch. L.H.P. = 0 means R.H.P. = value of node
+* Markov Likelyhood Matrix - 16*16 matrix, row is previous pixel, col is
+*                            likelyhood level. Entry is next pixel (byte)
+* First pixel - We need to start off with the top right pixel, from which
+*               derive the next one along, then the next one along, and 
+*               so on.
+* X size - width in pixels (not bytes)
+* Y size - height in pixels
+
+* Register Conventions : I've tried to stick to this:
+* Allocate A0-A5 upwards (not using A7 or A6)
+* Allocate D6-D0 with more permanent reg. higher up.
+* D7 used for returning the results of function calls
+* A6 always points to my workspace which is global throughout
+
+
+  JMP decompresspicture
+
+
+***************************************************************************
+
+
+workspace
+xwidth            DC.W 10
+ywidth            DC.W 10
+previouspixel     DC.B 15
+huffmandatabuffer DC.L 0
+huffmanshiftcount DC.L 0
+sourcepointer     DC.L 0
+
+* corrections for edges of the line
+leftmask        DC.W $FFFF,$7FFF,$3FFF,$1FFF,$0FFF,$07FF,$03FF,$01FF,$00FF
+		DC.W       $007F,$003F,$001F,$000F,$0007,$0003,$0001,$0000
+rightmask       DC.W $FFFF,$FFFE,$FFFC,$FFF8,$FFF0,$FFE0,$FFC0,$FF80,$FF00
+                DC.W       $FE00,$FC00,$F800,$F000,$E000,$C000,$8000,$0000
+
+lineofpixels    DS.W 320
+
+* working stuff, and parameters which may change later
+Toolong               EQU  $FF		* An escape value 
+right_kind_of_header  EQU  $ABCD	* indentity check word
+N                     EQU  16 		* no. of pixels per unit on screen
+bytes_per_screen_line EQU  160
+SP                    EQUR A7
+
+* offsets into picture header area
+palette       EQU 0
+xsize         EQU 32
+ysize         EQU xsize+2
+firstpixel    EQU xsize+4
+id            EQU xsize+6		* identity word
+spare         EQU xsize+8		* maybe use for checksum & length
+nextbestpixel EQU xsize+16
+huffmantable  EQU nextbestpixel+256
+huffmandecode EQU huffmantable+164
+picturedata   EQU huffmantable+256+16
+EVEN
+
+
+***************************************************************************
+
+
+decompresspicture
+
+* Entry : Routines grab_data_byte and put_picture_line intialised 
+*         as required.
+*         (A5) -> Parameters First pixel (top right)
+*                            X size (pixels) , Y size (pixels)
+*                            Next Best Pixel table (256 bytes)
+*                            Huffman decoding tables (16+256 bytes)
+*         (A6) -> Screen start location
+*          D5.W = x offset and D6.W = y offset both in pixels
+
+xposition EQUR D5
+yposition EQUR D6
+  MOVEM.L D0-D7/A0-A6,-(SP)
+  BSR     initdecomp
+  BSR     rationaliseoffsets		* sets D6=0 and D5<16
+  LEA     lineofpixels(PC),A4		* buffer for line of pixels
+decline
+  CMP.W   ysize(A5),yposition
+  BGE     finisheddec
+  JSR     prepare_line
+  MOVE.W  xsize(A5),D4
+  JSR     put_picture_line
+  ADDQ.W  #1,yposition
+  BRA     decline
+finisheddec
+  MOVEM.L (SP)+,D0-D7/A0-A6
+  RTS
+
+
+**************************************************************************
+
+
+initdecomp
+* initialise decompression picture routine
+  LEA     huffmanshiftcount(PC),A0
+  MOVE.W  #7,(A0)			* shift counter <- 7
+  JSR     initgrab_data_word		* initialise source of data
+  LEA     huffmandatabuffer(PC),A0
+  JSR     grab_data_byte		* get 1st byte of picture
+  MOVE.B  D7,1(A0)			* put in l.s.byte of data buffer
+  JSR     grab_data_byte		
+  MOVE.W  D7,0(A0)			* put in m.s.byte of data buffer
+  EXT.L   D5				* x position
+  EXT.L   D6				* y position
+  LEA     previouspixel(PC),A0
+  MOVE.B  firstpixel(A5),(A0)		* begin chain of pixels with first 
+  RTS
+
+
+***************************************************************************
+
+
+rationaliseoffsets
+* Take as arguments:
+* Screen start address in A6
+* x offset in D5
+* y offset in D6
+* Return with y offset=0 , x offset=(x offset) AND $F
+* and A6 contains the location of the first byte affected by the picture
+* i.e. location of its top left pixel in memory.
+  MULU   #bytes_per_screen_line,yposition	* calculate vertical adjust
+  ADD.L  yposition,A6				* adjust vertically
+  MOVE.W xposition,D6
+  LSR.W  #1,D6					* (x offset DIV 16) * 8 as the
+  AND.W  #$FFF8,D6				* horizontal adjust
+  ADD.L  D6,A6
+  AND.W  #$F,xposition				* correct x offset
+  CLR.W  yposition				* correct y offset
+  RTS
+
+
+***************************************************************************
+
+
+pixelcount   EQUR D5
+lastpixel    EQUR D6
+hdatabuffer  EQUR D4
+hshiftcount  EQUR D3
+htable       EQUR A3
+prepare_line
+  MOVEM.L D0-D7/A0-A6,-(SP)
+  CLR.L   lastpixel			* so we can use it as a word value
+  LEA     previouspixel(PC),A0
+  MOVE.B  (A0),lastpixel		* set up the registers first
+  LEA     huffmandatabuffer(PC),A0
+  MOVE.W  (A0),hdatabuffer
+  LEA     huffmanshiftcount(PC),A0
+  MOVE.W  (A0),hshiftcount
+  LEA     huffmantable(A5),htable	* A3 remains valid during call
+  MOVE.W  xsize(A5),pixelcount		* count x-size pixels
+prep1
+  SUBQ.W  #1,pixelcount			* FOR pixelcount = xsize-1 TO 0
+  BCS     prepexit
+  BSR     grabvalue
+  ASL.B   #4,lastpixel			
+  OR.B    D7,lastpixel			* (last pixel)*16 + likelyhood
+  MOVE.B  nextbestpixel(A5,lastpixel),lastpixel	* use of offset
+  MOVE.B  lastpixel,(A4)+		* insert next pixel into buffer
+  BRA     prep1				* NEXT pixelcount
+prepexit
+  LEA     previouspixel(PC),A0
+  MOVE.B  lastpixel,(A0)		* update permanent copies of data
+  LEA     huffmandatabuffer(PC),A0
+  MOVE.W  hdatabuffer,(A0)
+  LEA     huffmanshiftcount(PC),A0
+  MOVE.W  hshiftcount,(A0)
+  MOVEM.L (SP)+,D0-D7/A0-A6
+  RTS
+
+
+***************************************************************************
+
+
+grabvalue
+* Entry : htable -> start of huffman decoding tables
+*               consisting of 16 bytes of length data
+*               fllowed by 256 bytes of decoding data
+*         hdatabuffer and hshiftcounter set up
+* return next huffman encoded value in D7 (byte value, all hi bits 0)
+result       EQUR D7
+length       EQUR D2
+holength     EQU  0
+hodecode     EQU  16
+  CLR.W   result
+  MOVE.B  hdatabuffer,result		* extract low byte of data buffer
+  MOVE.B  hodecode(htable,result),result	
+  CMP.B   #Toolong,result
+  BEQ.S   escapesequence
+  CLR.W   length
+  MOVE.B  holength(htable,result),length * get length as a word
+* fall through to... 
+shiftbufferbylength
+  SUBQ.W  #1,length			* prepare for loop
+grb1
+  LSR.W   #1,hdatabuffer		* shift ENTIRE WORD down
+  DBRA    hshiftcount,grb2		* check if we need a new byte yet
+  MOVE.W  result,-(SP)			* this is corrupted by s/r call
+  BSR     grab_data_byte
+  ASL.W   #8,D7
+  OR.W    D7,hdatabuffer		* insert m.s.byte in data buffer
+  MOVEQ   #7,hshiftcount		* reset to count 8 shifts
+  MOVE.W  (SP)+,result
+grb2
+  DBRA    length,grb1
+  RTS
+
+escapesequence
+* The escape value Toolong is followed by the 4-bit value
+  MOVE.W  #8,length			* get rid of escape sequence
+  BSR     shiftbufferbylength		* first of all
+  MOVE.W  hdatabuffer,result		* Now get our 4-bit number
+  AND.W   #$F,result			* 
+  MOVE.W  #4,length			* and remove it from buffer
+  BRA     shiftbufferbylength		
+
+
+
+***************************************************************************
+***************************************************************************
+
+
+grab_data_byte
+
+* Atari ST specific routine
+* Returns in D7 the next data byte from the source, and adjusts pointer
+* Currenlt the source is memory, a buffer, but it could be disk too.
+* Entry : No parameters.
+*         BUT The SOURCE pointer must be set up correctly
+* Exits with D7 = next byte
+
+  MOVEM.L A0/A1,-(SP)
+  LEA     sourcepointer(PC),A0
+  MOVE.L  (A0),A1
+  MOVE.B  (A1),D7			* Will incr. scource pointer
+  ADDQ.L  #1,(A0)			* here by 1
+  MOVEM.L (SP)+,A0/A1
+  RTS
+
+
+initgrab_data_word
+  LEA     sourcepointer(PC),A0
+  MOVE.L  A5,(A0)
+  ADD.L   #picturedata,(A0)
+  RTS
+
+***************************************************************************
+
+
+put_picture_line
+
+* Atari ST specific routine
+* Takes a line of pixels and inserts them onto the screen memory area
+* making sure that only the pixels plotted are overwritten and oleaving
+* old data intact
+* it plots in "units" which are 8-byte or 16-pixel groups
+* Entry : (A4) points to start of pixel line (one pixel per byte)
+*         (A6) points to left screen location  
+*         D5 = x offset of line from left edge in pixels
+*         D6 = y offset of line from top edge in pixels
+*         D4 = x size (no. of pixels in line)
+
+leftboundary  EQUR D5			* remain valid during call
+rightboundary EQUR D6
+pixelpointer  EQUR D4
+  MOVEM.L D0-D7/A0-A6,-(SP)
+* set A6 -> location to plot the line, and also zero D6
+  BSR     rationaliseoffsets	
+  MOVE.W  leftboundary,rightboundary	* left boundary in D5
+  ADD.W   D4,rightboundary		* right boundary in D6
+  MOVE.W  leftboundary,pixelpointer	* pixel pointer in D4
+  AND.W   #$FFF0,pixelpointer		* round back to unit boundary
+ptl
+  CMP.W   rightboundary,pixelpointer
+  BGE     ptdone
+  BSR     plotoneunit			* will adjust pointers too
+  BRA     ptl  
+ptdone
+  MOVEM.L (SP)+,D0-D7/A0-A6 
+  RTS
+
+*****************
+
+plotoneunit
+
+* given D5 = left hand boundary in pixels
+*       D6 = right hand boundary in pixels
+*       D4 = pixel where we are plotting to, on a unit boundary
+*       A4 -> start of pixel buffer, containing new data in bytes
+*       A6 -> location on screen where we wish to start 
+*       while D4 is oustide range D5->D6 , no data is plotted
+* Exits with registers set up for next call:
+*       D4 incremented by 16
+*       A6 incremented by 8
+*       A4 incremented by however many pixels were plotted 
+*       D5,D6 preserevd
+* Plots a 16 pixel unit of the line, without overunning line edges
+pixel           EQUR D2
+wordnumber      EQUR D3
+accumulator     EQUR D0
+pmask           EQUR D7
+lineofpixelsptr EQUR A4
+
+  MOVE.W   #$FFFF,pmask			* initially assume plot everywhere
+  CLR.W    wordnumber			* count 4 words on screen
+  MOVE.L   lineofpixelsptr,A1		* remember position in line data
+  BSR      maskforleft			* adjust mask for left hand edge
+  BSR      maskforright			* ditto right hand edge
+  CMP.W    #$FFFF,pmask			* have we clashed with either edge?
+  BEQ      plotwithoutmask              * No, so forget about the mask
+plotwithmask
+  MOVE.W   #15,pixel		  	* count through 16 pixels
+  CLR.W    accumulator			* accumulator for data
+  MOVE.L   A1,lineofpixelsptr		* point back to line data
+assbleword
+  BTST     pixel,pmask			* see if we need to do this pixxel
+  BEQ.S    assblenext			* skip, X flag will be masked out
+  BTST     wordnumber,(lineofpixelsptr)+
+  BEQ.S    assblenext
+  BSET     pixel,accumulator
+assblenext
+  DBRA     pixel,assbleword
+  AND.W    pmask,accumulator		* plotting data
+  NOT.W	   pmask
+  AND.W    pmask,(A6)			* old screen data masked
+  NOT.W    pmask
+  OR.W     accumulator,(A6)+		* inster new data to screen
+  ADDQ.W   #1,wordnumber
+  CMP.W    #4,wordnumber
+  BLT      plotwithmask
+  ADD.W    #16,pixelpointer		* adjust pixel pointer
+  RTS
+
+***********
+
+makeapixel MACRO
+  BTST.B   wordnumber,(lineofpixelsptr)+
+  BEQ.S    nmassblenext\1
+  BSET     #\1,accumulator
+nmassblenext\1
+  ENDM
+
+plotwithoutmask
+* In this case we know that we have 16 pixels to plot, and they will 
+* fully overwrite what was on the screen.
+  CLR.W    accumulator			* accumulator for data
+  MOVE.L   A1,lineofpixelsptr		* point back to line data
+nmassbleword
+  makeapixel 15
+  makeapixel 14
+  makeapixel 13
+  makeapixel 12
+  makeapixel 11
+  makeapixel 10
+  makeapixel 9
+  makeapixel 8
+  makeapixel 7
+  makeapixel 6
+  makeapixel 5
+  makeapixel 4
+  makeapixel 3
+  makeapixel 2
+  makeapixel 1
+  makeapixel 0
+  MOVE.W   accumulator,(A6)+		* plot the new data onto screen
+  ADDQ.W   #1,wordnumber
+  CMP.W    #4,wordnumber
+  BLT      plotwithoutmask
+  ADD.W    #16,pixelpointer		* adjust pixel pointer
+  RTS
+
+
+*********
+
+maskforleft
+* given D5 = left hand boundary and D6 = right hand boundary
+*       D4 = pixel pointer (on a unit boundary)
+*       D7 = current mask
+  MOVE.W   leftboundary,D0
+  SUB.W    pixelpointer,D0
+  BLS      mlexit			* stop if lhs <= pixel ptr.
+  ASL.W    #1,D0			* 0 < D0 < 16
+  LEA      leftmask(PC),A0		* look up mask adjustment
+  AND.W    0(A0,D0),pmask		* zero some of the msb's of mask
+mlexit
+  RTS
+ 
+**********
+
+maskforright
+* entry same as left mask
+  MOVE.W   pixelpointer,D0
+  ADD.W    #16,D0			* get to next unit boundary			
+  SUB.W    rightboundary,D0
+  BLS      mrexit			* don't if (pixel ptr+16) <= rhs
+  ASL.W    #1,D0
+  LEA      rightmask(PC),A0
+  AND.W    0(A0,D0),pmask		* zero lsb's of mask
+mrexit
+  RTS
+
+  
+  
+***************************************************************************
+
+  IFD debuggingon
+
+bdos MACRO
+     MOVE.W #\1,-(SP)
+     TRAP   #1
+     ENDM
+
+changescreenmode
+* Enter with A6 as the address where you want the screen to start being
+* displayed
+* and D7 contains resolution no. (0=low,1=medium,2=high)
+  MOVE.W D7,-(SP)			* same resoltution
+  MOVE.L A6,-(SP)			* physical address
+  MOVE.L #-1,-(SP)			* leave logical adress as it was
+  MOVE.W #5,-(SP)			* function required
+  TRAP   #14				* do it
+  ADD.L  #12,SP				* coreect
+  RTS
+
+setuppalette
+* Enter with A5 pointing to new palette which is brought in
+* The old one is lost 
+  MOVE.L A5,-(SP)
+  MOVE.W #6,-(SP)
+  TRAP   #14
+  ADDQ.L #6,SP
+  RTS
+
+physicalscreen EQU $78000		* location of screen
+delayvalue     EQU 20*500000		* about 20 secs
+doapicture
+  LEA    physicalscreen,A6		* start of display
+  MOVE.W #0,D7				* low resoklution
+  BSR    changescreenmode
+disppic
+  BSR    loadrawdata
+  TST.W  D4
+  BMI    disppic
+  LEA    physicalscreen,A6
+  LEA    rawdata(PC),A5
+  BSR    setuppalette
+  MOVE.W #0,D6				* y offset
+  MOVE.W #0,D5				* x offset
+  JSR    decompresspicture
+  MOVE.L #delayvalue,D0
+delay
+  SUB.L  #1,D0
+  BNE    delay
+  BRA    disppic
+  
+loadrawdata
+* load data file into memory
+  BSR     preparefilename
+  BSR     openfile
+  TST.W   D4
+  BMI     error
+  BSR     loadfile
+  BSR     closefile
+  RTS
+error
+  BSR     prs
+  DC.B    'Cannot open file',0
+  RTS
+
+f_open   EQU $3D
+f_read   EQU $3F
+f_close  EQU $3E
+
+openfile
+  MOVE.W #0,-(SP)			* open for read
+  LEA    filename,A0
+  MOVE.L A0,-(SP)
+  bdos   f_open
+  MOVE.W D0,D4 				* handle
+  ADD.L  #8,SP
+  RTS
+  
+loadfile
+  LEA    rawdata(PC),A0
+  MOVE.L A0,-(SP)			* where to put it
+  MOVE.L #$7FFF,-(SP)			* max length to read
+  MOVE.W D4,-(SP)			* handle
+  bdos   f_read
+  ADD.L  #12,SP
+  RTS
+  
+closefile
+  MOVE.W D4,-(SP)			* handle
+  bdos   f_close
+  ADD.L  #4,SP
+  RTS
+
+***********
+
+c_conin   EQU 1
+c_conout  EQU 2
+
+preparefilename
+  BSR   prs
+  DC.B  'Picture number ?',0
+  EVEN
+  LEA   digits,A0
+  BSR   gettwochars
+  RTS
+
+prs
+* Entry : (SP) -> 0 terminated message follow the BSR call
+* Exits with SP updated to point to after the message (even address)
+  MOVEM.L A0/D7,-(SP)
+  MOVE.L  8(SP),A0
+prs1
+  MOVE.B  (A0)+,D7
+  BEQ     prsend
+  BSR     oswrch
+  BRA     prs1
+* make sure even return address
+prsend
+  MOVE.W  A0,D7
+  BTST    #0,D7
+  BEQ     prsend1
+  ADDQ.L  #1,A0
+prsend1
+  MOVE.L  A0,8(SP)
+  MOVEM.L (SP)+,A0/D7
+  RTS
+
+oswrch
+* print code in D7.B
+  MOVE.L  A0,-(SP)
+  MOVE.W  D7,-(SP)
+  bdos    c_conout
+  ADDQ.L  #2,SP				* remove funnction call
+  MOVE.W  (SP)+,D7
+  MOVE.L  (SP)+,A0
+  RTS
+
+cr EQU 13
+gettwochars
+* get 2 characters from the user keyboard and insert them into
+* memory at A0
+  BSR     osrdch
+  MOVE.B  D7,(A0)+
+  BSR     osrdch
+  CMP.B   #cr,D7
+  BEQ     namedone
+  MOVE.B  D7,(A0)+
+namedone
+  MOVE.B  #'.',(A0)+
+  MOVE.B  #'C',(A0)+
+  MOVE.B  #'M',(A0)+
+  MOVE.B  #'P',(A0)+
+  MOVE.B  #0,(A0)+
+  RTS
+
+osrdch
+  MOVE.L  A0,-(SP)
+  bdos    c_conin 
+  ADDQ.L  #2,SP
+*  CMP.B   #'1',D0
+*  BLT     osrddigit
+*  CMP.B   #'9',D0
+*  BGT     osrddigit
+  MOVE.B  D0,D7
+  MOVE.L  (SP)+,A0
+  RTS
+
+  EVEN
+filename
+  DC.B    'A:\'				* pathname
+digits
+  DC.B    '00'				* filename
+  DC.B    '.CMP'			* extention
+  DC.B    0   				* terminator
+    
+  ENDC
+
+  EVEN
+
+* Test code for the system
+* eventually this should be load from disk
+rawdata
+  DS.W    20				* some space
+

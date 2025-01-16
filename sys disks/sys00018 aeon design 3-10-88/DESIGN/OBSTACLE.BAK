@@ -1,0 +1,38 @@
+
+
+            AEON OBSTACLES. COPYRIGHT (C) 1988. LEVEL 9 
+            ------------------------------------------- 
+
+GENERAL NOTES 
+
+Aeon is limited in its number of sprites, and these are basically 
+reserved for creatures and/or missiles. Obstacles therefore use 
+background graphics and will normally be set in the floor or walls 
+so that creatures will never have to pass behind them. 
+
+There are two major exceptions. One is very small obstacles (e.g 
+falling missiles). The second uses the fact that extra sprites can 
+be made available on alternate frames - they will flicker but this 
+does not matter for translucent foreground obstacles such as 
+flames or jets of freezing air. 
+
+USES OF OBSTACLES 
+
+A major feature of Aeon is that objects interect wherever possible. 
+It is not feasible to completely list such effects without the 
+design becoming hopelessly unwieldy, but here are some examples. 
+
+On fire levels, there will be gratings in the floor through which 
+flames occasionally emerge. The idea is to work out the pattern 
+involved and cross the gratings between bursts of fire, but if you 
+leave things on the grating then the following might happen.. 
+ Inflamable object (eg scroll, chest): burns, leaving any contents; 
+ Fireball wand: recharged;  Food: cooked; Torch: lit; 
+ Ice: melted, leaving any contents.
+
+On water levels, rain drips down. It fills any bottle below, and 
+can be used to water plants, or thrown as a weapon (if acid rain). 
+Acid water corodes metal, destroying
+things on the ground. 
+
+Teleport discs (

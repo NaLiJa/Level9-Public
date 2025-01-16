@@ -1,0 +1,188 @@
+; FX.TXT Copyright (C) 1991 Level 9 Computing. Subroutines 
+; for Crystal Maze Programs. Nick Austin, April 1991
+; 
+; routines: 
+; * PlayLongSample. List17=asciiz drive+path+name.
+;                  Plays any sound effect file @ 15000 hz sample frequency.
+; * PlayTuneForSample. (Polling.) Min time between calls=1 sec.
+
+table
+const
+var
+begin
+
+.HiPriPlaySample ; play high priority sample
+  return
+
+;...sPlayLongSample:0:
+;=============================================================
+
+ cif AllowSoundEffects
+     ;List17(8) must already be (path+)Filename
+.PlayLongSample
+  V5=2                          ;Test if already playing
+  gosub @MCdigitalHandler
+  if V1<>0 then @NoSoundSample  ;Playing... so don't interrupt
+
+  &V1=ListConfig(cfSoundSampleHandle) ;Check if last sample did not...
+  if v1=0 then DontClose              ;...terminate correctly.
+  if v1=65535 then DontClose
+  gosub EndSoundSample          ;Recover old file handle
+.DontClose
+
+  V1=0                          ;Open file for reading
+  gosub @MCopenFileHandle
+  if v1=65535 then @NoSoundSample      ;File not found
+
+  &ListConfig(cfSoundSampleHandle)=v1  ;Save handle number
+  &ListConfig(cfSoundSampleOddEven)=c1 ;Set to EVEN buffer (list 27)
+  V2=27                         ;list27
+  V3=0
+  V4=16384                      ;16K bytes
+  gosub @MCreadFileHandle
+
+  if V1=2 then @NoSoundSample   ;0=ok, 1=EOF, 2=Error
+  &ListConfig(cfSoundSampleLength)=V2
+
+  V5=6                          ;Play sample
+  V1=27                         ;list27
+  V2=0                          ;offset
+  V3=15000                      ;Frequency
+  V4=0                          ;Hi=Loop, Lo=Repeat count
+  &V6=ListConfig(cfSoundSampleLength)
+  gosub @MCdigitalHandler
+  gosub lSetupAux
+  return
+
+.EndSoundSample
+  &V1=ListConfig(cfSoundSampleHandle)
+  gosub @MCcloseFileHandle
+  x1=65535
+  &ListConfig(cfSoundSampleHandle)=x1
+.NoSoundSample
+  return
+ cend ;AllowSoundEffects
+;...e
+
+;...sPlayTuneForScene:0:
+;=============================================================
+
+.PlayTuneForScene
+ cif AllowSoundEffects
+     ;Sample must be triggered by "PlayLongSample"...
+
+  &x1=ListConfig(cfEffectsAllowed)
+  if x1=0 then @NoEffects       ;No ADL.SND driver...
+  &x1=ListConfig(cfSoundSampleHandle)
+  if x1=0     then @EffectsIdle ;No sample playing
+  if x1=65535 then @EffectsIdle ;Current sample finished
+
+     ;Sample ought to be playing. There are three cases...
+     ;  1. Sample still playing and next 16K setup up
+     ;  2. Sample still playing but one of the 16k buffer now free.
+     ;  3. Sample not playing at all -- Error. "PlayTuneForScene" was
+     ;     not called frequently enough.
+
+  V5=10                         ;Test Aux sample
+  gosub @MCdigitalHandler
+  if V1<>0 then @NoEffects      ;Both 16K buffers in use.
+
+  V5=2                          ;Test if still playing one 16k buffer
+  gosub @MCdigitalHandler
+  if V1=0 then @SampleEnded     ;Neither 16K buffer playing...
+ 
+.lSetupAux
+  &V1=ListConfig(cfSoundSampleHandle)
+  gosub @SetSampleBufferV2      ;Set V2=27/28 to next 16K buffer
+  V3=0
+  V4=16384                      ;16K bytes
+  gosub @MCreadFileHandle
+  if V1=2 then @SampleEnded     ;0=ok, 1=(EOF), 2=Error
+  &ListConfig(cfSoundSampleLength)=V2
+  if V2=0 then @SampleEnded     ;nothing read (EOF)
+
+  V5=2                          ;Test if still playing the other 16k buffer
+  gosub @MCdigitalHandler
+  if V1=0 then SampleEnded      ;Sample ended during disk load... Hmm..
+ 
+  V5=9                          ;Set Aux Play sample
+  gosub SetSampleBufferV2       ;Set V2=27/28, buffer to use
+  V1=V2                         ;Set V1=27/28
+  V2=0                          ;offset
+  &V6=ListConfig(cfSoundSampleLength)
+  gosub @MCdigitalHandler
+
+  &x1=ListConfig(cfSoundSampleOddEven)
+  add x1,c1                     ;Set up next buffer to use
+  and x1,c1
+  &ListConfig(cfSoundSampleOddEven)=x1
+.NoEffects
+  return
+
+.SampleEnded                    ;Error loading file/Reached EOF.
+  &V1=ListConfig(cfSoundSampleHandle)
+  gosub @MCcloseFileHandle
+  x1=65535
+  &ListConfig(cfSoundSampleHandle)=x1
+ cend ;AllowSoundEffects
+  return
+
+ cif AllowSoundEffects
+.EffectsIdle                    ;No sample playing or current sample finished
+  &x1 = ListConfig(cfTestSoundSystem)
+  if x1<>0 then StartIdleSample
+  return
+
+.StartIdleSample
+  x1=92 ;"\"                    ;\SOUND00\TODOME.SPL
+  List17(8)=x1
+  x1=83 ;"S"
+  List17(9)=x1
+  x1=79 ;"O"
+  List17(10)=x1
+  x1=85 ;"U"
+  List17(11)=x1
+  x1=78 ;"N"
+  List17(12)=x1
+  x1=68 ;"D"
+  List17(13)=x1
+  x1=48 ;"0"
+  List17(14)=x1
+  x1=48 ;"0"
+  List17(15)=x1
+  x1=92 ;"\"
+  List17(16)=x1
+  x1=84 ;'T'
+  List17(17)=x1
+  x1=79 ;'O'
+  List17(18)=x1
+  x1=68 ;'D'
+  List17(19)=x1
+  x1=79 ;'O'
+  List17(20)=x1
+  x1=77 ;'M'
+  List17(21)=x1
+  x1=69 ;'E'
+  List17(22)=x1
+  x1=46 ;'.'
+  List17(23)=x1
+  x1=83 ;'S'
+  List17(24)=x1
+  x1=80 ;'P'
+  List17(25)=x1
+  x1=76 ;'L'
+  List17(26)=x1
+  List17(27)=c0
+  goto @PlayLongSample
+ cend ;AllowSoundEffects
+;...e
+
+;...sSetSampleBufferV2:0:
+.SetSampleBufferV2
+  V2=27                         ;List27: Buffer for Odd 16K bytes of sample
+  &x1=ListConfig(cfSoundSampleOddEven)
+  if x1=0 then EvenBuffer
+  V2=28                         ;List28: Buffer for Even 16K bytes of sample
+.EvenBuffer
+  return
+;...e

@@ -1,0 +1,26 @@
+; TABLE.TXT, assembler format data for tables, a.k.a lists/arrays. 
+; (Save the assembled data as TABLE.DAT). 
+;
+; You must start all DEFWs on EVEN boundaries, else subsequent code 
+; seems to be padded to make it even (according to the GENST listing, 
+; anyway). The EVEN directive inserts a padding byte if appropriate.
+;
+ ORG 0
+starttables
+ dc.l LIST1-starttables ; MOVEABLE OBJECT START
+ dc.l $8000
+ dc.l $8100
+ dc.l LIST4-starttables
+ dc.l List5-StartTables
+ dc.l $8200
+ dc.l $8300
+ dc.l list8-starttables
+ dc.l $8400
+ dc.l ENDTABLE-starttables
+;---
+List1
+List4
+List5
+List8
+ dc.b 0,1,2,3,4,5,6,7,8,9,10,11,12
+EndTable

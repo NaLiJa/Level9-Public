@@ -1,0 +1,88 @@
+06601090305800
+1
+2
+F0110030
+9[...................................................................]011
+€
+AllinstructionsCopyright(C)Level9Computing
+
+DATEreplacewithtodaysdate.e.g."27th.September1988."
+GAMENAMEthenameofthegame.e.g."KnightOrc"
+FILENAME6asixcharacterfile-name.e.g."ORC1"
+MSXCHECKthechecksumoftheMSXmastertape(youwon'tknow
+thisuntiltheMSXversionismastered.)
+
+€DATE.
+ˆ
+GAMENAMEmasterfortheMSX
+€
+ThemasterfortheMSXversionofGAMENAMEissuppliedonfour
+cassettes.TheseinstructionsuseaMSXwithtaperecordertoproduce
+atapemasterreadyforduplication.Someduplicatorsareableto
+connecthigh-qualitytaperecorderstoaMSX,sothismethodallows
+high-qualitytapestobeproduced.
+
+SomeofthefilesonthetapearerecordedinLevel9'sownformat,
+andcanonlyberead(andwritten)bytheotherprogramsonthetapes.
+
+TorunthemasterontheMSXenterthecommandˆRUN"CAS:"€
+
+ˆDuplication€
+
+GAMENAMEisathree-partgame.Thereareonlyminordifferences
+inmasteringeachpart,sotheseinstructionsneedtoberepeated
+threetimes,withdifferencesonlywhereindicated.Underliningisused
+forthekeysyouhavetopress.
+
+1.SwitchofftheMSX,waitafewsecondsthenswitchonagain.
+
+2.LoadtheBasictitlepage,fromthe"PART1"tape.
+ˆLOAD"CAS:"€
+Stopthetapeassoonasithasloaded,butdonotrewindit.A
+secondfileisstoredonthetapeimmediatelyfollowingtheBasic
+program.
+
+3.theMSXLOADcommanddoesnotcheckforloaderrors,soˆRUN€the
+titleprogramtocheckforerrors.Whenitstopsholddown
+ˆCTRL€andpressˆSTOP€(Gives"DeviceI/Oerrorin80)
+
+4.Savethetitletothemastertape:
+ForthefirstpartofGAMENAMEˆSAVE"€FILENAME6ˆ"€
+ForthesecondpartofGAMENAMEˆSAVE"FILENAME6"€
+ForthelastpartofGAMENAMEˆSAVE"FILENAME6"€
+
+5.Loadthemachinecodeprogram,storedonTAPE1afterthebasic
+program.
+ˆCLEAR0,&H9000€
+ˆBLOAD"CAS:"€
+Oncetheprogramhasloadedrewindtape1.
+
+6.Savethemachine-code
+ˆBSAVE"code",&HD180,&HF200,&HEA06€
+Aftersavingfinishesleave10secondsofblanktape.
+
+€
+7.Withthecodefromstep5stillinmemoryrunthe'copy'program
+ˆDEFUSR0=&HE000€
+ˆPRINTUSR(0)€
+
+Thisalsodisplaysachecksumforthecodeloadedinstep5which
+mustbeMSXCHECK.Anyothervalueindicatesaloadingerror,which
+alsomeansstep6mayhavesavedcorruptedcode,sostartagainfrom
+thestartofthecurrentpartoftheGAMENAMEgame.
+
+ForthefirstpartofGAMENAMEplaytape2
+ForthesecondpartofGAMENAMEplaytape3
+ForthelastpartofGAMENAMEplaytape4.
+
+Thesetapestakeabout15minutestoload.
+
+8.IfthedataloadsOKitdisplays"Savefile(Y/N)?";PressˆY€to
+savethegame.Ifaloadingerroroccursitdisplays"Read
+error";PressSPACE,rewindthetapeandplayitagain.
+
+9.Testthenewmaster.SwitchofftheMSXtoexitthecopyprogramand
+tocleartheMSXmemory,waitafewsecondsthenswitchonagain.
+RunthegameusingˆRUN"CAS:"€.Eachpartwhenloadeddisplaysabouta
+screen-fulloftext.
+

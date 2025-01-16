@@ -1,0 +1,86 @@
+var
+ x1 x2 x3 x4 x5
+begin
+ code +
+.Loop
+ push x1
+ gosub test
+ pop x1
+ goto Loop
+
+.test
+ x1=10
+ return
+
+;Never executed...
+
+.backward1
+ goto forward1
+ gosub forward1
+
+ goto @forward1
+ gosub @forward1
+
+.forward1
+ goto backward1
+ gosub backward1
+
+ goto @backward1
+ gosub @backward1
+
+ if x3=x4 then forward2
+ if x3=x3 then @forward2
+ if x3=x2 then backward1
+ if x3=x1 then @backward1
+
+ if x2=1000 then forward2
+ if x2=1000 then @forward2
+ if x2=1000 then backward1
+ if x2=1000 then @backward1
+
+.forward2
+.backward2
+
+ if x3<x4 then forward3
+ if x3<x3 then @forward3
+ if x3<x2 then backward2
+ if x3<x1 then @backward2
+
+ if x2<1000 then forward3
+ if x2<1000 then @forward3
+ if x2<1000 then backward2
+ if x2<1000 then @backward2
+
+.forward3
+.backward3
+
+ if x3>x4 then forward4
+ if x3>x3 then @forward4
+ if x3>x2 then backward3
+ if x3>x1 then @backward3
+
+ if x2>1000 then forward4
+ if x2>1000 then @forward4
+ if x2>1000 then backward3
+ if x2>1000 then @backward3
+
+.forward4
+.backward4
+
+ if x3<>x4 then forward5
+ if x3<>x3 then @forward5
+ if x3<>x2 then backward4
+ if x3<>x1 then @backward4
+
+ if x2<>1000 then forward5
+ if x2<>1000 then @forward5
+ if x2<>1000 then backward4
+ if x2<>1000 then @backward4
+
+
+.forward5
+
+ code -
+
+ prs "The end"
+

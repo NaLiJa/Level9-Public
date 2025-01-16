@@ -1,0 +1,483 @@
+/*   SAMECELL.C  */
+
+#include <stdio.h>
+#include <dos.h>
+/*#include <dir.h>
+  */
+
+   FILE *infile;
+   int long position;
+   char far *screen=0Xa0000000L;
+   int screenxbytes=40,screenylines=200,screenbitplanes=4;
+   union REGS inregs,outregs;
+
+   static struct ffblk fileblock;
+   static char NeoScreen[32128];
+   char *bufferptr;
+
+   int WhichParm;
+   char garbage[80]; /*****/
+
+/*   struct ffblk
+         {
+         char      ff_reserved[21];
+         char      ff_attrib;
+         unsigned  ff_ftime;
+         unsigned  ff_fdate;
+         long      ff_fsize;
+         char      ff_name[13];
+         };                  */
+
+   static char filename[15];
+
+   static int ReverseByte[256] = {
+      0,128,64,192,32,160,96,224,
+      16,144,80,208,48,176,112,240,
+      8,136,72,200,40,168,104,232,
+      24,152,88,216,56,184,120,248,
+      4,132,68,196,36,164,100,228,
+      20,148,84,212,52,180,116,244,
+      12,140,76,204,44,172,108,236,
+      28,156,92,220,60,188,124,252,
+      2,130,66,194,34,162,98,226,
+      18,146,82,210,50,178,114,242,
+      10,138,74,202,42,170,106,234,
+      26,154,90,218,58,186,122,250,
+      6,134,70,198,38,166,102,230,
+      22,150,86,214,54,182,118,246,
+      14,142,78,206,46,174,110,238,
+      30,158,94,222,62,190,126,254,
+      1,129,65,193,33,161,97,225,
+      17,145,81,209,49,177,113,241,
+      9,137,73,201,41,169,105,233,
+      25,153,89,217,57,185,121,249,
+      5,133,69,197,37,165,101,229,
+      21,149,85,213,53,181,117,245,
+      13,141,77,205,45,173,109,237,
+      29,157,93,221,61,189,125,253,
+      3,131,67,195,35,163,99,227,
+      19,147,83,211,51,179,115,243,
+      11,139,75,203,43,171,107,235,
+      27,155,91,219,59,187,123,251,
+      7,135,71,199,39,167,103,231,
+      23,151,87,215,55,183,119,247,
+      15,143,79,207,47,175,111,239,
+      31,159,95,223,63,191,127,255
+      } ;
+
+static int IRGB[64]=
+   {
+      0,1,2,3,4,5,6,7,
+      0,9,2,3,4,5,6,9,
+      0,3,10,3,6,5,6,10,
+      0,9,10,11,4,9,10,11,
+      0,5,6,3,12,5,6,12,
+      0,9,2,9,12,13,12,13,
+      0,1,10,10,12,12,14,14,
+      0,9,10,11,12,13,14,15,
+   } ;
+
+/*--------------------*/
+
+main(argc,argv)
+   int argc;
+   char **argv;
+
+{
+   int colour;
+
+/* check parameters */
+   if (argc<2)
+      {
+      printf("try: SAMECELL filename\n");
+      goto finish;
+      }
+
+   for (WhichParm=1;WhichParm<argc;WhichParm++)
+   {
+
+   if (argv[WhichParm,0]=='\0') goto finish;
+
+   /* parse filename */
+      fparse(argv[WhichParm],"NEO");
+
+/* find first filename */
+      if (findfirst(filename,&fileblock,0)!=0)
+         if (WhichParm==1)
+            {
+               printf("File not found!\n");
+               goto finish;
+            }
+
+/* open file */
+      if ((infile=fopen(fileblock.ff_name,"rb"))==NULL) goto finish;
+
+/* set screen mode */
+      setmode(0);
+
+/* set palette */
+      fseek(infile,4L,SEEK_SET);
+      for (colour=0;colour<16;colour++)
+         setcolour(colour);
+
+/* load data */
+      fseek(infile,0L,SEEK_SET); /*128L*/
+      ReadNeo(infile);
+      fclose(infile);
+
+      screen=0Xa0000000L;
+/* Display it */
+      DisplayNeo();
+
+/* Remove repeated cells... */
+      PackNeo();
+      DisplayNeo();
+
+      SaveNeo();
+
+   }
+
+/* exit */
+
+finish:
+
+/* Wait for CR */
+   printf("Press CR:\n");
+   gets(garbage);
+   setmode(99);
+}
+
+
+/*--------------------*/
+
+setmode(modenumber)
+   int modenumber;
+
+   {
+   int screenmode;
+
+   switch(modenumber)
+      {
+      case 0 :screenmode=13;
+            screenxbytes=320/8;
+            screenylines=200;
+            screenbitplanes=4;
+            break;
+      case 99:screenmode=2;
+            break;
+      }
+   inregs.h.al=screenmode;
+   inregs.h.ah=0;
+   int86(0X10,&inregs,&outregs);
+   }
+
+
+/*--------------------*/
+
+setbitplane(bitplane)
+   int bitplane;
+
+   {
+    outp(0X3C4,2);
+   outp(0X3C5,1<<bitplane);
+   }
+
+
+/*--------------------*/
+
+setcolour(colour)
+   int colour;
+
+   {
+   int tempvalue,portvalue;
+   int red,green,blue;
+
+   portvalue=0;
+
+   red=(getc(infile)<<5);
+   if ((red&64)!=0) portvalue|=4 ; /* 32;*/
+   if ((red&128)!=0) portvalue|=32 ; /*4;*/
+
+   tempvalue=getc(infile);
+   green=((tempvalue<<1)&0XE0);
+   if ((green&64)!=0) portvalue|=2; /*16;*/
+   if ((green&128)!=0) portvalue|=16; /*2;*/
+
+   blue=(tempvalue<<5);
+   if ((blue&64)!=0) portvalue|=1; /*8; */
+   if ((blue&128)!=0) portvalue|=8; /*1;*/
+
+   if (red+green+blue!=0)
+      {
+      red|=63;
+      green|=63;
+      blue|=63;
+      }
+
+   if (IRGB[portvalue]>7) portvalue|=8;
+/*   portvalue=IRGB[portvalue]; */
+
+   inp(0X3DA);
+   outp(0X3C0,colour);
+   outp(0X3C0,portvalue);
+
+   inp(0X3DA);
+   outp(0X3C0,0X20);
+   }
+
+
+/*--------------------*/
+
+fparse(infilename,ext)
+   char infilename[11],ext[2];
+
+   {
+   int c;
+
+   for (c=0;c<8;c++)
+      {
+      filename[c]=infilename[c];
+      if ((infilename[c]=='.')|(infilename[c]==0)) break;
+      }
+   filename[c++]='.';
+   filename[c++]=ext[0];
+   filename[c++]=ext[1];
+   filename[c++]=ext[2];
+   while (c<12) filename[c++]=' ';
+   return;
+   }
+
+
+/*--------------------*/
+
+ReadNeo(stream)
+   FILE *stream;
+
+   {
+   int c=32128;
+
+   bufferptr=NeoScreen;
+   while ((c--)!=0)
+      *(bufferptr++)=getc(stream);
+   }
+
+/*--------------------*/
+
+SaveNeo()
+   {
+      FILE *c; /*infile*/
+      c=fopen(fileblock.ff_name,"wb") ;  /*Delete file*/
+      fseek(c,0L,SEEK_SET); /*128L*/
+      fwrite(NeoScreen,sizeof(char),sizeof(NeoScreen),c)   ;
+      fclose(c);
+   }
+
+/*--------------------*/
+
+DisplayNeo()
+   {
+   int bitp;
+
+   for (bitp=0;bitp<screenbitplanes;bitp++)
+      {
+         setbitplane(bitp);
+         DisplayScreen(bitp);
+      }
+   }
+
+/*--------------------*/
+
+int PackNeo()
+   {
+   char *Pointer;
+   int X,Y;
+
+   Pointer=&NeoScreen[128];
+   for (Y=0;Y<12;Y++)
+      {
+         for (X=0;X<20;X++)
+            {
+               if ( CellNotBlank(Pointer)  )
+                  RemoveIdenticalFrom(X,Y,Pointer);
+               Pointer+=8; /* bytes between each cell */
+            }
+         Pointer+=2400; /* 2560=bytes per 20 cells (one line) */
+      }
+   }
+
+/*--------------------*/
+
+int CellNotBlank(Pointer)
+/* Tell if Cell starting NeoScreen[Pointer] is transparent */
+   char *Pointer;
+   {
+   int c;
+
+   for (c=0;c<16;c++)
+      {   if (*Pointer++!='\0') goto NotBlank;
+         if (*Pointer++!='\0') goto NotBlank;
+         if (*Pointer++!='\0') goto NotBlank;
+         if (*Pointer++!='\0') goto NotBlank;
+         if (*Pointer++!='\0') goto NotBlank;
+         if (*Pointer++!='\0') goto NotBlank;
+         if (*Pointer++!='\0') goto NotBlank;
+         if (*Pointer++!='\0') goto NotBlank;
+         Pointer+=152 ; /* 160=bytes per line  */
+      }
+   return(0);
+
+NotBlank:
+   return(1);
+   }
+
+/*--------------------*/
+
+RemoveIdenticalFrom(X,Y,Pointer)
+/* Compare cells from start of picture up to (X,Y) with
+   Cell NeoScreen[Pointer] */
+   int X,Y;
+   char *Pointer;
+   {
+
+   char *Pointer2;
+   int X2,Y2,Done=0;
+
+   Pointer2=&NeoScreen[128];
+   for (Y2=0;Y2<12;Y2++)
+      {
+         if (Done==0)
+            for (X2=0;X2<20;X2++)
+               {
+                  if (Done==0)
+                     if ((X2==X) && (Y2==Y)) goto RIF;
+                     if (Pointer==Pointer2) goto RIF;
+                     if (CellsIdentical(Pointer,Pointer2))
+                        {
+                           FlashCell(Pointer);
+                           DeleteCell(Pointer2);
+                           FlashCell(Pointer);
+            /*               Done=1; */
+                        }
+RIF: ; /***/
+                  Pointer2+=8; /* bytes between each cell */
+               }
+         Pointer2+=2400; /* 2560=bytes per 20 cells (one line) */
+      }
+/*** RIF: ; ***/
+   }
+
+/*--------------------*/
+
+CellsIdentical(Pointer1,Pointer2)
+   char *Pointer1,*Pointer2;
+   {
+
+   int c;
+   register char HiByte;
+   char *P1,*P2;
+   P1=Pointer1;
+   P2=Pointer2;
+      for (c=0;c<16;c++)
+      {   if (*Pointer1++!=*Pointer2++) goto NotSame;
+         if (*Pointer1++!=*Pointer2++) goto NotSame;
+         if (*Pointer1++!=*Pointer2++) goto NotSame;
+         if (*Pointer1++!=*Pointer2++) goto NotSame;
+         if (*Pointer1++!=*Pointer2++) goto NotSame;
+         if (*Pointer1++!=*Pointer2++) goto NotSame;
+         if (*Pointer1++!=*Pointer2++) goto NotSame;
+         if (*Pointer1++!=*Pointer2++) goto NotSame;
+         Pointer1+=152 ; /* 160=bytes per line  */
+         Pointer2+=152;
+      }
+   return(1);   /*Identical*/
+NotSame:
+
+   Pointer1=P1;
+   Pointer2=P2;
+
+      for (c=0;c<16;c++)
+      {   HiByte=ReverseByte[*(Pointer1++)] ;
+         if (ReverseByte[*(Pointer1++)]!=*Pointer2++) goto NotSame2;
+         if (HiByte!=*Pointer2++) goto NotSame2;
+
+         HiByte=ReverseByte[*(Pointer1++)] ;
+         if (ReverseByte[*(Pointer1++)]!=*Pointer2++) goto NotSame2;
+         if (HiByte!=*Pointer2++) goto NotSame2;
+
+         HiByte=ReverseByte[*(Pointer1++)] ;
+         if (ReverseByte[*(Pointer1++)]!=*Pointer2++) goto NotSame2;
+         if (HiByte!=*Pointer2++) goto NotSame2;
+
+         HiByte=ReverseByte[*(Pointer1++)] ;
+         if (ReverseByte[*(Pointer1++)]!=*Pointer2++) goto NotSame2;
+         if (HiByte!=*Pointer2++) goto NotSame2;
+
+         Pointer1+=152 ; /* 160=bytes per line  */
+         Pointer2+=152;
+      }
+   return(1);  /*Reversed copies*/
+NotSame2:
+   return(0);
+   }
+
+/*--------------------*/
+
+DeleteCell(Pointer)
+   char *Pointer;
+   {
+   int c;
+
+   for (c=0;c<16;c++)
+      {
+         *Pointer++='\0';
+         *Pointer++='\0';
+         *Pointer++='\0';
+         *Pointer++='\0';
+         *Pointer++='\0';
+         *Pointer++='\0';
+         *Pointer++='\0';
+         *Pointer++='\0';
+         Pointer+=152 ; /* 160=bytes per line */
+      }
+/****   DisplayNeo(); *****/
+   }
+
+/*--------------------*/
+
+FlashCell(Pointer)
+   char *Pointer;
+   {
+   int b,c;
+
+   for (c=0;c<16;c++)
+      {
+         for (b=0;b<8;b++)
+            {
+               *Pointer^=0xFF;
+               Pointer++;
+            }
+         Pointer+=152 ; /* 160=bytes per line */
+      }
+   }
+
+/*--------------------*/
+
+DisplayScreen(offset)
+   int offset;
+
+   {
+   int c;
+
+   bufferptr=&NeoScreen[128]+(2*offset);
+   offset=0;
+   for (c=0;c<4000;c++)
+      {
+      *(screen+offset++)=*(bufferptr++);
+      *(screen+offset++)=*(bufferptr++);
+      bufferptr+=6;
+      }
+   }
+
+
+/*--------------------*/
+

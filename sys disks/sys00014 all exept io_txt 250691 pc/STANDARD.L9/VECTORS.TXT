@@ -1,0 +1,256 @@
+; VECTORS.TXT
+;
+; vectors to get over long-jump limitations. Compile
+; as near to the middle of your program (by code size)
+; as possible
+ begin
+.MCHeroOnceOnlyInit goto @vMCHeroOnceOnlyInit 
+.MCHeroInit goto @vMCHeroInit 
+.MCClearScreen goto @vMCClearScreen 
+
+.MCMoveScreen goto @vMCMoveScreen 
+.MCSpecials goto @vMCSpecials 
+.MCBuildBackground goto @vMCBuildBackground 
+.MCDisplayDestroyedWalls goto @vMCDisplayDestroyedWalls 
+.MCMoveAllSprites goto @vMCMoveAllSprites 
+.MCDisplayAllSprites goto @vMCDisplayAllSprites 
+.MCTrimEdges goto @vMCTrimEdges 
+.MCDisplayTextLine goto @vMCDisplayTextLine 
+.MCDisplayUpperTextLine goto @vMCDisplayUpperTextLine 
+.MCDoAllTimers goto @vMCDoAllTimers 
+.MCCalculateMemoryFree goto @vMCCalculateMemoryFree 
+.MCHeroInput goto @vMCHeroInput 
+.MCOswrchV1 goto @vMCOswrchV1 
+.MCInvertedOswrchV1 goto @vMCInvertedOswrchV1 
+.MCDestroyTempMoved goto @vMCDestroyTempMoved 
+.MCDestroyTempFixed goto @vMCDestroyTempFixed 
+.MCCloseDown goto @vMCCloseDown 
+.MCFindSprite goto @vMCFindSprite 
+.MCSetUpNewSprite goto @vMCSetUpNewSprite 
+.MCSprite goto @vMCSprite 
+.MCHandlePlayerInput goto @vMCHandlePlayerInput 
+.MCReturnFrameTime goto @vMCReturnFrameTime 
+.MCUpdateFrameTime goto @vMCUpdateFrameTime 
+.MCClearRectangle goto @vMCClearRectangle 
+.MCMapBuildBackground goto @vMCMapBuildBackground 
+.MCPreScrollMap goto @vMCPreScrollMap 
+.MCSpecialCheck goto @vMCSpecialCheck 
+.MCStartBigExplosion goto @vMCStartBigExplosion 
+.MCScrollTextLine goto @vMCScrollTextLine 
+.MCReCalcSpriteGraphics goto @vMCReCalcSpriteGraphics 
+.MCOsrdch goto @vMCOsrdch 
+.MCChecksum goto @vMCChecksum 
+.MCEmptyRoom
+.MCInit3D goto @vMCEmptyRoom
+.MCDrawObjectV1 goto @vMCDrawObjectV1 
+.MCBuildRoom
+.MCBuildViewMap goto @vMCBuildRoom
+
+.MCDisplayRoom
+.MCDisplayViewMap goto @vMCDisplayRoom
+
+.MCInitBootPrg goto @vMCInitBootPrg 
+.MCReturnSpriteAddress goto @vMCReturnSpriteAddress 
+.MCNoClipSprite goto @vMCNoClipSprite 
+.MCCalcScreenAddress goto @vMCCalcScreenAddress 
+.MCSaveFile goto @vMCSaveFile 
+.MCLoadFile goto @vMCLoadFile 
+.MCCopy goto @vMCCopy 
+.MCAbsChangeListPtr goto @vMCAbsChangeListPtr 
+.MCLoadCells goto @vMCLoadCells 
+.MCSetUpPtrs goto @vMCSetUpPtrs 
+.MCParseInputWord goto @vMCParseInputWord 
+.MCInitTask goto @vMCInitTask 
+.MCSnooze goto @vMCSnooze 
+.MCAddToListPtr goto @vMCAddToListPtr 
+.MCReserveMemory goto @vMCReserveMemory 
+.MCSetUpVariablePtrs goto @vMCSetUpVariablePtrs 
+.MCPreLoadCells goto @vMCPreLoadCells 
+.MCPlotLogicalScreen goto @vMCPlotLogicalScreen 
+.MCPlotPhysicalScreen goto @vMCPlotPhysicalScreen 
+.MCUpdateScreen goto @vMCUpdateScreen 
+.MCUnPlotScreen goto @vMCUnPlotScreen 
+; returns v1=actual frame time in ms
+.MCSetPalette goto @vMCSetPalette 
+.MCSetTextWIndow goto @vMCSetTextWIndow 
+.MCSetGraphicsWindow goto @vMCSetGraphicsWindow 
+.MCClearChangeMaps goto @vMCClearChangeMaps 
+.MCClearTextBuffer goto @vMCClearTextBuffer 
+.MCCopyTextBuffer goto @vMCCopyTextBuffer 
+.MCEnableTextBuffer goto @vMCEnableTextBuffer 
+.MCInitSound goto @vMCInitSound 
+.MCStartSound goto @vMCStartSound 
+.MCFindObj goto @vMCFindObj 
+.MCInitGraphics goto @vMCInitGraphics 
+.MCCalcMatrix goto @vMCCalcMatrix 
+.MCDrawVector goto @vMCDrawVector 
+.MCKeyDown goto @vMCKeyDown 
+.MCInitJoystic goto @vMCInitJoystic 
+.MCReserveChip goto @vMCReserveChip 
+.MCSaveProtect goto @vMCSaveProtect 
+.MCInitScrolling goto @vMCInitScrolling 
+.MCScrollDirection goto @vMCScrollDirection 
+.MCPurgeAllCells goto @vMCPurgeAllCells 
+; MCSetTextWindow     = Allocate memory for text buffer
+;       v1=top screen line
+;       v2=number of screen lines
+; MCSetGraphicsWindow = Set graphics clipping
+;       v1=Left   X
+;       v2=Right  X
+;       v3=Top    Y
+;       v4=Bottom Y
+; MCClearChangeMaps   = (Rebuild physical screen from Buffer2)
+; MCClearTextBuffer   = Clear one character row of text buffer
+;       v1=buffer Y to clear
+; MCCopyTextBuffer    = Copy text buffer to physical screen
+;       v1=Buffer Y to top of text window
+; MCEnableTextBuffer  = Select character output 
+;       v1=0, write to TextScreenBase
+;       v1=mask: 1=buffers, 2=Logical, 4=Physical
+
+.MCSetMaxFrameRate
+ goto @vMCSetMaxFrameRate
+ 
+; Paramters:
+;             V1 = 84; Time in milliseconds
+
+.MCSetPreloadPalette
+ goto @vMCSetPreloadPalette
+ 
+
+.MCCopyScreenToBuffer
+ goto @vMCCopyScreenToBuffer
+ 
+; Copies the logical screen back to the buffer screen, thus adding
+; any sprites on a semi-permament basis. goto @v 
+; insert/remove activity will corrupt these added sprites. goto @v 
+; these added sprites do not obey the 3D rules, so may give
+; peculiar effects
+
+.MCRasterHandler
+ goto @vMCRasterHandler
+ 
+;          /* Parameters:
+;                 V1 = destination raster
+;                 V2 = source raster or clear color
+;                 V5 = 2; /+ copy raster +/ 0=clear to color
+
+.MCSetPrintRaster
+ goto @vMCSetPrintRaster
+ 
+; Parameter: V1=raster to print onto from now on. goto @v 
+
+
+.MCSetPrintFont
+ goto @vMCSetPrintFont
+ 
+; v1=list number, v2=offset, v3=CGA palette code (mono machines only)
+
+
+.MCRasterPrintCharacter
+ goto @vMCRasterPrintCharacter
+ 
+
+.MCPasteCell
+ goto @vMCPasteCell
+ 
+
+.MCMobilityAbility
+ goto @vMCMobilityAbility
+ 
+
+.MCLoadCellDataDirect
+ goto @vMCLoadCellDataDirect
+ 
+;          /* V1=list #, v2=offset, v3=cell # */
+
+.MCTransferParkedSprites
+ goto @vMCTransferParkedSprites
+ 
+
+.MCdigitalHandler
+ goto @vMCdigitalHandler
+ 
+;          /* Paramters:
+;                V5=0 Initialise
+;                V5=1 Terminate System
+;                V5=2 FindState Audio  (returns V1=0 or 0FFFF)
+;                V5=3 Wait For Audio
+;                V5=4 Volume Control   (V5=Volume)
+;                V5=5 Translate Sample (V1,V2 = sample, V6 = length,
+;                                       V3=Frequncy, V4=Volume)
+;                V5=6 Play Sample      (V1,V2 = sample, V3=Frequency,
+;                                       V4=loop count, V6=Repeat count)
+;                V5=7 Terminate Sample
+;          */
+
+.MCOnceOnlyMusicInit
+ goto @vMCOnceOnlyMusicInit
+ 
+;          /* Returns V1,V2 = (driver) InfoWord
+;                     V6 = 00000ABC
+;                          A=1 Adlib sound driver
+;                          B=1 Roland sound driver
+;                          C=1 ReelTalk
+;             (Note: Adlib/Soundblaster requires a resident driver to be
+;                    loaded before the game. goto @v 
+;                    error handler call occurs before V6 is returned)
+;             (Note: This is one of the few cases where error handlers
+;                    could occur before SetUpVariablePtrs, so take care
+;                    not to PRINT to the buffer screens) 
+;          */
+
+.MCInitialiseScore
+ goto @vMCInitialiseScore
+ 
+;          /* Paramters:
+;                V1 list V2 offset Music Score
+;                V3 list V4 offset Adlib Instrument File
+;                V5 Score number (0-3)
+;          */
+          
+.MCPlayScore
+ goto @vMCPlayScore
+ 
+;          /* Paramters:
+;                V1 Score number (0-3)
+;                V2 Repeat Flag (255=forever, 0=once, #=number of times)
+;                V3 Operation (0=restart, 1=resume, 2=stop)
+;          */
+          
+.MCMusicCloseDown
+ goto @vMCMusicCloseDown
+ 
+
+.MCOpenSpriteFile
+ goto @vMCOpenSpriteFile
+ 
+;          /* Paramters:
+;                V1 list V2 offset = first 7 chars of sprites file name
+;          */
+
+.MCstopWithMessage
+ goto @vMCstopWithMessage
+ 
+;          /* Parameters:
+;                V1 list V2 offset = 80 character error message
+;                As MCCloseDown but also prints message
+;          */
+
+.MCJumpOverlay
+ goto @vMCJumpOverlay
+ 
+; v1 is ascii code: e.g. goto @vg. 
+; v2 is offset starting from 0 of routine within overlay
+
+.MCCallOverlay
+ goto @vMCCallOverlay
+ 
+.MCLoadGamedata goto @vMCLoadGamedata
+; v1 is ascii code: e.g. gamedat1.dat
+; Loads in gamedata but does not affect acode file.
+; Remember that list1..9 pointers will be changed,
+; with the exception that any pointers equal to 0 in the new
+; table.txt/dat will not change the existing pointers
+
+

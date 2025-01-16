@@ -1,0 +1,461 @@
+; AAHead.txt
+;
+; M.J.Austin Nov 1988
+;
+; Copyright (C) 1988 Level 9 Computing
+;
+;----
+; tables shared between strategy task and AA stuff...
+table
+; CurrentX=12
+; CurrentZ=13
+; CurrentH=25
+; Hires=12
+
+ begin
+ data @Start,@Start ; Dummy - overwritten by "ToMCEnd" vector
+.Start
+ code +
+ data @AcodeFns,@MCFns ; pointers to the major jump blocks
+
+
+.AcodeFns
+; jump table for acode functions called from MC
+ goto @AcodeStart
+ goto @FGSpecials
+ goto @FGSpecialsMovedSprite
+ goto @BGSpecials
+ goto @Dummy ; SpecialCollision
+ goto @DAMSSpecials
+ goto @IRQScheduler
+ goto @VBL
+ goto @HandleCR
+ goto @ExtraTask
+ goto @StrategyTask
+ goto @ErrorHandler
+ goto @OverlayEntryPoint ; OverlayEntryOffset = 12
+ 
+.MCFns
+; jump table for MC functions called from Acode
+; reserve 6 bytes per jump - absolute, long jumps
+; poked in by MC
+.vMCHeroOnceOnlyInit            data @Dummy,@Dummy,@Dummy ;0
+.vMCHeroInit                    data @Dummy,@Dummy,@Dummy ;1
+.vMCClearScreen                 data @Dummy,@Dummy,@Dummy ;2
+.vMCMoveScreen                  data @Dummy,@Dummy,@Dummy ;3
+.vMCSpecials                    data @Dummy,@Dummy,@Dummy ;4
+.vMCBuildBackground             data @Dummy,@Dummy,@Dummy ;5
+.vMCDisplayDestroyedWalls       data @Dummy,@Dummy,@Dummy ;6
+.vMCMoveAllSprites              data @Dummy,@Dummy,@Dummy ;7
+.vMCDisplayAllSprites           data @Dummy,@Dummy,@Dummy ;8
+.vMCTrimEdges                   data @Dummy,@Dummy,@Dummy ;9
+.vMCDisplayTextLine             data @Dummy,@Dummy,@Dummy ;10
+.vMCDisplayUpperTextLine        data @Dummy,@Dummy,@Dummy ;11
+.vMCDoAllTimers                 data @Dummy,@Dummy,@Dummy ;12
+.vMCCalculateMemoryFree         data @Dummy,@Dummy,@Dummy ;13
+.vMCHeroInput                   data @dummy,@Dummy,@Dummy ;14
+.vMCOswrchV1                    data @Dummy,@Dummy,@Dummy ;15
+.vMCInvertedOswrchV1            data @Dummy,@Dummy,@Dummy ;16
+.vMCDestroyTempMoved            data @Dummy,@Dummy,@Dummy ;17
+.vMCDestroyTempFixed            data @Dummy,@Dummy,@Dummy ;18
+.vMCCloseDown                   data @Dummy,@Dummy,@Dummy ;19
+.vMCFindSprite                  data @Dummy,@Dummy,@Dummy ;20
+.vMCSetUpNewSprite              data @Dummy,@Dummy,@Dummy ;21
+.vMCSprite                      data @Dummy,@Dummy,@Dummy ;22
+.vMCHandlePlayerInput           data @Dummy,@Dummy,@Dummy ;23
+.vMCReturnFrameTime             data @Dummy,@Dummy,@Dummy ;24
+.vMCUpdateFrameTime             data @Dummy,@Dummy,@Dummy ;25
+.vMCClearRectangle              data @Dummy,@Dummy,@Dummy ;26
+.vMCMapBuildBackground          data @Dummy,@Dummy,@Dummy ;27
+.vMCPreScrollMap                data @Dummy,@Dummy,@Dummy ;28
+.vMCSpecialCheck                data @Dummy,@Dummy,@Dummy ;29
+.vMCStartBigExplosion           data @Dummy,@Dummy,@Dummy ;30
+.vMCScrollTextLine              data @Dummy,@Dummy,@Dummy ;31
+.vMCReCalcSpriteGraphics        data @Dummy,@Dummy,@Dummy ;32
+.vMCOsrdch                      data @Dummy,@Dummy,@Dummy ;33
+.vMCChecksum                    data @Dummy,@Dummy,@Dummy ;34
+.vMCEmptyRoom
+.vMCInit3D                      data @Dummy,@Dummy,@Dummy ;35
+.vMCDrawObjectV1                data @Dummy,@Dummy,@Dummy ;36
+.vMCBuildRoom
+.vMCBuildViewMap                data @Dummy,@Dummy,@Dummy ;37
+.vMCDisplayRoom
+.vMCDisplayViewMap              data @Dummy,@Dummy,@Dummy ;38
+.vMCInitBootPrg                 data @Dummy,@Dummy,@Dummy ;39
+.vMCReturnSpriteAddress         data @Dummy,@Dummy,@Dummy ;40
+.vMCNoClipSprite                data @Dummy,@Dummy,@Dummy ;41
+.vMCCalcScreenAddress           data @Dummy,@Dummy,@Dummy ;42
+.vMCSaveFile                    data @Dummy,@Dummy,@Dummy ;43
+.vMCLoadFile                    data @Dummy,@Dummy,@Dummy ;44
+.vMCCopy                        data @Dummy,@Dummy,@Dummy ;45
+.vMCAbsChangeListPtr            data @Dummy,@Dummy,@Dummy ;46
+.vMCLoadCells                   data @Dummy,@Dummy,@Dummy ;47
+.vMCSetUpPtrs                   data @Dummy,@Dummy,@Dummy ;48
+.vMCParseInputWord              data @Dummy,@Dummy,@Dummy ;49
+.vMCInitTask                    data @Dummy,@Dummy,@Dummy ;50
+.vMCSnooze                      data @Dummy,@Dummy,@Dummy ;51
+.vMCAddToListPtr                data @Dummy,@Dummy,@Dummy ;52
+.vMCReserveMemory               data @Dummy,@Dummy,@Dummy ;53
+.vMCSetUpVariablePtrs           data @Dummy,@Dummy,@Dummy ;54
+.vMCPreLoadCells                data @Dummy,@Dummy,@Dummy ;55
+.vMCPlotLogicalScreen           data @Dummy,@Dummy,@Dummy ;56
+.vMCPlotPhysicalScreen          data @Dummy,@Dummy,@Dummy ;57
+.vMCUpdateScreen                data @Dummy,@Dummy,@Dummy ;58
+.vMCUnPlotScreen                data @Dummy,@Dummy,@Dummy ;59
+; returns v1=actual frame time in ms
+.vMCSetPalette                  data @Dummy,@Dummy,@Dummy ;60
+.vMCSetTextWIndow               data @Dummy,@Dummy,@Dummy ;61
+.vMCSetGraphicsWindow           data @Dummy,@Dummy,@Dummy ;62
+.vMCClearChangeMaps             data @Dummy,@Dummy,@Dummy ;63
+.vMCClearTextBuffer             data @Dummy,@Dummy,@Dummy ;64
+.vMCCopyTextBuffer              data @Dummy,@Dummy,@Dummy ;65
+.vMCEnableTextBuffer            data @Dummy,@Dummy,@Dummy ;66
+.vMCInitSound                   data @Dummy,@Dummy,@Dummy ;67 
+.vMCStartSound                  data @Dummy,@Dummy,@Dummy ;68
+.vMCFindObj                     data @Dummy,@Dummy,@Dummy ;69
+.vMCInitGraphics                data @Dummy,@Dummy,@Dummy ;70
+.vMCCalcMatrix                  data @Dummy,@Dummy,@Dummy ;71
+.vMCDrawVector                  data @Dummy,@Dummy,@Dummy ;72
+.vMCKeyDown                     data @Dummy,@Dummy,@Dummy ;73
+.vMCInitJoystic                 data @Dummy,@Dummy,@Dummy ;74
+.vMCReserveChip                 data @Dummy,@Dummy,@Dummy ;75
+.vMCSaveProtect                 data @Dummy,@Dummy,@Dummy ;76
+.vMCInitScrolling               data @Dummy,@Dummy,@Dummy ;77
+.vMCScrollDirection             data @Dummy,@Dummy,@Dummy ;78
+.vMCPurgeAllCells               data @Dummy,@Dummy,@Dummy ;79
+; MCSetTextWindow     = Allocate memory for text buffer
+;       v1=top screen line
+;       v2=number of screen lines
+; MCSetGraphicsWindow = Set graphics clipping
+;       v1=Left   X
+;       v2=Right  X
+;       v3=Top    Y
+;       v4=Bottom Y
+; MCClearChangeMaps   = (Rebuild physical screen from Buffer2)
+; MCClearTextBuffer   = Clear one character row of text buffer
+;       v1=buffer Y to clear
+; MCCopyTextBuffer    = Copy text buffer to physical screen
+;       v1=Buffer Y to top of text window
+; MCEnableTextBuffer  = Select character output 
+;       v1=0, write to TextScreenBase
+;       v1=mask: 1=buffers, 2=Logical, 4=Physical
+
+.vMCSetMaxFrameRate             data @Dummy,@Dummy,@Dummy ; 80
+; Paramters:
+;             V1 = 84; Time in milliseconds
+
+.vMCSetPreloadPalette           data @Dummy,@Dummy,@Dummy ; 81
+
+.vMCCopyScreenToBuffer          data @Dummy,@Dummy,@Dummy ; 82
+; Copies the logical screen back to the buffer screen, thus adding
+; any sprites on a semi-permament basis. Note though, that any
+; insert/remove activity will corrupt these added sprites. Also
+; these added sprites do not obey the 3D rules, so may give
+; peculiar effects
+
+.vMCRasterHandler               data @Dummy,@Dummy,@Dummy ; 83
+;          /* Parameters:
+;                 V1 = destination raster
+;                 V2 = source raster or clear color
+;                 V5 = 2; /+ copy raster +/ 0=clear to color
+
+.vMCSetPrintRaster             data @Dummy,@Dummy,@Dummy ; 84
+; Parameter: V1=raster to print onto from now on. Must be in memory. 
+
+
+.vMCSetPrintFont               data @Dummy,@Dummy,@Dummy ; 85
+; v1=list number, v2=offset, v3=CGA palette code (mono machines only)
+
+
+.vMCRasterPrintCharacter       data @Dummy,@Dummy,@Dummy ; 86
+
+.vMCPasteCell                  data @Dummy,@Dummy,@Dummy ; 87
+
+.vMCMobilityAbility            data @Dummy,@Dummy,@Dummy ; 88
+
+.vMCLoadCellDataDirect         data @Dummy,@Dummy,@Dummy ; 89
+;          /* V1=list #, v2=offset, v3=cell # */
+
+.vMCTransferParkedSprites      data @Dummy,@Dummy,@Dummy ; 90
+
+.vMCDigitalHandler             data @Dummy,@Dummy,@Dummy ; 91
+;          /* Paramters:
+;                V5=0 Initialise
+;                V5=1 Terminate System
+;                V5=2 FindState Audio  (returns V1=0 or 0FFFF)
+;                V5=3 Wait For Audio
+;                V5=4 Volume Control   (V5=Volume)
+;                V5=5 Translate Sample (V1,V2 = sample, V6 = length,
+;                                       V3=Frequncy, V4=Volume)
+;                V5=6 Play Sample      (V1,V2 = sample, V3=Frequency,
+;                                       V4=? loop count, V6=? Repeat flag)
+;                V5=7 Terminate Sample
+;          */
+
+.vMCOnceOnlyMusicInit          data @Dummy,@Dummy,@Dummy ; 92
+;          /* Returns V1,V2 = (driver) InfoWord
+;                     V6 = 00000ABC
+;                          A=1 Adlib sound driver
+;                          B=1 Roland sound driver
+;                          C=1 ReelTalk
+;             (Note: Adlib/Soundblaster requires a resident driver to be
+;                    loaded before the game. If the driver is absent an
+;                    error handler call occurs before V6 is returned)
+;             (Note: This is one of the few cases where error handlers
+;                    could occur before SetUpVariablePtrs, so take care
+;                    not to PRINT to the buffer screens) 
+;          */
+
+.vMCInitialiseScore            data @Dummy,@Dummy,@Dummy ; 93
+;          /* Paramters:
+;                V1 list V2 offset Music Score
+;                V3 list V4 offset Adlib Instrument File
+;                V5 Score number (0-3)
+;          */
+          
+.vMCPlayScore                  data @Dummy,@Dummy,@Dummy ; 94
+;          /* Paramters:
+;                V1 Score number (0-3)
+;                V2 Repeat Flag (255=forever, 0=once, #=number of times)
+;                V3 Operation (0=restart, 1=resume, 2=stop)
+;          */
+          
+.vMCMusicCloseDown             data @Dummy,@Dummy,@Dummy ; 95
+
+.vMCOpenSpriteFile             data @Dummy,@Dummy,@Dummy ; 96
+;          /* Paramters:
+;                V1 list V2 offset = first 7 chars of sprites file name
+;          */
+
+.vMCstopWithMessage            data @Dummy,@Dummy,@Dummy ; 97
+;          /* Parameters:
+;                V1 list V2 offset = 80 character error message
+;                As MCCloseDown but also prints message
+;          */
+
+.vMCJumpOverlay                data @Dummy,@Dummy,@Dummy ; 98
+; v1 is ascii code: e.g. acode1.acd, gamedat1.dat
+; v2 is offset starting from 0 of routine within overlay
+
+.vMCCallOverlay                data @Dummy,@Dummy,@Dummy ;99
+; v1 is ascii code: e.g. acode1.acd, gamedat1.dat
+; v2 is offset starting from 0 of routine within overlay
+; Do a return when you've finished in the overlay to
+; reload the caller
+
+.vMCLoadGamedata               data @Dummy,@Dummy,@Dummy ;100
+; v1 is ascii code: e.g. gamedat1.dat
+; Loads in gamedata but does not affect acode file.
+; Remember that list1..9 pointers will be changed,
+; with the exception that any pointers equal to 0 in the new
+; table.txt/dat will not change the existing pointers
+
+.MCloadEXE                     data @Dummy,@Dummy,@Dummy ;101
+;    Description: Loads a file containing a DOS-style relocation table
+;    Args:        V1 = list, V2=offset; of file name
+;                 V3 = list, V4=offset; load address
+;    Returns:     V1,V2 = size of file loaded
+;
+.MCSqueak                      data @Dummy,@Dummy,@Dummy ;102
+;    Description: clicks internal speaker
+;    Args:        none
+;    Returns:     none
+;
+.MCinitSerial                  data @Dummy,@Dummy,@Dummy ;103
+;    Description: Initialise serial comms/Clear RX and TX buffers
+;    Args:        none
+;    Returns:     V1=0    success
+;                 V1=FFFF no serial port (not installed)
+;
+
+.MCreadSerial                  data @Dummy,@Dummy,@Dummy ;104
+;    Description: Read Serial port (buffered)
+;                 (V2/V3 are status only. Error conditions are always in V1)
+;    Args:        none
+;    Returns:     V1 = FFFF (nothing read)
+;                 V1 = 0 thru 00FF (byte received)
+;                 V2 = bytes remaining in RX buffer (normally 0)
+;                 V3 = bytes remaining in TX buffer (normally 0)
+;
+
+.MCwriteSerial    ;       105
+                data @Dummy,@Dummy,@Dummy
+;    Description: Writes serial port (buffered)
+;                 (V2/V3 are status only. Error conditions are always in V1)
+;    Args:        V1 (lo byte only) byte to send
+;    Returns:     V1 = 0            byte sent (or put in TX buffer)
+;                 V1 = FFFF         Buffer full
+;                 V2 = bytes remaining in RX buffer (normally 0)
+;                 V3 = bytes remaining in TX buffer (normally 0)
+;
+
+.MCdecodeFile     ;       106
+                data @Dummy,@Dummy,@Dummy
+;    Description: Decompress LZH file. (Presumably the file is loaded
+;                 with the flag ByteWS[DisableLZH] set.)
+;
+;    Args:        V1=list, V2=offset Compressed file
+;                 V3=list, V4=offset Decompress file
+;    Returns:     V1=(decompressed) file length
+;                 V1=FFFF file not LZH format
+;
+
+.MCChooseVGAcard  ;       107
+                data @Dummy,@Dummy,@Dummy
+;    Description: See M Bryant
+;    Args:        V1=Card number
+;    Returns:     none
+;
+
+.MCCopyVGAtoVGA   ;       108
+                data @Dummy,@Dummy,@Dummy
+;    Description: See M Bryant
+;    Args:        V1=Source card number
+;    Returns:     none
+;
+
+.MCvalidateSoftInterrupt ; 109
+                data @Dummy,@Dummy,@Dummy
+;    Description: Check software interrupt is initialised
+;    Args:        V1=list
+;                    V2=offset
+;                    V3=interrupt number
+;                    If not initialised exits to MCstopWithError
+;                    (Displays error message in list V1)
+;                 V1=FFFF
+;                    V3=interrupt number
+;    Returns:     V1=0 not initialised
+;                 V1=segment, initialise
+;
+
+.MCcallSoftInterrupt    ; 110
+                data @Dummy,@Dummy,@Dummy
+;    Description: execute INT instruction
+;    Args:        V1 = interrupt number
+;                 V2 = List address for DS:SI
+;                 V3 = List address for ES:DI
+;                 V4 = List containing 5 words, for registers ax,bx,cx,dx,bp
+;                      Word at offset 0: AX
+;                      Word at offset 2: BX
+;                      Word at offset 4: CX
+;                      Word at offset 6: DX
+;                      Word at offset 8: BP
+;    Returns      List V2 redirected to returned DS:SI
+;                 List V3 redirected to returned ES:DI
+;                 List V4 contents altered to returned ax,bx,cx,dx,bp
+
+.MCsetPollingInterrupt     data @Dummy,@Dummy,@Dummy ;111
+;    Description: Hook vectors to a timer interrupt (IBM only)
+;    Args:        V1 = interrupt number
+;                 V2 = -1 unhook all
+;                    = 0  unhook interrupt
+;                    = 1  add to 50 Hz (vbl) chain
+;                    = 2  add to 400 Hz chain (cyberdrome only)
+
+.MCfreeMemory              data @Dummy,@Dummy,@Dummy ;112
+;    Description: Temporarily gives memory to the pool.
+;    Args:	 V1=list, v2=offset within list
+;		 V3=amount of memory
+;    Returns:	 None
+
+.MCreclaimMemory           data @Dummy,@Dummy,@Dummy ;113
+;    Description: Reclaims all memory given to the pool.
+;    Args:        None
+;    Returns:	 None
+
+.MCopenFileHandle          data @Dummy,@Dummy,@Dummy ;114
+;    Description: Open a file on hard disk
+;    Args:        List17(8) if file name (may include drive/path) in asciiz
+;                 V1=open mode
+;                   =0 for reading
+;                   =1 to delete file, then open for writing
+;                   =2 to append to end of existing file (create if no file)
+;                   =3 for read/over-write (to not extend file length)
+;    Returns:     V1=-1 for fail
+;                 V1=file handle
+
+.MCreadFileHandle          data @Dummy,@Dummy,@Dummy ;115
+;    Description: Read from a file (opened with V1=0 or V1=4)
+;    Args:        V1=file handle
+;                 V2=List
+;                 V3=offset in list where to put bytes
+;                 V4=max bytes to read
+;    Returns:     V1=0 if OK (bytes read = bytes requested)
+;                   =1 if EOF reached (bytes read < bytes requested)
+;                   =2 other error
+;                 V2=number of bytes read
+
+.MCwriteFileHandle         data @Dummy,@Dummy,@Dummy ;116
+;    Description: Append to end of file/Re-write existing file
+;                 (Where possible physical writes to disk & updating directories
+;                 takes place sooner rather than later so it is much faster
+;                 to create the file in memory first before writing)
+;    Args:        V1=file handle
+;                 V2=List
+;                 V3=offset in list of bytes to write
+;                 V4=bytes to write
+;    Returns:     V1=0 if OK
+;                   =1 error (Bad handle/Write Protect/Disk full)
+
+.MCcloseFileHandle         data @Dummy,@Dummy,@Dummy ;117
+;    Description: Release file handle
+;    Args:        V1=file handle
+
+                data @Dummy,@Dummy,@Dummy ;118
+                data @Dummy,@Dummy,@Dummy ;119
+                data @Dummy,@Dummy,@Dummy ;120
+                data @Dummy,@Dummy,@Dummy ;121
+                data @Dummy,@Dummy,@Dummy ;122
+                data @Dummy,@Dummy,@Dummy ;123
+                data @Dummy,@Dummy,@Dummy ;124
+                data @Dummy,@Dummy,@Dummy ;125
+                data @Dummy,@Dummy,@Dummy ;126
+                data @Dummy,@Dummy,@Dummy ;127
+                data @Dummy,@Dummy,@Dummy ;128
+                data @Dummy,@Dummy,@Dummy ;129
+                data @Dummy,@Dummy,@Dummy ;130
+                data @Dummy,@Dummy,@Dummy ;131
+                data @Dummy,@Dummy,@Dummy ;132
+                data @Dummy,@Dummy,@Dummy ;133
+
+.Dummy
+ code -
+ prs " bug!"
+
+ code +
+.AcodeDelay
+; gosub @Delay
+; goto @HeroLoop
+
+.AcodeStart
+ goto @Start3D
+
+.HandleCR
+; MCOSWRCH has requested a cr.
+ gosub @DoCR
+ return
+
+
+code -
+;
+;
+; Args for MCDrawObjectV1:
+;  V1: object number
+;  V2: x coord in pixels
+;  V3: z   "
+;  V4: h   "
+;  V5: flag = -1 for remove object from structure
+;              0 for insert object into structure
+; 	      +ve draw to screen directly (as a sprite)
+
+; Args for MCSetPalette:
+; V1=list number
+; V2=offset within list
+;
+; list:  db x  ) 16 times
+;	 db y  ) 
+; where yyyy   yyyy    xxxx    xxxx
+;       red.   green   blue    RGBI
+;         0..7 (VGA)	       (EGA)
+
+

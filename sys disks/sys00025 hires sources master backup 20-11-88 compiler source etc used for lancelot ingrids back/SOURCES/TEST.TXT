@@ -1,0 +1,51 @@
+table
+ list1=1
+
+var
+ a b c d e f g x1
+
+begin
+.Start
+ prs " start of acode: "
+ input x1 x1 x1 x1
+ a=12345
+ c=1
+
+ code +
+
+ push a
+ pop b
+ and a,b
+ or a,b
+ xor a,b
+ add a,b
+ sub a,b
+ list1(0)=a
+ &list1(2)=a
+ b=4
+ &list1(b)=a
+ d=list1(3)
+ e=list1(b)
+ &f=list1(2)
+ &g=list1(b)
+ code -
+
+ prs " contents of list 1 are: "
+ a=0
+.Tloop2
+ b=list1(a)
+ print b
+ prs " "
+ add a,c
+ if a<20 then Tloop2
+ prs " d="
+ print d
+ prs " e="
+ print e
+ prs " f="
+ print f
+ prs " g="
+ print g
+ input x1 x1 x1 x1
+
+

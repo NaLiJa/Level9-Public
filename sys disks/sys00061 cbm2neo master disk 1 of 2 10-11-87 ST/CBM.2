@@ -1,0 +1,429 @@
+/* ----- */
+
+#include <stdio.h>
+#include <fcntl.h>
+
+/* Global variables: */
+
+char screenmap [680] ;   /* Colour values for colours 1,2 */
+char colourmap [680] ;   /* Colour values for colour 3 */
+int background ;         /* Colour value for colour 0 */
+
+char inputname[80] ;     /* File name/type for CBM file */
+char outputname[80] ;    /* File name/type for NEO file */
+
+int inputformat ;        /* Non-zero if 128 byte AMSDOS header */
+int contenttype ;        /* Non-zero if full-screen */
+
+char characterrow[320] ; /* One complete row of characters */
+
+int plane0 ;
+int plane1 ;
+int plane2 ;
+int plane3 ;
+int eightcount ;
+
+/* ----- */
+
+prs(string)
+char *string ;
+{ for ( ; *string > '\0' ; )
+  { putch ( *string ) ;
+    string ++ ;
+  }
+}
+
+newline()
+{ prs("\n") ;
+}
+
+anykey()
+{ newline() ;
+  prs("Press any key to continue:");
+  for ( ; kbhit() > 0 ; ) ;
+  getch() ;
+}
+
+/* ----- */
+
+getfilename(name)
+char * name [80] ;
+{ for ( name[0] = '\0' ; name[0] == '\0' ; ) gets(name) ;
+}
+
+displaydecimal(number)
+int number ;
+{ int digit ;
+  int index ;
+  if ( number == 0 )
+       prs ("0") ;
+  else { for ( index = 1 ; (index*10) <= number ; index *= 10 ) ;
+         for ( ; index > 0 ; )
+           { digit = (int) ( number / index ) ;
+             putch ( (char) (48 + digit) ) ;
+             number = number - ( digit * index ) ;
+             index = (int) (index / 10) ;
+           }
+       }
+}
+
+/* ----- */
+
+copyright()
+{ newline() ;
+  prs("CBM 64 picture to ST/NEO format.") ;
+  newline() ;
+  newline() ;
+  prs("Copyright (C) 1987 Level 9") ;
+  newline() ;
+}
+
+int _iomode = 0X8000 ;
+
+askfilenames()
+{ int exists ;
+  int fp ;
+  for ( exists=0 ; exists == 0 ; )
+    { newline() ;
+      prs ("Input file (CBM 64/CBM Art Studio format) ? ") ;
+      getfilename(&inputname) ;
+      newline() ;
+      fp = open ( &inputname , (int) (O_RDONLY) ) ;
+      if ( fp == -1 )
+           { prs ("File not found") ;
+             newline() ;
+           }
+      else { exists = 1 ;
+             close ( fp ) ;
+           }  
+    }
+  newline() ;
+  selectheader() ;
+  newline() ;
+  prs ("Output file (NEO format) ? ") ;
+  getfilename(&outputname) ;
+}
+
+/* ----- */
+
+selectfiletype()
+{ char ch ;
+  newline() ;
+  prs ("Select (A) CBM Art Studio format.") ;
+  newline() ;
+  prs ("Or     (S) CBM smallpic   format.") ;
+  newline() ;
+  newline() ;
+  prs ("Choose (A/S) ?") ;
+  for ( ch = getch() ; (ch == 'a') || (ch == 's') ||
+                       (ch == 'A') || (ch == 'S') ; ) ;
+  if ( (ch == 'a') || (ch == 'A') )
+       contenttype = 1 ;
+  else contenttype = 0 ;
+  newline() ;
+}
+
+selectheader()
+{ char input[80] ;
+  int index ;
+  for ( inputformat = 3 ; ( inputformat == 3 ) || ( inputformat == 0 ) ; )
+    { prs ("Remove AMSDOS header ((Y/N) ? ");
+      gets(input) ;
+      for ( index=0 ; (index == 79) || (inputformat == 3) ; )
+         { inputformat = 0 ;
+           if ( input[index] == 'y' ) inputformat = 1 ;
+           if ( input[index] == 'Y' ) inputformat = 1 ;
+           if ( input[index] == 'n' ) inputformat = 2 ;
+           if ( input[index] == 'N' ) inputformat = 2 ;
+           if ( input[index] == ' ' ) inputformat = 3 ;
+           index ++ ;
+         }
+    }
+}
+
+/* ----- */
+
+int positive ( ch )
+char ch ;
+{ int byte ;
+  byte = (int) ch ;
+  if ( byte < 0 ) byte = 256 + byte ;
+  return ( byte ) ;
+}
+
+/* ----- */
+
+unpackcolourmap()
+{ int indexfrom ;
+  int indexto ;
+  int temphi ;
+  int templo ;
+  if ( contenttype == 0 )
+    { indexfrom = 340 ;
+      indexto = 680-1 ;
+      for ( ; indexfrom > 0 ; )
+        { templo = positive ( colourmap [ indexfrom-1 ] ) ;
+          temphi = (int) ( templo / 16 ) ;
+          templo = templo - ( 16 * temphi ) ;
+          colourmap [ indexto ] = templo ;
+          indexto-- ;
+          colourmap [ indexto ] = temphi ;
+          indexto -- ;
+          indexfrom -- ;
+        }
+    }
+}
+
+unexpectedeof( string )
+char * string ;
+{ newline() ;
+  prs ("***** ERROR: Unexpected EOF (") ;
+  prs ( string ) ;
+  prs (")") ;
+  newline() ;
+  exit ( 1 ) ;
+}
+
+junk ( fp , length )
+int fp ;
+int length ;
+{ char buffer ;
+  int count ;
+  for ( count=0 ; count < length; count ++ )
+    if ( 1 == read ( fp , &buffer , 1 ) ) ;
+    else unexpectedeof ("skip") ;
+}
+
+readattributes()
+{ int fp ;
+  char ch ;
+  int index ;
+  fp = open ( &inputname , (int) (O_RDONLY) ) ;
+  if ( fp == -1 )
+     { prs ("***** ERROR: can't re-open input *****") ;
+       exit ( 2 ) ;
+     }
+  if ( inputformat == 1 )
+    junk ( fp , 128 ) ;
+  if ( contenttype == 1 )
+       { junk ( fp , 5440 ) ;
+         for ( index=0 ; index < 680 ; index++ )
+            if ( read ( fp , &ch , 1 ) == 1 )
+                 screenmap [ index ] = positive ( ch ) ;
+            else unexpectedeof ( "screen map") ;
+         for ( index=0 ; index < 340 ; index++ )
+           if ( read ( fp , &ch , 1 ) == 1 )
+                colourmap [ index ] = positive ( ch ) ;
+           else unexpectedeof( "colour map") ;
+         unpackcolourmap() ;
+         if ( read ( fp , &ch , 1 ) == 1 )
+              background = positive ( ch ) ;
+         else unexpectedeof("background") ;
+       }
+  else { junk ( fp , 8000 ) ;
+         for ( index = 0 ; index < 1000 ; index++ )
+            if ( read ( fp , &ch , 1 ) == 1 )
+                 screenmap [ index ] = positive ( ch ) ;
+            else unexpectedeof ( "screen map") ;
+         junk ( fp , 1 ) ; /* Border colour */
+         if ( read ( fp , &ch , 1 ) == 1 )
+              background = positive ( ch ) ;
+         else unexpectedeof("background") ;
+         junk ( fp , 102 ) ;
+         for ( index = 0 ; index < 1000 ; index++ )
+            if ( read ( fp , &ch , 1 ) == 1 )
+                 colourmap [ index ] = positive ( ch ) ;
+            else unexpectedeof ("colour map") ;
+       }
+  close(fp) ;
+}
+
+/* ----- */
+
+writebyte ( file , byte )
+int file ;
+int byte ;
+{ char ch ;
+  ch = (char) byte ;
+  if ( 1 == write ( file , &ch , 1 ) ) ;
+  else { prs ("***** ERROR: can't write output") ;
+         exit ( 1 ) ;
+       }
+}
+
+writetwobytes ( file , word )
+int file ;
+int word ;
+{ int lobyte ;
+  int hibyte ;
+  hibyte = (int) ( word / 256 ) ;
+  writebyte ( file , hibyte ) ;
+  lobyte = word - ( 256 * hibyte ) ;
+  writebyte ( file , lobyte ) ;
+}
+
+writeheader( fp )
+int fp ;
+{ int index ;
+  writetwobytes ( fp , 0 ) ;      /* Unused */
+  writetwobytes ( fp , 0 ) ;      /* Unused */
+  writetwobytes ( fp , 0 ) ;      /* Colour 0 Black  */
+  writetwobytes ( fp , 0x0777 ) ; /* Colour 1 White  */
+  writetwobytes ( fp , 0x0700 ) ; /* Colour 2 Red    */
+  writetwobytes ( fp , 0x0055 ) ; /* Colour 3 Cyan   */
+  writetwobytes ( fp , 0x0506 ) ; /* Colour 4 Purple */
+  writetwobytes ( fp , 0x0070 ) ; /* Colour 5 Green  */
+  writetwobytes ( fp , 0x0007 ) ; /* Colour 6 Blue   */
+  writetwobytes ( fp , 0x0770 ) ; /* Colour 7 Yellow */
+  writetwobytes ( fp , 0x0721 ) ; /* Colour 8 Orange */
+  writetwobytes ( fp , 0x0211 ) ; /* Colour 9 Brown  */
+  writetwobytes ( fp , 0x0733 ) ; /* Colour 10 Lt. Red   */
+  writetwobytes ( fp , 0x0111 ) ; /* Colour 11 Dark Grey */
+  writetwobytes ( fp , 0x0222 ) ; /* Colour 12 Med. Grey */
+  writetwobytes ( fp , 0x0373 ) ; /* Colour 13 Lt. Green */
+  writetwobytes ( fp , 0x0337 ) ; /* Colour 14 Lt. Blue  */
+  writetwobytes ( fp , 0x0444 ) ; /* Colour 15 Lt. Grey  */
+  for ( index=0 ; index < 46 ; index++ )
+     writetwobytes ( fp , 0 ) ;
+}
+
+/* ----- */
+
+int setbit( bitplane , byte , range )
+int bitplane ;
+int byte ;
+int range ;
+{ int bit ;
+  byte = (int) ( byte / range ) ;
+  bit = byte - 2 * ( (int) ( byte / 2 ) ) ;
+  return ( (bitplane * 4) + (bit * 3) ) ; /* Double the resolution */
+}
+
+outpixel( fp , value , row , column )
+  int fp ;
+  int value ;
+  int row ;
+  int column ;
+{ int index ;
+  int byte ;
+  index = ( ( (int) (row / 8) ) * 40 ) + ( (int) (column / 4) ) ;
+  if ( value == 0 )
+       byte = background ;
+  else if ( value == 1 )
+       byte = (int) ( screenmap [index] / 16 ) ;
+  else if ( value == 2 )
+       byte = (int) screenmap [index] ;
+  else if ( value == 3 )
+       byte = (int) colourmap [index] ;
+  else { prs ("*****ERROR: internal expansion") ;
+         exit ( 2 ) ;
+       } ;
+  byte = positive ( byte ) ;
+  plane0 = setbit ( plane0 , byte , 1 ) ;
+  plane1 = setbit ( plane1 , byte , 2 ) ;
+  plane2 = setbit ( plane2 , byte , 4 ) ;
+  plane3 = setbit ( plane3 , byte , 8 ) ;
+  eightcount ++ ;
+  if (eightcount == 8)
+     { eightcount = 0 ;
+       writetwobytes ( fp , plane0 ) ; /* Lowest colour bit first */
+       writetwobytes ( fp , plane1 ) ;
+       writetwobytes ( fp , plane2 ) ;
+       writetwobytes ( fp , plane3 ) ;
+       plane0 = 0 ;
+       plane1 = 0 ;
+       plane2 = 0 ;
+       plane3 = 0 ;
+     }
+}
+
+int processrow( fin , fout , row )
+int fin ;
+int fout ;
+int row ;
+{ int column ;
+  int subrow ;
+  int subcolumn ;
+  int byte ;
+  int value ;
+  char characterrow[320] ;
+  column = 0 ;
+  if ( 320 == read ( fin , &characterrow , 320 ) )
+      for ( subrow=0 ; subrow < 8 ; subrow++ )
+        for ( subcolumn=0 ; subcolumn < 320 ; subcolumn += 8 )
+         { byte = positive ( characterrow [ subrow + subcolumn ] ) ;
+           value = (int) (byte / 64) ;
+           byte = byte - value * 64 ; /* Top two bits are left pixel */
+           outpixel ( fout , value , row , column ) ;
+           value = (int) (byte / 16) ;
+           byte = byte - value * 16 ;
+           outpixel ( fout , value , row , column ) ;
+           value = (int) (byte / 4) ;
+           byte = byte - value * 4 ;
+           outpixel ( fout , value , row , column ) ;
+           value = (int) (byte / 1);
+           outpixel ( fout , value , row , column ) ;
+           column += 4 ;
+
+           if ( column >= 160 )
+              { column = 0 ;
+                row++ ;
+              }
+         }
+  else unexpectedeof( "pixels" ) ;
+  return ( row ) ;
+}
+
+transform()
+{ int fin ;
+  int fout ;
+  int index ;
+  int row ;
+  fout = creat ( &outputname , 0x8000 ) ;  /* Raw mode */
+  writeheader ( fout ) ;
+  fin = open ( &inputname , (int) O_RDONLY ) ;
+  if ( fin == -1 )
+       { prs ("Can't re-open input") ;
+         newline() ; 
+         exit ( 3 ) ;
+       }
+  else if ( inputformat == 1 )
+         junk ( fin , 128 ) ;
+  row = 0 ;
+  plane0 = 0 ;
+  plane1 = 0 ;
+  plane2 = 0 ;
+  plane3 = 0 ;
+
+  if ( contenttype == 0 )
+       for ( index=0 ; index < (8000/320) ; index++ )
+          { row = processrow ( fin , fout , row ) ;
+            prs ("pixels processed = ") ;
+            displaydecimal ( index * 4 ) ;
+            newline() ;
+          }
+  else for ( index=0 ; index < (5440/320) ; index++ )
+          { row = processrow ( fin , fout , row ) ;
+            prs ("pixels processed = ") ;
+            displaydecimal ( index * 4 ) ;
+            newline() ;
+          }
+
+  if ( inputformat == 0 )
+    for ( index = 0 ; index < 10240 ; index ++ )
+       writebyte ( fout , 0 ) ;
+  close ( fin ) ;
+  close ( fout ) ;
+}
+
+/* ----- */
+
+
+main()
+{ copyright() ;
+  askfilenames() ;
+  selectfiletype() ;
+  readattributes() ;
+  transform();
+  anykey() ;
+}

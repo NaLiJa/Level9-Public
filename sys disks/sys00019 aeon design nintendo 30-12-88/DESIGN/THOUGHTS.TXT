@@ -1,0 +1,49 @@
+
+
+
+
+
+              AEON DESIGN NOTES. 23/7/87. LEVEL 9
+
+BACKGROUND
+
+
+
+DESIGN OUTLINE 
+
+
+                           OBJECT ICONS
+
+As we intend to avoid words where ever possible, it is necessary to 
+use icons instead. Whenever an object is picked up or selected, an 
+enlarged picture is displayed, with an icon representing its function 
+on the label.
+
+Objects (colours vary with type)... 
+  Armour: picture of helmet/shield/breastplate 
+  Potion: rounded bottle 
+  Ring: loop, with stylised gem 
+  Scroll: paper, rolled at ends 
+  Wand: stick with prickly end 
+  Weapon: picture of dagger/sword/bow 
+
+Categories... 
+  Creation: as type 
+  Protection: circle with diagonal bar on the type (cf Ghostbusters) 
+  Wall: repeated types, side-by-side 
+
+Types... 
+  Cold: snowflake 
+  Detection (and hence invisibility): eye 
+  Fire: flame
+  Flight: wings 
+  Growth: 
+  Healing: red cross
+  Light: candle 
+  Lightning: zig-zag bolt 
+  Map: 
+  Opening: key 
+  Strength: arm + biceps 
+  Poison: skull 
+  Teleport: n-shaped arrow 
+  Water: blue drop  

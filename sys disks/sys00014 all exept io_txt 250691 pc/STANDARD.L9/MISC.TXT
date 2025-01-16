@@ -1,0 +1,1939 @@
+; MISC.TXT Copyright (C) 1990 Level 9 Computing. Subroutines for 
+; Crystal Maze. Mike and Pete Austin December 1990
+; 
+; Display routines: 
+; * BuildNewScreen/DisplayNewScreen 
+; * DisplayEverything
+; * PutUpHourglass
+; * DisplayFrame
+; * WaitForFrame
+; * i/cMarkForPreloadX1toX2 ; mark all objects in range x1 to x2 
+; * PreLoadAndInsertDv1     ; used when displaying screen dv1 
+; * MarkForPreloadDv1       ; then gosub @mcPreLoadCells
+; * StartFreeACB0 ; start ani ObjectNumber at 0,0,0. Dx4:=ACB offset
+; * StartFreeACB  ;   "   " ObjectNumber at dv2/3/4. Dx4:=ACB offset
+; * StartFreeACBdv1 ; "   "      dv1     at dv2/3/4. Dx4:=ACB offset
+; * MoveACBdx4    ; move ACB dx4 to dv2/3/4 
+; * ReadACBdx4    ; set dv2/3/4 to coordinates of ACB dx4
+; * SetUpACBdx4   ; setup ACB dx4 for ani ObjectNumber 
+; * ChangeACBdx4  ; Change ACB dx4 to use ani ObjectNumber 
+; 
+; Object table routines: 
+; * ClearHiresTable       ; clear table used by following routines 
+; * ScanObjectTables      ; store dv1/dv2/dv3/dv4/dv6 for collision det 
+; * i/cForgetDv1          ; forget address of dv1 (at dv2/dv3/dv4/dv6)
+; * i/cRememberDv1        ; store address of dv1 (at dv2/dv3/dv4/dv6)
+; * i/cInsertOrReplaceDv1 ; insert dv1 at dv2/dv3/dv4/dv6 
+; * i/cReadDv1            ; read dv2/dv3/dv4/dv6 for first object dv1 
+; * i/cRemoveDv2Dv3Dv4    ; remove first object at dv2/dv3/dv4/dv6 
+; * i/cRemoveDv1          ; remove first instance of dv1 remembered 
+; * i/cStoreNegPosDv1     ; store dv1/dv2/-dv3/dv4/dv6 
+; * i/cStorePosDv1        ; store dv1/dv2/dv3/dv4/dv6 
+; 
+; Initialisation routines: 
+; * MazeOnceOnlyInit      ; done by first overlay to load 
+; * MazeEachTimeInit      ; done by each overlay 
+; * OpenNormalStructures  ; open normal structure file 
+; * ScreenInit            ; init screen for each overlay 
+; * Initialise            ; misc initialisation 
+; * AllocateWorkspaceLists
+; * LoadStructures/AllocateStructures/AAEssentialInit
+; * SetPreLoadPalettes/SetCGAPalettes
+; * ReadObjectAreas       ; read object type range variables 
+; 
+; Input routines: 
+; * iWaitForInput/cWaitForInput/WaitForInput ; ch:=ASCII "key" 
+; * iDelayInput/cDelayInput/DelayInput ; for input or WaitDelay 
+; * iDelay/cDelay/Delay                ; for WaitDelay frames 
+; * BufferSensors                      ; records sensors each frame
+; * ReadAverageSensorV1                ; read average 0/1 for sensor v1
+; 
+; Interface routines: 
+; * CheckForMessage                    ; process network msg 
+; 
+; Maths routines: 
+; * DivX1X2    ; x1 := x1/x2
+; * MultX1X2   ; x1 := x1*x2
+; * ModX1X2    ; x1 := x1 mod x2
+; * AbsX1      ; x1 := absolute value of x1, in x1
+; * MultDX1DX2 ; dx1:= dx1*dx2
+; 
+; draw flags are...
+; dRemoveRedraw=65535 ;  -1 Remove and redraw
+; dInsert=0 ;             0 insert
+; dPlot=1 ;               1 plot as sprite
+; dInsertRedraw=2 ;       2 insert and redraw
+; dMarkPreload=3 ;        3 mark to preload
+; dSetProtect=4 ;         4 set protection mark
+; dUnsetProtect=5 ;       5 unset protection mark
+; 
+const
+; 
+FFFF=65535 
+FFFE=65534 
+;
+ Sensor1Offset=2000 ; start of sensor 1 buffer in WorkList
+ Sensor2Offset=2005 ; start of sensor 2 buffer in WorkList
+ Sensor3Offset=2010 ; start of sensor 3 buffer in WorkList
+ Sensor4Offset=2015 ; start of sensor 4 buffer in WorkList
+ Sensor5Offset=2020 ; start of sensor 5 buffer in WorkList
+ Sensor6Offset=2025 ; start of sensor 6 buffer in WorkList
+ Sensor7Offset=2030 ; start of sensor 7 buffer in WorkList
+ Sensor8Offset=2035 ; start of sensor 8 buffer in WorkList
+; 
+table
+; 
+var
+; 
+;;================================================================= 
+;                       DISPLAY ROUTINES 
+;================================================================= 
+; 
+begin
+; 
+; Display new screen. Input parameters... 
+;   NewScreen = screen to display 
+; 
+; And output parameters... 
+;   NewScreen := 0 
+;   CurrentScreen := screen displayed 
+; 
+.BuildNewScreen  ; this bit initalises each screen
+;
+;* GMJ 22.02.91 - send output signal as game screen is 
+; built
+ if NewScreen<>3 then NotBuildGameScreen
+ gosub @SetIOGamePlay ; output signal
+.NotBuildGameScreen
+;
+.DisplayNewScreen 
+ gosub @InitACBs ; GMJ 29.01.91 - kill ACBs set up by 
+; previous build, since PutUpHourGlass appears to display 
+; them for a frame. 
+ gosub @PutUpHourglass
+ CurrentScreen=NewScreen
+ NewScreen=0
+ TextBoxDisplayed=False ; 0
+;  
+ v1 = 800 ; x pixel size of map (ignored for non-scrolling game)
+ v2 = 1240 ; y pixel size of map (ignored for non-scrolling game)
+ v3=0 ; game mode: 0=non-scrolling, 1=scrolling, 2=jumps
+ gosub @mcInitScrolling
+; 
+; need to do SetGraphicsWindow for PC, even if game is scrolling
+ v1=0    ; X1 Left edge
+ v2=319  ; X2 Right edge
+ v3=0    ; Y1 Top edge
+ v4=191  ; Y2 Bottom edge
+ gosub @mcSetGraphicsWindow ; set the clipping area - i.e. the
+; area of sprites within which sprites will appear.
+; 
+; GMJ 29.01.91 Empty only the screen we're emulating 
+; if in single screen mode
+ if TestScreen<>ScreenOne then BNSnotemptyscreenone
+ if PlotScreenType=ScreenTwo then BNSnoemptyroom
+.BNSnotemptyscreenone
+ if TestScreen<>ScreenTwo then BNSnotemptyscreentwo
+ if PlotScreenType=ScreenOne then BNSnoemptyroom
+.BNSnotemptyscreentwo
+; 
+ gosub @mcEmptyRoom ; clear out any existing room that
+; may have been built (using mcBuildRoom)
+.BNSnoemptyroom
+; 
+ WantCSTB=false ; Don't want to do mcCopyScreenToBuffer (permamently
+; adds all displayed sprites to room, but may screw up 3D. See manual.)
+;; .NotInitGameMap
+ RasterOffset = 0  
+ BuildingRoom=true
+; 
+ gosub @OpenNormalStructures ; ensure it's still open
+;***** gosub @ClearHiresTable ; for CD in map and walkabout stuff.
+ ACBsearchStart=ConstACBstart
+ ACBstart=ConstACBstart
+ ACBend=ConstACBend
+; 
+ dv1 = CurrentScreen
+ gosub @PreLoadAndInsertdv1    ; does InitACBs as well
+ gosub @SetUpCursor 
+; 
+ ScrollXdir=0
+ ScrollYdir=0
+ LastNonZeroScrollXdir=0
+ ScreenX = 0 ; position on map of top left of screen 
+ ScreenY = 0
+;
+.BuildSameScreen ;******************************** Nick 25/6/91
+; GMJ 29.01.91 Build only the screen we're emulating
+; if in single screen mode
+ if TestScreen<>ScreenOne then BNSnotbuildscreenone
+ if PlotScreenType=ScreenTwo then BNSnobuildroom
+.BNSnotbuildscreenone
+ if TestScreen<>ScreenTwo then BNSnotbuildscreentwo
+ if PlotScreenType=ScreenOne then BNSnobuildroom
+.BNSnotbuildscreentwo
+;
+ v1=ScreenX  ; x/y positions in pixels 
+ v2=ScreenY 
+ gosub @mcBuildRoom ; builds everything inserted using mcDrawObject
+; or DrawObject into a "room" (background plus transparency information)
+; which can be displayed (copied from the BufferScreen to the logical
+; screen) with mcDisplayRoom.
+ BuildingRoom=false
+ HourglassState=false ; don't display hourglass until requested
+;                       by code in this part of the game.
+.BNSnobuildroom
+ return 
+; 
+;=================================================================
+; 
+; upper limits...
+; 50 Hz 12.5 fps
+; 60 Hz 16   fps
+
+.DisplayEverything
+ cif NotPC
+  if FrameCount < 4 then DisplayEverything ; (3) GMJ
+ cend ; NotPC 
+ FrameCount=0
+; 
+ cif PC
+  gosub @mcPlotLogicalScreen
+ cend ; PC 
+; 
+ gosub @mcDisplayRoom ; copy BufferScreen (created using mcBuildRoom)
+; to logical screen. The logical screen will have the sprites added
+; to it, and will then be made visible at the end of DisplayEverything.
+; 
+ gosub @SpecialPreSprites
+;
+ PlotScreenType=ScreenOne ; screen 1 ACBs
+ if UpdateACBs=false then DE2
+ gosub @DisplayACBs
+ HourglassState=0 ; have started to animate, so kill the hourglass
+.DE2
+ gosub @SortAndDisplayObjects
+;
+ PlotScreenType=ScreenTwo ; screen 2 ACBs
+ if UpdateACBs=false then DE21
+ gosub @DisplayACBs
+ HourglassState=0 ; have started to animate, so kill the hourglass
+.DE21
+ gosub @SortAndDisplayObjects
+;
+ gosub @SpecialSprites
+; 
+ if TextBoxDisplayed=False then BANoBox ; 0 *****MIKE
+ gosub @MenuSprites
+ dv1=TextBoxDisplayed
+ dv2=ScreenX
+ dv3=ScreenY ; z
+ dv4=0 ; h
+ dv5=1 ; plot
+ dv6=0 ; non-reflected
+ gosub @mcDrawObjectDv1
+; 
+.BANoBox
+ cif ReallyST
+; a kludge to clear the bottom of the screen on the ST - this
+; is due to a bug in the scrolling system.
+  &WordWS(WordCursorXPos)=c0
+  x1=192
+  &WordWS(WordCursorYPos)=x1
+  v1=320 ; pixels wide
+  v2=8 ; pixels high
+  gosub @mcClearRectangle
+ cend ; ReallyST 
+; 
+; if requested elsewhere, do a CopyScreenToBuffer - this
+; copies the logical screen (including any sprites displayed so far)
+; onto the BufferScreen (kinda the reverse of mcDisplayRoom).
+; The effect is to permamently freeze the sprites. Remember though
+; that it may screw up the 3D afterwards, because the 3D structure
+; is not changed. It's most useful if you have a flat room (i.e.
+; one with no transparency)
+ if WantCSTB=false then BANoCSTB
+ WantCSTB=false
+ gosub @mcCopyScreenToBuffer
+; 
+.BANoCSTB ; HOURGLASS code...
+ if HourglassState=false then BANoHourglass
+ if CurrentScreen=SelectPlayerScreen then BANoHourglass
+ if CurrentScreen=0 then BANoHourglass
+ dv1=HourglassObject
+ dv2=0   ; x
+ dv3=400 ; z 
+ dv4=400 ; h
+ dv5=dPlot
+ dv6=0 ; reflect
+ gosub @mcDrawObjectDv1
+ HourglassState=2 ; now displayed
+; 
+.BANoHourglass
+  gosub @mcUpdateScreen ; PC system - end of plotting. See manual.
+  gosub @DisplayFrame ; ST/Amiga. Makes logical screen visible (by
+; swapping the physical/logical screens)
+ cif NotPC
+  gosub @WaitForFrame ; ST/Amiga. Waits for physical/logical screens
+; to be swapped.
+ cend ; NotPC 
+ cif PC
+  gosub @mcUnplotScreen ; PC system. See manual.
+  gosub @SpewBufferToScreen2 ; display second screen if selected 
+; (PC only)
+ cend ; PC 
+; 
+ cif scrolling 
+  push v1
+  push v2
+   if ScreenX<32000 then NotLimitLeft
+   ScrollXdir=8 ; bring back on!
+.NotLimitLeft
+   if ScreenY<32000 then NotLimitTop
+   ScrollYdir=8 ; bring back on!
+.NotLimitTop
+   if ScreenX>8 then NotLimitLeft2
+   if ScrollXdir<200 then NotLimitLeft2
+; near left, trying to go left - disable
+   ScrollXdir=0
+.NotLimitLeft2
+   if ScreenY>8 then NotLimitTop2
+   if ScrollYdir<200 then NotLimitTop2
+; near top, trying to go up - disable
+   ScrollYdir=0
+.NotLimitTop2
+   v1 = ScrollXdir ; 65532 ; x step=-4
+   v2 = ScrollYdir ; 0 ; y step
+   gosub @mcScrollDirection ; tell system how much we want to scroll.
+   add ScreenX,v1 ; ScrollXdir
+   add ScreenY,v2 ; ScrollYdir
+  pop v2
+  pop v1
+ cend ; scrolling 
+;
+ gosub @BufferSensors
+ return
+; 
+;================================================================= 
+;
+; After a DisplayEverything, the contents of the DrawObject 
+; buffer are emptied to the Second screen if selected (PC only) 
+;
+; Closely assosciated with DisplayEverything, so placed 
+; here rather than in alphebetical order
+;
+cif PC
+.SpewBufferToScreen2
+ if TestScreen<>BothScreens then @SorryCantSpew ; not in dual screen mode
+;
+; Churn out DrawObject data between ScreenTwoBuffer(0) 
+; and ScreenTwoBuffer(ScreenTwoBufferPtr-2)
+;
+ gosub @SetScreenTwo ; write to secondary screen
+ BuildingRoom=True ; don't trap objects
+ gosub @mcPlotLogicalScreen
+;
+ x1=0 ; temporary buffer pointer
+ if ScreenTwoBufferPtr=c0 then @SBTS2empty
+.SBTS2loop
+ &v1=ScreenTwoBuffer(x1)
+ add x1,c2
+ &v2=ScreenTwoBuffer(x1)
+ add x1,c2
+ &v3=ScreenTwoBuffer(x1)
+ add x1,c2
+ &v4=ScreenTwoBuffer(x1)
+ add x1,c2
+ &v5=ScreenTwoBuffer(x1)
+ add x1,c2
+ &v6=ScreenTwoBuffer(x1)
+ add x1,c2
+push x1
+ gosub @MCDrawObjectv1Vec ; direct call to machine code (i.e. untrapped)
+pop x1
+ if x1<ScreenTwoBufferPtr then @SBTS2loop
+.SBTS2empty
+;
+ gosub @MCUpdateScreen
+ gosub @MCUnplotScreen
+ gosub @SetScreenOne ; resume primary screen
+ BuildingRoom=False ; trap objects again
+;
+; Now redirect the buffer pointer back to the start of the 
+; buffer for the next pass...
+ ScreenTwoBufferPtr=0
+;
+.SorryCantSpew
+ return
+cend ; PC
+;
+;================================================================= 
+; 
+.PutUpHourglass
+ if HourglassState=2 then PUHRet ; already displayed?
+ if CurrentScreen=SelectPlayerScreen then PUHRet
+ if CurrentScreen=0 then PUHRet
+ HourglassState=1 ; we want to display it
+;
+; GMJ 31.01.91 - DO NOT CALL DISPLAYEVERYTHING FROM WITHIN 
+; BUILDNEWROOM, AS IT SETS THE OUTPUT SCREEN TO ONE AFTER 
+; SPEWING OUT THE DRAWOBJECT BUFFER!!
+;; push UpdateACBs
+;; push dv1
+;;  UpdateACBs=false ; don't change any sprites
+;;  gosub @DisplayEverything
+;; pop dv1
+;; pop UpdateACBs
+;
+.PUHRet
+ return
+; 
+;================================================================= 
+; 
+.DisplayFrame
+; tell ST/Amiga system that the logical screen is 
+; ready to be swapped with the physical screen.
+ gosub @SetUpTextPtr
+ ByteWS(ByteFrameReadyFlag)=c1
+ return
+;------
+; wait for frame to be displayed
+.WaitForFrame
+; wait for ST/Amiga system to take notice of DisplayFrame
+ cif NotPc ; don't wait on pc.
+  x1=ByteWS(ByteFrameReadyFlag)
+  if x1<>0 then WaitForFrame
+ cend ; NotPC 
+ return
+;----
+.WP1
+.EBRet
+ return 
+; 
+; =========================================================== 
+; 
+; Preload Dv1. 
+; 
+ code - 
+.iMarkAndPreloadDv1
+ code + 
+  gosub @MarkAndPreloadDv1 
+ code - 
+ return 
+ code + 
+; 
+.MarkAndPreloadDv1 
+.cMarkAndPreloadDv1 
+ gosub @MarkForPreloadDv1 
+ gosub @mcPreLoadCells
+ return 
+; 
+; =========================================================== 
+; 
+; Prepare to preload objects X1-X2 inclusive. 
+; 
+ code - 
+.iMarkForPreloadX1toX2
+ code + 
+  gosub @MarkForPreloadX1toX2
+ code - 
+ return 
+ code + 
+; 
+.MarkForPreloadX1toX2
+.cMarkForPreloadX1toX2
+ push dv5 
+ push dv6 
+  dv5=dMarkPreload
+  dv6=0 ; dNonReversed
+.pxtxPreloadCell  
+  dv1=X1 
+  gosub @mcDrawObjectDv1
+  add x1,c1 
+  if x1<x2 then pxtxPreloadCell  
+ pop dv6 
+ pop dv5 
+ return 
+; 
+;================================================================= 
+; 
+; The best way to get a new screen displayed. Handles preloading, 
+; and preloads the first bit of the animation as well. For simple 
+; screens, this will get rid of the need to have a separate preload 
+; range. Entry: DV1 is object number to insert.
+; 
+.PreLoadAndInsertDv1
+.cPreLoadAndInsertDv1
+ gosub @InitACBs
+;; dv2=0
+;; dv3=0
+;; dv4=0
+;; dv6=0 ; non-reversed
+;; gosub @MarkForPreloadDv1 
+; 
+ if CurrentScreen=GameMap then PLAI2
+;
+; preload the first bit of any animation sequences, doing
+; repeats once and once only...
+ x1=8 ; countdown counter
+ push dv1
+.PLAI1
+  push x1
+   gosub @DisplayACBsDv5
+   gosub @SortAndDisplayObjects
+  pop x1
+  sub x1,c1
+  if x1>0 then PLAI1
+ pop dv1
+ dv2=0
+ dv3=0
+ dv4=0
+ dv6=0
+
+.PLAI2
+;; gosub @mcPreLoadCells
+ dv5=dInsert ; insert into structure.
+ if CurrentScreen=GameMap then @mcDrawObjectDv1 ; gosub, return
+;***** gosub @InitACBs
+ goto @DrawObjectDv1 ; gosub, return. 
+; 
+;----------------------------------------------------------------- 
+; 
+.MarkForPreloadDv1 
+ push dv5 
+  dv5=dMarkPreload
+  gosub @mcDrawObjectDv1
+ pop dv5 
+ return 
+; 
+;================================================================= 
+; 
+.StartFreeACB0
+; ani sequence ObjectNumber, started at coords 0
+; returns dx4 as ACB offset
+ dv2=0; x
+ dv3=0 ; z
+ dv4=0 ; h
+ dv6=0 ; Reflect 
+
+.StartFreeACB ; ObjectNumber, dv2, dv3, dv4; returns dx4
+; The best way to start a new ACB.
+ dv1=ObjectNumber
+; 
+.StartFreeACBdv1 ; dv1, dv2, dv3, dv4; returns dx4
+ ObjectNumber=dv1 
+ dv5=dPlot
+ dv6=0 ; no reflection
+ gosub @FindObjectNumber
+ goto @SetupACB
+; 
+;================================================================= 
+; 
+; Move ACB dx4 to dv2,dv3,dv4... 
+; 
+.MoveACBdx4
+ push dx4
+  add dx4,c4
+  &ACBlist(dx4) = dv2
+  add dx4,c2
+  &ACBlist(dx4) = dv3
+  add dx4,c2
+  &ACBlist(dx4) = dv4
+ pop dx4
+ return
+; 
+; Set dv2,dv3,dv4 to the coordinates of ACB dx4... 
+; 
+.ReadACBdx4
+ push dx4
+  &dv1 = ACBlist(dx4)
+  add dx4,c4
+  &dv2 = ACBlist(dx4) 
+  add dx4,c2
+  &dv3 = ACBlist(dx4) 
+  add dx4,c2
+  &dv4 = ACBlist(dx4) 
+  pop dx4
+ return
+; 
+; ... 
+; 
+.SetUpACBdx4
+ push dx4
+  gosub @FindObjectNumber
+  gosub @DecodeHeader
+ pop dx4
+ dv1=ObjectNumber
+ gosub @SUAGotBlankACB
+ return
+; 
+; Change ACB dx4 to use animation ObjectNumber... 
+; (The best way to change the Animation sequence used by an
+; ACB without changing anything else about it.)
+; 
+.ChangeACBdx4
+ push ACBheader
+ push dx4
+  ACBheader=dx4
+  push ObjectNumber
+  gosub @KillACBheader
+  pop ObjectNumber
+  gosub @FindObjectNumber
+  gosub @DecodeHeader
+ pop dx4
+ pop ACBheader
+ dv1=ObjectNumber
+ dv6=0 ; reset reflection
+ gosub @SUAChangeACB
+ return
+; 
+;================================================================= 
+; 
+.mcDrawObjectV1Vec
+ goto @mcDrawObjectV1
+; 
+.mcNoClipSpriteVec
+ goto @mcNoClipSprite
+; 
+.mcFindObjVec
+ goto @mcFindObj
+; 
+;;================================================================= 
+;                      OBJECT TABLE ROUTINES 
+;================================================================= 
+; 
+;                   Object Table Data Structure 
+; 
+; ObjectTable (list 1) ; 2 byte object-number entries, starting 
+;            at CurrentObjectTable and ending with number -1, of 
+;            the objects whose coordinates we want to keep. 
+; HiresTable (list 2) ; 16 bytes per object listed in ObjectTable, 
+;            starting at address 0. 2 byte contents are: 
+;            * Dv2 (X coordinate)     ; original 
+;            * Y coordinate (dv3-dv4) ; original 
+;            * Dv1 (Object number)    ; defined by Pete 
+;            * Dv3 (Z coordinate)     ; defined by Pete 
+;            * Dv4 (H coordinate)     ; defined by Pete 
+;            * Dv6 (Reflected?)       ; defined by Pete 
+;            * spare                  ; defined by Pete 
+;            * spare                  ; defined by Pete 
+; When built, this table is used both for collision detection, and 
+; for the addition/removal of e.g screen icons (cf Raj). 
+; 
+;----------------------------------------------------------------- 
+; 
+; Clear table giving coordinates of objects on current screen
+; 
+.ClearHiresTable
+ push X1 
+ push X2 
+  x1=0
+  x2=SizeHiresTable 
+  add x2,c16 ; clear static AND first "variable" entry. ** PETE ** 
+.chtLoop
+  &HiresTable(x1)=c0
+  add x1,c2
+  if x1<X2 then chtLoop
+ pop X2 
+ pop X1 
+ return
+; 
+;----------------------------------------------------------------- 
+; 
+; Scan object table, looking for dv1. If found (i.e if it was 
+; interesting and so has an entry programmed in ObjectTable in 
+; TABLE.DAT), store its current address (dv2 etc) for later use 
+; by the collision detection logic... 
+; 
+.ScanObjectTable
+.ScanObjectTables
+ push x1                  ; (All variables are unchanged) 
+ push x2 
+  x1=CurrentObjectTable
+.sotScanNextEntry
+  &x2=ObjectTable(x1)
+  if x2=MinusOne then @sotReturn
+  if x2=dv1 then RecordCoordinates 
+  add x1,c2
+  goto @sotScanNextEntry
+; 
+.RecordCoordinates ; got a match - calculate coord address 
+  sub x1,CurrentObjectTable
+  x2=FFFE ; mask off bottom bit
+  and x1,x2
+  add x1,x1 ; now index into 16-byte-per-entry table: i.e. times 8
+  add x1,x1
+  add x1,x1 ; x1=number of object times 16
+  gosub @StorePosDv1 
+; 
+.sotReturn
+ pop x2 
+ pop x1 
+ return
+; 
+; ============================================================= 
+; 
+; Forget object dv1 (use if e.g its details are in the table, but 
+; it is not part of the screen). 
+; 
+; Such routines maintain HiresTable, with 16-byte entries: 
+;    dv2,dv3-dv4(Y),dv1,dv3,dv4,spare,spare,spare  (dv1=0 at end)
+; 
+ code -
+.iForgetDv1;  Forget icon dv1 
+  code + 
+   gosub ForgetDv1;  Forget icon dv1
+  code - 
+ return 
+ code +
+; 
+.cForgetDv1 
+.ForgetDv1 
+ push X1 
+ push X2 
+ push X3 
+ push X4 
+  X1=VariablePartOfHiresTable 
+.fdv1ScanList ; search list for coord match, or until end found.  
+  X2=X1 
+  add X2,C4 
+  &X3=HiresTable(X2) ; Object number  
+  if X3=0 then @fdReturn ; end of list, so can't Forget 
+  if X3=dv1 then fdEntryFound  ; Forget dv1/2/3/4/6 at X1 
+  add X1,c16 
+  goto fdv1ScanList 
+; 
+; Matching entry at X1, so delete it and slide later data down. 
+; 
+.fdEntryFound 
+.fdCopyEntry 
+  X3=X1 
+  add X3,C4 
+  &X3=HiresTable(X3) 
+  if X3=0 then fdReturn ; Leave if current object is number 0. 
+  X2=X1 
+  add X2,C16 
+  X3=X2 
+.fdCopyNumber ; Copy next 16-bit entry back onto this one. 
+  &X4=HiresTable(X2) 
+  &HiresTable(X1)=X4 
+  add X1,C2 
+  add X2,C2 
+  if X1<X3 then fdCopyNumber 
+  goto fdCopyEntry 
+; 
+.fdReturn 
+ pop X4 
+ pop X3 
+ pop X2 
+ pop X1 
+ return 
+;
+; ---------------------------------------------------------------
+; 
+; Remember details of object dv1 at dv2,dv3,dv4,dv6 (replacing 
+; any existing object in the same place or, if none, at the end). 
+; 
+; Such routines maintain HiresTable, with 16-byte entries: 
+;    dv2,dv3-dv4(Y),dv1,dv3,dv4,dv6,spare,spare  (dv1=0 at end)
+;  
+code -
+.iRememberDv1 
+ code + 
+  gosub RememberDv1 
+ code - 
+ return 
+code +
+; 
+.RememberDv1
+.cRememberDv1 
+ push X1 
+ push X2 
+  X1=VariablePartOfHiresTable ; First few entries special for CD 
+.RememberScanList ; search list until end reached.  
+  X2=X1 
+  add X2,C4 
+  &X2=HiresTable(X2) ; Object number  
+  if X2=0 then RememberEndOfList 
+.RememberTryNextEntry 
+  add X1,C16 
+  goto RememberScanList 
+; 
+.RememberEndOfList 
+  gosub @StorePosDv1 
+  X2=20 
+  add X2,X1 
+  &HiresTable(X2)=C0 ; give next entry object number 0 
+.RememberReturn 
+ pop X2 
+ pop X1 
+ Return 
+; 
+; ------------------------------------------------------------- 
+; 
+; Insert object dv1 at dv2,dv3,dv4 - reflected according to dv6. 
+; If there is an existing object known at the same coordinates, 
+; then remove it. This routine is intended for displaying icons 
+; on e.g the book in the Raj offices.  
+; 
+; Such routines maintain HiresTable, with 16-byte entries: 
+;    dv2,dv3-dv4(Y),dv1,dv3,dv4,spare,spare,spare  (dv1=0 at end)
+;  
+code -
+.iInsertOrReplaceDv1 
+ code + 
+  gosub InsertOrReplaceDv1 
+ code - 
+ return 
+code +
+; 
+.cInsertOrReplaceDv1
+.InsertOrReplaceDv1 
+ push X1 
+ push X2 
+ push X3 
+  X1=VariablePartOfHiresTable 
+.iordScanList ; search list for coord match, or until end found.  
+  X2=X1 
+  add X2,C4 
+  &X3=HiresTable(X2) ; Object number  
+  if X3=0 then @iordEndOfList 
+  X2=X1 
+  &X3=HiresTable(X2) ; X coord 
+  if X3<>dv2 then iordTryNextEntry 
+  add X2,C6 
+  &X3=HiresTable(X2) ; Z coord 
+  if X3<>dv3 then iordTryNextEntry 
+  add X2,C2 
+  &X3=HiresTable(X2) ; H coord 
+  if X3=dv4 then @iordEntryFound 
+.iordTryNextEntry 
+  add X1,C16 
+  goto @iordScanList 
+; 
+.iordEntryFound 
+  X2=X1 
+  add X2,C4 
+  &X3=HiresTable(X2)
+  if X3=dv1 then @iordReturn ; new object=old object, so exit  
+  dv5=dInsertRedraw
+  gosub @rdDrawObjectDv1 ; Draw new object upon screen 
+  push X1 
+   add X1,C4 
+   &HiresTable(X1)=dv1 ; Just alter object num (coords all match)
+   add X1,C6 
+   &X2=HiresTable(X1)
+    &HiresTable(X1)=dv6 ; and alter reflection flag 
+   dv6=X2 ; use old dv6 for remove/redraw 
+  pop X1 
+  dv1=X3 
+  dv5=dRemoveRedraw
+  gosub @rdDrawObjectDv1 ; remove old object at these coords
+  goto iordReturn 
+;  
+.iordEndOfList 
+  gosub @StorePosDv1 
+  X2=20 
+  add X2,X1 
+  &HiresTable(X2)=C0 ; give next entry object number 0 
+  dv5=dInsertRedraw
+  gosub @rdDrawObjectDv1 ; Draw new object upon screen 
+; 
+.iordReturn 
+ pop X3 
+ pop X2 
+ pop X1 
+ Return 
+; 
+; ----------------------------------------------------------- 
+; 
+; Read dv2,dv3,dv4,dv6 for object dv1. 
+; Such routines maintain HiresTable, with 16-byte entries: 
+;    dv2,dv3-dv4(Y),dv1,dv3,dv4,spare,spare,spare  (dv1=0 at end)
+; 
+; >>> GRAHAM 15.01.91 - wanted to test if ReadDv1 actually found 
+; >>> dv1. Returns Result=False if dv1 couldn't be found. 
+; 
+ code -
+.iReadDv1;  Read icon dv1 
+  code + 
+   gosub ReadDv1;  Read icon dv1
+  code - 
+ return 
+ code +
+; 
+.cReadDv1 
+.ReadDv1 
+ push X1 
+ push X2 
+ push X3 
+ push X4 
+  X1=VariablePartOfHiresTable 
+.readDv1ScanList ; search list for object num match, or end found.  
+  X2=X1 
+  add X2,C4 
+  &X3=HiresTable(X2) ; Object number  
+  Result=X3 ; GMJ 15.01.91 - On exit, Result=false if couldn't find dv1
+  if X3=0 then readDv1Return ; end of list, so can't read 
+  if X3<>dv1 then readDv1NextEntry 
+  X2=X1 
+  &dv2=HiresTable(X2) ; X 
+  add X2,C6 
+  &dv3=HiresTable(X2) ; Z 
+  add X2,C2 
+  &dv4=HiresTable(X2) ; H 
+  add X2,C2 
+  &dv6=HiresTable(X2) ; Reflect? 
+  goto @readDv1Return 
+.readDv1NextEntry 
+  add X1,c16 
+  goto @readDv1ScanList 
+.readDv1Return 
+ pop X4 
+ pop X3 
+ pop X2 
+ pop X1 
+ return 
+; 
+; ----------------------------------------------------------- 
+; 
+; Remove first object at coordinates dv2,dv3,dv4,dv6. 
+; Such routines maintain HiresTable, with 16-byte entries: 
+;    dv2,dv3-dv4(Y),dv1,dv3,dv4,spare,spare,spare  (dv1=0 at end)
+;  
+code -
+.iRemoveDv2Dv3Dv4;  remove icon at dv2,dv3,dv4
+ code + 
+  gosub RemoveDv2Dv3Dv4;  remove icon at dv2,dv3,dv4
+ code - 
+ return 
+code +
+; 
+.cRemoveDv2Dv3Dv4
+.RemoveDv2Dv3Dv4 
+ push X1 
+ push X2 
+ push X3 
+ push X4 
+  X1=VariablePartOfHiresTable 
+.rdddScanList ; search list for coord match, or until end found.  
+  X2=X1 
+  add X2,C4 
+  &dv1=HiresTable(X2) ; Object number  
+  if dv1=0 then @rdReturn ; end of list, so can't remove 
+  X2=X1 
+  &X3=HiresTable(X2) 
+  if X3<>dv2 then rdddNextEntry ; does X coordinate match? 
+  add X2,C6 
+  &X3=HiresTable(X2) 
+  if X3<>dv3 then rdddNextEntry ; does Z coordinate match? 
+  add X2,C2 
+  &X3=HiresTable(X2) 
+  if X3<>dv4 then rdddNextEntry ; does H coordinate match? 
+  add X2,C2 
+  &X3=HiresTable(X2) 
+  if X3=dv6 then @rdEntryFound  ; does Reflect flag match? 
+.rdddNextEntry                  ; If so, remove dv1/2/3/4 at X1 
+  add X1,c16 
+  goto @rdddScanList 
+; 
+; ----------------------------------------------------------- 
+; 
+; Remove object dv1. 
+; Such routines maintain HiresTable, with 16-byte entries: 
+;    dv2,dv3-dv4(Y),dv1,dv3,dv4,spare,spare,spare  (dv1=0 at end)
+; 
+ code -
+.iRemoveDv1;  remove icon dv1 
+  code + 
+   gosub RemoveDv1;  remove icon dv1
+  code - 
+ return 
+ code +
+; 
+.cRemoveDv1 
+.RemoveDv1 
+ push X1 
+ push X2 
+ push X3 
+ push X4 
+  X1=VariablePartOfHiresTable 
+.rdv1ScanList ; search list for coord match, or until end found.  
+  X2=X1 
+  add X2,C4 
+  &X3=HiresTable(X2) ; Object number  
+  if X3=0 then @rdReturn ; end of list, so can't remove 
+  if X3<>dv1 then rdv1NextEntry 
+  X2=X1 
+  &dv2=HiresTable(X2) ; X 
+  add X2,C6 
+  &dv3=HiresTable(X2) ; Z 
+  add X2,C2 
+  &dv4=HiresTable(X2) ; H 
+  add X2,C2 
+  &dv6=HiresTable(X2) ; Reflect? 
+  goto @rdEntryFound  ; Remove dv1/2/3/4/6 at X1 
+.rdv1NextEntry 
+  add X1,c16 
+  goto @rdv1ScanList 
+; 
+; Matching entry at X1, so delete it and slide later data down. 
+; 
+.rdEntryFound 
+  push X1 
+   add X1,C4 
+   &dv1=HiresTable(X1) 
+  pop X1
+  dv5=dRemoveRedraw
+  gosub @rdDrawObjectDv1 ; delete current object for this entry 
+; 
+.rdCopyEntry 
+  X3=X1 
+  add X3,C4 
+  &X3=HiresTable(X3) 
+  if X3=0 then rdReturn ; Leave if current object is number 0. 
+  X2=X1 
+  add X2,C16 
+  X3=X2 
+.rdCopyNumber ; Copy next 16-bit entry back onto this one. 
+  &X4=HiresTable(X2) 
+  &HiresTable(X1)=X4 
+  add X1,C2 
+  add X2,C2 
+  if X1<X3 then rdCopyNumber 
+  goto @rdCopyEntry 
+; 
+.rdReturn 
+ pop X4 
+ pop X3 
+ pop X2 
+ pop X1 
+ return 
+; 
+; ----------------------------------------------------------- 
+; 
+; Draw Dv1 at Dv2/3/4 (flags Dv5/Dv6) while saving important vars 
+; 
+.rdDrawObjectDv1 
+ push dv1 
+ push dv2 
+ push dv3 
+ push dv4 
+ push dv6 
+ push header 
+ push dx4 
+; GMJ 29.01.91 - DrawObjectDv1 uses SpecialRasterOffset, even 
+; when deleting rasters. This causes certain game flags to 
+; be re-initialised, and in some cases, the "remembering" of 
+; a raster as it is erased! 
+push x1 ; preserve table ptr x1 in case any future modifications 
+; to MCDrawObjectDv1
+;<< gosub @DrawObjectDv1 ; Draw new object upon screen 
+  gosub @MCDrawObjectDv1 ; Draw new object upon screen 
+pop x1
+ pop dx4 
+ pop header 
+ pop dv6 
+ pop dv4 
+ pop dv3 
+ pop dv2 
+ pop dv1 
+ return 
+; 
+; =========================================================== 
+; 
+; Store details of current object in HiresTable(X1), but 
+; first negate the Z position (dv3). 
+; 
+; Each entry is: dv2(X),dv3-dv4(Y),dv1,dv3,dv4,dv6,0,0 
+; All variables are unchanged, except dv1:=0. 
+; 
+ code -
+.iStoreNegPosDv1         ; store dv1/dv2/-dv3/dv4 
+  code + 
+   gosub cStoreNegPosDv1 
+  code - 
+ return 
+ code +
+; 
+.cStoreNegPosDv1 
+.StoreNegPosDv1 
+ push dv3 
+ push X3 
+  X3=0 
+  sub X3,dv3 
+  dv3=X3 ; Negate z coordinate to indicate this icon not shown 
+  gosub StorePosDv1 
+ pop X3 
+ pop dv3 ; Restore original z coordinate 
+ dv1=0 ; don't plot this icon
+.shtnpx1Return 
+ return 
+; 
+; ------------------------------------------------------------- 
+; 
+; Store details of current object in HiresTable(X1). 
+; Each entry is: dv2(X),dv3-dv4(Y),dv1,dv3,dv4,dv6,0,0 
+; 
+; All variables are unchanged. 
+; 
+ code -
+.iStorePosDv1         ; store dv1/dv2/dv3/dv4 
+  code + 
+   gosub cStorePosDv1 
+  code - 
+ return 
+ code +
+; 
+.cStorePosDv1 
+.StorePosDv1 
+ push X1 
+ push X2 
+  &HiresTable(X1)=dv2 ; dv2 (X) 
+  add X1,C2 
+  X2=dv3 
+  sub X2,dv4 
+  &HiresTable(X1)=X2  ; dv3-dv4 (Y) 
+  add X1,C2 
+  &HiresTable(X1)=dv1 ; dv1 (Object num) 
+  add X1,C2 
+  &HiresTable(X1)=dv3 ; dv3 (Z) 
+  add X1,C2 
+  &HiresTable(X1)=dv4 ; dv4 (H) 
+  add X1,C2 
+  &HiresTable(X1)=dv6 ; Reflect? 
+ pop X2 
+ pop X1 
+.shtpx1Return 
+ Return 
+; 
+;;=================================================================
+;                       INITIALISATION ROUTINES 
+;=================================================================
+; 
+; System initialisation, only carried out once by the first overlay 
+; to load. This involves the following: 
+; * initialise HUGE system,  
+; * initialise pallette tables from data in List4, 
+; * initialise music, 
+; * initialise screen (blank). 
+; 
+.MazeOnceOnlyInit 
+ gosub @AAEssentialInit
+ gosub @mcHeroOnceOnlyInit
+  cif PC
+ x1=256  ;bit 8=Dual/Single (V1 retured by HeroOnceOnlyInit)
+ and V1,x1
+  cend
+  cif ST
+ V1=c0
+  cend
+ push V1 ;Dual mode flag
+
+ gosub @AllocateTSRlists    ;allocate NPPC workspace
+ gosub @SpecialOnceOnlyInit ;e.g. for debug code
+ gosub @Initialise
+; 
+ pop V1 ;Dual mode flag
+ gosub @SetDefaultConfigV1
+; 
+ v1=4          ; list4
+ cif NotPC
+  &v2=List4(16) ; palette
+ cend ; NotPC 
+ cif pc
+  &v2=List4(14) ; palette
+  v3=16
+  v4=4096 ;1000h set both VGA screens
+ cend
+ gosub @mcSetPalette
+; 
+ gosub @mcOnceOnlyMusicInit
+ &ListConfig(cfEffectsAllowed)=v6 ;Save installed options. 1=Effects enabled
+;
+ UpdateACBs=true ; not menu mode
+ gosub @AAEssentialInit
+
+ gosub @mcEmptyRoom
+
+  cif PC
+ v1=84 ;84 ms (1000/84 = 11.90 frames = 12 fps)
+ gosub @vMCsetMaxFrameRate
+  cend
+;
+ V5=0     ;Initialise
+ gosub @MCdigitalHandler
+
+ return 
+;
+;---------------------------------------------------------------- 
+;
+;...sSetDefaultConfigV1:0:
+;---------------------------------------------------------------- 
+; 
+;V1=result of mcHeroOnceOnlyInit
+;
+.SetDefaultConfigV1
+   ;Set all config parameters default value in case
+   ;config files do not overide them (of for running on ST)
+
+     ;Environment..................
+; &ListConfig(cfNPPCloaded)=c0
+ &ListConfig(cfDualScreen)=v1
+; &ListConfig(cfCardReaderPresent)=c0
+; &ListConfig(cfIOcardPresent)=c0
+ gosub @InitCardReader
+
+;Default disk configuration...
+
+ x1=60   ;heartbeat interval for idle/alert/dispatch
+ &ListConfig(cfNPPCtimeoutValue)=x1 
+ x1=10   ;heartbeat interval in "can't find network"
+ &ListConfig(cfRetryTimeoutValue)=x1
+ x1=240  ;heartbeat interval in active/play
+ &ListConfig(cfPlayNoComms)=c5
+ x1=1
+ &ListConfig(cfIOmaskWhenCellInUseLo)=x1
+ x1=2
+ &ListConfig(cfIOmaskWhenGamePlayLo)=x1
+ x1=4
+ &ListConfig(cfIOmaskWinPulseLo)=x1
+ x1=8
+ &ListConfig(cfIOmaskLosePulseLo)=x1
+ x1=1
+ &ListConfig(cfInputMaskStartLo)=x1
+ x1=2
+ &ListConfig(cfInputMaskStopLo)=x1
+ x1=8
+ &ListConfig(cfInputMaskSelectLo)=x1
+ x1=4
+ &ListConfig(cfInputMaskLeftFireLo)=x1
+ x1=4
+ &ListConfig(cfInputMaskRightFireLo)=x1
+
+ x1=16
+ &ListConfig(cfInputMaskSensor1Lo)=x1
+ x1=32
+ &ListConfig(cfInputMaskSensor2Lo)=x1
+ x1=64
+ &ListConfig(cfInputMaskSensor3Lo)=x1
+ x1=128
+ &ListConfig(cfInputMaskSensor4Lo)=x1
+ x1=256
+ &ListConfig(cfInputMaskSensor5Lo)=x1
+ x1=512
+ &ListConfig(cfInputMaskSensor6Lo)=x1
+ x1=1024
+ &ListConfig(cfInputMaskSensor7Lo)=x1
+ x1=2048
+ &ListConfig(cfInputMaskSensor8Lo)=x1
+ x1=480 ;8 minutes
+ &ListConfig(cfNoShowLength)=x1
+ x1=20 ;default to 20 seconds (GameAllocated message overrides this)
+ &ListConfig(cfMapDisplayTime)=x1 ;display of route message (seconds)
+
+ x1=10 ;*  30 ;if no reply to GameResult or AllocateGame messages
+ &ListConfig(cfDispatchTimeout)=x1
+
+ &ListConfig(cfCellID)=c1 ;default to GAME01 if nothing else overrides
+ x1=3
+ &ListConfig(cfWinPulseLength)=c3
+ &ListConfig(cfLosePulseLength)=c3
+
+;Parameters set from dispatch/alert overlay...
+
+;&ListConfig(cfDifficulty)=c0  ;EASY
+ &ListConfig(cfCrystalsWon)=c8
+ &ListConfig(cfPlayTeamID)=c4
+ x1=200
+ &ListConfig(cfOriginalCTU)=x1   ;Total time allocated
+ x1=60
+ &ListConfig(cfRemainingCTU)=x1  ;Time left until team enter dome
+;&ListConfig(cfNumberOfGames)=c0 ;games played previously
+;&ListConfig(cfSpecialCard)=c0   ;0=Player Card
+
+;Internal values....
+
+;&ListConfig(cfStartUpComplete)=c0
+
+  cif ST
+ &ListConfig(cfTerminalID)=c1
+ &ListConfig(cfCellID)=c0
+  cend
+
+  cif ST
+ x1=65535
+ &ListConfig(cfAutoKeyPress)=x1
+  cend
+
+;Values for debug....
+; &ListConfig(cfAutoModeEnable)=c2    ; (for debug)
+; &ListConfig(cfNPPCtimeoutValue)=c5  ; (for debug)
+; x1=3600                             ; (for debug)
+; &ListConfig(cfRetryTimeoutValue)=x1 ; (for debug)
+; &ListConfig(cfPlayNoComms)=c5       ; (for debug)
+; &ListConfig(cfTestSoundSystem)=c1   ; (for debug)
+;....values for debug:0:
+
+ return
+;...e
+;
+;---------------------------------------------------------------- 
+; 
+; Overlay initialisation, carried out once by every overlay which 
+; loads. This involves the following: 
+; * DO NOT load gamedata file: gamedat'v1'.dat
+; * Purge all graphics cells in memory 
+; * Open graphics structure file whose name is ??? 
+;  
+.MazeEachTimeInit 
+  miVBLticks=0
+  v1=0 ; purge
+  gosub @mcPurgeAllCells
+;
+  StructureFile=0 ; void structure name to force loading
+  gosub @OpenNormalStructures
+;;  cif PC 
+;;   gosub @LoadFont 
+;;  cend ; PC 
+ gosub @TestScreenTwo ;force player screen @ start
+ GameOver=false ; (Just in case) This should normally be set 
+; in DEMO.TXT at the start of each game. While false, it ensures 
+; that the STOP key is enabled, and while true, disabled (e.g. 
+; during a win / lose sequence). 
+ return  
+; 
+;================================================================= 
+; 
+.OpenNormalStructures
+  if StructureFile=NormalStructures then ONSSRet
+ v1=IntroTablesList
+ &v2=IntroTables(34) ; map/town sprites filename
+ v3=1 ; 0=purge, 1=don't purge
+ gosub @mcOpenSpriteFile
+ gosub @mcPurgeAllCells
+; 
+.ONS2
+ StructureFile=NormalStructures
+ gosub @LoadStructures
+ gosub @InitACBs
+.ONSSret
+ return
+; 
+;----------------------------------------------------------------- 
+; 
+; Screen initialisation, carried out once by every overlay which 
+; loads. This includes the following: 
+; * Initialise screen coordinates and text colours, 
+; * Select 'raster printing'.  
+;  
+.ScreenInit 
+ TextBoxDisplayed=False ; 0
+ ScreenX=0 ; reset screen pos so e.g. text box appears
+ ScreenY=0
+ ForegroundColour=7 ; foreground color (7: black)
+ BackGroundColour=0 ; background color (0: transparent)
+ UpdateACBs=true ; not menu mode
+ &WordWS(WordVBLdisabled)=c0
+ CurrentScreen=0
+
+  cif PC
+ &LocalDifficulty=ListConfig(cfDifficulty)
+ &LocalCrystalsWon=ListConfig(cfCrystalsWon)
+  cend
+ return 
+; 
+;----------------------------------------------------------------- 
+; 
+.Initialise
+; All the once-only initialisation, including e.g. memory
+; allocation.
+; 
+ gosub @mcHeroInit ; a few bits of system initialisation. Ignore.
+; 
+ cif NotPC
+; tell ST/Amiga which screen they're using to start with. Handled
+; automatically in mc after this point.
+  &x1=LongWS(HiLongLogicalBase)
+  &LongWS(HiLongGraphicsScreenBase)=x1
+  &x1=LongWS(LoLongLogicalBase)
+  &LongWS(LoLongGraphicsScreenBase)=x1
+ cend ; NotPC 
+ gosub @AllocateWorkspaceLists ; allocate all temporary acode lists.
+; 
+; set up random seed to a known value. You might wish to remove
+; this to allow the system to be initially random...
+ x1=0
+ &LongWS(HiLongRandomSeed)=x1
+ &LongWS(LoLongRandomSeed)=x1
+; 
+; disable task-switching as it's not used during the initialisation.
+; (Probably not used in the game, for that matter).
+ &WordWS(WordSuspendTaskSwap)=c1 ; suspended during init
+; 
+ gosub @AAEssentialInit
+; 
+ gosub @SetUpTextPtr
+ x1=39
+ ByteWS(ByteWordWrapWidth)=x1 ; Word wrap width. Nowadays,
+; this is normally overridden in PRINT.TXT because we're now
+; using a proportional font.
+; 
+; initialise 3D. Uses all remaining memory for the various
+; graphics system bits that are needed.
+ v1=2000 ; number of cells used. (error 259 if too small)
+ v2=3500 ; number of maplinks    (error 258 if too small)
+ cif ST
+  v3=200 ; no. of composite cells
+  v4=1800 ;no. of cumulative transparency masks
+ cend ; ST 
+ cif PC
+  v3=200 ; no. of heap entries   (error 257 if too small)
+  v4=800 ;no. of cumulative transparency masks
+ cend ; PC 
+ v5=600 ; why not 240? ; size of ground map=map width*height in cells.
+ gosub @mcSetUpVariablePtrs ; allocate memory for the 3D system
+;
+  cif PC
+ if V1<600 then @OutOfMemory
+ &ListConfig(cfCellPoolSize)=v1
+  cend ;PC
+; 
+ v1=320 ; 1 screen, 20 pixels wide, in pixels
+ v2=192 ; 1 screen, 12 pixels high, in pixels
+ v3=1 ; game mode: 0=non-scrolling, 1=scrolling, 2=jumps
+ gosub @mcInitScrolling ; set biggest map size that will be possible.
+; 
+ cif pc ; must SetGraphicsWindow for PC, even if game is scrolling
+  v1=0    ; X1
+  v2=319  ; X2
+  v3=0    ; Y1
+  v4=191  ; Y2
+  gosub @mcSetGraphicsWindow ; set clipping areas etc.
+ cend ; PC 
+; 
+ gosub @mcEmptyRoom ; clear out the "room"
+;
+  cif PC
+ &WordWS(WordTextBufferOffset)=c0                ;* nick 9/5/91
+ code-                                           ;* nick 9/5/91
+  prs "Init: OK ... "                            ;* nick 9/5/91
+  message 11                                     ;* nick 9/5/91
+ code+                                           ;* nick 9/5/91
+  cend
+;
+; set up system raster offset. If you're using
+; acode DrawObjectDv1, then use variable RasterOffset instead
+ &WordWS(WordRasterOffset)=c0
+ RasterOffset=0
+; 
+ &WordWS(WordSuspendTaskSwap)=c0 ; start swapping!
+ gosub @SetUpTextPtr
+ &WordWS(WordVBLdisabled)=c0 ; enable vbl
+ return
+; 
+  cif PC
+.OutOfMemory
+ push V1 ;pool size
+ &WordWS(WordTextBufferOffset)=c0
+ V1=0
+ gosub @vMCenableTextBuffer
+
+  code-
+ prs "Out of memory ("
+  code+
+ pop x1
+  code-
+ print x1
+ prs ") press ESC "
+  code+
+.WaitESC
+ gosub @vMCosrdch
+ if v1<>27 then WaitESC
+ goto @vMCcloseDown
+  cend
+
+;----------------------------------------------------------------- 
+; 
+.AllocateWorkspaceLists
+  cif ST
+ v1=4000 ; space for extra vars, temp tables in table.txt
+ gosub @mcReserveMemory
+  cend
+
+ gosub @AllocateStructures
+; 
+; set up filename buffer (List17)
+ &x1=longws(HiLongFreeWorkspace)
+ &List11(68)=x1 ; set up List17
+ &x1=longws(LoLongFreeWorkspace)
+ &List11(70)=x1 ; set up list17
+ v1=64 ; reserve space for list 17 (filename buffer)
+ gosub @mcReserveMemory
+; 
+; set up screen 2 DrawObject info buffer (List18)
+; NOTE: on the ST list18() is the screen address for MCoswrchV1.
+cif PC
+ &x1=longws(HiLongFreeWorkspace)
+ &List11(72)=x1 ; set up List18
+ &x1=longws(LoLongFreeWorkspace)
+ &List11(74)=x1 ; set up list18
+ v1=2048 ; 12 bytes per entry - should be ample, if not excessive!!
+ gosub @mcReserveMemory
+cend ; PC
+; 
+ gosub @AllocateAndLoadFont ; in list 26
+; 
+ cif AllowMusic
+  gosub @AllocateSamplesAndMusic
+ cend
+; 
+; HiresTable is used for collision detection etc. - See ScanObjectTables
+ &x1=longws(HiLongFreeWorkspace)
+ &List11(8)=x1 ; set up list2
+ &x1=longws(LOLongFreeWorkspace)
+ &List11(10)=x1 ; set up list2
+ v1=SizeHiresTable ; reserve space for list2 (HiresTable)
+ add v1,c16
+ gosub @mcReserveMemory
+; 
+; list16 is available for the game programmer to use for
+; whatever they choose. -- Includes BufferSensors workspace.
+ &x1=longws(HiLongFreeWorkspace)
+ &List11(64)=x1 ; set up list16
+ &x1=longws(LOLongFreeWorkspace)
+ &List11(66)=x1 ; set up list16
+ v1=WorkListSize ; reserve space for list 16
+ gosub @mcReserveMemory
+;
+ &x1=longws(HiLongFreeWorkspace)
+ &List11(108)=x1 ; set up list27
+ &x1=longws(LoLongFreeWorkspace)
+ &List11(110)=x1
+ v1=16384 ;reserve space for "ODD"  16K chunk of sound sample
+ gosub @mcReserveMemory
+;
+ &x1=longws(HiLongFreeWorkspace)
+ &List11(112)=x1 ; set up list28
+ &x1=longws(LoLongFreeWorkspace)
+ &List11(114)=x1 ; set up list28
+ v1=16384 ;reserve space for "EVEN" 16K chunk of sound sample
+ gosub @mcReserveMemory
+;
+ return
+; 
+;----------------------------------------------------------------- 
+; 
+.LoadStructures
+ StructureFile=NormalStructures
+ &v1=IntroTables(12) ; 's.dat'
+.LoadStructuresV1
+ gosub @CopyFilename
+ v1=15 ; load list 15 (structureBuffer onwards)
+ v2=0 ; offset within list15
+ v3=0
+ gosub @mcLoadFile ; filename is list17(8...)
+; 
+ v1=15 ; use list15, please
+ gosub @mcSetUpPtrs ; tell mc about ptrs
+ gosub @ReadObjectAreas ; read mincell, minraster, mincompressed
+;; StartStructureBuffer=32
+ StructureFile=NormalStructures
+ return
+; 
+;----------------------------------------------------------------- 
+; 
+.AllocateStructures
+; set up ACBlist (14)
+ &x1=longws(HiLongFreeWorkspace)
+ &List11(56)=x1 ; set up list14
+ &x1=longws(LOLongFreeWorkspace)
+ &List11(58)=x1 ; set up list14
+ v1=ACBlistSize ; probably excessive
+ gosub @mcReserveMemory
+; 
+; structure file...
+ &x1=longws(HiLongFreeWorkspace)
+ &List11(60)=x1 ; set up list15
+ &x1=longws(LOLongFreeWorkspace)
+ &List11(62)=x1 ; set up list15
+; 
+ v1=28000 ;Structure file.
+ gosub @mcReserveMemory
+; 
+; drop through to AAEssentialInit...
+; 
+.AAEssentialInit
+; things which must be initialised after clear etc.
+ c0=0 
+ c1=1
+ c2=2
+ c3=3
+ c4=4
+ c5=5
+ c6=6
+ c7=7
+ c8=8
+ c9=9
+ c16=16
+ c32=32
+ return
+; 
+;----------------------------------------------------------------- 
+; 
+ cif pc
+.SetPreLoadPalettes
+; set objects x1..x2 to use cga palette x3
+  v1=x3
+  gosub @mcSetPreloadPalette
+  v1=x1
+  v5=7 ; dSetPreloadPalette
+.SPLP1
+  gosub @mcDrawObjectV1
+  add v1,c1
+  if v1<x2 then SPLP1
+  v1=FFFE
+  gosub @mcSetPreloadPalette
+  return
+ cend ; PC 
+; 
+;----------------------------------------------------------------- 
+; 
+;This version of CGA palettes is specific to BILLY THE KID
+;
+;This is only valid of called after the structures and sprites
+;are set up
+;
+;; .SetCGAPalettes
+;;  cif pc
+;;   &v2=List4(20) ; CGA2 palette
+;;   v3=2 ; 2-color palette
+;;   v4=0 ; default palette
+;;   gosub @mcSetPalette
+;; ; 
+;;   x1=16
+;;   add v2,x1 ; skip on to people palette
+;;   v4=1 ; palette 1 - people
+;;   gosub @mcSetPalette
+;; ;
+;;   x1=16
+;;   add v2,x1 ; skip on to train palette
+;;   v4=2 ; palette 2 - people
+;;   gosub @mcSetPalette
+;; ;
+;;   x1=1 ; first object used for people
+;;   x2=199 ; last object used for people
+;;   x3=1 ; palette to set to
+;;   gosub @SetPreLoadPalettes
+;; ;
+;;   x1=2070; first object used for people
+;;   x2=2083; last object used for people
+;;   x3=1 ; palette to set to
+;;   gosub @SetPreLoadPalettes
+;; ;
+;;   x1=2150 ; first object used for people
+;;   x2=2191 ; last object used for people
+;;   x3=1 ; palette to set to
+;;   gosub @SetPreLoadPalettes
+;; ;
+;;   x1=2347 ; first object used for people
+;;   x2=2370 ; last object used for people
+;;   x3=1 ; palette to set to
+;;   gosub @SetPreLoadPalettes
+;; ; 
+;;   x1=2380 ; first object used for people
+;;   x2=2391 ; last object used for people
+;;   x3=1 ; palette to set to
+;;   gosub @SetPreLoadPalettes
+;; ; 
+;;   x1=2499 ; first object used for people
+;;   x2=2525 ; last object used for people
+;;   x3=1 ; palette to set to
+;;   gosub @SetPreLoadPalettes
+;; ; 
+;;   x1=2645 ; first object used for people
+;;   x2=2670 ; last object used for people
+;;   x3=1 ; palette to set to
+;;   gosub @SetPreLoadPalettes
+;; ; 
+;;   x1=3170 ; first object used for people
+;;   x2=3220 ; last object used for people
+;;   x3=1 ; palette to set to
+;;   gosub @SetPreLoadPalettes
+;; ; 
+;;   x1=330 ; first object used for train
+;;   x2=348 ; last object used for train
+;;   x3=2 ; palette to set to
+;;   gosub @SetPreLoadPalettes
+;;  cend ; PC 
+;;  return
+; 
+;---------------------------------------------------------------- 
+; 
+; Set up MinXZH, MinRaster, MinAnimation, MinCompressed and MinCell 
+; in case they turn out to be useful in the program. (These vars 
+; are not, I think, used by "system" code). 
+; 
+.ReadObjectAreas
+ MinXZH=1
+ &MinRaster=StructureBuffer(4)
+ add MinRaster,c1
+ &MinAnimation=StructureBuffer(10)
+ add MinAnimation,c1
+ &MinCompressed=StructureBuffer(16)
+ add MinCompressed,c1
+ &MinCell=StructureBUffer(28)
+.ADRRet
+ return
+; 
+;;================================================================= 
+;                           INPUT ROUTINES
+;================================================================= 
+; 
+; Wait for a "key" to be pressed; returning v1=ch=ASCII code 
+; 
+ code - 
+.iWaitForInput 
+ code + 
+  gosub cWaitForInput 
+ code - 
+ return 
+; 
+;-----------------------------------------------------------------
+; 
+; Delay for WaitDelay frames (tenths of seconds), or for a "key" 
+; to be pressed; returning v1=ch=ASCII code 
+; 
+.iDelayInput 
+ code + 
+  gosub cDelayInput 
+ code - 
+ return 
+ code + 
+; 
+;-----------------------------------------------------------------
+; 
+; Wait for a "key" to be pressed; returning v1=ch=ASCII code 
+; 
+.cWaitForInput          ; returns v1=ch=ascii code 
+.WaitForInput 
+ WaitDelay=0 
+ goto @cDelayInput 
+; 
+;-----------------------------------------------------------------
+; 
+; Delay for WaitDelay frames (tenths of seconds), or for a "key" 
+; to be pressed; returning v1=ch=ASCII code 
+; 
+.cDelayInput 
+.DelayInput 
+ ch=0 
+ gosub @DisplayCurrentScreen 
+ if WaitDelay=1 then cdiReturn  
+ if WaitDelay=0 then cdiInfiniteDelay 
+ sub WaitDelay,C1 
+.cdiInfiniteDelay 
+ if ch=0 then @DelayInput 
+.cdiReturn 
+ v1=ch 
+ RETURN 
+; 
+;-----------------------------------------------------------------
+; 
+; Delay for WaitDelay frames (tenths of seconds). 
+; 
+ code - 
+.iDelay 
+ code + 
+  gosub cDelay 
+ code - 
+ return 
+ code + 
+; 
+; Delay for WaitDelay frames (tenths of seconds). 
+; 
+.cDelay
+.Delay
+ gosub @DisplayCurrentScreen 
+ if WaitDelay=1 then cdReturn  
+ if WaitDelay=0 then cDelay 
+ sub WaitDelay,C1 
+ goto cDelay 
+.cdReturn 
+ return 
+; 
+;-----------------------------------------------------------------
+;
+; Done each frame to remember last 5 readings for each sensor
+; 
+.BufferSensors
+push v1
+push v2
+ gosub @DecodeAllToSensor1
+ v2=Sensor1Offset               ;start of sensor 1 buffer in WorkList
+ gosub @WriteV1toSensorBuffer
+ gosub @DecodeAllToSensor2
+ v2=Sensor2Offset               ;start of sensor 2 buffer in WorkList
+ gosub @WriteV1toSensorBuffer
+ gosub @DecodeAllToSensor3
+ v2=Sensor3Offset               ;start of sensor 3 buffer in WorkList
+ gosub @WriteV1toSensorBuffer
+ gosub @DecodeAllToSensor4
+ v2=Sensor4Offset               ;start of sensor 4 buffer in WorkList
+ gosub @WriteV1toSensorBuffer
+ gosub @DecodeAllToSensor5
+ v2=Sensor5Offset               ;start of sensor 5 buffer in WorkList
+ gosub @WriteV1toSensorBuffer
+ gosub @DecodeAllToSensor6
+ v2=Sensor6Offset               ;start of sensor 6 buffer in WorkList
+ gosub @WriteV1toSensorBuffer
+ gosub @DecodeAllToSensor7
+ v2=Sensor7Offset               ;start of sensor 7 buffer in WorkList
+ gosub @WriteV1toSensorBuffer
+ gosub @DecodeAllToSensor8
+ v2=Sensor8Offset               ;start of sensor 8 buffer in WorkList
+ gosub @WriteV1toSensorBuffer
+pop v2
+pop v1
+ return
+; 
+; Add sensor value v1 to the 5 byte buffer WorkList(v2)+
+; 
+.WriteV1toSensorBuffer
+push v3
+push v4
+push v5
+push v2
+ v3=v2
+ add v2,c3                      ; penultimate byte in 5-byte buffer
+ add v3,c4                      ; final byte in 5-byte buffer
+ v5=4                           ; 4 copies to shunt buffer
+.WVshuntBuffer
+ v4=WorkList(v2)                ; early value
+ sub v2,c1
+ WorkList(v3)=v4                ; shunt to later value
+ sub v3,c1
+ sub v5,c1
+ if v5>0 then WVshuntBuffer
+pop v2
+ if v1=0 then GotBistableV1
+ v1=1                           ; force non-zero = 1
+.GotBistableV1
+ WorkList(v2)=v1                ; write new value
+pop v5
+pop v4
+pop v3
+ return
+;
+; Return v1 as the average of the 5 last readings of sensor v1
+;
+.ReadAverageSensorV1
+push v2
+push v3
+ sub v1,c1                      ; now sensor 0-7
+ v2=v1
+ add v1,v1
+ add v1,v1
+ add v1,v2                      ; 5 bytes per sensor
+ v2=Sensor1Offset               ; base for sensor buffer
+ add v1,v2
+ v2=WorkList(v1)
+ add v1,c1
+ v3=WorkList(v1)
+ add v1,c1
+ add v2,v3
+ v3=WorkList(v1)
+ add v1,c1
+ add v2,v3
+ v3=WorkList(v1)
+ add v1,c1
+ add v2,v3
+ v3=WorkList(v1)
+ add v2,v3                      ; v2 is total of last 5 readings
+ v1=0
+ if v2<3 then RASret            ; average of 0
+ v1=1                           ; average of 1
+.RASret
+pop v3
+pop v2
+ return
+;
+;;================================================================= 
+;                           MATHS ROUTINES
+;================================================================= 
+; 
+; Receive any message which may have come over the network, and 
+; act upon it. This usually just involves sending an error back. 
+; 
+.CheckForMessage 
+ gosub @CheckForHeartBeat 
+ return 
+; 
+;;================================================================= 
+;                           MATHS ROUTINES
+;================================================================= 
+; 
+.DivX1X2 ; x1:=x1/x2
+ x3=minusone ; result = 0 if x2>x1
+.DivLoop
+ add x3,c1
+ sub x1,x2
+ if x1<50000 then DivLoop
+ x1=x3
+ return
+; 
+;----------------------------------------------------------------- 
+; 
+.MultX1X2 ; x1=x1*x2
+ x3=x1
+ if x2=0 then Multx1x2Zero
+ if x2=1 then Multx1x2Ret
+.Multx1x2Loop
+ add x1,x3
+ sub x2,c1
+ if x2>1 then Multx1x2Loop
+.Multx1x2Ret
+ return
+.Multx1x2Zero
+ x1=0
+ return
+; 
+;----------------------------------------------------------------- 
+; 
+.ModX1X2 ; x1:=x1 mod x2
+.ModLoop
+ x3=x1 ; trial result
+ sub x1,x2
+ if x1<50000 then ModLoop
+ x1=x3
+ return
+; 
+;----------------------------------------------------------------- 
+; 
+.AbsX1 ; return absolute value of x1, in x1
+ if x1<32768 then AbsX1Ret
+ push x2
+ x2=x1
+ x1=0
+ sub x1,x2
+ pop x2
+.AbsX1Ret
+ return
+; 
+;----------------------------------------------------------------- 
+; 
+.MultDX1DX2 ; dx1=dx1*dx2
+ dx3=dx1
+ if dx2=0 then MultDX1DX2zero
+ if dx2=1 then MultDX1DX2ret
+.MultDX1DX2loop
+ add dx1,dx3
+ sub dx2,c1
+ if dx2>1 then MultDX1DX2loop
+.MultDX1DX2ret
+ return
+.MultDX1DX2zero
+ dx1=0
+ return
+; 
+

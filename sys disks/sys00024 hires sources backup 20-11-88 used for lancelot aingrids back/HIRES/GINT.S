@@ -1,0 +1,944 @@
+lines	equ	136
+* 68000 hires graphics system. Copyright (C) 1987 Level 9 Computing
+*
+* 10:19 15/01/87 C.J.Jones-Steele
+*
+* GINT.S
+testpos	equ	14
+* ---
+*
+* A-LINE equates first
+v_planes	equ	0	; No of video planes
+v_lin_wr	equ	2	;bytes per video line
+fgbp1		equ	24	;mask bit-plane 0 value
+fgbp2		equ	26	;mask bit-plane 1
+fgbp3		equ	28	;bit_plane 2
+fgbp4		equ	30	;bit-plane 3
+lstlin		equ	32	;set this to -1
+ln_mask		equ	34	;line style word
+wrt_mode	equ	36	;writing mode
+ax1		equ	38	;x1 co-ordinate
+ay1		equ	40	;y1 co-ordinate
+ax2		equ	42	;x2 co-ordinate
+ay2		equ	44	;y2 co-ordinate
+patptr		equ	46	;pointer to fill pattern
+patmsk		equ	50	;fill pattern mask
+multifil	equ	52	;multi plane fill flag
+clip		equ	54	;clipping flag (0 => off)
+intin		equ	8
+
+init_a		equ	$a000
+hide_mouse	equ	$a00a
+show_mouse	equ	$a009
+transmouse	equ	$a00b
+point_offset	equ	4
+
+* first lets try to get the mouse pointer sorted out
+do_draw_sprite	macro
+	bsr	draw_sprite
+	endm
+
+do_undraw_sprite	macro
+	bsr	undraw_sprite
+	endm
+
+send	macro
+	move.w	#\1,-(sp)
+	move.w	#2,-(sp)
+	addq.w #1,suspendtaskswap ;>>mike 14/7/87
+	trap	#1
+	subq.w #1,suspendtaskswap ;>>mike 14/7/87
+	addq.l	#4,sp
+	endm
+
+wvblank	macro
+	move.w	#37,-(sp)
+	addq.w #1,suspendtaskswap ;>>mike 14/7/87
+	trap	#14
+	subq.w #1,suspendtaskswap ;>>mike 14/7/87
+	addq.l	#2,sp
+	endm
+
+mouseint
+	move.b	(a0)+,buttons
+	move.w	xpos(pc),d0
+	move.b	(a0)+,d1
+	ext.w	d1
+	add.w	d1,d0
+	cmp.w	#5,d0
+	bgt.s	xok1
+	move.w	#5,d0
+xok1	cmp.w	#639,d0
+	blt.s	xok2
+	move.w	#639,d0
+xok2	move.w	d0,xpos
+	clr.w	makeinvis
+	move.w	ypos(pc),d0
+	move.b	(a0)+,d1
+	ext.w	d1
+	btst	#1,buttons
+	beq	noleftbut
+	tst.w	d1
+	bpl	noleftbut
+	add.w	d1,d0
+	cmp.w	picy,d0
+	bcc.s	nottohigh
+	move.w	#1,makeinvis
+nottohigh
+	cmp.w	ymin(pc),d0
+	bgt.s	yok2
+	move.w	ymin(pc),d0
+	bra.s	yok2
+
+noleftbut
+	add.w	d1,d0
+ cmp.w WholeScreenYMax,d0
+ bgt.s IgnoreYChange
+ cmp.w #5,d0
+ blt.s IgnoreYChange
+ move.w	picy(pc),d1
+ addq.w	#point_offset,d1
+ cmp.w	d1,d0
+ blt.s SetMinY
+
+*	move.w	picy(pc),d1
+*	addq.w	#point_offset,d1
+*	cmp.w	d1,d0
+*	bgt.s	yok1
+*	move.w	d1,d0
+*
+*yok1	cmp.w	ymax(pc),d0
+*	blt.s	yok2
+*	move.w	ymax(pc),d0
+yok2
+	move.w	d0,ypos
+ignoreYchange
+	move.b	#1,intflag
+	rts
+
+SetMinY
+ move.w d1,d0
+ bra.s yok2
+
+draw_sprite
+; d0=x d1=y a0=sprdef a2=sprsav
+	cmp.b	#2,screenresolution
+	beq	hiressprite
+; first find the screen byte of first word
+	movem.l	d2-d7/a0-a6,-(sp)
+	move.w	d0,d2
+	lsr.w	#4,d2
+	lsl.w	#2,d2		; now on word boundary
+	move.w	d1,d3
+	lsl.w	#5,d3		; * 32
+	move.w	d3,d4
+	lsl.w	#2,d3
+	add.w	d4,d3		; *160
+	move.l	this_screen(pc),a3
+	add.w	d3,a3
+	add.w	d2,a3		; address of word required
+	move.l	a3,(a2)		; save that for later
+; now deal with sprite size and mask
+	move.w	d0,d3
+	and.w	#$f,d3		; now contains shift size
+	move.w	d3,4(a2)	; saved
+	move.l	#$ffff,d4	; make a mask
+	ror.l	d3,d4
+	move.l	d4,6(a2)
+	move.w	#15,d7
+	lea	10(a2),a2
+	lea	10(a0),a0
+; now try to put the sprite on the screen
+drl1
+	move.l	d7,-(sp)	; save d7 for loop
+	move.w	(a3),d6		; get word from screen
+	and.w	d4,d6		; mask
+	move.w	d6,(a2)+	; background saved
+	clr.l	d5
+	move.w	(a0)+,d5
+	move.l	d5,d7
+	or.w	(a0),d7		; make mask
+	ror.l	d3,d5
+	ror.l	d3,d7
+	not.l	d7
+	move.w	(a3),d6
+	and.w	d7,d6
+	or.w	d5,d6
+	move.w	d6,(a3)
+	move.w	4(a3),d6
+	swap	d4
+	and.w	d4,d6
+	move.w	d6,(a2)+	; background saved
+	move.w	4(a3),d6
+	swap	d7
+	and.w	d7,d6
+	swap	d5
+	or.w	d5,d6
+	cmp.w	#624,d0
+	bcc.s	off1
+	move.w	d6,4(a3)
+off1
+; first plane done
+	move.w	2(a3),d6
+	swap	d4
+	and.w	d4,d6
+	move.w	d6,(a2)+	; background saved
+	clr.l	d5
+	move.w	(a0)+,d5
+	move.l	d5,d7
+	or.w	-4(a0),d7
+	ror.l	d3,d5
+	ror.l	d3,d7
+	not.l	d7
+	move.w	2(a3),d6
+	and.w	d7,d6
+	or.w	d5,d6
+	move.w	d6,2(a3)
+	move.w	6(a3),d6
+	swap	d4
+	and.w	d4,d6
+	move.w	d6,(a2)+	; background saved
+	move.w	6(a3),d6
+	swap	d7
+	and.w	d7,d6
+	swap d5
+	or.w	d5,d6
+	cmp.w	#624,d0
+	bcc.s	off2
+	move.w	d6,6(a3)
+off2
+	swap	d4
+	add.l	#160,a3
+	move.l	(sp)+,d7
+	dbra	d7,drl1
+endsprite
+	movem.l	(sp)+,d2-d7/a0-a6
+	rts
+hiressprite
+	movem.l	d0-d2/a0-a2/a6,-(sp)
+	dc.w	$a00d
+	movem.l	(sp)+,d0-d2/a0-a2/a6
+	rts
+undraw_sprite
+; a2=sprsav
+	cmp.b	#2,screenresolution
+	beq	unhiressprite
+; first find the screen byte of first word
+	movem.l	d2-d7/a0-a6,-(sp)
+	move.l	(a2),a3		; save that for later
+; now deal with sprite size and mask
+	move.w	4(a2),d3
+	move.l	6(a2),d4
+	move.w	#15,d7
+	not.l	d4
+	lea	10(a2),a2
+; now try to put the sprite on the screen
+undrl1
+	move.w	(a3),d6
+	and.w	d4,d6
+	or.w	(a2)+,d6
+	move.w	d6,(a3)
+	move.w	4(a3),d6
+	swap	d4
+	and.w	d4,d6
+	or.w	(a2)+,d6
+	move.w	d6,4(a3)
+	move.w	2(a3),d6
+	swap	d4
+	and.w	d4,d6
+	or.w	(a2)+,d6
+	move.w	d6,2(a3)
+	move.w	6(a3),d6
+	swap	d4
+	and.w	d4,d6
+	or.w	(a2)+,d6
+	move.w	d6,6(a3)
+	swap	d4
+	add.l	#160,a3
+	dbra	d7,undrl1
+	movem.l	(sp)+,d2-d7/a0-a6
+	rts
+unhiressprite
+	movem.l	d0-d2/a0-a2/a6,-(sp)
+	dc.w	$a00c
+	movem.l	(sp)+,d0-d2/a0-a2/a6
+	rts
+jjsinit
+	lea	ymax(PC),a0
+	move.w	initymax,(a0)
+	dc.w	init_a
+	dc.w	hide_mouse
+	call_ebios	_getrez
+	addq.l	#2,sp
+	cmp.b	#2,d0			; is this hi-res
+	bne.s	jjslor
+	move.w	#0,spbk
+	move.w	#1,spfr
+	asl.w	ymax
+	subq.w	#2,ymax
+	asl.w	WholeScreenYMax
+	move.w	#5,ymin
+	asl.w	ypos
+	asl.w	picy
+jjslor
+	dc.w	init_a
+	move.w	#-1,lstlin(a0)
+	move.w	#-1,ln_mask(a0)
+	move.w	#0,wrt_mode(a0)
+	move.w	#0,clip(a0)
+	move.l	a0,a5
+	move.w	#1,fgbp1(a0)
+	move.w	#1,fgbp2(a0)
+	move.w	#1,fgbp3(a0)
+	move.w	#1,fgbp4(a0)
+	move.l	#filpat,patptr(a0)
+	move.w	#0,patmsk(a0)
+	move.w	#0,multifil(a0)
+	move.w	#kbdvbase,-(sp)
+	addq.w #1,suspendtaskswap ;>>mike 14/7/87
+	trap	#14
+	subq.w #1,suspendtaskswap ;>>mike 14/7/87
+	addq.l	#2,sp
+	move.l	d0,a0			; point the mouse interrupt at my code
+	move.l	16(a0),systemmouse	; save for return to os
+	move.l	#mouseint,16(a0)
+* now set text cursor to non flashing to stop problems with
+* mouse pointer during multi-tasking
+	move.w	#3,-(sp)
+	move.w	#cursconf,-(sp)
+	addq.w #1,suspendtaskswap ;>>mike 14/7/87
+	trap	#14
+	subq.w #1,suspendtaskswap ;>>mike 14/7/87
+	lea	4(sp),sp
+	bsr	scroll_itnow
+	rts
+
+jjsclosedown
+	move.w	#kbdvbase,-(sp)
+	addq.w #1,suspendtaskswap ;>>mike 14/7/87
+	trap	#14
+	subq.w #1,suspendtaskswap ;>>mike 14/7/87
+	addq.l	#2,sp
+	move.l	d0,a0			; point the mouse interrupt at my code
+	move.l	systemmouse(pc),16(a0)
+	move.w	#-1,-(sp)
+	move.l	screenpointer,-(sp)
+	move.l	screenpointer,-(sp)
+	move.w	#5,-(sp)
+	addq.w #1,suspendtaskswap ;>>mike 14/7/87
+	trap	#14
+	subq.w #1,suspendtaskswap ;>>mike 14/7/87
+	lea	12(sp),sp
+	rts
+
+showpointer
+	addq.w	#1,suspendtaskswap
+	tst.w	oktouse
+	beq.s	noshow
+	subq.w	#1,pointeron
+	bne.s	noshow
+	clr.w	noshowit
+	tst.b	drivergraphicsmode
+	beq.s	show1
+	tst.b	intflag
+	beq.s	show1
+	tst.w	makeinvis
+	beq.s	showit
+show1	move.w	#1,noshowit
+	bra.s	noshow
+showit	movem.l	d0-d1/a0-a2,-(sp)
+	move.w	xpos(pc),d0
+	move.w	ypos(pc),d1
+	move.l	#sprdef,a0
+	move.l	#sprsav,a2
+	do_draw_sprite
+	movem.l	(sp)+,d0-d1/a0-a2
+noshow
+	subq.w	#1,pointerinuse
+	subq.w	#1,suspendtaskswap
+	rts
+
+hidepointer
+	addq.w	#1,pointerinuse
+	addq.w	#1,suspendtaskswap
+	tst.w	oktouse
+	beq.s	nohide2
+	tst.w	pointeron
+	bne.s	nohide
+	tst.w	noshowit
+	bne.s	nohide
+	move.l	a2,-(sp)
+	move.l	#sprsav,a2
+	do_undraw_sprite
+	move.l	(sp)+,a2
+nohide
+	addq.w	#1,pointeron
+nohide2
+	subq.w	#1,suspendtaskswap
+	rts
+
+mousevector
+	rts
+
+sprdef
+	dc.w	0			; x offset to hot spot
+	dc.w	0			; y offset to hot spot
+	dc.w	1			; and format
+spbk	dc.w	1			; background color
+spfr	dc.w	2			; foreground color
+sprite	dc.w	$200
+	dc.w	$200
+	dc.w	$5800
+	dc.w	$5800
+	dc.w	$9100
+	dc.w	$9100
+	dc.w	$2000
+	dc.w	$1800
+	dc.w	$4000
+	dc.w	$4c00
+	dc.w	$0
+	dc.w	$600
+	dc.w	$0
+	dc.w	$300
+	dc.w	$0
+	dc.w	$180
+	dc.w	$0
+	dc.w	$c0
+	dc.w	$0
+	dc.w	$60
+	dc.w	$0
+	dc.w	$30
+	dc.w	$0
+	dc.w	$18
+	dc.w	$0
+	dc.w	$c
+	dc.w	$0
+	dc.w	$6
+	dc.w	$0
+	dc.w	$2
+	dc.w	$0
+	dc.w	$0
+
+filpat	dc.w	$ffff
+;sprsav	ds.b	266			; space for sprite save block
+xpos	dc.w	100
+ypos	dc.w	170
+oktouse	dc.w	0
+pointerok
+	dc.w	0
+pointeron
+	dc.w	1
+pointerinuse
+	dc.w	1
+mouseparameter
+	dc.b	0
+	dc.b	1
+	dc.b	1
+	dc.b	1
+	dc.w	640
+	dc.w	50
+	dc.w	100
+	dc.w	20
+
+setuppictured0
+	rts
+
+old_picture	dc.w	0
+this_picture	dc.w	0
+;gint_buffer	ds.b	20
+
+gintstart
+* just hires for now
+	move.w	old_picture,d0
+	cmp.w	this_picture,d0
+	beq.s	no_change
+	lea	gint_buffer,a6
+	bsr	do_display
+GintFatalError
+no_change
+ clr.w fflag * indicate to acode that we're doing nothing now.
+* (i.e. testHires will return 0, so a new picture can be started)
+
+	bsr	do_scroll
+	bsr	snooze
+	bra	no_change
+
+scroll_test
+	tst.w	oktouse
+	beq.s	scroll_testret
+	btst	#1,buttons
+	beq.s	scroll_testret
+	move.w	ypos(pc),d0
+	subq.w	#point_offset,d0 ;allow four scan line before pointer
+
+* prevent picture being pulled down too far
+ addq.w	#point_offset,d0
+ cmp.w ymax(pc),d0
+ ble.s scroll_test_ok
+ move.w ymax(pc),d0
+
+scroll_test_ok
+ subq.w #point_offset,d0
+	move.w	d0,picy
+	cmp.w	oldpicy(pc),d0
+scroll_testret
+	rts
+
+do_scroll
+	move.l	d0,-(sp)
+	bsr	scroll_test
+	beq.s	gintsnoozeloop
+	bsr	scroll_itnow
+gintsnoozeloop
+* redisplay menu?
+* move.w YPos(PC),d0
+* move.w PicY(PC),d1
+* add.w #16,d1
+* cmp.w d1,d0
+* bgt.s ScrollHideMenus *NoMenus
+* movem.l d0-d7/a0-a6,-(sp)
+* bsr ShowMenus
+* movem.l (sp)+,d0-d7/a0-a6
+
+	move.l	(sp)+,d0
+	rts
+
+*ScrollHideMenus
+* bsr HideMenus
+* move.l (sp)+,d0
+* rts
+
+
+scroll_itnow
+	movem.l	d0-d7/a0-a6,-(sp)
+*	bsr	HideMenus
+	bsr	hidepointer
+	addq.w	#1,suspendtaskswap
+	bsr	copytoback
+scroll_again
+	cmp.b	#2,screenresolution
+	bne	loresscroll
+	move.w	#400,d0
+	sub.w	picy(pc),d0
+	move.w	d0,d1
+	asr.w	#4,d1
+	sub.w	#2,d1
+	cmp.w	#6,d1
+	bge.s	eno
+	move.w	#6,d1
+eno	move.b	d1,linestoscroll
+	mulu.w	#80,d0
+	move.l	hscreen,a0
+	add.w	d0,a0			; pointer into offscreen buffer
+	move.l	screenpointer,a1
+	move.w	picy(pc),d0
+;	mulu.w	#20,d0			; how many long words to move
+;	subq.l	#1,d0
+;gintloop1
+;	move.l	(a0)+,(a1)+
+;	dbra	d0,gintloop1
+
+;>>change by Mike 6/5/88
+* we want to copy 20*d0 longs...
+; asr.w #1,d0
+ sub.w #1,d0 * because copyLines uses dbra
+ bmi.s gintloop1
+ bsr ShortCopyLines * copies d0.w sets of 40 longs (a0) to (a1)
+gintloop1
+
+
+; asr.w #1,d0
+; sub.w #1,d0 * because copyLines uses dbra
+; bmi.s gintloop1
+; bsr copyLines * copies d0.w sets of 40 longs (a0) to (a1)
+;gintloop1
+
+
+; check if graphics screen now higher than old one
+	move.w	oldpicy(pc),d0
+	sub.w	picy(pc),d0
+	bmi	noclear
+	move.w	picy(pc),d1
+	mulu.w	#80,d1
+	move.l	logpointer,a0
+	add.l	d1,a0
+
+;	mulu.w	#20,d0
+;gintloop2
+;	move.l	(a0)+,(a1)+
+;	dbra	d0,gintloop2
+
+;>>change by Mike 6/5/88
+* we want to copy 20*d0 longs...
+; asr.w #1,d0
+ sub.w #1,d0 * because copyLines uses Dbra.
+ bmi.s gintloop2
+ bsr ShortCopyLines * copies d0.w sets of 40 longs (a0) to (a1)
+gintloop2
+
+
+; asr.w #1,d0
+; sub.w #1,d0 * because copyLines uses Dbra.
+; bmi.s gintloop2
+; bsr copyLines * copies d0.w sets of 40 longs (a0) to (a1)
+;gintloop2
+ 
+	bra	noclear
+
+loresscroll
+	move.w	#200,d0
+	sub.w	picy(pc),d0
+	move.w	d0,d1
+	asr.w	#3,d1
+	sub.w	#2,d1
+	cmp.w	#6,d1
+	bge.s	eno2
+	move.w	#6,d1
+eno2	move.b	d1,linestoscroll
+	mulu.w	#160,d0
+	move.l	hscreen,a0
+	add.w	d0,a0			; pointer into offscreen buffer
+	move.l	screenpointer,a1
+	tst.b	swop
+	bne.s	gintswop1
+	move.l	screenpointer2,a1
+gintswop1
+	move.l	a1,this_screen
+	move.w	picy(pc),d0
+	move.w	d0,linestodo
+	subq.w	#1,d0
+	bsr	copylines
+	clr.l	d0
+	move.w	picy(pc),d0		; set test position for
+	mulu.w	#160,d0			; interrupt routine
+	add.l	this_screen,d0
+	sub.l	#testpos,d0
+	move.w	d0,midsplitposbuf
+; check if graphics screen now higher than old one
+	move.w	picy(pc),moveline
+	move.w	oldpicy(pc),d0
+	sub.w	picy(pc),d0
+	bmi.s	noclearlo
+	move.w	oldpicy(pc),moveline
+	move.w	picy(pc),d1
+	mulu.w	#160,d1
+	move.l	logpointer,a0
+	add.l	d1,a0
+	bsr	copylines
+noclearlo
+	tst.b	cursor_inuse
+	beq.s	nocursinuse
+	clr.w	-(sp)
+	move.w	#cursconf,-(sp)
+	addq.w #1,suspendtaskswap ;>>mike 14/7/87
+	trap	#14
+	subq.w #1,suspendtaskswap ;>>mike 14/7/87
+	addq.l	#4,sp
+nocursinuse
+	move.l	screenpointer,a0
+
+	move.l	screenpointer2,a1
+	tst.b	swop
+	beq.s	noclearl1
+	move.l	screenpointer2,a0
+	move.l	screenpointer,a1
+noclearl1
+	move.w	moveline,d0
+	mulu.w	#160,d0
+	add.l	d0,a0
+	add.l	d0,a1
+	move.w	#200,d0
+	sub.w	moveline,d0
+	bsr	copylines * (a0) to (a1)
+	move.w	#-1,-(sp)
+	move.l	this_screen,-(sp)
+	move.l	this_screen,-(sp)
+	move.w	#5,-(sp)
+	addq.w #1,suspendtaskswap ;>>mike 14/7/87
+	trap	#14
+	subq.w #1,suspendtaskswap ;>>mike 14/7/87
+	lea	12(sp),sp
+	move.w	#1,changescreen
+	wvblank
+	eori.b	#1,swop
+; the next bit of code is needed to persuade TOS that I have changed 
+; screens
+	tst.b	cursor_inuse
+	beq.s	nocur2
+	move.w	#1,-(sp)
+	move.w	#cursconf,-(sp)
+	addq.w #1,suspendtaskswap ;>>mike 14/7/87
+	trap	#14
+	subq.w #1,suspendtaskswap ;>>mike 14/7/87
+	addq.l	#4,sp
+nocur2
+	move.l	#fixstring,-(sp)
+	move.w	#9,-(sp)
+	addq.w #1,suspendtaskswap ;>>mike 14/7/87
+	trap	#1
+	subq.w #1,suspendtaskswap ;>>mike 14/7/87
+	addq.l	#6,sp
+noclear
+	move.w	picy(pc),oldpicy
+	subq.w	#1,suspendtaskswap
+	bsr	showpointer
+	movem.l	(sp)+,d0-d7/a0-a6
+	rts
+
+remove_graphics
+	movem.l	d0-d7/a0-a6,-(sp)
+	bsr	hidepointer
+	addq.w	#1,suspendtaskswap
+	cmp.b	#2,screenresolution
+	bne	loresremove
+	bsr	copytoback
+	move.l	screenpointer(pc),a1
+	move.l	logpointer,a0
+	move.l	#199,d0
+	bsr	copylines
+	bra	noclearremove
+loresremove
+	tst.b	cursor_inuse
+	beq.s	nocursinuseremove
+	clr.w	-(sp)
+	move.w	#cursconf,-(sp)
+	addq.w #1,suspendtaskswap ;>>mike 14/7/87
+	trap	#14
+	subq.w #1,suspendtaskswap ;>>mike 14/7/87
+	addq.l	#4,sp
+nocursinuseremove
+	bsr	copytoback
+	move.l	screenpointer,a1
+	tst.b	swop
+	bne.s	removeswop1
+	move.l	screenpointer2,a1
+removeswop1
+	move.l	a1,this_screen
+	move.l	logpointer,a0
+	move.w	#199,d0
+	bsr	copylines
+	move.w	#1,changescreen
+	move.w	#-1,-(sp)
+	move.l	this_screen,-(sp)
+	move.l	this_screen,-(sp)
+	move.w	#5,-(sp)
+	addq.w #1,suspendtaskswap ;>>mike 14/7/87
+	trap	#14
+	subq.w #1,suspendtaskswap ;>>mike 14/7/87
+	lea	12(sp),sp
+	wvblank
+	eori.b	#1,swop
+; the next bit of code is needed to persuade TOS that I have changed 
+; screens
+	tst.b	cursor_inuse
+	beq.s	nocur2remove
+	move.w	#1,-(sp)
+	move.w	#cursconf,-(sp)
+	addq.w #1,suspendtaskswap ;>>mike 14/7/87
+	trap	#14
+	subq.w #1,suspendtaskswap ;>>mike 14/7/87
+	addq.l	#4,sp
+nocur2remove
+	move.l	#fixstring,-(sp)
+	move.w	#9,-(sp)
+	addq.w #1,suspendtaskswap ;>>mike 14/7/87
+	trap	#1
+	subq.w #1,suspendtaskswap ;>>mike 14/7/87
+	addq.l	#6,sp
+noclearremove
+	move.w	picy(pc),oldpicy
+	subq.w	#1,suspendtaskswap
+	bsr	showpointer
+	movem.l	(sp)+,d0-d7/a0-a6
+	rts
+
+fixstring
+	dc.b	27,"A",27,"B",0
+	even
+copylines
+	move.l	(a0)+,(a1)+
+	move.l	(a0)+,(a1)+
+	move.l	(a0)+,(a1)+
+	move.l	(a0)+,(a1)+
+	move.l	(a0)+,(a1)+
+	move.l	(a0)+,(a1)+
+	move.l	(a0)+,(a1)+
+	move.l	(a0)+,(a1)+
+	move.l	(a0)+,(a1)+
+	move.l	(a0)+,(a1)+
+
+	move.l	(a0)+,(a1)+
+	move.l	(a0)+,(a1)+
+	move.l	(a0)+,(a1)+
+	move.l	(a0)+,(a1)+
+	move.l	(a0)+,(a1)+
+	move.l	(a0)+,(a1)+
+	move.l	(a0)+,(a1)+
+	move.l	(a0)+,(a1)+
+	move.l	(a0)+,(a1)+
+	move.l	(a0)+,(a1)+
+
+	move.l	(a0)+,(a1)+
+	move.l	(a0)+,(a1)+
+	move.l	(a0)+,(a1)+
+	move.l	(a0)+,(a1)+
+	move.l	(a0)+,(a1)+
+	move.l	(a0)+,(a1)+
+	move.l	(a0)+,(a1)+
+	move.l	(a0)+,(a1)+
+	move.l	(a0)+,(a1)+
+	move.l	(a0)+,(a1)+
+
+	move.l	(a0)+,(a1)+
+	move.l	(a0)+,(a1)+
+	move.l	(a0)+,(a1)+
+	move.l	(a0)+,(a1)+
+	move.l	(a0)+,(a1)+
+	move.l	(a0)+,(a1)+
+	move.l	(a0)+,(a1)+
+	move.l	(a0)+,(a1)+
+	move.l	(a0)+,(a1)+
+	move.l	(a0)+,(a1)+
+	dbra	d0,copylines
+	rts
+*----
+ShortCopyLines
+	move.l	(a0)+,(a1)+
+	move.l	(a0)+,(a1)+
+	move.l	(a0)+,(a1)+
+	move.l	(a0)+,(a1)+
+	move.l	(a0)+,(a1)+
+	move.l	(a0)+,(a1)+
+	move.l	(a0)+,(a1)+
+	move.l	(a0)+,(a1)+
+	move.l	(a0)+,(a1)+
+	move.l	(a0)+,(a1)+
+
+	move.l	(a0)+,(a1)+
+	move.l	(a0)+,(a1)+
+	move.l	(a0)+,(a1)+
+	move.l	(a0)+,(a1)+
+	move.l	(a0)+,(a1)+
+	move.l	(a0)+,(a1)+
+	move.l	(a0)+,(a1)+
+	move.l	(a0)+,(a1)+
+	move.l	(a0)+,(a1)+
+	move.l	(a0)+,(a1)+
+	dbra	d0,ShortCopylines
+	rts
+;---
+;HideMenus
+;* restore saved area if menus currently displayed
+; lea MenuDisplayed(PC),a0
+; move.b (a0),d0
+; beq.s ShowMenus
+; clr.b (a0)
+;
+;* set cursor to print at base of window area
+; clr.l d0
+; clr.l d1
+; move.w PicY(PC),d0
+; move.w BytesPerScreenLine(PC),d1
+; move.w #80,d1 **
+; mulu d1,d0
+; move.l this_Screen,a1
+; add.l d0,a1
+; move.l logpointer(PC),a0
+; add.l d0,a0
+; move.w #30,d0 **48,d0
+; bsr copylines
+;HideMenusRet
+; rts
+;*---
+;ShowMenus
+;* make menu bar visible, enable pdms
+;* save current cursor address
+; tst.w	makeinvis
+; bne.s	ShowMenusRet
+; lea MenuDisplayed(PC),a0
+; move.b (a0),d0
+; bne.s ShowMenus
+; move.b #1,(a0)
+;
+;* set cursor to print at base of window area
+; clr.l d0
+; clr.l d1
+; move.w PicY(PC),d0
+; move.w BytesPerScreenLine(PC),d1
+; move.w #80,d1 **
+; mulu d1,d0
+; move.l this_Screen,a0
+; add.l d0,a0
+;
+; lea MenuText1(PC),a1
+; move.w #(160*2*2),d0 * save 2 text lines
+;ShowMenus2
+; move.l (a1)+,(a0)+
+; dbra d0,ShowMenus2
+;
+;ShowMenusRet
+; rts
+*-----------
+;MenuText1
+; dc.l $ffffffff,$ffffffff,$ffffffff,$ffffffff
+; dc.l $ffffffff,$ffffffff,$ffffffff,$ffffffff
+; dc.l $ffffffff,$ffffffff,$ffffffff,$ffffffff
+; dc.l $ffffffff,$ffffffff,$ffffffff,$ffffffff
+; dc.l $ffffffff,$ffffffff,$ffffffff,$ffffffff
+; dc.l $ffffffff,$ffffffff,$ffffffff,$ffffffff
+; dc.l $ffffffff,$ffffffff,$ffffffff,$ffffffff
+; dc.l $ffffffff,$ffffffff,$ffffffff,$ffffffff
+; dc.l $ffffffff,$ffffffff,$ffffffff,$ffffffff
+; dc.l $ffffffff,$ffffffff,$ffffffff,$ffffffff
+
+*---
+gintclearg
+	rts
+midsplitposbuf
+	dc.w	0
+linestodo	dc.w	0
+clearlines	dc.w	0
+moveline	dc.w	0
+changescreen	dc.w	0
+screenpointer2	dc.l	0
+this_screen	dc.l	0
+swop	dc.b	0
+linestoscroll	dc.b	24
+	even
+stopint	dc.w	0
+option	dc.w	0
+osres	dc.w	0
+test	equ	lines-187
+
+	ifgt	test
+initymax	dc.w	183
+	endc
+
+	ifle	test
+initymax	dc.w	lines+4
+	endc
+
+ymax dc.w 0 * set up from initymax
+
+wholescreenymax dc.w 190
+ymin	dc.w	10+point_offset
+picline	dc.w	96
+picy	dc.w	183
+oldpicy	dc.w	0
+systemmouse
+	dc.l	0
+buttons	dc.b	0
+intflag	dc.b	0
+scrolling	dc.b	0
+cursor_inuse	dc.b	0
+makeinvis	dc.w	0
+noshowit	dc.w	0
+	even
+
+*MenuSaveArea
+* ds.b 160*8*6
+
+MenuDisplayed
+ dc.b 0
+ even
+

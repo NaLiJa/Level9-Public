@@ -1,0 +1,627 @@
+; MAP.TXT
+;
+; Copyright (C) 1988 Level 9 Computing
+;
+; M.J.Austin 7-8-88
+;
+;---
+ begin
+
+.ClearMap
+ x1=0
+.CM1
+ &Map(x1)=c0
+ &RoomMap(x1)=c0
+ add x1,c2
+ if x1<MapSize then CM1
+ return
+;------
+;.InitPlayer
+;; put player in room...
+; x1=PlayerSpriteOffset
+; x2=XPosOffset
+; add x1,x2
+;; x3=4
+;; add x3,RoomX
+; x3=x
+; add x3,c2
+; x5=WordScreenXPos
+; gosub @InitPlayer1
+; add x1,c2 ; yposoffset
+;; x3=3
+;; add x3,RoomY
+; x3=y
+; add x3,c2
+; x5=WordScreenYPos
+;;
+;; drop through to InitPlayer1
+;;
+;.InitPlayer1
+;; *16 to convert to pels
+; add x3,x3
+; add x3,x3
+; add x3,x3
+; add x3,x3
+; sub x3,c4 ; so that head overlap works, even with 8-pixel movement
+; &SpriteTable(x1)=x3
+; &WordWS(x5)=x3
+; return
+;---
+.PatchHoles
+; go through map, ensuring there is no connection between the 'non-existent'
+; area, and the walkable area. Of course, what the player does with
+; wands of digging is his own affair...
+ x4=0 ; ptr to map
+ x5=ScreenXBlocksTimes2 ; ptr to next row
+ x6=ScreenXBlocksTimes2
+ add x6,x6
+; thus x4,x5,x6 are 3 adjacent rows
+.PHLoop
+ x2=x5
+ &v1=Map(x2) ; current
+ if v1<>0 then @PHNotHole
+ sub x2,c2
+ &x1=Map(x2) ; to left
+ if x1=0 then PHNotPatchLeft
+ if x1<16 then PHPatchX2
+.PHNotPatchLeft
+ add x2,c4
+ &x1=Map(x2) ; right of current
+ if x1=0 then PHNotPatchRight
+ if x1<16 then PHPatchX2
+.PHNotPatchRight
+ x2=x4
+ &x1=Map(x2) ; above  current
+ if x1=0 then PHNotPatchAbove
+ if x1<16 then PHPatchX2
+.PHNotPatchAbove
+ x2=x6
+ &x1=Map(x2) ; below current
+ if x1=0 then PHNotPatchBelow
+ if x1<16 then PHPatchX2
+.PHNotPatchBelow
+ goto PHNotHole
+
+.PHPatchX2 ; x2 is the address of the walkable block adjacent
+; to a null block at x5
+ x1=32 ; straightforward block
+ &Map(x5)=x1
+
+.PHNotHole
+ add x5,c2
+ add x4,c2
+ add x6,c2
+
+ if x6<MapSize then @PHLoop
+ return
+;---
+.TidyMap
+; go through map, putting in the 3D effect etc.
+ x4=0 ; ptr to map
+ x5=ScreenXBlocksTimes2 ; ptr to next row
+.TM1
+ &x1=Map(x4)
+ if x1<16 then TM2 ; not a block, so no processing
+ &x1=Map(x5)
+ if x1>16 then TM2 ; line below IS a block, so no processing
+ x1=17 ; block with 'front' section
+ &Map(x4)=x1
+
+.TM2
+ add x4,c2
+ add x5,c2
+ if x5<MapSize then TM1
+ return
+;---
+.SetUpMap
+ gosub @ClearMap
+; build Map(0..2500) at random.
+ xmax=50
+ ymax=50
+ x=30
+ y=20
+ TrialPlacements=0
+ AttemptedNewRooms=0
+ RoomsPlaced=0
+; gosub @InitPlayer
+
+.SUMTryRoom
+ gosub @RandomRoomNumber ;  room=1
+ push x ; preserve co-ords of corridor end, in case placement fails
+ push y
+  RoomX=x
+  RoomY=y
+  gosub @PlaceRoom
+ pop y
+ pop x
+ add TrialPlacements,c1
+ if TrialPlacements>500 then @Terminate ;SUMRet ; escape!
+ if result=false then DC1 ; couldn't place room - continue digging
+ gosub @RecordRoom
+
+; Have we finished drawing the map?
+ if RoomsPlaced>14 then @SUMRet
+
+.SUMGetAnExit
+; now pick an exit at random, and grow a connection from it...
+ gosub @PickExit
+ if result=true then SUMGotExit
+; couldn't find an exit - try from one of the existing rooms...
+.SUMPickNewRoom
+ add AttemptedNewRooms,c1
+ if AttemptedNewRooms>500 then @Terminate ;* not acceptable in release?
+ gosub @PickNewRoom
+
+ if result=true then SUMGetAnExit ; try finding an exit
+ goto SUMPickNewRoom ;*
+
+.SUMGotExit
+; now dig the corridor...
+ StraightLength=0
+.DC1
+ gosub @SetUpDigStep
+ gosub @DigTunnelStep
+
+ add x,xDigStep ; add on step perpendicular to exit
+ add y,yDigStep
+
+ gosub @CheckTunnelStep
+ if result=true then dcDigOk
+; can't carry on in current direction - at present, just terminate
+ gosub @TerminateCorridor
+ goto @SUMPickNewRoom
+
+.dcDigOk
+
+ add StraightLength,c1
+ if StraightLength<3 then DC1 ; dig tunnel step
+ if StraightLength>20 then sumCFT ; see if we've overrunning
+code -
+ random x1
+code +
+ if x1>120 then DC1 ; continue digging tunnel
+
+.SUMCFT
+;; gosub @DebugShowMap
+ gosub @CheckForcedTermination
+ if result=false then @SUMPickNewRoom ; terminated or placed final room
+; not forced to terminate - try bunging a room here.
+ goto @SUMTryRoom ; try placing room at current corridor tip
+
+.Terminate
+
+.SUMRet
+ gosub @PatchHoles
+ gosub @TidyMap
+ return
+;---
+.RandomRoomNumber
+; return ROOM as a random choice from the rooms available
+code -
+ random ROOM
+code +
+ x1=7
+ and room,x1
+ if room>3 then RandomRoomNumber ;*****
+ return
+;---
+.CheckForcedTermination
+; check if tunnel is getting too close to edge
+ if dir=0 then CFTTerminate ;*** 
+ if dir<>North then cftNotNorth
+ if Y<15 then CFTTerminate
+.cftNotNorth
+ if dir<>East then cftNotEast
+ if X>35 then CFTTerminate
+.cftNotEast
+ if dir<>South then cftNotSouth
+ if Y>35 then CFTTerminate
+.cftNotSouth
+ if dir<>West then cftNotWest
+ if X<15 then cftTerminate
+.cftnotWest
+ result=true ; ok
+ return
+
+.cftTerminate
+; have to terminate corridor, or maybe change direction
+ gosub @RandomRoomNumber ;  room=1
+ push x ; preserve co-ords of corridor end, in case placement fails
+ push y
+  RoomX=x
+  RoomY=y
+  gosub @PlaceRoom
+ pop y
+ pop x
+ StraightLength=0
+ if result=false then @TerminateCorridor ; couldn't place room
+ gosub @RecordRoom
+ result=false ; pick a new room to grow from
+ return
+;---
+.PickNewRoom
+; choose a room at random from those already placed.
+ result=true ; unless otherwise set
+ x1=RoomTableOffset
+ x2=RoomsPlaced
+.PNRLoop
+ if x2=0 then @Fail
+code -
+ random x3
+code +
+ if x3>60 then PNR1 ; don't even try this room this time
+ x3=Workspace(x1) ; number of exits used so far from this room
+ if x3<3 then PickNewRoomFound
+.PNR1
+ x3=RoomTableEntrySize
+ add x1,x3
+ sub x2,c1
+ goto PNRLoop
+
+.PickNewRoomFound
+ add x1,c1
+ Room=Workspace(x1) ; get data # used in drawing this room
+ add x1,c1
+ RoomX=Workspace(x1)
+ add x1,c1
+ RoomY=Workspace(x1)
+ return
+;---
+.RecordRoom
+; record ROOM, at RoomX, RoomY
+; for future use by PickNewRoom
+ x1=RoomsPlaced
+;; x2=RoomTableEntrySize
+ add x1,x1 ; assumes RoomTableEntrySize=8 and RoomTableOffset=0
+ add x1,x1
+ add x1,x1
+ WorkSpace(x1)=c0 ; zero exits so far from this room
+ add x1,c1
+ Workspace(x1)=Room
+ add x1,c1
+ Workspace(x1)=RoomX
+ add x1,c1
+ Workspace(x1)=RoomY
+ add RoomsPlaced,c1
+ return
+;---
+.PickExit
+; choose a potential exit at random from those
+; in ROOM at coords RoomX,RoomY.
+; Return its co-ordinates on the map as x,y
+ gosub @GetRoomData ; sets Result=true if ok
+ if result=false then @Fail
+code -
+ random x1
+code +
+ if RoomY<10 then PENotNorth
+ dir=North
+ if x1<64 then PE1
+.PENotNorth
+ if RoomX>35 then PENotEast
+ dir=East
+ if x1<128 then PE1
+.PENotEast
+ if RoomY>40 then PENotSouth
+ dir=South
+ if x1<192 then PE1
+.PENotSouth
+ dir=0 ; prevent invalid dir being returned
+ if RoomX<15 then @Fail ; couldn't decide on a viable exit!
+ dir=West
+.PE1
+ gosub @CheckExit ; get x,y=coords of exit from ROOM in DIRection
+ gosub @SetUpDigStep
+ push x
+ push y
+ push x3
+  gosub @CalcMapAddress
+  add x1,DigStep ; x1=MapAddress
+ pop x3
+ pop y
+ pop x
+ &x2=Map(x1)
+ if x2<32 then @Fail ; already an exit there
+ return
+;---
+.SetUpDigStep
+; note that DigStep is the direction that the WIDTH of the corridor
+; is drawn in, and is an offset to the Map Address
+; xDigStep, yDigStep are the steps along the LENGTH of the corridor
+
+ xDigStep=0
+ yDigStep=65535
+ DigStep=RightMapStep
+ if dir=North then DUDS1
+
+ xDigStep=0
+ yDigStep=1
+;; DigStep=RightMapStep
+ if dir=South then DUDS1
+
+ xDigStep=1
+ yDigStep=0
+ DigStep=DownMapStep
+ if dir=East then DUDS1
+
+ xDigStep=65535
+ yDigStep=0
+;; DigStep=DownMapStep
+ if dir=West then DUDS1
+ break ;*
+.DUDS1
+ return
+;---
+.CheckExit
+; Enter with x4=ptr to room data for room at RoomX, RoomY
+; return x,y as coords of the potential exit in direction DIR,
+; and size as size of that exit. The existance
+; of the exit is not guaranteed
+;
+ x=0 ; offsets of wall we're using
+ y=0
+ if dir=North then @PEHoriz
+
+ add x4,c2
+ &x=RoomDefns(x4) ; get x size of room
+ sub x,c1 ; to give offset, not size
+ sub x4,c2
+ if dir=East then PEVert
+
+ x=0
+ add x4,c4
+  &y=RoomDefns(x4)
+  sub y,c1 ; to give offset, not size
+ sub x4,c4
+ if dir=South then PEHoriz
+
+.PEVert
+; the offsets given in RoomDefns are vertical, from the top
+; side of the room...
+ x3=ExitOffsetBase
+ add x3,dir
+ add x3,x4 ; get position of exit info
+ y=RoomDefns(x3)
+ add y,RoomY ; now y is y co-ord of potential exit
+ add x,RoomX
+ goto PEOk
+;---
+.PEHoriz
+; the offsets given in RoomDefns are horizontal, from the left hand
+; side of the room...
+ x3=ExitOffsetBase
+ add x3,dir
+ add x3,x4 ; get position of exit info
+ x=RoomDefns(x3)
+ add x,RoomX ; now x is x co-ord of potential exit
+ add y,RoomY
+; drop through to PEOk
+
+.PEOk
+ add x3,c1
+ size=RoomDefns(x3)
+ return
+;----
+.TerminateCorridor
+ push size
+ add size,c1 ; because loop terminates 1 early otherwise
+ x4=32
+ gosub @CalcMapAddress
+.TC1
+  &Map(x1)=x4
+  add x1,DigStep
+  sub size,c1
+  if size>0 then TC1
+ pop size
+ return
+;---
+.CheckTunnelStep
+; check a single step of tunnel at (x,y) of SIZE blocks,
+; in direction (xstep,ystep)
+ result=true
+ push size
+ gosub @CalcMapAddress
+.CTS1
+  &x4=Map(x1)
+  if x4<>0 then CTSFail
+  add x1,DigStep
+  sub size,c1
+  if size>0 then CTS1
+ pop size
+ return
+
+.CTSFail
+ pop size
+ goto @Fail
+;---
+.DigTunnelStep
+; dig a single step of tunnel at (x,y) of SIZE blocks,
+; in direction (xstep,ystep)
+ push size
+ x4=32
+ gosub @CalcMapAddress
+.DigTS1
+  &Map(x1)=x4
+  x4=1 ; blocks after first one are floor pattern
+  add x1,DigStep
+  sub size,c1
+  if size>0 then DigTS1
+  x4=32 ; finish up with a wall
+  &Map(x1)=x4
+ pop size
+ return
+;---
+.GetRoomData
+; return X4 as ptr to room data for ROOM
+; and RESULT=False if not found
+ result=true ; unless otherwise specified
+ x4=0
+ x1=ROOM
+.GRDLoop
+ &x3=RoomDefns(x4) ; ptr to next
+ if x3=0 then PlaceRoomFail
+ sub x1,c1
+ if x1>32000 then GRDFound
+ add x4,x3 ; add on offset of next room data block
+ goto GRDLoop
+
+.GRDFound
+ return
+;---
+code -
+.IntFail
+ result=false
+ return
+
+code+
+.PopDirFail
+ break ;*
+ pop dir
+
+.PlaceRoomFail
+.Fail
+ result=false
+ return
+;---
+.PlaceRoom
+; put ROOM at RoomX,RoomY if it will fit. Return result=1 if ok,
+; result=0 if not.
+
+; if we've been digging a tunnel, what exit must this room hook
+; on with.
+ if dir=0 then @PlaceRoomNoLink
+; reverse direction
+
+ push x ; save co-ords of the entrance door to this new room
+ push y
+ push size
+  RoomX=x
+  RoomY=y
+  push dir
+   &dir=list7(dir) ; reverses direction
+   gosub @GetRoomData ; sets result=true if ok
+   if result=false then @PopDirFail
+   gosub @CheckExit
+  pop dir
+; now x,y are positions of the exit on the map - assuming
+; the room started at RoomX, RoomY
+; Calc offsets within the room...
+   sub x,RoomX
+   sub y,RoomY
+; and shuffle over the room start so RoomX, RoomY become the top left
+; coords of the room
+   sub RoomX,x
+   sub RoomY,y
+   x=RoomX
+   y=RoomY
+
+   gosub PlaceRoomNoLink
+  pop size
+  pop y ; restore entrance door to this room
+  pop x
+ if result=false then @Fail
+ gosub @DigTunnelStep
+ return
+;
+.PlaceRoomNoLink
+; find data structure for room
+ result=true ; unless otherwise specified
+ gosub @GetRoomData
+ if result=false then @PlaceRoomFail
+; check if there is space on the grid. Note that the co-ordinates
+; specified will always represent the top left of the room.
+ add x4,c2 ; skip ll ptr
+ &xsize=RoomDefns(x4)
+ add x4,c2
+ &ysize=RoomDefns(x4)
+ add x4,c2
+ x=RoomX
+ y=RoomY
+
+ gosub @CheckSpace
+ if result=false then @Fail
+
+; nothing adverse found, so place the block...
+ gosub @AbsPlaceRoom
+ return
+;---
+.CheckSpace
+; check if there is space for a room of size xsize, ysize at x,y
+; check x+xsize,y+ysize is still on screen
+ if x>250 then @Fail ; negative
+ if y>250 then @Fail ; negative
+ if y<3 then @Fail
+ x1=x
+ add x1,xsize
+ if x1>ScreenXBlocks then @Fail
+ x1=y
+ add x1,ysize
+ if x1>ScreenYBlocks then @Fail
+
+; now check the actual map area it will cover...
+ push x
+ push y
+;  add x,c1
+;  add y,c1
+  gosub @CalcMapAddress
+ pop y
+ pop x
+; now x1 gives start position
+ LoopCounter2=ySize
+ sub LoopCounter2,c2 ; ignore edges of room
+ if LoopCounter2>240 then @CheckSpaceOk ; trap overflow
+
+.CheckSpaceYLoop
+ LoopCounter1=xSize
+ sub LoopCounter1,c2 ; ignore edges of room
+ if LoopCounter1>240 then @CheckSpaceOk ; trap overflow
+
+ x2=x1 ; save start of this row of blocks
+.CheckSpaceXLoop
+  &x3=Map(x1)
+  if x3<>0 then @PlaceRoomFail
+  add x1,c2
+  sub LoopCounter1,c1
+  if LoopCounter1<255 then CheckSpaceXLoop
+ x1=x2 ; restore x1 to start of current line
+ x5=ScreenXBlocksTimes2 ; word-based
+ add x1,x5
+ sub LoopCounter2,c1
+ if LoopCounter2<255 then CheckSpaceYLoop
+.CheckSpaceOk
+ return
+;---
+.AbsPlaceRoom
+ x1=8 ; skip over possible door info
+ add x4,x1
+ gosub @CalcMapAddress
+; now x1 gives start position
+ LoopCounter2=ySize
+
+.PlaceRoomYLoop
+ LoopCounter1=xSize
+ x2=x1 ; save start of this row of blocks
+.PlaceRoomXLoop
+  x3=RoomDefns(X4)
+  &Map(x1)=x3
+  add x4,c1
+  add x1,c2
+  sub LoopCounter1,c1
+  if LoopCounter1>0 then PlaceRoomXLoop
+
+ x1=x2 ; restore x1 to start of current line
+ x5=ScreenXBlocksTimes2
+ add x1,x5
+ sub LoopCounter2,c1
+ if LoopCounter2>0 then PlaceRoomYLoop
+ return
+;---
+.CalcMapAddress
+ x1=ScreenXBlocksTimes2
+ x2=y
+ gosub @MultX1X2
+ add x1,x
+ add x1,x * add on twice, because map table is word-based
+ return
+;---
+

@@ -1,0 +1,1052 @@
+0660103030566
+1Adventure Manual
+2Copyright (C) 1985page #Level 9 Computing
+9[....................................................]
+ÅâINTRODUCTION
+Ä
+ThismanualdescribesLevel9'sAdventureSystem.Itissupplied
+withonediskcontainingourstandardadventure.Youshouldalso
+havelistingsoftheadventureprogram.Otheradventuresare
+createdbymodifyingthestandardgame
+
+ÖWarning.ÄAlltheprograms,dataandlistingsthatyouhavebeen
+suppliedwitharecopyright(C)1986Level9Computing.Adventure
+programsproducedusingtheadventuresystemarealsocopyright
+(C)Level9Computingsincetheycontaincodewrittenbyus.
+
+Alotofefforthasbeeninvestedintheadventuresystem,so
+Level9willtakeactionagainstanyonewhosuppliesordiscloses
+detailstoanypersonnotauthorisedbyLevel9.Telephone
+Bracknell**********tocheckwithusifyou'reapproachedby
+someonewhoclaimstobeauthorised,beforesayinganythingor
+handinganythingover.
+
+
+
+ÅâCONTENTS
+Ä
+1Starting
+
+2TEXTMESSAGES
+
+3EXITS
+
+4LISTS
+
+5RUNNINGTHEGAME
+
+6PROGRAM(A-CODE)
+
+7SPELLINGCHECKING
+
+8PRINTING
+
+9CODINGSIZES&STANDARDS
+
+â1Introduction
+
+ÄTheadventuresystemallowsyoutoprogramanadventureonthe
+AtariST,creatingandtestingeverythingexceptmusicand
+pictures(theseareaddedlater).Level9willtransferthe
+completedgametoothermicros.
+
+Youshouldhaveoneofthefollowingsetsofhardware:
+
+MinimumConfiguration:
+     520STM,Doublesideddrive,ownmonitororTV.
+                              Costabout400poundsincl.
+
+     520STM,Doublesideddrive,winchester,monitor.
+                              Costabout1300poundsincl.
+
+DevelopmentcycletimesaregiveninappendixF.Attimeof
+writing(4/11/86),Ihavenotdecidedwhichonewe'llbedistributing.
+
+YouwillbeusingGEM(thewindowingsystemontheST),anda
+commandlineprogramwhichgivesaccesstoTOS,Atari'sown
+operatingsystem.ThisisverysimilarincommandstoMS-DOS(as
+foundonPCcompatibles),whichinturnisratherlikeanimproved
+CPM.AsummaryofusefulcommandsisgiveninappendixA.
+
+First,copythedisktoablankone(seeappendix1forhelp),and
+storetheoriginalsomewheresafe.
+
+NowputyourcopyofthediskindriveA.
+
+Thecomponentsofanadventureareasfollows:
+TextMessages:Allthemessagesoutputbytheadventurefor
+locationdescriptions,objectdetails,error
+messagesandreportsofwhathappensastheplayer
+doesthings.Keywordstoberecognizedbythe
+programarealsorecordedhere.
+Exits:Howthelocationsoftheadventureareconnected.
+Lists:Arraydata..Initialpositionsofobjectsetc.
+Program:Thea-code(shortforadventure-code)source.
+
+Istronglyadviseyoutobaseyourgameonthestandardadventure
+provided.Thestandardgamealreadyhandlesmostgamefeatures,
+movement,taking/droppingobjects,non-playercharactersetc-you
+onlyhavetoenterthenewkeywords,exitdetails,initial
+positionsofobjectsetc,andthecorrecttextdescriptionsof
+thingsandplaces.Thenaddthespecialcasestotheprogramto
+handlethepuzzlesinthegame.
+
+
+NOTE:Level9havemanualsformostoftheutilityprogramsused
+increatingadventures.Alltherelevantfeaturesshouldbe
+describedinthisAdventureManual,butifyoufeelthatyouneed
+moredetailsthenwecanprobablylendyouaspecificmanual.
+Pleaseask.
+
+â2TextMessagesÄ
+
+Inthenewadventuresystem,messages,exitsandacodesourceare
+alleditedusinganystandardSTeditor.Twoeditorsaresupplied
+ontheadventuresystemdisk.Detailsoftheseeditorsaregiven
+inAppendixB.
+
+ThefilenameofthetextfileisMESSAGE.TXT
+
+Themessagesmustbesquashedbeforetheycanbeusedbythe
+adventureprogram.Thisisafairlyslowprocesswhichtakesupto
+aboutanhourifyourgamehasalotoftext.Savethemessages,
+thentype:SQUASH(return)
+
+Whensquashingisover,thecompressedtextisautomaticallysaved
+asSQUASH.DATforsubsequentusebytheadventureprogram.
+
+
+
+â3ExitsÄ
+
+AnySTeditorisusedtoedittheexits(howthegamelocations
+areconnected).
+
+Thereisonelineofdataperexit.Theexitsaredescribedin
+order:firsttheexitsfromroom1,thenthosefromroom2andso
+onuntiltheexitsfromthelastroomhavebeendescribed.The
+formatofthedataforanexitisasfollows:
+LDITDirectionDestination
+
+Lisnormally0,butis1forthelastexitfromalocation.
+Disnormally0,butis1iftheexitisviaadoor.
+Iisnormally0,butis1iftheexitisinvisible
+(notreportedbyLOOK).
+Tis0foraone-wayexit,or1foratwo-wayexit.
+
+Directionhasvaluesasfollows:
+1=north2=northeast3=east4=south5=southeast
+6=southwest7=west8=northwest9=up10=down
+11=in12=out13=across
+
+Ifforsomereasonyouneedmoredirections,theycanhavevalues
+14and15.Besuretoaddtheappropriateverbs.
+
+Thedestinationissimplythelocationwheretheexitleads.
+
+Hereisanexampleofsomeexitdata:
+;Thedatastartswithroom1
+01012103;2-waydoor,NEfromroom1toroom103
+0000412;1-way,Sfromroom1toroom12
+10101112;1-way,INfromroom1toroom12.Last
+exit
+;Room2
+110131;2-waydoor,Efromroom2toroom1.
+                        Lastexit
+;Room3
+0001834;2-way,NWfromroom3toroom34
+1100150;1-way,Nfromroom3toroom50.Last
+                         exit.
+
+Thelastlineofthedatamustconsistof:
+000000
+
+
+Youshouldnotdefineatwo-wayexittwice;itcanbedefinedat
+eitherendbutneednotbedescribedatboth.Thissavesmemory.
+
+Eachlocationmusthaveatleastoneexitdefinedfromit.Ifyou
+arenotcareful,youmayfindthatwhenthetimecomestoenter
+theexitsforanewlocationyouhavealreadydefinedallits
+exitsfromtheirotherends.Thenyou'dhavetoredefineanexit
+andsowastespace.Trytoavoidthis.
+
+Thefilenameoftheexitdatausedbytheadventureprogramis:
+EXIT.TXT
+
+â5ListsÄ
+
+Thelistsarethea-codeequivalantofarraysandareusedfor
+suchthingsastheinitialandcurrentpositionsofobjectsinthe
+game,andforNPCattributes.
+
+AnSTassemblerproducedbyHisoft,'GENST'isusedtosetup
+enterthelistsusedbytheadventureprogram.Thisisdescribed
+indetailinAppendixC.
+
+Thefirstbytesofthelistdatamustresemblethefollowing:
+
+START
+DC.LLIST1-START
+DC.L$8000;firstworkspace
+..........
+DC.LLIST8-START
+DC.LEND-START
+
+;nowthemainbodyofthedata...
+list1
+     dc.b??
+     dc.b??
+etc...
+
+LIST1-9,ENDandSTARTarelabels.Thestartofapermanentlist
+isdefinedbyputtingitslabelinthefirstcolumnofthelineat
+thestartofthedata(asinnormalassemblersource).ENDis
+definedafterthelastpermanentlist.Notethatthe"-START"is
+essentialforthisassembler-ifitisommitted,assemblyerrors
+willprobablyoccur.
+
+Foraworkspacelistuseasuitableaddressbetween$8000and
+$8FFF($means"hexadecimal").Theworkspaceareastartsat$8000,
+andthenumberusedwillgivetheoffsetwithinthis.
+e.g.$8010wouldgiveatemporaryliststarting16(decimal)bytes
+intothetemporarylistarea.
+
+
+Anexamplelistmightbeasfollows:
+LIST1
+DC.B10;Object80startsinroom10
+DC.B99;Object81startsinroom99
+DC.B255;255isthehighestvalueforalistentry
+DC.B30;Object83startposition
+
+
+â6Program(A-code)Ä
+
+â6.1Tryingthegame
+
+ÄWhenyou'vemodifiedanypartofthegame,itmaybetriedby
+typingtheletterCorcfromthecommandlineprogram.Ifany
+errormessagesappear,typecontrol-Cafewtimestostopthe
+compilation,andgobacktocorrecttheappropriatefilebefore
+tryingagain.
+
+Whathappenswhenyoutype'c'isthatabatchfile,'C.BAT'is
+run.Thishastheeffectoftypingcommandstorunthefollowing
+programs:
+
+     comp(tocompiletheacode)
+     finish(tomergesquashedtext,exits,lists,acode)
+     menu(torunthegame)
+
+Ifallgoeswell,thegameshouldstartrunning.
+
+Theadventureprogramiswrittenusingacompiledlanguagecalled
+A-CODE.Thea-codesourceiseditedusingoneoftheeditors
+describedabove.Filenamesusetheextension'.TXT'andinthe
+WorminParadisethemainpartofthefilenamestartswith'A'
+'ASPECIAL.TXT','APARSE.TXT','AVERB.TXT'.
+
+â6.2A-CodeCompiler
+Ä
+Thesourceofaprogramissplitintoseveralpartswhichmaybe
+editedseparately.InKnightOrc,thesehavethefollowingnames:
+ACONST.TXT
+APARSE.TXT
+AVERB.TXT
+ASPECIAL.TXT
+        NPC.TXT
+        OOPS.TXT
+     BOOK.TXT
+
+Thefilesusedarecontrolledbyafile'COMPILE.BAT'whichthe
+compilerwillsearchforanduseifpresent.Thishasthe
+followingformat:
+
+1ACONST.TXT
+1APARSE.TXT
+1AVERB.TXT
+1ASPECIAL.TXT
+1NPC.TXT
+1OOPS.TXT
+1BOOK.TXT
+30
+
+Thenumbersareinsturctionstothecompiler.Theyhavethe
+followingmeaning:
+
+1..compilethisfile
+2..notimplemented
+3..saveacode(onlyworksifnoerrors)
+
+6..toggledebugginginfo(alsoifyouputDEBUGinthesource)
+7..toggleforcedlongjumps(makesdevelopmenteasier)
+
+
+
+â6.3A-CodeSourceFormat
+Ä
+Eachpartofthefilemayoptionallystartwithsectionsdefining
+CONSTANTs,VARiablesandTABLE(lists).Anyornoneofthese
+sectionsmaybeusedineachpart.BEGINÅmustÄbeusedbeforeany
+codestarts.Theformatofthesesectionsisobviousfromthe
+sampleprogramssupplied.
+
+Notethatvariablesarenumberedintheordertheyaredeclared,
+startingwiththesectionofthesourceandcontinuinginother
+sections.Itisimportantformulti-partgamesthatanyvariables
+tobesharedshouldhavethesamenumber.
+
+Maybeusingthesamefiletodeclarethemforallpartswouldbea
+goodidea.Thiscanbedone-usingthesamesourcefile.Allyou
+needtodoistosetupthecompile.batfileforeachpartto
+refertothesamefile.
+e.g.1\games.l9\orc.l9\part1.l9\aconst.txt
+-orsomethingsimilarifyouhaveasimplerdirectorystructure
+thanmyWinchesterdoes!
+YoumightalsocaretodotheabovefortheOOPS.TXTfile,and
+possiblyAPARSE.TXT.Thishasthemeritofensuringcompatability,
+andbugfixesareautomaticallyincorporated.Ithasthedanger
+thatanychangestothesefilesmustbetestedseparatelyoneach
+gametheyareusedin.(orelse,bugsmaybeintroducedwithout
+yourealisingatthetime).
+
+â6.3.1A-CodeStatementsÄ
+
+Adventuresareprogrammedinaa-code,asimplifiedversionof
+BASIC.Itincludesseveralfacilitiestailoredforadventure
+programmingandomitsunnecessaryfeaturessuchascomplexmaths.
+
+Allsymbolsusedintheprogrammaybeofanylength,about20
+charactersaresignificant.Becarefulifyouusemorecharacters,
+asobscurebugscansometimesoccur(despitethecompilerchecking
+forredifinedsymbols).Youareallowedupto255diferent
+variablesinaprogram.
+
+Numericvaluesarealldecimal&+ve,between0and65535
+(minus1=65535,minus2=65534etc.)
+
+Thereare9lists(numbered1to9)whichtaketheplaceof
+arrays.Theycanhold1-bytevalues(0-255).Thefirstentryina
+listisnumber0.Seesection5andaboveformoredetails.
+
+Jumps(GOSUB,GOTO&IF..THEN)arenormallyshortrange;within
+about40lines.Foralongerjump,addan"@"infrontoftheline
+number.e.g:
+10GOTO20
+20IFY2=1THEN@50000
+Don'taddan"@"unlessyouneedto,asthisincreasesthecode
+size.Whilstprogramming,modifyCOMPILE.BATtoselectoption7
+beforecompilinganyfiles,andleaveoutthe@sinyoursource
+code.Option7onthecompilermenuforcesalljumpstobelong
+form.Whentheprogramisnearlycomplete,removetheselectionof
+option7fromtheBEGIN.SUBfile,andproducealistingofthe
+errorsgenerated.
+
+Thea-codestatementsareasfollows(v1,v2,v3&v4indicate
+variables,nindicatesanumber,andlnisaline
+number):
+
+â6.3.2AssignmentÄ
+
+v1=v2v1=nvariable=avariableoraconstant
+v1=list(v2)v1=list(n)variable=alistelement
+list(v1)=v2list(n)=v2listelement=avariable
+
+Notetherestrictions:e.g.youcannotassignaconstantvalueto
+alist.Loaditintoavariablefirst.
+
+Alllistoperationsare8bitonly.Allvariable-variable
+operationsare16bitonly.
+
+â6.3.3FlowofControlÄ
+
+GOSUBlnRETURNAsGOSUB/RETURNinBASIC
+GOTOlnAsGOTOinBASIC
+
+IFv1=v2THENlnIfv1=nTHENlnIftrue,GOTOline
+IFv1<>v2THENlnIFv1<>nTHENln""""
+IFv1<v2THENlnIFv1<nTHENln""""
+IFv1>v2THENlnIFv1>nTHENln""""
+
+CALL@lnv1"ONv1GOTO",lnindicatesalinewithaDATA
+statement
+DATAln1ln2ln3etc..Alistoflinenumbersusedbythe
+correspondingJUMP.IFv1=0GOTOln1,IFv1=1GOTOln2etc..
+
+â6.3.4MathsÄ
+
+ADDv1,v2SUBv1,v2v1=v1+v2;v1=v1-v2
+
+
+â6.3.5InputÄ
+
+INPUTv1v2v3v4
+
+YoushouldÅneverÄusethisfunction.Usetheparserfacilities
+instead.Basically,forgetaboutinput.Inputisautomatic.
+
+If,despitetheaboveDIREWARNINGS,youstillinsistonusingthe
+low-levelcalls,youareheadingfortrouble.Theyareunfriendly
+andaminefieldfortheunwary.Ihavehiddenthedocumentation
+awaysomewhereinappendixD.
+
+Allyouneedtoknowisthefollowing:
+
+     Commandsarepassedtotheverbhandlers(e.g.TAKE,GIVE,
+PUTetc.)oneatatime,withVERB,NOUN1,NOUN2,PREPsetupas
+appropriate.
+
+     Evenifseveralobjectsaregiveninthecommand,theverbis
+calledwithoneobjectatatime:withtheabovevariablessetup
+withtheir(fairlyobvious?)meaning.
+e.g.PUTbottleandkeysinrucksackwouldgive:
+     VERB=IPUT,NOUN1=BOTTLE,NOUN2=RUCKSACK,PREP=IPIN
+andthen:
+     VERB=IPUT,NOUN1=KEYS,NOUN2=RUCKSACK,PREP=IPIN
+      
+     Thismechanismcopeswith99.9%ofsituationsinagame.
+
+     Therewillbeoccasionswhereyoumaywanttoforgetabout
+therestofthethingstheusertyped-e.g.errorhandling.In
+thiscase,jumptoCANCELINPUT.
+
+     IfyouwanttoaskaYESorNOquestion,printthe
+questionandcalltheroutineYESORNO.ThisreturnsRESULT=TRUEif
+yes,RESULT=FALSEifno.
+
+
+â6.3.6OutputÄ
+
+YoushouldnormallyusetheroutinesREPORTM1andREPORTM2to
+printmessagesandREPORTX1toprintnumbers.Thesecheckif
+anyoneisaroundwhomightbeinterestedinwhatisgoingonand
+sendthemessagetothem.(Thisispartlyforcompatabilitywith
+multi-usersystems).
+
+e.g.
+     m1=2707;avoiceboomsout"Hellopeasant"
+     gosub@reportm1
+
+Notethatthesewill(potentially)beprintedouttoanyonewhois
+intheroom,sotheymustnotreferdirectlytotheplayer(e.g.
+YOUisabadidea).Theymay,forexample,beproducedbyNPCs,so
+youcanenvisagesituationswhereamessagelike:
+     "Youcan'topenthegrate,dummy"
+isprinted,wheninfactitisanNPCwhohastriedit!
+
+Now,usingm1=2707,gosub@reportm1takes7bytes.UsingMESSAGE
+2707wouldonlytake3bytes.IfyouaresurethatanNPCwill
+NEVERtriggerthemessage,thenyoumayaswelluseMESSAGE2707,
+becauseitisshorter.
+
+e.g.providedyouKNOWWHATYOUAREDOING:
+     message2707;avoiceboomsout"HelloPeasant"
+
+
+Youwillprobablywanttoprintout'so-and-sodoessomething'
+fromtimetotime.Thisissimplifiedbyanumberofroutines:
+
+1)Endingsareautomaticallyaddedontoverbsbytheroutine
+PRINTVERB.ThislooksatwhoistheACTOR,andaddsthe
+appropriateendingtoVERB.Thisfeatureisusedbythefollowing
+routines:
+
+2)Therearecaseswhenyouwantpeopletodosomething,orto
+confirmthatsomethinghasbeendone.Aflashwayofdoingthisis
+tousetheroutineREPORTACTION:
+
+e.g.
+     VERB=132;attack
+     NOUN1=ORC
+     ACTOR=GOBLIN
+     gosub@describeaction
+willprint'theorcattacksthegoblin'
+i.e.ACTORverb(s)thenoun2
+     Notethatthisworksforwhoeverisdoingthething,and
+wherevertheyarewhendoingit.Theverbhasautomaticendings
+added,soitshouldmakesense.Thisisaveryflexibleroutine,
+andisusedinavarietyofplaces,includingtaking/dropping
+objects,movement,etc.
+
+3)SlightlysimplerisaOBJECTVERBwhichjustprintstheactor,
+andwhathe/she/it/theydoes/do.
+e.g.
+     VERB=199;stop
+     gosubobjectverb
+willgive'youstop'or'theorcstops'etc.
+
+Thisisobviouslyusefulwheretherearenoargumentstotheverb
+(i.e.itisintransitive,orisittransitive.Icannever
+remember).Thereareothersimilaruses-youwillprobablyknow
+whenyoufindone.
+
+Iftheaboveroutinesarenotsuitable,ortosavespace,the
+basicacodecallsareasfollows:
+
+MESSAGEv1MESSAGEnPrintthespecified
+message
+PRINTv1Printv1asanumber
+
+â6.3.8RandomNumbersÄ
+
+Theseareofvitalimportancetomanygames,soIhaveincludeda
+specialsectiononthesubject.
+
+Abasicrandomnumberbetween0and255maybegeneratedby:
+     RANDOMV1;whichgivesV1between0and255
+
+Thepseudo-randomsequenceprovidedisquiteeffective.Thereare
+waysinwhichyoucandrasticallyreduceitsrandomness.Themost
+commonistogeneratearandomnumberoneachandeverycommand
+entered.Donotdoit!
+
+Togeneratearandomnumberbetween0andanarbitrarynumber
+(<255)iseasy.Usethefollowingcode:
+
+     randomx1
+     x2=??;maximumnumbertogenerate
+     gosub@x1modx2
+;x1nowcontainstherandomnumberyouwanted.
+
+
+â6.3.7MiscAdventureFeaturesÄ
+
+Youwillprobablynotneedtouseanyofthese.Theyareincluded
+forcompleteness,andsoyoucanunderstandtheexistingcodemore
+easily.
+
+CLEARSetallvariablesto0
+STACKClearthestack(gettingridofunusedGOSUB
+                  addresses)
+SCREENTSelecttextmode(i.e.singlescreen)
+SCREENG          Selevtgraphicsmode(i.e.splitscreen)
+CLSGCleargraphicsscreen
+PICTUREv1Displaypicture
+EXITv1v2v3v4EXITfrom,direction,status("DIT"sect4),
+destination.Setupv1&v2.V3andv4are
+returned.Youwillnormallyneverusethis.
+DRIVER    Calldriverfunction.Argumentspassedin
+          LIST9.FirstentryinList9isfunctionto
+                  call,subsequententriesaretheparameter
+               block.
+
+SAVESavevariablesandworkspaceliststodisk
+RESTOREOppositeofSAVE
+
+âCreatinganAdventureÄ
+
+     Somestepstowardstheperfectadventure(notesteps1-5may
+havebeendonealready).
+
+1)Copyafolderfromanexistinggameontoyourdisk.
+
+2)Enterthefolder(bydouble-clickingonit),anddeleteallthe
+sub-foldersapartfromST.L9.
+
+3)DoubleclickonCOMMAND.PRGandtypeEDtostarttheeditor.
+
+4)Deleteallthegame-specificcodefromAVERBandASPECIAL,and
+allthespecificmessagesfromMESSAGE.TXT.Substituteanull
+exitsfileforEXIT.TXT.
+
+5)Setuptheexittableforyourgame.
+
+6)Numbertheobjectsyouwillneed.PLEASEleaveagapofat
+least20betweentheendoftheNPCsandthestartofthemobile
+objects,andbetweenthemobileobjectsandthestaticobjects.
+Thiscostsabout120bytesofmemory,butmakesitMUCHeasierto
+addextraobjects.
+
+7)SetuptheinitialpositionsoftheobjectsinLIST.TXTand
+assembleittoLIST.DAT
+
+8)Entertheroomdescriptions,objectdescriptionsandexamine
+messages.
+
+9)Quittheeditor,andtypeCtocompilethegame.Ifanyerrors
+occur,pressandholdcontrol-Cforabout1second(togenerate
+about3clicksfromthespeaker),thencorrectthem.Whenthegame
+iscorrect,thegameshouldautomaticallystart.Youshouldnowbe
+abletowalkaroundandadmirethescenery.Checktheexitsare
+correct.
+
+
+10)Youarenowreadytostartcodingthepuzzlesinthegame.In
+noparticularorder,youwillhavetocode:
+
+     SPECIALEXITStodefinewhetheranexitispossible(i.e.
+whereexitsmayormaynotbepresent,dependingoncircumstances)
+Thisisusedforprintingthepossibleexits,aswellasatthe
+firststageofeverymove.
+
+     SPECIALMOVEStodefinethingswhichmaypreventcertainmoves
+fromhappening(eventhoughtheyweredescribedintheroom
+description).e.g.monsters,portcullisescrashingdown,annoying
+doorsetc.
+
+     SPECIALTAKESforspecialcaseswhenobjectsaretaken.This
+routineiscalledwhenthetakeisbasicallypossible,buthasnot
+actuallyhappened.
+
+     SPECIALDROPSforspecialcaseswhenobjectsaredropped.See
+specialtakes.
+
+     AFTERMOVEforthingswhichhappenaftermovinginto
+particularrooms.
+
+     SPECIALPREEXAMINEtoprintthingsbeforethenormalexamine
+message.Thenormalmessagemayalsobedisabled(seecode)
+
+     SPECIALEXAMINEtohandlespecialthingswhichhappenon
+examiningobjects
+
+     FUNNIEStohandleinteractionwithscenery(usuallyvery
+littleornocode-addobjectsinstead)
+
+     OBJECTTRIGGERforobjectswhichreactregardlessofwhich
+verbyouuse(orwhereobjectsreactinthesamewaytolotsof
+verbs-e.g.monsters)
+
+     TIMEDEPENDENTCODEiscalledoneverymovethatgoespast.
+
+     STANDDEFAULTS,PUTON,PUTIN,PUTUNDERtoshowwhenpeople,or
+objectsmaygointovariouscontainers.
+
+     POSITIONSHADOWSforobjectswhichmayhavetochaseplayer
+around(e.g.doors,holesinwalls).Usewhereyoudon'twantto
+haveseveralobjectswiththesamename(Iwouldnormallyprefer
+ifyoudidhavemultipleobjects,butmemoryconstraintsmay
+intervene)
+
+     TRIGGERWORDSforwordswhichNPCswillreactto(otherthan
+commands)
+
+     Scoring.Oneofthelastthingstobecoded.
+
+     Alltheverbs!
+
+âAppendixA-STcommandsÄ
+
+     OntheST,youwilluseGEMsomeofthetime.Muchofthe
+operationisobviouswhenyouactuallytryit.(explainingitin
+wordsrarelyseemstowork).Herearesomehints:
+
+1)   Tousetheformatoptionyouneedtohighlightadiskiconby
+clickingonitonce.
+
+2)   Youusetheshowinfooptioninthesamewayasformat.It
+worksondisks,folders,andfiles.Filesmayberenamedinthis
+way.
+
+3)   Multiplefilesmaybehighlightedbydraggingaboxaround
+them,orbyholdingshift,andsingle-clickingoneachone.A
+secondsingle-clickun-highlightstheicon,soyoumustclickand
+holdonthelastoneyouwant.
+
+     Forquickerdevelopment,youwillnormallyusethe
+COMMAND.PRGprogramsuppliedineachgamefolder.Thisisvery
+reminiscentofMS-DOS,whichisitselfbasedonCPM.TheST
+versionisrathernicerbecauseallcommandsarememory-resident.
+
+     Hereisaquicksummary.Therearemore.TypeHELPfora
+prettycomprehensivelist.
+
+     HELP           giveslistofcommands.
+     COPYA:B:CopieswholediskfromdriveàAtoBÄ
+FORMATB:FormatsdiskindriveB
+DIRB:DisplaysdirectoryondriveB
+COPYfilename1filename2
+Copiesfilename1tofilename2
+RENfilename1filename2
+                    renamesfilename1asfilename2
+
+
+âAppendixB
+
+EDITORS
+Ä
+TherearetwoeditorsavailableontheST:GENSTand1stWord.
+
+Therearesomefunctionswhichareavailableonboth:
+
+     Thescrollbarattherighthandsideofthewindow.The
+littleboxmaybedraggedupanddowntomovetoanapproximate
+positioninthefile.Alternatively,clickingintheshadedarea
+aboveorbelowtheboxmovesonepageupordown.
+
+     Thebackspacekeydeletesthecharacterbeforethecharacter,
+deleteremovesthecharacterafterthecursor.
+
+     Botheditorsworkininsertmodeasthedefault.
+
+     UnwantedCRsmayberemovedbydeletingthem,andcursorleft
+atthestartofonelinemovestotheendofthepreviousone.
+Cursorrightattheendofalinemovestothestartofthenext.
+
+ÅEditorspecificfunctions:Ä
+
+Thefirsteditor,1stWordisonlyusedforblockcopyingfromonefile
+toanother.
+ItisstartedintheusualwayfromGEM.Arequesterforthefile
+toeditisdisplayed.Selecttheoneyouwantintheusualway.
+
+Aftersometime,1stWordwilldisplaythefile.Themostuseful
+commandsareeitherusedfrompdms,orfromthefunctionkeys(see
+thetemplatepermamentlydisplayedwhilst1stwordisrunning).
+
+
+âAppendixC-GENSTÄ
+
+Thesecondeditor,GENST,isprimarilyanassembler.Itis
+however,presentlythefastestGEMeditoravailable.Thisprobably
+hasalottodowithbeingwritteninmachinecoderatherthanC.
+
+Thebasicmodeofoperationisverysimilarto1stWord.Thereare
+oneortwodifferencesandshort-cuts:
+
+f1-markstartofblock
+f2-markendofblock
+shiftf3-deleteblock
+f4-movemarkedblocktocurrentcursorposition
+
+^R-moveuponepage
+^C-movedownonepage
+^left-startofline
+^right-endofline
+alt-T-topoftext
+alt-L-loadtext
+alt-S-savetext
+
+Thefunctionkeysaretheonlywayofdoingblockmoves,soyou
+willneedtorememberthem,orrefertotheabovetable.
+
+Anumberofthealt-somethingselectionsaresummarisedonthe
+pdms,asalittleboxfollowedbytheletter.Thismeansyoucan
+typealt-letterinsteadofselectingthemenuoption.Whichyoudo
+isuptoyou.Probablyyoushouldstartbyusingpdms,thenstart
+usingthekeysmore,becausetheyarenoticeablyfaster.
+
+
+ÅâAppendixD-NewTextformat
+Ä
+ÅD.1TextEntryandOutput
+
+ÄTextisenteredinastandardtextfileusinganyconvenient
+editor.Theformatusedtodefinemessagesisasindicatedbythe
+examplesbelow:
+
+[1:Thisismessage1.]
+[2:Thisismessage2.Linesmaybeverylong
+andsplitoverseveral
+
+lineswithoutregardtotheformatting.Multiplespacesand
+carriagereturnsareignored.Toforcetheinsertionofspaces,
+theunderlinecharacter_isusedinplaceofthespace(this
+isprovidedmainlyforcompatabilitywithearliersystems-it
+shouldonlybeusedveryoccasionallynow-whereanordinary
+spacedoesn'twork).
+
+Toforcetheinsertionofacarriagereturn,apercentsymbol%is
+used.Notethatacarriagereturnisnotprintedifthecursoris
+atthestartofaline,sotoprintmultiplecrs,use%_%_%_%to
+putaspacebetweeneach.]
+
+[Thisismessage3.Ifnonumberisspecified,itisassumedthat
+themessagenumberisincremented.Youareadvisednottorelyon
+thisformatasitcancomplicatemodifyingthetext.]
+[100:Thisismessage100.Notethatmessagesshouldbeenteredin
+numericorder.]
+
+;Thisisacomment
+
+[101:Whatnext?_];Messageprintedbeforeinput(another
+;comment).NotethatcommentsareterminatedbyaCR,so
+;asemicolonmustbeusedatthestartofeachcommentline.
+
+[102:Textisstoredinthecompressedformmostlyinlower-case.
+Textis,however,reproducedasitisentered.(Inmostcasesthis
+isdonebyobeyingnormalEnglishrulese.g.converttoUppercase
+afterafullstop.)]
+
+;Thefirstcharacterofeachmessageshouldbeenteredaslower
+;caseunlessyouwanttoforceittobeuppercase.
+;(Ifitfollowsadotwhenitisactuallyprinted,itwillbe
+;printedasuppercaseanyway.Ifyouenteritasuppercase,
+;morememoryisused.
+
+Whencreatingormodifyingamessage,notethat:
+*Word-wrapisautomaticwhenthegameisrunning(i.ewords
+willnotbehalfononelineandhalfonthenext).Youdon'tneed
+toworryaboutthis.
+*Incontrast,thereisnoword-wrapatallduringmessage
+creationormodification.Thefirstcharacterofalinedirectly
+followsthelastoneofthelinebefore.EXCEPTTHATthecarriage
+returnistreatedasifitwasaspace
+
+
+
+ÅD.2InputAnalysis.
+Ä
+Thereisnokeywordtableinthenewadventuresystem.Allwords
+tobeunderstoodbythegameareenteredinthemessages,andall
+wordsinthemessagescanberecognizedbythegame.Tomakethe
+scanningtaskpossible,onlywordswhicharespcificallymarkedin
+thetextarerecognized.
+
+Wordsinthetextaremarkedusinganup-arrowsymbol^plusa
+singlelettertogivethewordtype.Thisisoneofthefollowing:
+          V=verb=1
+         J=conjunction=2
+         P=preposition=3
+         N=nountype   =4
+         A=adjective  =5
+         C=wordmarkedforbookprotection=6
+
+Whenawordisentered(whilstthegameisrunning),theAcode
+programreceivesallthematcheswiththewordastwobytevalues
+fromeachmatchinList9,inorderofmessagenumber.
+
+Thebestwaytolearnaboutthissystemistoexamineanexisting
+textfile.LookattheKnightOrctext.
+
+Firstcometheprepositions,withnumbersuptoabout100.You
+shouldnotneedtochangethese.
+
+Next,from100to300areverbs.Leavetheexistingonesalone.
+Youmayneedtoaddextrasontotheendofeitherthetransitive
+table,ortheintransitivetable.Seecommentsinthetextfile
+fordetails.
+
+From400toabout600areobjects,followedby'omni-present
+objects'i.e.nounswhichmaybereferredtoevenwhenthereisno
+objectofthatnamepresent.e.g.for'DIGHOLE',thereisnohole
+aroundwhenthecommandisentered.
+*****examinemessages????
+From1000toabout1250areshortroomdescriptions.
+
+From1300toabout1550arelongroomdescriptions.
+
+From2000to2200aresomegeneraloutputmessages.
+
+From2300upwardsisthebestplacetooutputmessagesyour
+programwillprint.
+
+Anywordswhichtheprogramshouldtotallyignoreshouldbemarked
+from4000to4100.
+
+Thewordsforthebookprotectionsystemsitabove4200,sothis
+areashouldbeavoided.
+
+Generalnotesonmarkingwords:
+
+Markallnounsinobjectdescriptions,examinemessages,androom
+descriptions(as^N).Notethatduetoasystembug,ifyoumark
+anythingstartingwithanuppercaseletter,onlythiswillbe
+reported.Anyoccurencesofthesameword,butinlowercase,will
+beignored.Becareful!
+
+Adjectivesshouldbeusedwithcare.Unlessyouknowwhatyouare
+doing(orarepreparedforalittleexperimentation),itis
+probablybesttoavoidthem.Markasnounsinstead.
+
+Donotmarkprepositions(e.g.inside,on,beside)inthemain
+bodyofthetext.Itwillonlyslowdownthegame.
+
+
+
+
+
+ÅD.3ValuesreturnedbyInput
+Ä
+Thissectionoftheappendixistechnicalandmaybeomittedif
+youarenotinterested.Itisnotnecessarytounderstandthis
+sectioninordertowriteacodeprogramsusingthesystem,because
+higherlevelcallsarealwaysused.
+
+Eachtwo-bytevaluereturnedbyinputhasthefollowing
+components:
+     High-order3bits:wordtypeasgivenabove.
+     Remaining15bits:messagenumberinwhichmatchwasfound.
+ThevaluesarereturnedinList9high-orderfirst,thenlow-order
+insuccessivebytes.
+
+MatcheswitheachinputisreturnedeachtimeINPUTiscalled.
+Whentheendofthelineisfound,asingletwo-bytevalueofzero
+isreturned.Subsequentcallstoinputwillfetchinputfromthe
+user,andcontinuetoreturnitonewordatatime.
+
+Whenthematchingprocessencountersanon-alphanumericcharacter,
+thisisreturnedasanasciicodeinthefollowingform:
+     High-order8bits=0
+     Low-order8bits=asciicode
+
+Whenthematchingprocessencountersanumber,itisreturnedasa
+3bytevalueinthefollowingformat:
+     Firstbyte=1
+     Secondbyte=lo-orderbyteofnumber
+     Thirdbyte=mid-orderbyteofnumber
+     Fourthbyte=hi-orderbyteofnumber
+
+ÅD.4AcodeInputSupportRoutinesÄ
+
+TodecodethedatareturnedbyINPUTintoaformwhichcanbe
+readilyprocessed,agreatdealofworkhasbeenputinto
+producingacoderoutineswhichparsethecommands.These
+routinesarealltobefoundinthesourcefileAPARSE.TXT.
+
+Theroutinesmaybedividedintoanumberoflevels:
+
+1.Lowestlevel.AroutineREADINPUTLISTseparatesoutwordtype
+andvalue.(Forcomplexreasons,thetypesarethenumbersgiven
+abovemultipliedby2.Theseisofnoconsequenceastheyare
+alwaysreferredtobylabelse.g.NOUNTYPE).Forasciicharacters
+andnumbers,twopseudo-wordtypesarereturned-ASCIITYPEand
+NUMBERTYPE.Allvaluesarereturnedrelativetosomeconstants
+withnameslikeNOUNOFFSETsoastomaketheirrangeacceptable
+(e.g.singlebyte)
+
+2.AroutineCHECKTYPEzipsthroughlist9lookingforaninputof
+typeSEARCHTYPE.Thisisofusetoanyroutinewhichislooking
+wordsofspecifictype.e.g.Atthestartofasentence,themost
+likelyinputisaverb.Laterinthesentence,averbisunlikely,
+soitischeckedforaftercheckingfornounsetc.
+
+3.TheroutinePARSEINPUTusesCHECKTYPEtodoprioritychecking.
+Itgetsinputasitneedsit,andreturnsthevariablesVERB,
+PREP,NOUN2(anynounusedafterapreposition)andOBJECTTABLEas
+alistofobjectsspecified(orexcludedwithEXCEPT).Appropriate
+errormessagesareprintedforsceneryinthisroutine(soasto
+avoidstoringtheirvalues).
+
+4.ThehighestleveloftheparserisaroutinePRESENTMULTIPLE.
+ThistakestheVERB,PREP,NOUN2,OBJECTTABLE()formatof
+PARSEINPUTandcallstheappropriateverbhandlersonceforeach
+object.ThevariableNOUN1issetupforeachobjectinturn.The
+routinemustdoareturnattheendofitsprocessing,unless
+somethingofgreatimportanceoccurs-e.g.theplayermoving.
+
+âAppendixE.1-ObjectPositionsÄ
+
+Eachobjectinthenewadventuresystemhasapositionconsisting
+of2bytes-thelowandhipositions.Thesearestoredintwo
+separatetables,LOCURRENTPOSandHICURRENTPOS.Thehiposition
+determinestheeffectoftheloposition.Ifhipos=0,theobject
+isinroomlopos.Ifhipos<>0,theobjectiscontainedbyan
+objectofnumberlopos.Thetypeofcontainmentisgivenbythe
+valueofhipos.Forexample,sometypesofcontainmentareas
+follows: IN,ON,UNDER,INSIDE,BEHIND,STANDINGON,CARRIEDBY.
+
+Notethatallpeopleinthegame,includingtheplayerare
+objects.ThusobjectstheplayeriscarryinghaveLOPOS=PLAYERand
+HIPOS=CARRIEDorWORN.
+
+ÅE.2-UsingObjectPositionsÄ
+
+ÅE.2.1-CHECKOBJECTPOS
+
+ÄAdventuregamesoftenneedtocheckifanobjectisinacertain
+position.Tocheckbothhiandlopositionsisalittlecumbersome
+withthecurrentacode.Itisoftensufficientonlytocheckthe
+hiorlopositions.Forexample,ifanobjectneedstobecarried
+foraparticularpuzzle,justcheckingthehipositionmaybe
+enoughÅÄ(especiallyifothercharactershaveadifferentwayof
+holdingthings).
+
+ThereisausefulroutineCHECKOBJECTPOSwhichhasseveral
+functions.ItisgiventheparametersOBJECT,HIPOSandPOS.The
+routineismulti-functioned,dependentonthevaluesofthese:
+
+     IfPOS=0,OBJECTmayhaveanyLOCURRENTPOS
+     IfHIPOS=NONSPECIFIC,OBJECTmayhaveanyHICURRENTPOS
+     ForothervaluesofPOSandHIPOS,anexactmatchis
+required.
+
+TheroutinereturnsRESULT=TRUEiftheobjectisatthespecified
+co-ordinates.Thepowerofthisroutinecomesfromitstree-
+searchingnature.Ifitdoesnotfindontheimmediatepositionof
+theobject,itlooksattheobjectcontainingit(ifany),andso
+on.
+
+ÅE.2.2-GETNEXTOBJECTÄ
+
+Theaboveroutinesearchesinonedirectionalongtheobject
+positionstree.GETNEXTOBJECTsearchesintheotherdirection.
+i.e.givenanobject,itfindsalltheobjectscontainedwithin
+it.Itisusedindirectoryscanning,andotherspecialised
+applications.
+
+Becauseoftheenormousamountoflist-scanninginvolved,the
+routinehasbeenwritteninmachinecodeforspeed
+
+Touse,youmustsetSP=0,GOSUBINITGETOBJandinitialise
+SEARCHPOSandHISEARCHPOStothecontainer.Thispositionfollows
+exactlythesamerulesdiscussedbeforei.e.:
+     HISEARCHPOS=0,SEARCHPOS=roomnumberinwhichtofind
+objects.
+
+     HISEARCHPOS<>0,SEARCHPOS=objectnumberinwhichtofind
+objects.Therearetwosub-classestothis:
+          HISEARCHPOS=containmenttypee.g.IN,ONetc.
+          HISEARCHPOS=NONSPECIFIC,willfindallobjectscontained
+bytheobject.
+
+     
+Afterthisinitialising,thesubroutineGETNEXTOBJECTmaybeused
+togeteachobject,oneatatime.
+
+Therearefurtherdetailsinthecommentssurrounding
+GETNEXTOBJECTinACORE.TXT,andexamplesofuseINASPECIAL.TXTin
+theWormInParadise.Youwillnotoftenneedtousethisroutine,
+butwhenyoudo,itisessential.
+
+                    âAppendixF-HardwarePerformanceÄ
+
+Thefollowingtimingswereperformedona520STM,usingaCumana
+doublesidedfloppy,andtheArgonautWinchester.Theyreferto
+theversionofWorminParadiseusedinSiliconDreams.
+
+
+Function                 Accumulatedtime
+
+                           Fromfloppy         FromWinchester
+
+runeditor,
+loadaspecial,
+saveit,
+quitbacktoCLI.             0:38                0:12             
+
+timeatendofcompile:       1:19                0:30
+
+timeatendoffinish:        1:41                0:36
+
+rungame,returntoCLI       1:58                0:43
+
+Thelastfiguregivesthe'developmentcycle'time.Itisclearly
+aboutthreetimesfasterfromWinchester.
+
+Costsofthevarioushardwareconfigurationsareapprox:
+
+                                   Priceincl.VAT
+     520STM                             300
+     Doublesideddrive                 140
+     B/Wmonitor                        150
+     Colourmonitor                     300
+     Winchesterdrive                   600
+
+     520STM,Doublesideddrive,ownmonitororTV.
+                              Costabout400poundsincl.
+
+     520STM,Doublesideddrive,winchester,monitor.
+                              Costabout1300poundsincl.
+
+Overatypicalworkingday,withonecompilationeverytenminutes
+onaverage,usingaWinchesterwouldsaveabout2hours.Overthe
+twomonthsorsotodevelopagame,thisisabout80hours,or
+approxtwoweeks.Forasalariedprogrammerearning12000pounds
+pa,thisis500pounds,orslightlylessthanthecostofa
+Winchester.ThusaWinchestersystemis(just)cost-beneficialfor
+developingasinglegamefromstarttofinish.
+
+
+â

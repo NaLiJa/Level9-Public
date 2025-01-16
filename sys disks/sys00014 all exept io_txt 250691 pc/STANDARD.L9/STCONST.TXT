@@ -1,0 +1,11 @@
+; Machine constants
+; MCONST.TXT
+const
+ st=1 ; conditional assembly
+ ReallyST=1
+ Amiga=0
+ pc=0
+ notPc=1
+ Scrolling=0
+ AllowMusic=0
+ ALlowSoundEffects=0

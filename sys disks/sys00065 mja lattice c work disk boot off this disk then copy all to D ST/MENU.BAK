@@ -1,0 +1,46 @@
+####################################
+#                                  #
+# Standard C MENU+ info file       #
+#                                  #
+# Copyright (c) 1986 Metacomco plc #
+#                                  #
+####################################
+#
+# Tools menu item definitions
+#
+# Form: <item name> = <command line definition>
+#
+
+TOOLS
+
+EDIT           =  {command_dir}\ED.TTP {path}\{file}.{type} {editor_opts}
+COMPILE        =  {command_dir}\LC.TTP {compiler_opts} {path}\{file}
+LINK           =  {command_dir}\LINK.TTP {path}\{file} {linker_opts} ;;
+"COMPILE+LINK" =  {command_dir}\LC.TTP {compiler_opts} {path}\{file} +
+                  {command_dir}\LINK.TTP {path}\{file} {linker_opts} ;;
+RUN PROGRAM    =  {path}\{file}.PRG {run_opts} ;
+
+#
+# File menu item definitions
+#
+# Form: <item name> = <file pattern>
+#
+
+FILE
+
+Choose     =  *.*
+Choose C   =  *.C
+
+#
+# Option menu item definitions
+#
+# Form: <option name> = <initial value>
+#
+
+OPTIONS
+
+COMMAND_DIR   = {command_dir}
+EDITOR_OPTS   =
+COMPILER_OPTS = -g{command_dir}\
+LINKER_OPTS   = -with {command_dir}\C -debug -nolist
+RUN_OPTS      =

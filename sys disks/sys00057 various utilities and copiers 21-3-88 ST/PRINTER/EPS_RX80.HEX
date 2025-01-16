@@ -1,0 +1,261 @@
+****************************************************************
+*
+*    Epson RX-80 Matrix Printer Driver Configuration Table
+*
+*    some commands for FX80 and JX80 are also included,
+*    but they are commented out.
+*
+*    This file contains tables defining the code sequences
+*    to be sent to the printer to perform various functions
+*    and to access the characters from codes in the Atari
+*    character set.
+*
+****************************************************************
+
+*
+* Name of printer
+* ===============
+*
+Epson RX-80
+
+*
+* Miscellaneous configurable variables
+* ====================================
+*
+* 1: printer type, 0=dot matrix, 1=daisy wheel
+*    Note if printer type is 0 the following 4 variables are never used.
+* 2: unit width of one character
+* 3: unit height of one line
+* 4: Approximate middle of carriage after formfeed
+* 5: Carriage shift for bold overstrike
+*
+0, 0, 0, 0, 0
+
+*
+* Printer characteristics
+* =======================
+*
+* This table specifies the printer command sequences.
+* If the top bit of a code is set, then this indicates the position
+* of a parameter passed to the printer. The code whose top bit is set
+* in this table is added to the parameter passed before being sent to the
+* printer. It is not used in all command sequences, only in those where 
+* the printer requires  a variable value such as the length of a vertical 
+* tab.
+*
+* 0            * Character width
+1, D, A        * Linefeed WITH return
+* 2            * Forward print
+* 3            * Reverse print
+* 4, 1B, 42, 80, 0, B                * Vertical tab to line (FX or LX)
+* 5            * Absolute horizontal tab 
+6, 1B, 45      * Draft bold on
+7, 1B, 46      * Draft bold off
+* 8, 1B, 45      * Near Letter Quality (NLQ) bold on (LX80)
+* 9, 1B, 46      * NLQ bold off
+A, 1B, 34      * Draft italic on
+B, 1B, 35      * Draft italic off
+* C, 1B, 78, 0, 1B, 34, 1B, 47       * NLQ italic on
+* D, 1B, 48, 1B, 35, 1B, 78, 1       * NLQ italic off
+* E            * Draft light on
+* F            * Draft light off
+* 10, 1B, 78, 0  * NLQ light on
+* 11, 1B, 78, 1  * NLQ light off
+12, 1B, 53, 0  * Draft superscript on
+13, 1B, 54     * Draft superscript off
+* 14, 1B, 78, 0, 1B, 53, 0           * NLQ superscript on
+* 15, 1B, 54, 1B, 78, 1              * NLQ superscript off
+16, 1B, 53, 1  * Draft subscript on
+17, 1B, 54     * Draft subscript off
+* 18, 1B, 78, 0, 1B, 53, 1           * NLQ subscript on
+* 19, 1B, 54, 1B, 78, 1              * NLQ subscript off
+1A, 1B, 2D, 1  * Draft underline on
+1B, 1B, 2D, 0  * Draft underline off
+* 1C, 1B, 2D, 1  * NLQ underline on
+* 1D, 1B, 2D, 0  * NLQ underline off
+1E, C          * Formfeed
+1F, 12         * Horizontal initialisation
+* 20           * Vertical initialisation
+21, 1B, 40     * Termination: printer reset
+0              * NULL termination byte
+
+*
+* Translation Table
+* =================
+*
+* This table provides translation from single Atari input bytes into
+* multiple Epson printer codes, and is useful for printing extraneous
+* characters such as accented characters etc. All characters are 
+* subjected to translation, but if there is no entry in the table for
+* a particular code, then the original code is sent to the printer.
+*
+* The entries must be arranged in ascending order of Atari input
+* code. The table is NULL terminated.
+* 
+
+0                                  * NULL: print a space 
+1, 1B, 52, 0, 7C, 8, 5E            * Up arrow: USA | backspace USA ^
+2, 1B, 52, 0, 7C, 8, 76            * Down arrow: USA | backspace USA v
+3, 2D, 8, 3E  * Right arrow: - backspace >
+4, 3C, 8, 2D  * Left arrow: - backspace <
+5             * No close box
+6             * No size box
+7             * No full box
+8             * No tick
+9             * No clock
+A             * No bell
+B             * No musical note
+E             * No LH Atari symbol     
+F             * No RH Atari symbol
+10, 30        * LCD 0
+11, 31        * LCD 1
+12, 32        * LCD 2    
+13, 33        * LCD 3
+14, 34        * LCD 4
+15, 35        * LCD 5
+16, 36        * LCD 6
+17, 37        * LCD 7     
+18, 38        * LCD 8
+19, 39        * LCD 9     
+23, 1B, 52, 0, 23        * # from USA fount
+24, 1B, 52, 0, 24        * $ from USA fount
+40, 1B, 52, 0, 40        * @ from USA fount
+5B, 1B, 52, 0, 5B        * [ from USA fount
+5C, 1B, 52, 0, 5C        * \ from USA fount
+5D, 1B, 52, 0, 5D        * ] from USA fount
+5E, 1B, 52, 0, 5E        * ^ from USA fount
+60, 1B, 52, 0, 60        * ' from USA fount
+7B, 1B, 52, 0, 7B        * { from USA fount
+7C, 1B, 52, 0, 7C        * | from USA fount
+7D, 1B, 52, 0, 7D        * } from USA fount
+7E, 1B, 52, 0, 7E        * ~ from USA fount
+7F                       * No triangle
+80, 43, 8, 2C            * Capital C cedilla: C backspace ,
+81, 1B, 52, 2, 7D        * Lower case u umlaut from German fount
+82, 1B, 52, 1, 7B        * Lower case e acute from French fount 
+83, 61, 8, 1B, 52, 0, 5E * Lower case a circumflex: a backspace USA ^
+84, 1B, 52, 2, 7B        * Lower case a umlaut from German fount
+85, 1B, 52, 1, 40        * Lower case a grave from French fount
+86, 1B, 52, 4, 7D        * Lower case a boll from Danish 1 fount
+87, 1B, 52, 1, 5C        * Lower case c cedilla from French fount
+88, 65, 8, 1B, 52, 0, 5E * Lower case e circumflex: e backspace USA ^
+89, 65, 8, 1B, 52, 1, 7E * Lower case e umlaut: e backspace French umlaut
+8A, 1B, 52, 1, 7D        * Lower case e grave from French fount
+8B, 69, 8, 1B, 52, 1, 7E * Lower case i umlaut: i backspace French umlaut
+8C, 69, 8, 1B, 52, 0, 5E * Lower case i circumflex: i backspace USA ^
+8D, 1B, 52, 6, 7E        * Lower case i grave from Italian fount
+8E, 1B, 52, 2, 5B        * Capital A umlaut from German fount
+8F, 1B, 52, 4, 5D        * Capital A boll from Danish 1 fount
+90, 1B, 52, 9, 40        * Capital E acute from Norwegian fount
+91, 1B, 52, 4, 7B        * Lower case ae dipthong from Danish 1 fount
+92, 1B, 52, 4, 5B        * Capital AE dipthong from Danish 1 fount
+93, 6F, 8, 1B, 52, 0, 5E * Lower case o circumflex: o backspace USA ^
+94, 1B, 52, 2, 7C        * Lower case o umlaut from German fount
+95, 1B, 52, 6, 7C        * Lower case o grave from Italian fount
+96, 75, 8, 1B, 52, 0, 5E * Lower case u circumflex: u backspace USA ^
+97, 1B, 52, 1, 7C        * Lower case u grave from French fount
+98, 79, 8, 1B, 52, 1, 7E * Lower case y umlaut: y backspace French umlaut
+99, 1B, 52, 2, 5C        * Capital O umlaut from German fount
+9A, 1B, 52, 2, 5D        * Capital U umlaut from German fount
+9B, 63, 8, 1B, 52, 0, 7C * c cent: c backspace USA |
+9C, 1B, 52, 3, 23        * Pound sterling from UK fount
+9D, 1B, 52, 8, 5C        * Yen from Japanese fount
+9E, 1B, 52, 2, 7E        * Esszet from German fount
+9F, 66                   * Lower case swash f: print f
+A0, 61, 8, 27            * Lower case a acute: a backspace '
+A1, 69, 8, 27            * Lower case i acute: i backspace '
+A2, 6F, 8, 27            * Lower case o acute: o backspace '
+A3, 75, 8, 27            * Lower case u acute: u backspace '
+A4, 1B, 52, 7, 7C        * Lower case n tilde from Spanish fount
+A5, 1B, 52, 7, 5C        * Capital N tilde from Spanish fount
+A6, 61, 8, 5F            * Lower case a underline: a backspace underline
+A7, 6F, 8, 5F            * Lower case o underline: o backspace underline
+A8, 1B, 52, 7, 5D        * Inverted ? from Spanish fount
+A9                       * No top left corner     
+AA                       * No top right corner
+AB                       * No 1/2 fraction
+AC                       * No 1/4 fraction
+AD, 1B, 52, 7, 5B        * Inverted ! from Spanish fount
+AE                       * No <<
+AF                       * No >>
+B0, 61, 8, 1B, 52, 0, 7E * Lower case a tilde: a backspace USA ~
+B1, 6F, 8, 1B, 52, 0, 7E * Lower case o tilde: o backspace USA ~
+B2, 1B, 52, 4, 5C        * Capital crossed O from Danish 1 fount
+B3, 1B, 52, 4, 7C        * Lower case crossed o from Danish 1 fount
+B4                       * No lower case oe dipthong
+B5                       * No capital OE dipthong
+B6, 41                   * No capital A grave: print A
+B7, 41                   * No capital A tilde: print A
+B8, 4F                   * No capital O tilde: print O
+B9, 1B, 52, 1, 7E        * Umlaut from French fount
+BA, 27                   * Acute: print '
+BB                       * No dagger
+BC                       * No paragraph symbol
+BD                       * No copyright symbol
+BE                       * No Registered symbol
+BF                       * No Trademark symbol
+C0, 79, 8, 1B, 52, 1, 7E * ij ligature: y backspace French umlaut
+C1, 59                   * Capital IJ ligature: print Y
+C2        * No Hebrew...
+C3
+C4
+C5
+C6
+C7
+C8
+C9
+CA
+CB
+CC
+CD
+CE
+CF
+D0
+D1
+D2
+D3
+D4
+D5
+D6
+D7
+D8
+D9
+DA
+DB
+DC
+DD, 1B, 52, 2, 40   * Section mark from German fount
+DE        * No dropped circumflex
+DF        * No infinity
+E0        * No alpha
+E1, 1B, 52, 2, 7E   * Esszet from German fount     
+E2        * No Greek....
+E3
+E4
+E5
+E6
+E7
+E8
+E9
+EA
+EB
+EC
+ED
+EE
+EF
+F0, 3D, 8, 5F       * Equivalence: = backspace _
+F1, 2B, 8, 5F       * +-: + backspace _
+F2, 3E, 8, 5F       * >=: > backspace _
+F3, 3C, 8, 5F       * <=: < backspace _
+F4                  * No integral top piece
+F5                  * No integral bottom piece
+F6, 3A, 8, 2D       * Division sign: : backspace -
+F7                  * No twiddly = symbol
+F8, 1B, 52, 1, 5B   * Degree symbol from French fount
+F9        * No superior bullet
+FA        * No inferior bullet
+FB        * No square root sign
+FC        * No superior n
+FD        * No superior 2
+FE        * No superior 3
+FF        * No macron     
+0

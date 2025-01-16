@@ -1,0 +1,161 @@
+
+
+            AEON DISPLAY. COPYRIGHT (C) 1988. LEVEL 9 
+            ----------------------------------------- 
+
+The game is played on a full screen display, with the hero moved 
+by the keyboard, mouse or joystick. Two keys or mouse buttons use 
+use whatever are carried in his left and right hands respectively, 
+or the fire button uses what is in the current hand. 
+
+Space, both mouse buttons together, or a long press of fire selects 
+the possessions screen. Other actions are initiated by walking over 
+objects shown on the screen, or bumping into them. 
+
+The action display is shown below (characters represent 5*8 pixels): 
+
+ +-------+-----------------------------------------------+-------+ 
+ | <40>  |                      <240>                    |  <40> | 
+ |       |                                               |       |  
+ |       |                                           ^   |       | 
+ |       |                                           56  |       |  
+ |       |                                           v   |       |  
+ |       |  ^                                            |       |  
+ |       | 128              +----------------------------+       | 
+ |       |  v               |                            |       | 
+ |    .  |                +-+    balcony                 |  .    |  
+ |   /|  |                |  (some rooms)            ^   |  |\   |   
+ |  / |  |              +-+                          56  |  | \  | ^ 
+ |  | |  |              |                XXXXXX      v   |  | |  |176 
+ |  | |  | XXXXXX     +-+                XXXXXX          |  | |  | v 
+ |  | |  +-XXXXXX---+-+------------------XXXXXX----------+  | |  |  
+ |  | | /  XXXXXX                        XXXXXX           \ | |  |  
+ |  | |/   XXXXXX        player/         XXXXXX            \| |  | 
+ |  | /    XXXXXX    <   monster  >      XXXXXX      ^      \ |  |  
+ |  |/     XXXXXX        sprites         XXXXXX      64      \|  | 
+ |  /      XXXXXX        64*32           XXXXXX      v        \  |  
+ | /       XXXXXX                                              \ | 
+ |/                                     door                    \|  
+ +================================='------------'================+  
+ | l.hand   armour   health    head    wealth   dungeon   r.hand | ^
+ |          class             +level             level           | 24
+ +---------------------------------------------------------------+ v  
+
+STATUS BAR. The bottom of the screen shows a left hand and a right 
+hand, each cupping the object held. Armour class is indicated by a 
+helmet and a number, health by a partly-filled bar, wealth a bag of 
+gold and a number, and dungeon level by a dragon head and a number. 
+In the middle is the head of the chosen character (wizard, warrior 
+or jester), with a short name and a number for the hero's current 
+current experience level (e.g 9.85 would show that he was 9th level 
+and well on the way to 10th). 
+
+
+SPRITE NUMBERS. We plan to move the player and at least three other 
+sprites, presumably enemies. Plus a few missiles in flight (though 
+we will only let people fire one "arrow" at once). 
+
+
+SPRITES are typically 64*32, though e.g a sword can extend further. 
+
+Humanoid sprites are displayed "Double Dragon" fashion - facing 
+diagonally, even if the creature moves orthoganally. (This takes 
+only 40% as much ROM as holding all eight views, and avoids the 
+rather boring view from directly behind.) Animals, on the other 
+hand, will simply be shown from the side - facing left or right. 
+
+The player sprite shows the current armour and weapons. If the 
+player has a shield in his left hand, a sword in his right hand and 
+owns a helmet, this is what will be seen. (The sprite data is built 
+up, identikit fashion, as the object screen is left). 
+
+The aim is for people and monsters to look solid and realistic. 
+
+We will, however, ignore such realism when it seems right to do so. 
+When the player fires a bow, the animated sequence of him stringing 
+and firing an arrow will not show the shield he may be carrying (it 
+would look odd). 
+
+
+SPRITES IN RAM. To restrict the RAM needed for sprites, we only 
+hold those parts of animation frames which change... When the 
+player walks, for example, his head and upper body need not change 
+- they just move sideways, with a one-or-two pixel dip at the low 
+point of each stride - so, if his legs are replaced on a 5-frame 
+cycle, this is the equivalent of only 2 whole frames. 
+
+We will try to ensure that sprite data is ready before use. If a 
+group of orcs are about to enter stage right, the program will try 
+to pre-load appropriate sprite data. Likewise, if the player goes 
+near a bean stalk, there should be a second or two to get the 
+"climbing sequence" ready before it is needed. 
+
+If creatures wade through water or vegetation, their legs need not 
+be shown at all, which is probably the easiest special animation. 
+
+
+BACKGROUND. Aeon is a room-based system and the background does not 
+scroll. Instead, when the player leaves the current room (via back, 
+side or front) there is a brief pause and the next one is displayed. 
+
+The background has extensive spot animation, including all those 
+flickering flames and swinging pendulum effects that you either 
+love or hate, but that are good for attracting attention. 
+
+Each backdrop is built up from a (relatively) limited selection of 
+previously-drawn tiles, in the usual way when trying to decorate a 
+lot of rooms with limited graphics data. But, in addition, we have 
+quite cle long enough to 
+recognise it. 
+
+
+POSSESSIONS SCREEN. 
+
+Space, both mouse buttons together, or a long press of fire toggles 
+between the action display and the possessions screen. On this, 
+keys, the mouse or joystick moves an eye pointer among the objects 
+you own - in just the same way as the player moves on the action 
+screen - and an enlarged view of the current object is seen at the 
+top right. 
+
+Press a key or mouse button to to switch the current object with 
+whatever is held in the cor long enough to 
+recognise it. 
+
+
+POSSESSIONS SCREEN. 
+
+Space, both mouse buttons together, or a long press of fire toggles 
+between the action display and the possessions screen. On this, 
+keys, the mouse or joystick moves an eye pointer among the objects 
+you own - in just the same way as the player moves on the action 
+screen - and an enlarged view of the current object is seen at the 
+top right. 
+
+Press a key or mouse button to to switch the current object with 
+whatever is held in the corresponding hand. When using the joystick, 
+move the eye over a hand and press fire to make it the current hand, 
+and later press fire to swap the current object with what it holds. 
+
+The possessions display is below (characters represent 10*16 pixels): 
+
+                   <120>           <200> 
+               +-----------+------------------+ 
+             ^ |  big pic  | .   .   .   .   .|  
+            96 |    of     |     (objects)    |  
+             v |  current  | .   .   .   .   .| ^
+               |  object   |                  |176
+               |           | *   @   .   .   .| v
+               +-----------+                  |  
+             ^ |           | /   /   /   O   *| 
+            80 | NAME OF   |                  |  
+             v | THE GAME  |  give  eat  drop | 
+               |           |                  |  
+               +==============================+ ^ 
+               |lh ac health level gold dgn rh| 24
+               +------------------------------+ v 
+
+The status bar is the same as that on the action display. And the 
+give eat and drop icons are possibly a head and shoulders picture 
+of an anonymous person, an open mouth and an arrow pointing to the 
+ground, respectively. 

@@ -1,0 +1,184 @@
+; Standard adventure source, copyright (C) 1988 Level 9 Computing.
+;
+; SCONST, game-specific constants. You will probably need to change 
+; most of the values of these. 
+;
+; A standard labelling convention for constants is that constants 
+; preceded by I (e.g ILOOK) are relative to their appropriate offset 
+; (e.g verboffset).
+;
+CONST
+ StandardAdventure=1405 ; unique game identifier value
+;
+ AllowBoat=0 ; set to 1 if you want boat/vehicle code
+;
+; STARTsynthSHORTdescs=1199 ; shortroomdescs+minsynthroom
+ SHORTroomDESCS=800
+ LONGroomDESCS=1100
+;;
+ MAXMOVEABLE=109 ; MAX OBJECT WHICH MAY BE TAKEN, THROWN ETC.
+ MAXMOVEAPLUS1=110
+
+ xmax=3 ; co-ords go 0..xmax - remember to change room 1 exits.
+ xmaxplus1=4
+ ymax=3
+; 
+ minsynthroomminus2=218 ; 231
+ minsynthroomminus1=219 ; 232
+ minsynthroom=220 ; 233 ; the first room on the grid (bottom left hand corner)
+ maxsynthroom=248
+
+ minsceneryobj=180
+ minsceneryobjminus1=179
+ maxsceneryobj=190
+ maxsceneryobjplus1=191
+ minsceneryobjtimes2minus1=359
+ maxsceneryobjtimes2plus2=382
+ numsceneryobjplus1=11
+;
+ minweaponminus1=39
+ minweapon=40
+ maxweapon=43
+ maxweaponplus1=44
+;
+ minclothes=99 ; 60
+ maxclothes=99 ; 61
+;
+ minfood=80
+ maxfood=81
+ maxfoodplus1=82
+
+ mintreasure=84 ; used for ingredients range in gnome2
+ maxtreasure=91 ; used for ingredients range in gnome2
+
+ minallobject=40
+ maxallobject=129
+
+ MAXOBJECTVISIBLE=169
+ MAXOBJECT=189 ; includes scenery objects.
+; goes wrong for maxobject>190 (dunno why!)
+; - inventory gets a funny value for hisearchpos (24)
+ MAXOBJECTPLUS1=190
+; 
+ MINOMNI=190 ; 158 ; all real objects above this are omni-present
+ MINOMNIMINUS1=189 ; 159
+ MAXOMNI=260 ; must include ieverything, except, it
+;
+; Preposition values (all relative to prepoffset)
+;
+ FASTENEDTO=14
+
+ through=209
+;
+; VERBS...
+ iburn=115
+ ikiss=129
+ ipast=162
+ iwalk=164
+ icatch=165
+;---
+;
+; Offsets into SCORETABLE.. ( table 7 ) (starts at 32...)
+ scBase=32
+
+ scmax=75
+ scmaxplus1=76
+
+ VisitTableStart=76 ; 34
+ VisitTableEnd=255 ; 213 ; VisitTableStart + (179=num of "Real" rooms)
+
+ MeetingTable=255 ; 213
+ MeetingTableEnd=319 ; 277 ; meetingTable+MaxNpc
+;
+; Objects..
+ user=1
+
+
+ ithing=246
+ iroom=243
+;
+ minpeople=1 ; = creaturebase
+ maxpeople=64 ;
+ maxpeopleplus1=65
+;
+ creaturebase=1 ; including people, user etc.
+ creaturebaseminus1=0 ; including people, user etc.
+ MINNPC=2 ; all except user
+ MINNPCMINUS1=1 ; all except user
+ MAXNPC=64
+ MAXNPCPLUS1=65
+ MAXTALKINGNPCPLUS1=40
+;
+; npc status in list 6..
+ NPCTABLESIZE=520 ; MAXNPCPLUS1*NpcEntrySize
+ NPCTABLESIZEPLUS8=528
+ NPCCURRENTOFFSET=0
+;
+ NPCENTRYSIZE=8
+ 
+; npc command queues follow the above in list 6..
+ npcstackbase=520 ; immediately after npc table
+ npcstackbaseplus5=525
+ maxnpcentries=52 ; 5 bytes per queued-command entry on stack
+;
+ npcstackentrysize=5; each entry is 5 bytes (hence the 5's above)
+;
+ npctablesizetozero=1535 ; now fixed. was 785
+;
+; offsets within each npc table entry in list 6..
+ enemyoffset=0
+ followoffset=1 ; person to follow normally
+ masteroffset=2 ; the person or creature who subdued this npc
+ hitpointoffset=3
+ hatredoffset=4 ; the amount which this npc hates its enemy
+ npcptroffset=5
+ boredomoffset=6
+;>>l2 attentionoffset=7
+; and offsets within each corresponding entry in npcinitial, list 5..
+ attackoffset=2
+; hitpoint offset=3
+ obedienceoffset=4
+ patienceoffset=5
+ goldsingingoffset=6 ; in static data - word (hi byte first)
+;
+; 
+;----
+
+ s1=1 ; pride
+ s2=2 ; wrath
+ s3=3 ; envy
+ s4=4 ; lust
+ s5=5 ; gluttony
+ s6=6 ; avarice
+ s7=7 ; sloth
+ v1=8 ; lackOfFaith
+ v2=9 ; lackOfCharity
+ v3=10 ; injustice
+ v4=11 ; lackOfFortitude
+ v5=12 ; lackOfPrudence
+ v6=13 ; intemperence
+ com1=14 ; worshipAnotherGod
+ com2=15 ; gravenImage
+ com3=16 ; to take the name of Lord your God in vain
+ com4=17 ; not to remember the Sabbath] ;? is this possible
+ com5=18 ; not to honour your parents] ; ?ditt
+ com6=19 ; to kill
+ com7=20 ; to commit adultery
+ com8=21 ; to steal
+ com9=22 ; to bear false witness against your neighbour
+ com10=23 ; to covet
+
+;----
+
+TABLE
+ list6=6
+
+; game-specific variables...
+
+VAR
+ TotalMoves
+ ProblemObject ProblemVerb
+ gdCurrentSave gdHiSave
+ GalahadComment
+;---
+ GeneralScoreAddition

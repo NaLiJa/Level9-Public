@@ -1,0 +1,299 @@
+;Music not required for initial CyberDrome release.
+; This file removed. Was doing odd things, like displaying some
+; random dots before the first screen build; corrupting the
+; second screen; causing NPPC to lose its session numbers; crashing
+; at overlay switches and similar obscure bugs.
+
+var
+const
+begin
+
+.AllocateSamplesAndMusic
+.LoadSamplesForGame
+.PlaySample
+.StopTune
+  return
+
+;------------------------------------------------
+
+;;** ; MUSIC.TXT
+;;** ;
+;;** ; Mike Austin May 1990
+;;** ;
+;;** ; Copyright (C) 1990 Level 9 Computing Ltd
+;;** ;
+;;** var
+;;** ;; NextMusic ; contains next music
+;;** ; LastTunePlayed ; set to the value of NextMusic for the
+;;** ; last tune we've actually asked the driver for.
+;;**  HaveDoneStop ; set to 1 when we've asked for the current tune
+;;** ; to stop - i.e. at the next frame build, the driver should be
+;;** ; ready to play the next tune.
+;;**  MusicRepeatCount
+;;** ; SingleTrackMusic
+;;** 
+;;** const
+;;**  MusicDebug=0 ;**********************************
+;;** 
+;;** begin
+;;** ;---------
+.CopyFilename
+; from IntroTables(v1) to list17(8)
+ v2=8
+.CF2
+ v3=IntroTables(v1)
+; cif TrapOutOfRange ; add code to trap out-of-range list writes
+;  if v2>30 then CFBug
+; cend
+ list17(v2)=v3
+ add v1,c1
+ add v2,c1
+ if v3<>0 then CF2
+.PTFSRet
+ return
+
+; cif TrapOutOfRange ; add code to trap out-of-range list writes
+;.CFBug
+;  break ;Range Trap******
+;  break ;Range Trap******
+;  return
+; cend
+;----
+;;** 
+;;** ;.ConvertToSingleTrack
+;;** ;; if playing single-track tunes, convert filename to .MI1
+;;** ; code -
+;;** ; v2=8
+;;** ;.Conv1
+;;** ; v3=IntroTables(v1)
+;;** ; if v3=46 then Conv2 ; '.'
+;;** ; add v1,c1
+;;** ; if v3<>0 then Conv1
+;;** ; goto Conv3
+;;** ;
+;;** ;.Conv2
+;;** ; add v1,c3 ; skip on to 'D' of '.MID'
+;;** ; v2=49 ; '1'
+;;** ; list17(v1)=v2
+;;** ;
+;;** ;.Conv3
+;;** ; code +
+;;** ; return
+;;** ; 
+;;** ; =========================================================== 
+;;** ; 
+;;**  code - 
+;;** .iPlayTuneForScene
+;;**  code + 
+;;**   gosub cPlayTuneForScene
+;;**  code - 
+;;**  Return 
+;;**  code +
+;;** ; 
+;;** .PlayTuneForScene
+;;** .cPlayTuneForScene
+;;** ; NextMusic is offset in IntroTables of tune to play
+;;**  cif AllowMusic
+;;**   MusicOn=1
+;;**   if MusicOn=0 then PTFSReturn
+;;**   if MusicOn=255 then PTFSReturn ; No music on machine
+;;**   MusicRepeatCount=255 ; forever
+;;**   if NextMusic<>0 then PTFSTune ; no new tune
+;;**  cend
+;;** .PTFSReturn
+;;**  return
+;;** ; 
+;;** ; ----------------------------------------------------------- 
+;;** ; 
+;;**  code - 
+;;** .iPlayTuneOnceForScene
+;;**  code + 
+;;**   gosub cPlayTuneOnceForScene
+;;**  code - 
+;;**  Return 
+;;**  code +
+;;** ; 
+;;** .PlayTuneOnceForScene
+;;** .cPlayTuneOnceForScene
+;;** ; NextMusic is offset in IntroTables of tune to play
+;;**  cif AllowMusic
+;;**   if MusicOn=0 then ptofsReturn
+;;**   if MusicOn=255 then ptofsReturn ; No music on machine
+;;**   MusicRepeatCount=0 ; once 
+;;**   if NextMusic<>0 then PTFSTune ; no new tune
+;;**  cend
+;;** .ptofsReturn 
+;;**  return
+;;** ; 
+;;** ; =========================================================== 
+;;** ; 
+;;** .PTFSTune
+;;**  if NextMusic=0 then ptofsReturn
+;;**  if LastTunePlayed=NextMusic then ptofsReturn
+;;** ;; return ; we've just asked for this tune - don't ask again
+;;** 
+;;** ;;.PTFST2
+;;**  cif AllowMusic
+;;**  LastTunePlayed=NextMusic ; write it down as having requested this one
+;;** ;; if HaveDoneStop=1 then PTFSTune2
+;;** 
+;;** ; cif MusicDebug
+;;** ;  v1=7
+;;** ;  gosub @MCEnableTextBuffer
+;;** ;  code -
+;;** ;  prs " Stop: "
+;;** ;  message cr
+;;** ;  code +
+;;** ;  gosub @WaitKey
+;;** ; cend ; MusicDebug
+;;** 
+;;** 
+;;** 
+;;**  v1=0 ; score 0 for everything at the moment.
+;;** ; v2 not needed
+;;**  v3=2 ; stop
+;;**  gosub @MCPlayScore
+;;** ;; HaveDoneStop=1
+;;** ;; return
+;;** 
+;;** .PTFSTune2
+;;** ;; HaveDoneStop=0 ; reset the flag so the next tune will do a stop first
+;;** 
+;;** 
+;;**  &v1=IntroTables(NextMusic)
+;;**  gosub @CopyFilename
+;;** 
+;;** 
+;;** ; if SingleTrackMusic=0 then Conv4
+;;** ; gosub @ConvertToSingleTrack
+;;** ;
+;;** ;.Conv4
+;;** 
+;;**  cif MusicDebug
+;;**   push v1
+;;**   push v2
+;;**    v1=7
+;;**    gosub @MCEnableTextBuffer
+;;**    code -
+;;** xxxxxxxxxxxxxxxxxxxxxxx
+;;**    prs " Load: "
+;;**    code +
+;;**    v1=list17(8)
+;;**    gosub @MCOswrchV1
+;;**    v1=list17(9)
+;;**    gosub @MCOswrchV1
+;;**    v1=list17(10)
+;;**    gosub @MCOswrchV1
+;;**    v1=list17(11)
+;;**    gosub @MCOswrchV1
+;;**    v1=list17(12)
+;;**    gosub @MCOswrchV1
+;;**    v1=list17(13)
+;;**    gosub @MCOswrchV1
+;;**    v1=list17(14)
+;;**    gosub @MCOswrchV1
+;;**    v1=list17(15)
+;;**    gosub @MCOswrchV1
+;;**    v1=list17(16)
+;;**    gosub @MCOswrchV1
+;;**    v1=list17(17)
+;;**    gosub @MCOswrchV1
+;;**    v1=list17(18)
+;;**   code -
+;;** xxxxxxxxxxxxxxxxxx
+;;**    prs " "
+;;**    print v1 ; print out ascii code.
+;;**    prs " "
+;;**   code +
+;;**    v1=13
+;;**    gosub @MCOswrchV1
+;;**    gosub @WaitKey
+;;**   pop v2
+;;**   pop v1
+;;**  cend ; MusicDebug 
+;;** 
+;;** 
+;;** ;; v1=19 ; list to load into
+;;** ;; v2=MidiOffset
+;;** ;; v3=0
+;;** ;; gosub @MCLoadFile ; filename is list17(8...)
+;;** 
+;;** 
+;;** 
+;;**  cif MusicDebug
+;;**   &v1=list17(0) ; return code
+;;**   &v2=list17(2) ; return code
+;;**   &v3=list17(4) ; return code
+;;**   &v4=list17(6) ; return code
+;;** ;  code -
+;;** ;  print v1
+;;** ;  prs " "
+;;** ;  print v2
+;;** ;  prs " "
+;;** ;  message cr
+;;** ;  print v3
+;;** ;  prs " "
+;;** ;  print v4
+;;** ;  prs " "
+;;** ;  code +
+;;**   v1=7
+;;**   gosub @MCEnableTextBuffer
+;;**   code -
+;;** xxxxxxxxxxxxxxxxxx
+;;**   prs " Init: "
+;;**   code +
+;;**   gosub @WaitKey
+;;**  cend ; MusicDebug
+;;** 
+;;** 
+;;** 
+;;** 
+;;**  v1=19 ; list
+;;**  v2=MidiOffset
+;;**  v3=19 ; adlib instrument file?
+;;**  v4=AdlibOffset
+;;**  v5=0 ; score number
+;;**  gosub @MCInitialiseScore
+;;** ;          /* Paramters:
+;;** ;                V1 list V2 offset Music Score
+;;** ;                V3 list V4 offset Adlib Instrument File
+;;** ;                V5 Score number (0-3)
+;;** 
+;;** 
+;;**  cif MusicDebug
+;;**    v1=7
+;;**    gosub @MCEnableTextBuffer
+;;**    code -
+;;** xxxxxxxxxxxxxxxx
+;;**    prs " Play: "
+;;**    code +
+;;**   gosub @WaitKey
+;;**  cend ; MusicDebug
+;;** 
+;;** 
+;;**  v1=0 ; score number
+;;**  v2=MusicRepeatCount ; 0=1 play, 1=twice, ... 255=forever
+;;**  v3=0 ; restart
+;;**  gosub @MCPlayScore
+;;** 
+;;** ;          /* Paramters:
+;;** ;                V1 Score number (0-3)
+;;** ;                V2 Repeat Flag (255=forever, 0=once, #=number of times)
+;;** ;                V3 Operation (0=restart, 1=resume, 2=stop)
+;;** ;          */
+;;**  cend ; AllowMusic
+;;**  return
+;;** ;--------          
+;;** .StopTune
+;;**  v1=0 ; score 0 for everything at the moment.
+;;** ; v2 not needed
+;;**  v3=2 ; stop
+;;**  gosub @MCPlayScore
+;;**  return
+;;** ;--------          
+;;** cif MusicDebug
+;;** .waitkey
+;;**  gosub @MCOsrdch
+;;**  if v1=0 then WaitKey
+;;**  return
+;;** cend

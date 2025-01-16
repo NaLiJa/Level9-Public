@@ -1,0 +1,97 @@
+
+
+              AEON DESIGN. COPYRIGHT (C) 1988. LEVEL 9 
+              ---------------------------------------- 
+
+                              OUTLINE 
+                              -------
+
+Aeon combines the fast action and simple joystick control of arcade 
+games with the rich puzzles and scenery of fantasy adventures. 
+
+DISPLAY: Aeon has two displays, for action and for possessions.
+* Action display. Aeon has an aerial 3D view, similar to "Double 
+  Dragon", with large sprites (hopefully 64 by 32) and detailed, 
+  animated backgrounds. The keyboard, mouse or joystick move the 
+  player about and two keys/mouse buttons use whatever is in his 
+  left and right hand (with the joystick, press fire to use 
+  whatever is in the current hand).  
+* The possessions display shows all your belongings, and action 
+  pauses until you return to the game. The joystick moves a 
+  pointer about among them, and a window at the top left shows an 
+  enlarged view of whichever object it points at. (Press space, 
+  both mouse buttons or the fire button slowly to switch between 
+  the two screens). 
+
+PLOT SUMMARY. Climb the mountain to regain the head dragon's crown. 
+The mountain has nine levels, each starting on a mountainside ledge 
+with a shop run by a giant, neutral bird; continuing through many 
+passages defended by trolls etc; and ending by confronting the 
+dragon lord of the level. Defeat the nineth dragon to win. 
+
+The map is partly fixed and partly random, with four alternative 
+designs for each level, some random puzzles and a lot of random 
+objects and monsters. This means that the game will be different 
+each time - and people will want to play again even when they've 
+completed it once.
+
+Level themes are based around the four alchemical elements, as 
+appropriate for the dragon in charge: 
+9: Fire. Maze of Fire: Master Dragon's Realm. 
+8: Air. Mist and Smoke. 
+7: Water. Flooded Tunnels: Underwater Travel, Weed, Fish. 
+6: Earth. Necropolis. 
+5: Fire. Volcanic Crater, Fire Crevasses. 
+4: Air. Ventillation, Wind Machinery, Flags.  
+3: Water. Fish Lakes, Canals, Waterfalls. 
+2: Earth. Underground Farms: Mushrooms, Animal Pens, Mines.   
+1: Fire. Entrance Halls: Torches, Flame Jets. 
+
+COMMUNICATION BY PICTURES. Aeon is an adventure entirely without 
+words; graphic sequences replace all messages. 
+* When an object is collected, or when an interesting static 
+  object (scenery) is approached, a large picture of it will be 
+  displayed for a few seconds. This picture will oft no attempt is made to distinguish between the 
+objects of a type - e.g all potion bottles look alike. 
+
+This does not matter because, when an object is picked up, or 
+selected on the possessions screen, an enlarged picture is shown 
+and this makes its its function clear. E.g a ring of sight has a 
+gem like an eye, and a wand of lightning is shown with a jagged 
+spark at the tip. 
+
+
+OBJECT CLASS  TO ACTIVATE  NOTES
+
+Axe           Hold & use   Weapon. Also best for cutting obstacles. 
+Spear                    DETAILS 
+                              -------
+
+COMBAT 
+
+To fight, hold a weapon and push the key/button for that hand. A 
+long-range weapon (bow, wand etc) acts machine-gun fashion, but 
+with only one missile in flight at once; a hand weapon (sword, 
+spear etc) goes through an appropriate stabbing or slashing 
+sequence; and a shield moves up/down to possibly block blows. 
+
+Aeon is not like those platform games where a single injury is 
+fatal; damage is subtracted from health instead, and death 
+results when this reaches zero. Even walking unprotected across 
+lava would take a few frames to kill you. 
+
+
+TELEPORT SYSTEMS 
+
+Rapid transport around a level is by teleport discs. Stand on one 
+to vanish (with some appropriate special effect) and reappear on 
+the corresponding destination disc. Step off and back onto this to 
+return to the original place. 
+
+Teleport discs are in pairs, at opposite ends of a room. Step on to 
+the right one to teleport clockwise around the level, or the left 
+one to go anticlockwise. To go around a level, enter a room on one 
+teleport disc, walk across and leave from the other, then repeat. 
+
+There will be no major obstacles separating pairs of discs. 
+

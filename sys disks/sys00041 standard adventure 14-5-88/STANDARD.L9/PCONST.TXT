@@ -1,0 +1,15 @@
+; Standard Adventure source, copyright (C) 1988 Level 9 Computing.
+;
+; PCONST.TXT, Part-specific constants, to distinguish between parts of 
+; game. This file must be different for each part.
+;
+CONST
+ CONSTANTPARTNUM=1
+ part1=1
+ part2=0
+ part3=0
+
+ NOTpart1=0
+ NOTpart2=1
+ NOTpart3=1
+;

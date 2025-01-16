@@ -1,0 +1,17 @@
+; program to try using line-A to output text
+ dc.w $a000 ; initialise
+; now d0=a0=address of line-a variables.
+; (a1)=table of 3 pointers to system font pointers.
+ move.w #0,36(a0) ; wrt_mode
+ move.w #1,106(a0) ; foreground colour
+ move.w #0,114(a0) ; background colour
+; 84(a0) ; fbase - start of font data
+; 88(a0) ; fwidth - width of font form
+; 72(a0) ; sourcex - x-coord of of char in font
+; 74(a0) ; sourcey - ycoord of char in font
+; 76(a0) ; destx - x-pos of char on font
+; 78(a0) ; desty - y-pos of char on screen
+; 80(a0) ; delx - width of char
+; 82(a0) ; dely - height of char
+; 90(a0) ; style - flags for effects (see $a008)
+; etc....

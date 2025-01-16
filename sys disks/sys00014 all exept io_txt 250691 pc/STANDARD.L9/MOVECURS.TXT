@@ -1,0 +1,345 @@
+; MOVECURS - Cursor routines for Crystal Maze 
+; 
+ begin
+; 
+;=================================================================
+;          EXAMPLE USING CURSOR AND SCROLLING ROUTINES 
+;=================================================================
+; 
+; Example routines from main program (please keep commented), to 
+; illustrate the use of the routines in this file.   
+; 
+;;.WaitForInput 
+;; gosub @DisplayCurrentScreen 
+;; if ch=0 then @WaitForInput 
+;; RETURN 
+;; 
+;;.DisplayCurrentScreen 
+;; gosub @OpenNormalStructures ; Only if not already open 
+;; gosub @PlayTuneForScene     ; Start new tune if NextMusic>0 
+;; cif ST
+;;  gosub @AdjustScrollForST1  ; Display is faster if screen aligned 
+;; cend ; ST
+;; gosub @DisplayEverything    ; Display - room, acbs (sorted) 
+;; gosub @MapControls          ; Move cursor/map etc. 
+;; cif ST
+;;  gosub @AdjustScrollForST2 
+;; cend ; ST 
+;; return 
+; 
+;=================================================================
+;                    CURSOR MOVEMENT ROUTINES 
+;=================================================================
+; 
+; Read keyboard/mouse/joystick controls. Process cursor commands, 
+; move the cursor and scroll the map if possible/necessary. Then 
+; return any other input as an ASCII character in CH.  
+; 
+.MapControls
+ ScrollXdir=0
+ ScrollYdir=0
+ gosub @CheckKeys
+ cif Scrolling 
+  gosub @CheckMapScrolling
+ cend ; Scrolling 
+ goto @MoveTheCursor
+; 
+;=================================================================
+; 
+; Read keyboard/mouse/joystick controls. Process cursor commands 
+; and update the cursor position (CursorX/Y/Z) as necessary - but 
+; don't move its ACB because we may want to scroll the screen 
+; before doing this. 
+; 
+; Return any other input like an ASCII character in CH.  
+; 
+; Other details:
+;  Look at kbd/joystick/mouse and return dir as new movement 
+;  direction in standard adventure format. 
+;  And FireKey=0 if not pressed, 1 if pressed.
+;  And FireKeyChange=1 if pressed/released this turn
+; 
+;  And for directions, return:
+;	x1
+;   x4       x2
+;       x3
+; 
+; Non-zero means trying to move in that direction
+; and x5=x offset (single pixel movement), signed
+;     x6=y offset (single pixel movement), signed
+;     x7=direction number in standard adventure format
+;          i.e.          1
+;                     8     2
+;                    7       3
+;                     6     4
+;                        5
+; 
+.CheckKeys
+ gosub @sGetControls
+ KeyHeld=False ; No Cursor Key known to be held 
+; 
+ XSpeed=x5
+ YSpeed=x6
+ if FireKey=0 then ckNext1 
+  gosub @fire
+; 
+.ckNext1
+ &X1=WordWS(WordMouseXDistance) ; signed distance mouse has moved l/r 
+ &X2=WordWS(WordMouseYDistance) ; signed distance mouse has moved u/d 
+ &WordWS(WordMouseXDistance)=c0 
+ &WordWS(WordMouseYDistance)=c0 
+ add CursorX,X1 
+ add CursorY,X2 
+;
+; ***** 21/01/91 Cursor was being moved twice: Once by reading 
+; ***** the mouse, and secondly by reading LeftKey etc., WHICH 
+; ***** ARE SET BY MOUSE MOVEMENT IN STANDARD.TXT! - Graham
+ if x1>65528 then SmallCursorMove
+ if x1<8 then SmallCursorMove
+ if x2>65528 then SmallCursorMove
+ if x2>7 then @ckReturn ; mouse moved significantly
+.SmallCursorMove
+; 
+ if UpKey=0 then ckCursorNotUp
+ KeyHeld=True                   ; Up Cursor Key held 
+ sub CursorY,CursorSpeed
+.ckCursorNotUp
+ if RightKey=0 then ckCursorNotRight
+ KeyHeld=True                   ; Right Cursor Key held 
+ add CursorX,CursorSpeed
+.ckCursorNotRight
+ if DownKey=0 then ckCursorNotDown
+ KeyHeld=True                   ; Down Cursor Key held 
+ add CursorY,CursorSpeed
+.ckCursorNotDown
+ if LeftKey=0 then ckCursorNotLeft
+ KeyHeld=True                   ; Left Cursor Key held 
+ sub CursorX,CursorSpeed
+.ckCursorNotLeft
+; 
+.ckReturn
+ gosub @CorrectCursorPos       ; Keep Cursor on screen
+ gosub @CorrectCursorSpeed     ; Accellerate cursor if necessary 
+ return
+; 
+;=================================================================
+; 
+; Correct CursorX/Y/Z (to keep the cursor on the screen)... 
+; 
+.CorrectCursorPos 
+ if CursorY > 10000 then ccpTooHigh
+ if CursorY < TopBorder then ccpTooHigh
+ if CursorY > BottomBorder then ccpTooLow
+ goto ccpCheckLeftRight 
+.ccpTooHigh 
+ CursorY = TopBorder 
+ goto ccpCheckLeftRight 
+.ccpTooLow 
+ CursorY = BottomBorder 
+.ccpCheckLeftRight 
+ if CursorX > 10000 then ccpTooLeft
+ if CursorX < LeftBorder then ccpTooLeft
+ if CursorX > RightBorder then ccpTooRight
+ return 
+.ccpTooLeft 
+ CursorX = LeftBorder 
+ return 
+.ccpTooRight 
+ CursorX = RightBorder 
+ return 
+; 
+;=================================================================
+; 
+; Update the cursor speed, so that it accellerates under joystick 
+; or keyboard control, from 2 to MaxCursorSpeed. 
+; 
+.CorrectCursorSpeed 
+.CheckCursorSpeed
+ if KeyHeld>0 then ccsIncreaseCursorSpeed 
+ TimeHeld=0 
+ CursorSpeed=0 
+ return 
+; 
+.ccsIncreaseCursorSpeed 
+ add TimeHeld,c1    ; count for key kept pressed
+ add CursorSpeed,c2 ; increase cursor speed                  
+ if CursorSpeed<MaxCursorSpeed then ccsReturn 
+ CursorSpeed=MaxCursorSpeed 
+.ccsReturn 
+ return 
+; 
+;=================================================================
+; 
+; Reposition the cursor (move its ACB to CursorX/Y/Z)... 
+; 
+.RepositionCursor 
+.MoveTheCursor
+ dx4 = CursorACB
+ gosub @ReadACBdx4
+ dv2=CursorX     ; calculate coordinates relative to screen... 
+ sub dv2,ScreenX 
+ dv3=CursorZ 
+ dv4=CursorZ 
+ sub dv4,CursorY ; H=Z-Y (because Y=Z-H) 
+ sub dv4,ScreenY
+ gosub @MoveACBdx4 
+ return
+; 
+;=================================================================
+; 
+; Set up cursor at Z=384 in the middle of the area of the screen 
+; within which it can move. 
+; 
+.SetUpCursor 
+ dv1=Cursor
+ CursorX=LeftBorder 
+ add CursorX,RightBorder  ; CursorX = dv2 = X coord of map centre 
+ asr CursorX 
+ dv2=CursorX  
+ sub dv2,ScreenX 
+ CursorZ = 384            ; CursorZ = dv3 = Z coordinate (384) 
+ dv3=CursorZ 
+ CursorY=TopBorder 
+ add CursorY,BottomBorder ; CursorY       = Y coord of map centre 
+ asr CursorY 
+ dv4 = CursorZ 
+ sub dv4,CursorY          ; dv4 = H coord: Z-Y. (Because Y=Z-H) 
+ sub dv4,ScreenY 
+ gosub @StartFreeACBdv1  ; Starts ACB dv1 at dv2-4 
+ CursorACB = dx4 
+ CursorSpeed=0 
+ return
+;
+;;=================================================================
+;                          SCROLL ROUTINES 
+;=================================================================
+; 
+; On ST, for scrolling game, scroll screen across to end on a "fast" 
+; scroll position - i.e. one where the buffer screen can be copied 
+; directly to the logical screen, without any shifting or rotation.
+; 
+; See short example routine at the top of this file. 
+; 
+ cif ST 
+.AdjustScrollForST1 ; called before "DisplayEverything"... 
+  if CurrentScreen<>GameMap then asfstNoSpeedUpST2
+  if ScrollXdir<>0 then asfstNoSpeedUpST
+  dx1=ScreenX
+  dx2=15
+  and dx1,dx2
+  if dx1<8 then asfstNoSpeedUpST2
+; on ST, unless Scrollxpos mod 15 is >8, DISPLAYROOM is much slower.
+  ScrollXdir=8
+  if LastNonZeroScrollXdir<200 then asfstNoSpeedUpST
+  ScrollXdir=65528 ; -8
+.asfstNoSpeedUpST
+  LastNonZeroScrollXdir=ScrollXdir
+.asfstNoSpeedUpST2
+  return 
+ cend ; ST 
+; 
+; The ST display is faster if screen aligned, for scrolling games. 
+; And because the system only handles 8 pixel horizontal scrolling, 
+; it looks better if the game does several scrolls at once - it 
+; kinda fools the eye into thinking the movement is smooth.
+; 
+; See short example routine at the top of this file. 
+; 
+ cif ST 
+.AdjustScrollForST2 ; Called after "MapControls"... 
+  if ScrollXdir<>0 then COLNotSpeedST
+  if RepeatScroll=0 then COLNotSpeedST
+  if RepeatScroll>200 then COLNotSpeedST
+  sub RepeatScroll,c1
+  ScrollXdir=LastNonZeroScrollXdir
+  gosub @MoveTheCursor
+.COLNotSpeedST
+  return 
+ cend ; ST 
+; 
+;================================================================= 
+; 
+; Check whether we want to scroll the screen, so convert the 
+; map-based coordinates into screen-based coordinates.
+; 
+; CursorX/Y are coordinates relative to the map
+; ScreenCursorX/Y are coordinates relative to the screen (they are 
+; now only used in this routine). 
+; 
+.CheckMapScrolling
+ cif Scrolling 
+  ScreenCursorX=CursorX 
+  Sub ScreenCursorX,ScreenX 
+  ScreenCursorY=CursorY 
+  Sub ScreenCursorY,ScreenY 
+; 
+  if KeyHeld=0 then @mc3
+; First check for Map borders
+  if CursorY > MapTopBorder then scheckMapBottom
+     ScrollYdir = 0
+     goto @sCheckMapleft
+.sCheckMapBottom
+   if CursorY < MapBottomBorder then scheckScreenTop
+     ScrollYdir = 0
+     goto @sCheckMapleft
+ cend ; Scrolling 
+; 
+.scheckscreentop
+ cif Scrolling 
+  if ScreenCursorY < 10000 then sNotnegative
+    ScreenCursorY = 16
+.sNotNegative
+  if ScreenCursorY > 10 then sCheckScreenbottom  ;checkborder
+    ScreenCursorY = 16         ;reset cursor
+    ScrollYdir = 0
+    sub ScrollYdir,ScrollSpeed ;set scrolling direction
+;;    sub ScreenY,ScrollSpeed
+    goto scheckMapleft           
+ cend ; Scrolling 
+; 
+.sCheckScreenBottom
+ cif Scrolling 
+  if ScreenCursorY < 170 then sCheckMapLeft
+    ScreenCursorY = 169
+    ScrollYdir = ScrollSpeed 
+;;   add ScreenY,ScrollSpeed
+ cend ; Scrolling 
+; 
+.sCheckMapleft
+ cif Scrolling 
+  if CursorX>32000 then scheckscreenleft
+  if CursorX > MapLeftBorder then scheckMapright
+   ScrollXdir = 0
+   goto @MoveTheCursor
+.scheckmapright
+  if CursorX < MapRightBorder then sCheckScreenLeft
+   ScrollXdir = 0
+   goto @MoveTheCursor
+ cend ; Scrolling 
+; 
+.scheckscreenleft
+  if ScreenCursorX < 10000 then snotoffscreen
+   ScreenCursorX = 16
+.snotoffscreen 
+   if ScreenCursorX > 10 then scheckScreenright
+    ScreenCursorX = 16
+    sub ScrollXdir,ScrollSpeed
+ cif ST
+     ScrollXdir=65520 ; -16 - scrolls faster on ST!
+     if RepeatScroll<>0 then mc3
+     RepeatScroll=4 ; do several scrolls at once
+ cend ; ST 
+    goto mc3
+; 
+.sCheckScreenRight
+  if ScreenCursorX < 300 then mc3
+   ScreenCursorX = 299
+   ScrollXdir = ScrollSpeed
+ cif ST
+    ScrollXdir=16 ; Scroll much faster on ST.
+    if RepeatScroll<>0 then mc3
+    RepeatScroll=4 ; do several scrolls at once
+ cend ; ST 
+.mc3
+ return
+; 

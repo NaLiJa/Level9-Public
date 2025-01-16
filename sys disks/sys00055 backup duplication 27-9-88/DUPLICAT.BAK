@@ -1,0 +1,658 @@
+0660103030572
+1
+2
+9[......................................................................]
+€5thSeptember1988.
+
+ˆLancelotmasterfortheCommodoreAmiga
+€
+ThemasterfortheAmigaversionofLancelotissuppliedonanordinary
+Amigadisk.Thediscisnotprotected.
+
+TorunLancelotswitchonthemachineandinsertkickstart(onsome
+machinesthisisnotnecessary).Whenaskedtoinsert"Workbench"insert
+thegamedisk.
+
+Tocopythediskbootthemachinewith"Workbench"thenusethe
+Workbenchpull-downmenuoptionstoInitialiseanewmasterdisk,then
+copythediskbydraggingthesourcedisciconoverthedestinationdisc
+icon.
+
+23rdSeptember1988.
+ˆ
+LancelotdiscmasterfortheAPPLEII
+€
+ThemasterfortheAPPLEIIversionofLancelotissuppliedon
+anordinaryApplediscinnon-standardformat(i.e.Thediscwill
+notCATALOG)
+
+TorunLancelotbootthedisci.e.switchontheApplethenput
+theLancelotdiscinthedrive
+
+TocopythediscuseeithertheprogramCOPYorACOPYfoundonthe
+AppleDOSsystemdisc.
+
+23rdSeptember1988.
+
+ˆLancelotdiscmasterfortheAPPLEII€
+
+ThemasterfortheAPPLEIIversionofLancelotissuppliedon
+anordinaryApplediscinnon-standardformat(i.e.Thediscwill
+notCATALOG)
+
+TorunLancelotbootthedisci.e.switchontheApplethenput
+theLancelotdiscinthedrive
+
+TocopythediscuseeithertheprogramCOPYorACOPYfoundonthe
+AppleDOSsystemdisc.
+
+23rdSeptember1988.
+
+ˆLancelotdiscmasterfortheAtariXL/XE€
+
+ThemasterfortheAtariXL/XEversionofLancelotissuppliedon
+adouble-densitydisc.ThediscisformattedbytheAtari1050drive
+indouble-densitymode.
+
+TorunLancelot,switchofftheAtariforatleast10secondsto
+clearitsmemory.Thenholddownthe'Option'keyandswitchon.
+InserttheLancelotdisc.
+
+ThediscisformattedtodoubledensitybyanAtari1050drive,the
+first1040blocksofthediscareusedtostoretheboottracks,a
+'dummy'directory,andthecodeanddatausedforLancelot.The'dummy'
+directorydefeatstheDOS'Duplicate'commandandalsoanyfile-by-file
+copiers.ToproducecopiesofLancelotuseablock-by-blockcopier.None
+oftheblocksonthediscareprotected.
+
+13th.September1988.
+
+ˆLancelotmasterfortheAtariXL/XEtape€
+
+ThemasterfortheAtariXL/XEversionofLancelotissuppliedon
+threenormalsingle-densityAtariXL/Xediscs.Theseinstructions
+useanAtariXL/Xewithbothdatacorderanddiscdrivetoproducea
+tapemasterreadyforduplication.Someduplicatorsareableto
+connecthigh-qualitytaperecorderstoanAtariXL/XE,sothismethod
+allowshigh-qualitytapestobeproduced.
+
+ThemasterdiscisnotprotectedandtheDOS'D'uplicatecommandcan
+beusedtocopythediscforsecurity.
+
+TorunthemastertapeonanAtariXL/XEswitchonwhileholding
+downOPTIONandSTARTkeys.StartthetapeonplayandpressRETURN.
+NotethatsomeAtari'sareabletoholdtheirmemorycontents
+forsometimeevenwhenswitched-off,soiftheAtarihaspreviously
+beenrunningDOSitmaybenecessarytoswitchoffforupto30
+secondstogettheAtaritocorrectlybootfromtape.
+
+ˆDuplication€
+
+Lancelotisathree-partgame,suppliedonthreediscs.Thethreeparts
+ofLancelotaremasteredinexactlythesameway,usingadifferent
+discforeachpart.Underliningisusedforthekeysyouhavetopress.
+
+1.SwitchofftheAtari,removeallcartidges,switchonthedisk
+drive,choosethediskforthepartofLancelottobemasteredand
+putthisinthedrive,holddownOPTIONandthenswitchonagain.
+Afterapprox20secondstheDOSmenuappears.
+
+2.Tomasterthetape,loadandrunthethreemachine-codeprograms:
+SAVE1,SAVE2,SAVE3andSAVE4inthatorder.Eachprogram
+requiresRETURNtobepressedonceortwice(toinitiatesavingto
+tape)thenwhensavingfinisheseachprogramreturnstotheDOSmenu.
+Thisprocessissummarisedbelow:
+
+ˆL€ˆSAVE1€ˆY€ˆY€(Loadsfor40seconds)
+pressRETURNtwice(Savesfor90seconds)
+ˆL€ˆSAVE2€ˆY€ˆY€(Loadsfor45seconds)
+pressRETURN.(Savesfor35seconds)
+ˆL€ˆSAVE3€ˆY€ˆY€(Loadsfor55seconds)
+pressRETURN.(Savesfor4mins)
+ˆL€ˆSAVE4€ˆY€ˆY€(Loadsfor45seconds)
+pressRETURN.(Savesfor11mins)
+
+3.Testing.WhensavingiscompleteswitchofftheAtarifor30
+seconds(toexitDOSandclearmemory),thenloadthemastertape
+(describedabove)totestthanthemasterhasbeenproduced
+correctly.Eachpartwhenloadeddisplaysaboutascreen-fullof
+text.
+
+21stSeptember1988.
+
+ˆLancelotmasterfortheCommodore64disk€
+
+ThemasterfortheCommodore64versionofLancelotissuppliedon
+twoordinarysingle-sideddiscs.Neitherdiscis
+protected.Theduplicatedmastersshouldbe"flippydiscs",side1
+shouldbethe"gamedisc"andside2the"picturedisc".Thegamedisc
+containsaturbo-loaderwhichcontainscopyrightedcode.
+
+TorunLancelotonaCommodore64typeinsertthe"gamedisc":
+ˆLOAD"*",8,1€
+
+TorunLancelotonaCommodore128:
+SwitchonthemachinewiththeCommodore-symbolkeyhelddown.
+Insertthe"gamedisc"
+TypethecommandˆLOAD"*",8,1€
+
+Therearealargenumberofpublicdomaindisccopiersforthe
+Commodore64/128,anyofwhichwillcopyLancelot.Thedisccanbe
+copiedeitherfile-by-fileorbyusingadisc-blockcopier.
+
+7thSeptember1988.
+
+ˆLancelotMasterfortheCommodore64tape€
+
+ThemasterfortheCommodore64versionofLancelotissuppliedon
+anormalsingle-sidedCBM64disc.TheseinstructionsuseaCommodore
+64withbothdatacorderanddiscdrive(orCBM128with
+datacorder)toproduceatapemasterreadyforduplication.Some
+duplicatorsareabletoconnecthigh-qualitytaperecorderstoaCBM
+64,sothismethodallowshigh-qualitytapestobeproduced.
+
+Themasterdiscisnotprotectedandanydisccopyutilitycanbeused
+tocopythedisc.Thedisccontainsatapeturbo-loaderwhichis
+copyrightof"ChoiceSoftware".Thefinalmastertapehoweveris
+onlycopyrightofLevel9Computing.
+
+Turbo-loadersotherthanthe'Choice'turbomaybeusedwith
+Lancelot.Detailsaregivenlater.
+
+TorunthemastertapeonaCommodore64justafterswitch-onhold
+downSHIFTandpressRUN/STOP.
+
+TorunthemastertapeonaCommodore128enter'64'mode,thenhold
+downSHIFTandpressRUN/STOP.
+
+ˆDuplication€
+
+Theseinstructionswillassumethatthe'choice'turbo-loaderis
+beingusedtoproducethemastertape.
+
+ThethreepartsofLancelotaremasteredinexactlythesameway.
+Onlyfilenamesdiffer.Underliningisusedforthekeysyouhaveto
+press.
+
+1.Loadtheturbo-loader:
+ˆLOAD"!",8,1€
+Onceloadedtheturbo-loadermenuappears.
+
+2.Selectthebaudratewithoptionˆ8€thenpressˆ2€(speedis7
+timesnormal)
+
+3.Savetheturbo-headerusingoptionˆ1€
+forthefirstpartusethefilenameˆLANCELOT1€
+forthesecondpartusethefilenameˆLANCELOT2€
+forthelastpartusethefilenameˆLANCELOT3€
+
+4.Select'Loadprogrampart'ˆ2€andloadfileˆGAMEA€
+
+5.Select'Saveprogrampart'ˆ3€withoutrelocationˆN€
+
+6.Select'Loadprogrampart'ˆ2€
+forthefirstpartloadthefileˆGAME1€
+forthesecondpartloadthefileˆGAME2€
+forthelastpartloadthefileˆGAME€3
+
+7.Select'Saveprogrampart'ˆ3€withoutrelocationˆN€
+
+8.Select'Loadprogrampart'ˆ2€andloadfileˆGAMEB€
+
+9.Select'Savelastprogrampart'ˆ4€tosavemachine-codeˆM€
+Useanexecute-addressofˆ4867€andrelocateˆY€toaddressˆ57344€
+
+ˆTesting€
+
+WhensavingiscompleteswitchofftheCommodore(toexittheturbo-
+loaderandclearmemory),thenloadthemastertape(described
+above)totestthanthemasterhasbeenproducedcorrectly.Each
+partwhenloadeddisplaysaboutascreen-fulloftext.
+
+ˆOtherturboloaders€
+
+The'choice'turboloaderdefaultsfilestart-andend-addressesto
+thosestoredinthefile-headerondisc.Notallturbo'sdothis,
+sothisinformationisduplicatedbelow:
+
+ˆFilename€ˆStartaddress€ˆLength€
+
+GAMEA13000540
+
+GAME11840B7C0
+GAME21840B7C0
+GAME31840B7C0
+
+GAMEBE0001700
+
+Alsoonthediscisthefile"TITLEMPIC"whichistheloadingscreen
+usedonthediscversionofCBM64Lancelot.Thisisstoredin"CBM64
+AdvancedOCPArtStudio"format,andshouldbedisplayedduring
+loadingfromtapeonlyiftheturbo-loaderusedallowsthis;Otherwise
+thisfileshouldbeignored.
+
+21stSeptember1988.
+
+ˆLancelotMasterfortheAmstradCPC464/6128tape€
+
+ThemasterfortheAmstradCPC464/6128tapeversionofLancelot
+issuppliedonanormalsingle-sidedCPCdisc.Theseinstructions
+useanAmstradwithbothtaperecorderanddiscdrivetoproducea
+tapemasterreadyforduplication.Someduplicatorsareableto
+connecthigh-qualitytaperecorderstoaCPC,sothismethodallows
+high-qualitytapestobeproduced.
+
+ThemasterdiscisnotprotectedandtheCP/Mutilityˆdisccopy€can
+beusedtocopythediscforsecurity.
+
+TorunthemasteronanAmstradCPC464typeˆRUN""€andplaythetape.
+
+TorunthemasteronanAmstradCPC6128typeˆ|TAPE€thenˆRUN""€.
+
+ˆDuplication
+€
+ThethreepartsofLancelotaremasteredinexactlythesameway.
+Onlyfilenamesdiffer.Underliningisusedforthekeysyouhaveto
+press.
+
+1.SwitchofftheAmstrad,waitafewsecondsthenswitchonagain.
+
+2.Copythe'loader'program.
+ˆLOAD"LOAD"
+€ˆTAPE
+€ForthefirstpartofLancelotˆSAVE"LANCELOT1",P€
+ForthesecondpartofLancelotˆSAVE"LANCELOT2",P€
+ForthelastpartofLancelotˆSAVE"LANCELOT3",P€
+
+3.Copythe'machine-code'
+ˆ|DISC
+€ˆMEMORY&3FFF
+€ˆLOAD"TBOOT4T.BIN",&4000
+€ˆ|TAPE
+€ˆSAVE"game",B,&4000,&100
+€
+4.Copythe'data'files
+ˆ|DISC
+€ˆRUN"CREATE"
+€ForthefirstpartofLancelotpressˆ1€
+ForthesecondpartofLancelotpressˆ2€
+ForthelastpartofLancelotpressˆ3€
+PressˆS€
+PressSPACE.
+
+5.Afterthe'data'hasloadedfromdisc"PressSPACEtosave:"appears.
+StartrecordingandpressSPACE.Savingiscompletewhenthe
+computerresets(i.e.returnstoBasic)
+
+6.Testthemaster.SwitchofftheAmstrad,thenloadthemastertape
+(describedabove)totestthatthemasterhasbeenproduced
+correctly.Eachpartwhenloadeddisplaysaboutascreen-fullof
+text.6thSeptember1988.
+
+ˆLancelotfortheIBMPCandPCcompatibles€
+
+ThemasterforthePCversionofLancelotissuppliedonan
+ordinarydouble-sided40-track51/4"PCdisc.Thediscisnot
+protected.
+
+TorunLancelotbootyourPCwithMS-DOSversion2or3.Insert
+theLancelotdisk.Ifyoubootedfromaharddiscselectthefloppy
+withˆA:€.TypeˆMENU
+€
+Tocopythediskusetheprogramˆdiskcopy€onthePCsystemdisk.On
+amachinewithonefloppydrivetype:
+ˆdiskcopya:a:€
+Onamachinewithtwofloppydrivestype:
+ˆdiskcopya:b:€
+Thenfollowthepromptsdisplayedbythecopyprogram.
+
+5thSeptember1988.
+
+ˆLancelotdiscmasterfortheMAC€
+
+ThemasterfortheAPPLeMACversionofLancelotissuppliedon
+anordinarysingle-sideddisc.
+
+TorunLancelot,boottheMACsystem,theninserttheLancelotdisc
+andclickontheapplication-icon"Lancelot".WhenrunningunderMulti-
+Finderdonottrytorunanyotherprogramsatthesametime.
+
+Thedischastobesingle-sidedtobereadablebyearlyversionsof
+theMAC.TheMACcannotproducesector-by-sectorcopiesofdiscs,
+sothefollowingistherecomendedmethodforproducingidentical
+copiesoftheLancelotdisconasingle-drivesystem:
+
+1.Insertablankdiscandwhenrequested(theMACsays"Thisdisk
+isunreadable"),formatitone-sidedandleavethedisk-
+nameas"Untitled".Ifthediscisalreadyformatedwhenitsdisc-
+iconappearsclickonthat,thenselect"Erasedisc"fromthepull-
+downmenu.
+
+2.Onceinitialised,typealt-E,toejectthedisc.(altisthekeywith
+four-circles).InserttheLancelotmaster.
+
+3.Dragthe"Lancelot"disc-iconoverthe"Untitled"disc-icon,MAC
+theconfirmswith"Areyousureyouwanttocompletelyreplacethe
+contentsof...".clickon'OK'.
+
+4.Oncethecopyiscomplete,usethegrabber-barofthe"Untitled"disk
+windowtomoveitswindowtoexactlycoverthe"Lancelot"window.
+
+5.Dragthe"Lancelot"disk-icontotheWastebasket(thisclosesits
+window).
+
+6.Clickonthe"Untitled"disk-iconandrenameit(Justtypethenew
+namefollowedbyENTER)as"Lancelot".
+
+7.Typealt-Etoejectthedisc,thenwrite-protectit.
+
+8thSeptember1988.
+ˆ
+LancelotmasterfortheMSX
+€
+ThemasterfortheMSXversionofLancelotissuppliedonfour
+cassettes.TheseinstructionsuseaMSXwithtaperecordertoproduce
+atapemasterreadyforduplication.Someduplicatorsareableto
+connecthigh-qualitytaperecorderstoaMSX,sothismethodallows
+high-qualitytapestobeproduced.
+
+SomeofthefilesonthetapearerecordedinLevel9'sownformat,
+andcanonlyberead(andwritten)bytheotherprogramsonthetapes.
+
+TorunthemasterontheMSXenterthecommandˆRUN"CAS:"€
+
+ˆDuplication€
+
+Lancelotisathree-partgame.Thereareonlyminordifferences
+inmasteringeachpart,sotheseinstructionsneedtoberepeated
+threetimes,withdifferencesonlywhereindicated.Underliningisused
+forthekeysyouhavetopress.
+
+1.SwitchofftheMSX,waitafewsecondsthenswitchonagain.
+
+2.LoadtheBasictitlepage,fromthe"PART1"tape.
+ˆLOAD"CAS:"€
+Stopthetapeassoonasithasloaded,butdonotrewindit.A
+secondfileisstoredonthetapeimmediatelyfollowingtheBasic
+program.
+
+3.theMSXLOADcommanddoesnotcheckforloaderrors,soˆRUN€the
+titleprogramtocheckforerrors.Whenitstopsholddown
+ˆCTRL€andpressˆSTOP€(Gives"DeviceI/Oerrorin80)
+
+4.Savethetitletothemastertape:
+ForthefirstpartofLancelotˆSAVE"CAMELO"€
+ForthesecondpartofLancelotˆSAVE"LOGRIS€"
+ForthelastpartofLancelotˆSAVE"GRAIL€"
+
+5.Loadthemachinecodeprogram,storedonTAPE1afterthebasic
+program.
+ˆCLEAR0,&H9000€
+ˆBLOAD"CAS:"€
+Oncetheprogramhasloadedrewindtape1.
+
+6.Savethemachine-code
+ˆBSAVE"code",&HD180,&HF200,&HEA06€
+Aftersavingfinishesleave10secondsofblanktape.
+
+
+7.Withthecodefromstep5stillinmemoryrunthe'copy'program
+ˆDEFUSR0=&HE000€
+ˆPRINTUSR(0)€
+
+Thisalsodisplaysachecksumforthecodeloadedinstep5which
+mustbe57438.Anyothervalueindicatesaloadingerror,which
+alsomeansstep6mayhavesavedcorruptedcode,sostartagainfrom
+thestartofthecurrentpartoftheLancelotgame.
+
+ForthefirstpartofLancelotplaytape2
+ForthesecondpartofLancelotplaytape3
+ForthelastpartofLancelotplaytape4.
+
+Thesetapestakeabout15minutestoload.
+
+8.IfthedataloadsOKitdisplays"Savefile(Y/N)?";PressˆY€to
+savethegame.Ifaloadingerroroccursitdisplays"Read
+error";PressSPACE,rewindthetapeandplayitagain.
+
+9.Testthenewmaster.SwitchofftheMSXtoexitthecopyprogramand
+tocleartheMSXmemory,waitafewsecondsthenswitchonagain.
+RunthegameusingˆRUN"CAS:"€.Eachpartwhenloadeddisplaysabouta
+screen-fulloftext.
+
+16thSeptember1988.
+
+ˆLancelotMasterfortheAmstradCPC/PCW/+3Disc€
+
+ThemasterfortheCPC/PCW/+3versionofLancelotissuppliedona
+singledouble-sided3inchdisc.Thediscinnotprotected,butis
+formattedbytheCPCin'DATA'formattomakeitatripple-formatdisc,
+read/writeablebytheCPC6128,PCW8256,PCW8512,PCW9512and
+Sinclair+3.
+
+TorunLancelotonthePCW8256/8512/9512,bootfromthesystemdisc,
+theninsertthe'game'sideofLancelotandtypeˆMENU
+€
+TorunLancelotontheCPC6128turnontheCPC,insertthe'game'
+sideofthediscandtypeˆRUN"MENU"
+€
+TorunLancelotontheSinclair128k+3switchon,insertthedisc
+andpressENTER.
+
+Tocopythediscinsertside1oftheCPCsystemdisc,type
+ˆ|CPM€thenrunˆdisccopy€onthesamedisc.Followtheprompts
+givenbytheprogram,whichbothformatsandcopiesdiscs.Donotuse
+eitherthePCWor+3toformatdiscs,astheycannotproducetripple-
+formatteddiscs.
+
+9thSeptember1988.
+
+ˆLancelotmasterfortheSpectrum+2€
+
+Theseinstructionsarecopyright(C)1988Level9Computing.
+
+TheSpectrum+2versionoflancelotrunsfromtape,text-only,onall
+ZXSpectrumswith128Kmemory.
+
+ThemasterfortheSpectrum+2versionofLancelotissuppliedon
+fourcassettes(labelledZX+2).TheseinstructionsuseaSpectrum48
+withtaperecorder,orSpectrum+2in48modetoproduceatape
+masterreadyforduplication.ASpectrum+2orSpectrum+3isneeded
+totestthemaster.Someduplicatorsareabletoconnecthigh-quality
+taperecorderstoaSpectrum,sothismethodallowshigh-quality
+tapestobeproduced.
+
+ThegamemustbeMASTEREDin48Kmode,andwillonlyrunin128Kmode.
+
+SomeofthefilesonthetapearerecordedinLevel9'sownformat,
+andcanonlyberead(andwritten)bytheotherprogramsonthetapes.
+
+TorunthemasteronaSpectrum+2select'tapeloader'andplaythe
+tape.
+
+TorunthemasteronaSpectrum+3select'loader'andplaythetape.
+(AnadaptorleadisrequiredtoconnecttheSOUNDsockettoatape
+recorder.)
+
+ˆDuplication€
+
+Lancelotisathree-partgame.Thereareonlyminordifferences
+inmasteringeachpart,sotheseinstructionsneedtoberepeated
+threetimes,withdifferencesonlywhereindicated.Underliningisused
+forthekeysyouhavetopress.
+
+Youmightliketoknowthekeystokesforthefollowingkeywords:
+
+LINEextendsymbol-shift3
+CODEextendI
+USRextendL
+
+Onsomekeyboardsextend-modeisenteredbypressingCAPS-SHIFT
+andSYMBOL-SHIFTtogether.
+
+1.SwitchofftheSpectrum,waitafewsecondsthenswitchonagain.
+Ona128Kmachineselect48mode.
+
+2.LoadtheBasictitlepage,fromthe"ZX+2part1"tape.
+ˆLOAD""€
+Stopthetapeassoonasithasloadedastherearethreefileson
+thistape.
+
+3.Saveittothemastertape:
+ForthefirstpartofLancelotˆSAVE"LANCELOT1"LINE1€
+ForthesecondpartofLancelotˆSAVE"LANCELOT2"LINE1€
+ForthelastpartofLancelotˆSAVE"LANCELOT3"LINE1€
+
+4.Loadthemachinecodecopy/loaderprogram,thesecondfileontape1.
+ˆLOAD""CODE€
+
+5.ForthesecondandthirdpartsofLancelotpatchtheloader:
+ˆPOKE64294,2€forpart2
+ˆPOKE64294,3€forpart3.
+
+6.Savethepatchedloaderprogram
+SAVE"game"CODE64256,800
+
+7.Executethecopyroutine,alsoloadedin(4)above.
+ˆPRINTUSR64265€
+whichloadsthethirdfilefromtape1.Onceloadedrewindtape1.
+
+ThecopyprogramusesthesaveI/OroutinesasusedonLancelot,
+soitwillpauseaboutevery20linesandflashthecursor,
+WhenthishappenspressSHIFTtomakethecopyprogramcontinue.
+
+
+8.Savethemachinecode,Selectoptionˆ1€.
+
+9.Copythe'acode',thefirstfileoneachoftapes2,3and4.
+Selectoptionˆ8€
+ForthefirstpartofLancelotplaythepart2tape.
+ForthesecondpartofLancelotplaythepart3tape.
+ForthelastpartofLancelotplaythepart4tape.
+Onceloadedstopthetape,astherearetwofilesonthistape.
+ForthefirstpartofLancelotselectoptionˆ5€tosave.
+ForthesecondpartofLancelotselectoptionˆ6€tosave.
+ForthelastpartofLancelotselectoptionˆ7€tosave.
+
+10.Copythe'gamedata',thesecondfileoneachoftapes2,3,4.
+Selectoptionˆ8€
+Continueplayingtape2/3/4fromstep(8)
+Onceloadedrewindthetape.
+ForthefirstpartofLancelotselectoptionˆ2€tosave.
+ForthesecondpartofLancelotselectoptionˆ3€tosave.
+ForthelastpartofLancelotselectoptionˆ4€tosave.
+
+ˆTesting€
+
+WhensavingiscompleteswitchofftheSpectrum(toexitthecopy
+programandclearmemory),thenloadthemastertape(described
+above)totestthatthemasterhasbeenproducedcorrectly.Each
+partwhenloadeddisplaysascreen-fulloftext.
+
+22ndSeptember1988.
+
+ˆLancelotmasterfortheSpectrum48€
+
+ThemasterfortheSpectrum48versionofLancelotissuppliedon
+fourcassettes.TheseinstructionsuseaSpectrum48withtape
+recorderorSpectrum+2/+3runningin'48'modetoproduceatape
+masterreadyforduplication.Someduplicatorsareabletoconnect
+high-qualitytaperecorderstoaSpectrum,sothismethodallows
+high-qualitytapestobeproduced.
+
+SomeofthefilesonthetapearerecordedinLevel9'sownformat,
+andcanonlybereadbytheotherprogramsonthetapes.
+
+TorunthemasteronaSpectrum48enterthecommandˆLOAD""€
+
+TorunthemasteronaSpectrum+2/+3enter'48'modeandenterˆLOAD""€
+
+ˆDuplication€
+
+Lancelotisathree-partgame.Thereareonlyminordifferences
+inmasteringeachpart,sotheseinstructionsneedtoberepeated
+threetimes,withdifferencesonlywhereindicated.Underliningisused
+forthekeysyouhavetopress.
+
+Youmightliketoknowthekeystokesforthefollowingkeywordswhen
+in48kmode:(Onsomekeyboards'extend'isCAPSSHIFTandSYMBOLSHIFT
+helddowntogether.)
+
+LINeextendsymbol-shift3
+CODeextendI
+USRextendL
+
+1.SwitchofftheSpectrum,waitafewsecondsthenswitchonagain.
+
+2.LoadtheBasictitlepage,fromthePART1tape.
+ˆLOAD""
+€Onceloadedstopthetape,therearethreemorefilesfollowingit
+onthesametape,whicharereadbysteps4,6and10.
+
+3.Saveittothemastertape:
+ForthefirstpartofLancelotˆSAVE"LANCELOT1"LINE1€
+ForthesecondpartofLancelotˆSAVE"LANCELOT2"LINE1€
+ForthelastpartofLancelotˆSAVE"LANCELOT3"LINE1€
+
+4.Loadthe'driver',thenextfilefromthePART1tape.
+ˆLOAD""CODE€
+Onceloadedstopthetape.
+
+5.Savetheprogram'driver'
+ˆSAVE"code1"CODE63344,1677€
+
+6.Loadtheprogram'load',thethirdfileonthePART1tape.
+ˆLOAD""CODE€
+
+7.The'loader'issuppliedreadyforusewiththefirstpartof
+Lancelotanddoesnotneedpatching.Forthesecondpartof
+Lancelotpatchtheloader:
+ˆPOKE26979,2€
+ForthelastpartofLancelotpatchtheloader:
+ˆPOKE26979,3€
+
+8.Savethe'loader'
+ˆSAVE"code2"CODE26944,200€
+
+
+9.Executethecopyprogram,whichiscontainedaspartofthe'loader'
+ˆPRINTUSR62592€
+
+ThecopyprogrammakesuseoftheI/OroutinesfoundinLancelot,so
+itwillpauseaboutevery16linesandflashthecursor,Whenthis
+happenspressSHIFTtomakethecopyprogramcontinue.
+
+10.Selectoptionˆ1€(theprogramdisplayes'11')andloadthe
+fourthfilefromthePART1tape.Onceloadedrewindthetape.
+
+11.PressˆY€tosavetothemastertape.
+
+12.ForthefirstpartofLancelotselectthePART2tape.
+ForthesecondpartofLancelotselectthePART3tape.
+ForthelastpartofLancelotselectthePART4tape.
+PressˆN€thenselectoptionˆ2€andloadthetape.
+
+13.PressˆY€tosavetothemastertape.
+
+ˆTesting€
+
+WhensavingiscompleteswitchofftheSpectrum(toexitthecopy
+programandclearmemory),thenloadthemastertape(described
+above)totestthatthemasterhasbeenproducedcorrectly.Each
+partwhenloadeddisplaysabouttwo-thirdsofascreenoftext.
+
+5thSeptember1988.
+
+
+ˆLancelotmasterfortheAtariST€
+
+ThemasterfortheAtariSTversionofLancelotissuppliedonan
+ordinarysingle-sided,80track,10sectordisc.Thediscisnot
+protected.
+
+TorunLancelotinsertthediskindriveA:andpressRESET.
+
+Tocopythediskuseanydisccopierwhichcancopysingle-sided80-
+track10-sectordiscs.Alternativelyformatablankdiskwitha
+10-sectorsingle-sidedformatterthencopythediscfile-by-file.
+

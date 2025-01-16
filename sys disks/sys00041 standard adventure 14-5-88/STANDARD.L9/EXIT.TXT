@@ -1,0 +1,542 @@
+; Standard Adventure source, copyright (C) 1987 Level 9 Computing.
+;
+; EXIT.TXT, data for the game exits. The numeric values for the 
+; directions is as follows:
+;
+;         1           up=9      in=11    cross=13   climb=14   jump=15
+;      8     2        down=10
+;         !
+;    7  --+--  3
+;         !
+;      6     5   <- note that 4&5 are reversed. You cannot change this.
+;         4
+;
+; Special notes for interface between static and synthesised rooms..
+;
+; There must be an in/out connection between the static and the 
+; object number of the scenery object to which it connects.
+;
+; E.g If you have a location object "[480:^N castle]", then an exit 
+; from room 15:  1001 12 180
+; will set up an in/out connection to the room where object no. 180
+; is situated. This allows the exit table to be changed easily.
+
+;********* remember to take out the dummy end exits
+;&******** when I've finished using COMP option 5 to run the game!
+
+
+;
+;Room number 1
+; room modifiers for forest in part1
+;
+; CHANGE THESE IF YOU CHANGE THE SIZE OF THE GRID.
+0000 1 4 ; North. 	; = XMAX
+0000 2 5 ; NE 		; = N+1
+0000 3 1 ; E	 	; = always 1
+0000 4 252 ; SOUTH 	; = 256-XMAX
+0000 5 253 ; SE 	; = SOUTH+1
+0000 6 251 ; SW 	; = SOUTH-1
+0000 7 255 ; WEST 	; = always 255
+1000 8 3 ; NW 		; = North-1
+;Room number 2
+0000 1 2 ; North. 	; = XMAX
+0000 2 3 ; NE 		; = N+1
+0000 3 1 ; E	 	; = always 1
+0000 4 254 ; SOUTH 	; = 256-XMAX
+0000 5 255 ; SE 	; = SOUTH+1
+0000 6 252 ; SW 	; = SOUTH-1
+0000 7 255 ; WEST 	; = always 255
+1000 8 1 ; NW 		; = North-1
+; Room number 3
+1000 0 0 ; no exit - must use lift. 1001 9 39
+; Room number 4
+1001 4 6
+; Room number 5
+0011 12 7
+1011 5 7
+; Room number 6
+1001 4 7
+; Room number 7
+0101 12 50
+1011 6 50
+; Room number 8
+1001 4 9
+; Room number 9
+0001 12 119
+1011 4 119
+; Room number 10
+1001 7 9
+; Room number 11
+1000 0 0
+; Room number 12
+0111 12 61
+1001 4 61
+; Room number 13
+0001 10 64
+1011 4 64
+; Room number 14
+0001 12 69
+0011 10 69
+1011 4 69
+; Room number 15
+1101 7 14
+; Room number 16
+0001 12 70
+1011 1 70
+; Room number 17
+1001 1 16
+; Room number 18
+0001 12 71
+1011 1 71
+; Room number 19
+0001 10 18
+1001 1 18
+; Room number 20
+1001 1 19
+; Room number 21
+1001 10 106
+; Room number 22
+1001 7 19
+; Room number 23
+0001 12 71
+1011 7 71
+; Room number 24
+0001 12 101
+1011 4 101
+; Room number 25
+1001 4 47
+; Room number 26
+0001 12 49
+1011 1 49
+; Room number 27
+0001 12 26
+1001 3 26
+; Room number 28
+0001 12 27
+1001 3 27
+; Room number 29
+1001 10 21
+; Room number 30
+1001 10 32
+; Room number 31
+1001 7 30
+; Room number 32
+1001 3 33
+; Room number 33
+1001 12 111
+; Room number 34
+1001 9 32
+; Room number 35
+1001 7 34
+; Room number 36
+0000 3 112
+0000 12 112
+1001 9 35
+; Room number 37
+1101 7 35
+; Room number 38
+1101 3 39
+; Room number 39
+1001 4 4
+; Room number 40
+1000 0 0
+; Room number 41
+1000 0 0
+; Room number 42
+1000 0 0
+; Room number 43
+1000 0 0
+; Room number 44
+1000 0 0
+; Room number 45
+1001 1 110
+; Room number 46
+1001 7 45
+; Room number 47
+1001 7 46
+; Room number 48
+1001 1 47
+; Room number 49
+1001 1 48
+; Room number 50
+1001 4 51
+; Room number 51
+1001 4 53
+; Room number 52
+1001 3 53
+; Room number 53
+1001 3 55
+; Room number 54
+0001 12 52
+1011 1 52
+; Room number 55
+1001 3 56
+; Room number 56
+1001 3 57
+; Room number 57
+1001 3 68
+; Room number 58
+0001 1 118
+1001 4 68
+; Room number 59
+0001 4 185 ; to camelot! 59
+1001 1 68
+; Room number 60
+1001 3 180
+; Room number 61
+1001 5 62
+; Room number 62
+0011 4 66
+1001 10 66
+; Room number 63
+0001 10 62
+1011 7 62
+; Room number 64
+1001 6 63
+; Room number 65
+1000 0 0
+; Room number 66
+0001 10 67
+1001 3 67
+; Room number 67
+1001 3 97
+; Room number 68
+1001 3 60
+; Room number 69
+0001 10 181
+1001 7 181
+; Room number 70
+1001 7 182
+; Room number 71
+1001 7 70
+; Room number 72
+0001 5 78
+0001 4 77
+1001 3 73
+; Room number 73
+0001 4 78
+1001 3 74
+; Room number 74
+0001 4 79
+1001 3 75
+; Room number 75
+0001 4 80
+1001 3 76
+; Room number 76
+1001 4 81
+; Room number 77
+0001 4 82
+1001 3 78
+; Room number 78
+0001 5 84
+0001 4 83
+1001 3 79
+; Room number 79
+0001 4 84
+1001 3 80
+; Room number 80
+0001 4 85
+1001 3 81
+; Room number 81
+1001 4 85
+; Room number 82
+0001 4 87
+1001 3 83
+; Room number 83
+0001 5 89
+1001 4 88
+; Room number 84
+1001 7 83
+; Room number 85
+1001 4 90
+; Room number 86
+0001 12 91
+1011 4 91
+; Room number 87
+0001 4 92
+1001 3 88
+; Room number 88
+0001 4 93
+0001 10 93
+0001 5 94
+1001 3 89
+; Room number 89
+1001 3 90
+; Room number 90
+1001 3 91
+; Room number 91
+1001 4 96
+; Room number 92
+1001 3 93
+; Room number 93
+0001 4 97
+1001 3 94
+; Room number 94
+1001 3 95
+; Room number 95
+1001 1 90
+; Room number 96
+1001 7 95
+; Room number 97
+1001 3 100
+; Room number 98
+1001 4 99
+; Room number 99
+1001 4 100
+; Room number 100
+1001 3 52
+; Room number 101
+1001 4 102
+; Room number 102
+1001 4 103
+; Room number 103
+1001 4 104
+; Room number 104
+1001 4 105
+; Room number 105
+1001 4 106
+; Room number 106
+1001 4 107
+; Room number 107
+1001 4 50
+; Room number 108
+1001 4 109
+; Room number 109
+1001 7 105
+; Room number 110
+1001 7 108
+; Room number 111
+1001 11 33
+; Room number 112
+1001 1 111
+; Room number 113
+1001 4 114
+; Room number 114
+1001 4 115
+; Room number 115
+1001 7 111
+; Room number 116
+1001 1 115
+; Room number 117
+1001 1 116
+; Room number 118
+1001 1 117
+; Room number 119
+1001 4 56
+; Room number 120
+1000 0 0
+; Room number 121
+1000 0 0
+; Room number 122
+1000 0 0
+; Room number 123
+1000 0 0
+; Room number 124
+1000 0 0
+; Room number 125
+1001 10 30
+; Room number 126
+1001 1 97
+; Room number 127
+0001 12 98
+1001 4 98
+; Room number 128
+1001 3 19
+; Room number 129
+1001 7 181
+; Room number 130
+0001 12 55
+1011 1 55
+; Room number 131
+1000 0 0
+; 132
+1000 0 0
+; 133
+1001 7 151
+; 134
+1001 12 173
+; 135
+1001 10 159
+; 136
+1001 9 161
+;137
+1000 0 0
+; 138
+1000 0 0
+; 139
+1000 0 0
+; 140
+1001 4 141
+; 141
+0011 4 143
+1001 10 143
+; 142
+1001 7 141
+; 143
+0001 12 169
+1011 4 169
+; 144
+0001 12 184
+1011 4 184 ; to mews object
+; 145
+0001 12 171
+1011 4 171
+; 146
+0001 12 170
+1011 4 170
+; 147
+1001 4 151
+; 148
+1101 3 150
+; 149
+1101 7 150
+; 150
+1000 10 151
+; 151
+0101 12 172
+1011 4 172
+; 152
+1001 3 183 ; to west way object
+; 153
+1001 1 172
+; 154
+1001 7 153
+; 155
+1001 1 187 ; to south way
+; 156
+0001 10 178
+0011 14 178
+1011 12 178
+; 157
+1001 1 156
+; 158
+1001 3 159
+; 159
+1001 1 157
+; 160
+1011 12 161
+; 161
+0001 12 179
+0011 1 179
+1001 9 159
+; 162
+1000 0 0
+; 163
+1000 0 0
+; 164
+1001 3 165
+; 165
+1001 3 166
+; 166
+1001 3 167
+; 167
+1001 3 168
+; 168
+1001 3 152
+; 169
+1001 3 170
+; 170
+1001 3 171
+; 171
+1001 3 184 ; road
+; 172
+1001 7 186 ; market square
+; 173
+1001 7 172
+; 174
+1001 1 155
+; 175
+1001 1 174
+; 176
+1001 1 175
+; 177
+1001 1 176
+; 178
+1001 3 179
+; 179
+1011 1 177
+; 180
+1000 0 0
+; 181
+1000 0 0
+; 182
+1000 0 0
+; 183
+1000 0 0
+; 184
+1000 0 0
+; 185
+1000 0 0
+; 186
+1000 0 0
+; 187
+1000 0 0
+; 188
+1000 0 0
+; 189
+1000 0 0
+; 190
+1000 0 0
+; 191
+1000 0 0
+; 192
+1000 0 0
+; 193
+1000 0 0
+; 194
+1000 0 0
+; 195
+1000 0 0
+; 196
+1000 0 0
+; 197
+1000 0 0
+; 198
+1000 0 0
+1000 0 0
+1000 0 0
+1000 0 0
+1000 0 0
+1000 0 0
+1000 0 0
+1000 0 0
+1000 0 0
+
+;207
+1000 0 0
+1000 0 0
+1000 0 0
+1000 0 0
+1000 0 0
+1000 0 0
+1000 0 0
+1000 0 0
+1000 0 0
+1000 0 0
+
+;217
+1000 0 0
+1000 0 0
+1000 0 0
+1000 0 0
+1000 0 0
+1000 0 0
+1000 0 0
+1000 0 0
+1000 0 0
+1000 0 0
+
+;227
+1000 0 0
+1000 0 0
+1000 0 0
+1000 0 0
+1000 0 0
+1000 0 0
+1000 0 0
+1000 0 0
+1000 0 0
+1000 0 0
+
+
+0000 0 0

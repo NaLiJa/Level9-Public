@@ -1,0 +1,1171 @@
+; Lancelot 1 source, copyright (C) 1988 Level 9 Computing.
+;
+; MESSAGE.TXT, messages/keywords for the game.
+;
+; ST Version
+;
+; Messages are of the form: [ number : text ] ; comment
+; They must be in numeric order, but gaps are allowed in the number 
+; sequence, of course.
+;
+; | (vertical bar) terminates the printable part of a message. It 
+;   is typed by shifting backslash (to the left of the keyboard).
+; / forces the following character to be printed literally. 
+; % is carriage return. Note that carriage return is ignored if 
+;   the printing is already at the start of a line, to make coding 
+;   simpler. To force a real carriage return, print space first.
+; ^ (shift 6) marks a word for recognition by the parser. It is 
+;   followed by a letter for word type: 
+;   Adjective; Comment; conJunction; Noun; Preposition; Verb. 
+;
+; The word type ^C is used when a word is not to be used as part of 
+; the normal parsing but is to be available for checking should it 
+; be needed. This is so references to scenery may be checked for
+; containing particular words.
+;
+; Capitalization is done automatically on output and you are 
+; recommended to use lower case for the first letter of messages 
+; as this improves compression and will make no difference on 
+; output, providing all punctuation is correct. 
+;
+; punctuation messages..
+[1: ]
+[2::]
+[3:, ]
+[4:.] ; dot with no space
+[5:%]
+[6:and ] 
+[7:.%]
+[8:?%]
+[9:. ]
+;
+; positions etc..
+[10:exits led ]
+[11:an exit led ] 
+[12: through a door]
+[13: through an open door]
+[14: and ] 
+[15:That's enough "What now" prompts. ]
+[16:%> ]
+[17:%What now? ]
+[18:: ];
+[19:"]
+;
+; Messages for printing objects..
+[20:a ]
+[21:the ]
+[22:an ]
+[23:some ]
+[24:." ] ; dot quote
+[25:% %] ; blank line
+[26:worn] ; for 'couldn't have worn'
+[27:taken] ; for 'couldn't have taken'
+;
+; exits directions, doubling as movement verbs..
+[51:^V north|^V north ^V n ^V northwards]
+[52:^V northeast|^V northeast ^V ne]
+[53:^V east|^V e ^V eastwards]
+[54:^V south|^V s ^V southwards]
+[55:^V southeast|^V se]
+[56:^V southwest|^V sw]
+[57:^V west|^V w ^V westwards]
+[58:^V northwest|^V northwest ^V nw]
+[59:^V upwards|^V u ^V up]
+[60:^V downwards|^V d ^V down]
+[61:^V inside|^V in ^V inwards ^V into ^V enter]
+[62:^V outside|^V out ^V leave]
+[63:^V cross|^V across ^V over]
+[64:with the ^V climb|^V scramble ^V ascend ^V mount]
+; is in 'you struggle with the climb and are in'
+;
+; Intransitive verbs..
+[70:^V i]
+[71:^V again|^V a]
+[72:^V look|^V l ^V display ^V redisplay ^V refresh]
+[73:^V inventory|^V inv ^V possessions ^V possess ^V list]
+[74:^V quit ^V restart]
+[75:^V restore ^V load]
+[76:^V save]
+[77:^V ramsave ^V ram]
+[78:^V ramload]
+[79:^V score ^V rating ^V status]
+[80:^V verbose]
+[81:^V brief]
+[82:^V wait|^V wa ^V pause ^V z]
+[83:^V ring|^V play ^V blow ^V toot ^V sound]
+[84:^V on]
+[85:^V off|^V jump] ; >>
+[86:^V pictures ^V graphics]
+[87:^V words ^V text]
+;
+[89:^V undo ^V oops ^V whoops]
+[90:^V attacked|^V attack ^V hit ^V break ^V kick ^V punch ^V smash
+^V bend] ; for bend bars >>special to L1
+;
+[92:^V searched|^V search ^V explore]
+[93:^V dig]
+[94:^V sniffed|^V sniff ^V smell]
+[95:^V knocked|^V knock]
+[96:got|^V stood ^V stand] ; output e.g. "L got out", "L got in" etc.
+[97:^V lay|^V lie]
+[98:^V sat|^V sit]
+;
+[100:^V said|^V say ^V whisper ^V call]
+[101:^V teleported|^V teleport]
+[102:^V getme]
+;
+[103:^V filled|^V fill] ; >>Lancelot
+[104:^V ran|^V run]
+[105:^V made|^V make] ;>>Lancelot3
+;; [106:^V prayed|^V pray] ;>>Lancelot3
+[107:yeuch|^V eat ^V bite ^V taste ^V nibble ^V lick]
+;;[105:^V poured|^v pour ^V empty] ;>>gnome2
+;;[106:^V watered|^V water] ;>>gnome2
+[108:^V went|^V go ^V goto ^V find ^V walk]
+[109:stopped|^V stop ^V abort]
+[110:^V drank|^V drink]
+[112:^V exits ^V exit]
+;
+; verbs for output..
+[130:^V had|^V have ] ; mainly for output
+[131:^V had|^V has ] ; mainly for output
+[132:^V was|^V am ] ; mainly for output
+[133:^V were|^V are ] ; mainly for output 'you were'
+[134:^V was|^V is ] ; mainly for output 'someone was'
+[135:are] ; output only - present tense for 'tell me about'
+[136:is]  ; output only - present tense for 'tell me about'
+;
+;; [137 is 'GO IN']
+;; [138 is 'GO OUT']
+;; 139 is 'wait for person'
+;; 140 is 'wait until time'
+;; 141 is 'wait for (length of time)'
+;; 142 is 'wait for single turn'
+[143:^V fought|^V fight ^V kill]
+;; [144:^V retaliate ^V strike ^V challenge ^V prove] ; special to L1
+[145:^V dodged|^V dodge]
+; 146 and 147 have text for debugging output only - do not mark
+[146:gdgo]  ; 196 - gdgo
+[147:gdrun] ; 197 - gdrun
+[148:^V stuff]
+;
+; Transitive verbs..
+[150:^V examined|^V examine ^V read]
+[151:^V cut|^V chop]
+[152:^V woke|^V wake ^V rouse]
+;
+[154:^V got|^V get]
+[155:^V took|^V take ^V carry ^V acquire ^V steal ^V picked ^V pick
+^V pluck ^V catch ^V lift ^V pull ^V hold ^V keep ^V turn ^V rotate
+^V grab]
+[156:^V wore|^V wear]
+[157:^V dropped|^V drop ^V discard]
+[158:^V put|^V hide ^V conceal]
+[159:^V removed|^V remove ^V free ^V release]
+[160:^V threw|^V throw ^V chuck ^V toss ^V hurl]
+[161:^V gave|^V give ^V offer ^V offered ^V sell]
+[162:^V asked|^V ask ^V question]
+[163:^V followed|^V follow ^V chase]
+[164:^V opened|^V open ^V unlock]
+;; [165:^V snap] ; as in 'snap fingers'
+;; [166:^V hold ^V keep] ; as in 'hold cave mouth' ;>>special to gnome 2
+;; [167:^V plant ^V bury] ; as in 'plant bulb' >>special to gnome 2
+[168:^V pushed|^V tug ^V push ^V launch ^V shovel 
+^V paddle] ; >>gnome3 - launch
+[169:^V fastened|^V fasten ^V tie ^V attach]
+[170:^V unfastened|^V unfasten ^V untie]
+;
+[176:^V inserted|^V insert]
+;
+;; [182:^V collect] ; goal-directed
+;
+; 186, 187 and 189 have text for debugging only
+[186:return object] ; 186 is 'return object to initial' (for npcs)
+;; [188:^V find] ; set up find.
+[189:gdfind] ; 239 is gdfind
+;
+[190:^V closed|^V close ^V shut]
+;; 
+[192:^V told|^V tell]
+[194:struggled] ; mainly for output
+; 195 is 'steal all from'
+;
+[197:killed] ; output only
+;
+[210:reached] ; output only
+[211:dragged] ; output only
+[212:passed] ; output only
+[213:flew] ; output only
+[214:walked] ; output only
+[215:caught] ; output only
+[216:entered] ; output only, e.g 'Fred enters from the east'. Do not mark 
+;
+; Echo verbs (250-299) which just print the message containing them..
+[250:OK, if you say not|^V no]
+[251:right, so be it|^V yes]
+[252:whee! That was fun. Now let's get back to business|^V leap ^V hop 
+^V skip ^V dance ^V celebrate]
+[253:and as that word was released upon the wind, time stood still, the 
+world was plunged into blackness and all sound ceased. Then, from afar, 
+Lancelot heard a voice say, "What the heck was that?" and another replied, 
+"I haven't a clue, but it wasn't for us". Then everything went back to 
+normal|^V plugh ^V xyzzy ^V sesame ^V plover ^V humakaat ^V satarh
+^V ollabin ^V obis] ; magic words for amusing response
+[254:the ^V weather was nothing much to write about]
+[255:if you want to talk to someone, follow their name with what you 
+want to say to them. For example GATE, HELLO|^V hello ^V welcome ^V hi 
+^V greetings ^V day ^V afternoon]
+[256:Lancelot heard nothing that he didn't already know about|^V listen 
+^V hear]
+[257:send the coupon to Level 9 for a ^V hint|^V help]
+;; [258:the ground was much to hard for digging|^V dig]
+[259:send your ^V cheques to Level 9|^V treasure ^V money]
+[260:the only ^V escape is to finish the game]
+[261:fancy that? What I want is some fish to go with my chips, but we 
+can't always get what we ^V want.]
+[262:Lancelot will have to find that out for himself|^V what]
+[263:Why not|^V y ^V why]
+[264:funny you should ask that, I was just wondering ^V where it was myself]
+[265:I'm afraid even I don't know ^V how things work around here. I'm just 
+grateful when they do]
+[266:sorry, I can't help with such matters.
+%Actually, I'm not in the least bit sorry. I like to see people 
+struggling|^V whether ^V who]
+[267:that kind of language does not impress me one little bit|^V sod 
+^V motherfucker ^V crap ^V nipples ^V cock 
+^V bloody ^V scott ^V adams ^V frigging ^V wanker ^V turd ^V piss 
+^V shit ^V twat ^V cunt ^V prick ^V bollocks ^V jesus ^V christ ^V dick 
+^V god ^V devil ^V tits ^V asshole ^V arsehole ^V cretin ^V conservatives 
+^V spastic ^V coon ^V wog ^V fucking ^V screw ^V fucker ^V bastard 
+^V bugger ^V damn ^V fart ^V sex ^V hell ^V bonk ^V rainbird ^V pratt
+^V rape ^V shag]
+; lower case swear words 
+
+[268:the real question is whether there is ^V intelligent life on Earth
+|^V intelligence]
+[269:if you are in search of the meaning of ^V life, the universe and 
+everything - look elsewhere]
+[270:so what is there to ^V shout about? I don't know|^V yell]
+[271:^V royalties are never enough and are always late arriving]
+[272:forget these funereal fulminations and get on with life|^V death]
+[273:what? Going so soon? Try CONTROL C, but don't forget to save 
+your position first|^V goodbye ^V bye]
+[274:you're forgiven, and bless you for your consideration|^V sorry]
+[275:EEEK! (Will that do?)|^V scream]
+[276:what a scorcher|^V phew]
+[277:%^V directory of disk A:\
+% %No files.
+%Space free = no Megabytes|^V dir ^V catalog ^V cat]
+;
+[278:try the chemist|^V condoms]
+[279:Lancelot closed his eyes and tried to ^V sleep, but couldn't. So 
+he gave up and stayed awake instead]
+[280:the killer whales made swimming too dangerous around there. Besides, 
+the water was freezing|^V swim]
+[281:what do you mean, ^V think? Thinking's your department, not mine]
+[282:Lancelot's attempts at musicianship were not well received]
+[283:hit] ; the object 'hit' target
+;
+[285:bleuch] ;>>gnome2 |^V drink]
+[286:Lancelot thought about shaking it, but decided it might not be a good 
+idea|^V shake]
+;;[287:Lancelot's attempts at musicianship are rarely well received, are 
+;;they? This was no exception]
+[288:you are here to use objects, not to ^V bury them]
+;; [289:yeuch|^V eat ^V bite ^V taste ^V nibble ^V lick]
+[290:Lancelot polished it until it gleamed in 
+the noonday sun|^V rub ^V clean ^V polish]
+[291:you ^V fill a container by, e.g, "PUT THING IN CONTAINER"]
+[292:please ^V empty a container by removing its contents in turn]
+;; [293:rat-a-tat-tat! That was fun|^V knock]
+[294:Lancelot had no way to ^V light anything. He
+was a non-smoker, you see]
+[295:try throwing some water at it|^V extinguish]
+
+;; [296:that's not a musical instrument|^V play ^V blow]
+[297:XXX. If you don't mind, I'll just pay lip service to that 
+command|^V kiss]
+[298:the only thing worth waving around here is a magic ^N wand, and I 
+don't know if we've got one of those|^V wave]
+[299:nothing happened. Lancelot tried again, and that time nothing 
+happened again|^V press ^V select ^V depress ^V poke ^V prod ^V touch]
+;
+; Objects (300+N)..
+[301:^N Lancelot|^N player ^N me ^N myself]
+; Lancelot must start with upper case.
+
+;
+;---------------
+;
+; Brief location objects (479+N). See 779+ for examine messages and 
+; 1199+ for their verbose equivalents..
+;[480:^N bleak ^N shore]
+;[481:^N isle of ^N Servage]
+;[482:^N shore near ^N Corbin ^N village]
+;[483:^N west ^N way]
+;[484:^N mews ^N entrance]
+;[485:^N King's ^N gate]
+;[486:^N market ^N square]
+;[487:^N south ^N way]
+; 
+; These are used for seeing from a distance and for input, e.g for 
+; 'examine tower' and 'go castle'. (Note that 'go scenery' also works).
+; They also provide a link between the grid of synthesised locations 
+; and the real, static locations used for rooms inside buildings etc.
+;---
+[530:^N rainbird]
+[531:^N breadcrumbs|^N sausagemeat]
+
+; Collective nouns...
+[534:^N everything ^N all ^N every]
+[535:^N ingredients] ; collective noun - was 'treasure'
+;; [536:^N weapons] ; collective noun
+[537:^N people|^N everyone ^N everybody] ; collective noun
+;;[538:^N clothes|^N armour]
+;
+; Omni-present objects.. 
+[539:^N door] ; normal door, for the benefit of PRINTACTORACTION. It 
+; is apparently never described by PRINTOBJECT (so?).
+[541:^N water|^N river]
+[542:^N be]
+[543:^N room|^N ground ^N floor] ; used for output as well
+[544:^N wall|^N walls]
+[545:^N sky|^N sun ^N moon]
+; 
+; and finally, some miscellaneous nouns which are used miscellaneously..
+[547:^N except ^N but]
+[548:^N it|^N that ^N them ^N those ^N none ^N him ^N her]
+[549:^N minute ^N minutes]
+
+;[550:^N sign ^N cross] ;for 'MAKE SIGN OF CROSS' >>special to Lancelot3
+[551:^J then ^J next]
+[552:^J therefore ^J so]
+[553:^N Lancelot|^N you] ;you
+[554:^N horse|^N armour ^N weapons ^N sword ^N helmet ^N feet ^N nose]
+; >>special to Lancelot
+;
+; Pronouns...
+[560:it] ; ita
+[561:it] ; itan
+[562:some]
+[563:he]
+[564:she]
+[565:they]
+[566:Lancelot] ; you
+[567:he] ; proper male
+[568:she] ; proper female
+;
+[570:it] ; ita
+[571:it] ; itan
+[572:them]
+[573:him]
+[574:her]
+[575:them]
+[576:Lancelot] ; you]
+[577:him] ; proper male
+[578:her] ; proper female
+;
+; and some misc output messages
+; plural endings, and other odd verb declension...
+[579:~] ; print to avoid bug which can print a space after previous word 
+[580:s]
+[581:es]
+[582:is] ; used in examine
+;
+; Entry directions, in the form 'The animal enters from the 
+; outside'. (As opposed to 'The animal goes in' - the normal 
+; verb table.) Note that directions are reversed, so the offset 
+; into the table is the direction of the moving npc.
+;
+[585:from the south]      ; north
+[586:from the southwest]  ; northeast
+[587:from the west]       ; east
+[588:from the north]     ; south
+[589:from the northwest] ; southeast
+[590:from the northeast] ; southwest
+[591:from the east]       ; west
+[592:from the southeast]  ; northwest
+[593:from below]          ; above
+[594:from above]          ; below
+[595:from outside]        ; inside
+[596:from inside]         ; outside
+[597:from across the way] ; across
+[598:by climbing]         ; climb
+[599:with a jump]         ; jump
+;
+; Examine messages (600+N). NO full stops at end please.
+;
+[601:a brave and fearless knight]
+
+;
+;
+; Brief location objects (479+N). See 779+ for examine messages and 
+; 1199+ for their verbose equivalents..
+;[783:the west way]
+;[784:the mews entrance]
+;[785:the King's gate]
+;[786:the market square]
+;[787:the south way]
+
+
+
+;
+; Short-Form room Descriptions (800+N). No full stops at end please.
+; These are the brief mode descriptions; they are prefixed by 'you 
+; are' and, in verbose mode, messages 1100+N are appended.
+;
+; room 1 is used as exit modifier for synthesised rooms.
+; rooms 2..20 are those with static connections; i.e. not on the 
+; synthesised grid.
+;
+; description order is:
+; 'Lancelot was' '800++'   '1100++'  '.'
+;              locn obj      short      long
+;
+;
+; 803..929 are rooms and echo locations in part 2.
+;[803:in the ^N lower ^N prison]
+;[804:in the ^N courtyard]
+
+[859:^N Logris] ; words for 'go part 2'
+
+; 'echo locations...'
+;[925:in the upper stories of the tower. Finding nothing of interest,
+;Lancelot returned to the stairs beside the living quarters]
+;[926:in some thick woodland, and then returned to the path]
+;[927:in King Pellam's castle. He visited King Pellam,
+;who told him about the Holy Grail. Then he made his excuses and left]
+
+; 940..1030 are real rooms for part 1
+;[940:in the ^N guest ^N room]
+;[941:in the ^N study]
+
+
+; grid rooms...
+; 1020-1030 is grid in part 1
+;[1020:in the ^N south ^N warren]
+;[1021:on the ^N south ^N way]
+
+
+;
+; Now verbose additions to brief location descriptions (1100+n). No 
+; full stops at end please. These are printed immediately after each 
+; short description (800+N), without any intervening punctuation. 
+; (You may start a message with either punctuation or just text.)
+;
+;[1103:leading into the distance to the west]
+
+;[1269:outside Merlin's house]
+;[1270:outside the kennels]
+;[1271:outside the stables]
+;
+;
+;
+; 1350+n are messages printed on first entering each room
+; ( VisitTable)
+
+;[1499:Lancelot said goodbye to Guenever and prepared to take his
+;leave of her]
+;[1501:Lancelot was knighted by Arthur, stayed for a meal, and realized
+;he was in love with Guenever. She looked at him coyly, and he asked
+;to be her champion. She refused to consider being championed by
+;a novice, and invited him to return when he had proved himself worthy.
+;Lancelot realized he must go off to Logris to prove himself by great
+;and noble deeds, and by freeing some round table knights held captive
+;there. ]
+
+;
+;
+;
+; Message pairs for use in describing containment positions
+; also used for preposition table
+;
+; part printed before container
+;
+[1600:Lancelot could see]      ; 0 - you can see (user's name not
+; printed by PRINTOBJECTS)
+[1601:^P on |^P onto] ; 1 - on
+[1602:^P underneath|^P below ^P under] ; 2 - under
+[1603:^P behind]      ; 3 - behind
+[1604:]               ; 4 - carrying
+[1605:]               ; 5 - wearing
+[1606:in|^P at]       ; 6 - blocking the hole
+[1607:^P in |^P into ^P inside] ; 7 - in 
+[1608:hanging from]   ; 8
+[1609:growing from ]  ; 9 - part of
+[1610:^P between]     ; tied between is tied a rope
+;[1611:]              ;11 - 'the carter was pushing a cart'
+[1612:lying on]       ;12
+[1613:sitting on]     ;13
+[1614:fastened to]    ;14
+; 15 'giant Nabon was lying on the pillow'
+[1616:^P with|^P using]
+[1617:^P from]
+;
+; part printed between container and contained.
+;
+[1640:]                ; 0 
+[1641:was]             ; 1 - on
+[1642:was]             ; 2 - under
+[1643:was]             ; 3 - behind
+[1644:was carrying]    ; 4
+[1645:was wearing]     ; 5
+[1646:was blocked by]  ; 6 - is blocked by
+[1647:was]             ; 7 - in
+[1648:was]             ; 8
+[1649:was]             ; 9 - part of is
+[1650:was tied]        ;10 -
+[1651:was driving]     ;11 - the carter was pushing a cart
+[1652:]                ;12
+[1653:]                ;13
+[1654:was]             ;14 - fastened to
+[1655:was lying on]
+;
+; for plural contents...
+[1670:]                ; 0 
+[1671:were]             ; 1 - on
+[1672:were]             ; 2 - under
+[1673:were]             ; 3 - behind
+[1674:was carrying]    ; 4
+[1675:was wearing]     ; 5
+[1676:was blocked by]  ; 6 - is blocked by
+[1677:were]             ; 7 - in
+[1678:were]             ; 8
+[1679:were]             ; 9 - part of is
+[1680:was tied]        ;10 -
+[1681:was driving]     ;11 - the carter was pushing a cart
+[1682:]                ;12
+[1683:]                ;13
+[1684:were]             ;14 - fastened to
+[1685:was lying on]
+
+; 1700: is base for prepositions to use with 'you'
+;
+; 1700+N is part printed before 'you'
+[1715:tied to]
+;
+; 1740+N is part printed between you and object(s)
+[1741:was on]         ; 1 - on
+; 1742 is 2
+; 1743 is 3
+[1744:owned]          ; 4 - own
+[1745:was wearing]    ; 5
+[1746:was riding]     ; 6
+[1747:was in]         ; 7
+[1751:was driving]    ; 11 - Lancelot was pushing
+[1752:was lying on]   ; 12
+[1753:was sitting on] ; 13
+[1754:was fastened to];14
+[1755:was lying on]
+;
+; for plural prepositions...
+; 1770+N is part printed between you and object(s)
+[1771:were on]         ; 1 - on
+; 1772 is 2
+; 1773 is 3
+[1774:owned]           ; 4 - own
+[1775:were wearing]    ; 5
+[1776:were riding]     ; 6
+[1777:were in]         ; 7
+[1782:were lying on]   ; 12
+[1783:were sitting on] ; 13
+[1784:were fastened to];14
+[1785:were] ; tied to you is 15
+;
+[1800:^P off]
+[1801:^P up]
+[1802:^P down]
+[1803:^P to]
+[1804:^P out]
+[1805:^P from the ] ; used for npc motion
+[1806:^P for]
+[1807:^P until]
+[1808:^P debug]
+[1809:^P through]
+[1810:^P about]
+;
+; Parser messages..
+[2000:you don't need to use "] 
+[2001:" to finish the game]
+;
+[2003:I don't understand the word "]
+[2004:" when used like that]
+;
+[2006:Lancelot was ]
+[2007:in a ] ; as in 'You are in an alder forest
+[2008:in an ]
+[2009:exits led in all directions]
+;
+; general error message when parsing has broken down.
+[2010:I don't understand what you mean]
+[2011:Lancelot couldn't see]
+[2012:Lancelot didn't have]
+[2013:Lancelot already had]
+[2014:(Perhaps I'm just being particularly thick today, but I really 
+haven't a clue as to what you are blathering on about)]
+[2015:it's too far away] ; examine, take etc. scenery objects
+[2016:I can't find a verb in that sentence]
+[2017:it's not there]
+[2018:there were too many nouns in that sentence.]
+[2019:Lancelot couldn't see that here]
+[2020:Lancelot owned nothing at all. ]
+[2021:it was dark, Lancelot could not see. ]
+;
+[2036:sorry, I don't fully understand that verb.]
+; ^ verb in keyword table but not in CALLVERB routine
+[2037:there didn't seem to be anything suitable. ]
+[2038:said "that was a rhetorical question"]
+[2039:what a mouthful! ]
+;
+[2044:couldn't have ] ; as in 'Lancelot couldn't have knocked that'
+;; [2045:that]
+[2046:that]
+[2047:here]
+[2048:Lancelot couldn't find ]
+;
+[2053:it's not clear to what ]
+[2054: is referring] 
+;
+;; [2055:(removing] ; E.g '(Removing the bat from the cage first).'
+;; [2056:from the]  ; to avoid containers inside themselves.
+;; [2057:first).]
+;
+; error messages for NPC's
+[2060:are you talking to yourself again?]
+[2061:Lancelot couldn't talk to several people at once]
+;
+;; [2065:for] ; as in 'looks for the cask'
+;; [2066:but can't find]
+;
+;; ; message pair when a npc tries to take stuff from others...
+;; [2074:won't let]
+;; [2075:take it]
+;
+; Standard Adventure output messages
+;
+[2100:Welcome to part 1 of Lancelot, copyright (C) 1988 Level 9 
+Computing. ]
+;; [2101:Lancelot couldn't see]
+;; [2102:Lancelot didn't have]
+;; [2103:Lancelot already had]
+;; [2104:Lancelot couldn't see that here]
+;; [2105:in the distance is ] ; for scenery seen from afar
+;; [2106:Lancelot owned nothing at all. ]
+;; [2108:it was dark, Lancelot could not see]
+;
+; examining something greater than maxobject: (but not scenery)
+; rare occurrence - mostly for omnipresent objects, numbers, spells
+[2112:it looked exactly as Lancelot had expected. ]
+;; [2113: nothing]
+[2114:Lancelot couldn't go that way]
+[2115:through the door]
+;; [2116:Lancelot banged his nose, knees and knuckles on the door. Perhaps he 
+;; should have opened it first? ]
+[2117:it's already open]
+;; [2118:it's already closed]
+;; [2119:Lancelot found]
+;
+[2123:Lancelot couldn't put ] ; paired with 2124
+[2124:there]
+;
+;; [2125:Lancelot couldn't go there! ]
+[2126:Lancelot would have to drop it first]
+;
+;; [2127:Lancelot couldn't climb that]
+[2128:%Did you know that you can go quickly to a far off place? E.g 
+"RUN TO LOGRIS" or "GOTO CATHEDRAL."%]
+;
+; 2130 is used when player refers to scenery which is not nearby
+[2130:I can't find a reference to "]
+[2131:Lancelot was on it! ]
+[2132:what? ]
+[2133:where? ]
+[2134:Lancelot was wearing ]
+[2135:please try again, saying what with? ]
+[2136:which one?]
+[2137:at what?]
+[2139:was full]
+[2140:" here]
+;
+[2142:Lancelot couldn't wear ]
+;; [2143:Lancelot couldn't reach it from here]
+;
+[2147:Lancelot was already wearing that]
+[2148:Lancelot found he didn't need to do that]
+;
+; Confirmation messages
+;
+[2152:worn]
+[2153:OK]
+[2155:time passed. ]
+[2156:said]
+[2158:Lancelot found he would have to untie it first]
+;
+[2160:YES or NO please.%]
+;
+;; [2177;Lancelot heard strange noises]
+;; [2178:Lancelot heard a strange noise]
+;; [2179:Lancelot heard some strange noises coming from nearby]
+;; [2180:Lancelot heard an odd noise and, though he listened carefully, he 
+;; could not identify it]
+;; [2181:Lancelot heard a strange noise]
+;
+;; [2190:(]
+;; [2191:)]
+;
+; Death, scoring, game control etc.
+;
+[2200:really restart? ]
+;; [2201:%press space to play again]
+[2202:really restore? ]
+[2203:% %did Lancelot continue? ]
+[2204:said, "Thank you"]
+;
+[2209:% %the adventure is over.
+%Please type RESTART, OOPS, RESTORE or RAM RESTORE: ]
+[2210:the room was badly damaged] ; attack/fireball room
+[2211:Lancelot looked around and decided it wasn't worth the effort. he had 
+made a good job of devastating the place last time]
+[2212:really! You're so destructive! Why don't you go and punch up a paper 
+bag instead? ]
+[2213:it looks as though the Vandals have been at work here]
+;; [2214:% %Do you want to continue? ]
+[2215:that's too long to wait] ; won't wait
+[2216:you can wait for someone (e.g. WAIT FOR PENGUIN),
+for a certain length of time (e.g. WAIT FOR 25 MINUTES),
+or until a time (e.g. WAIT UNTIL 14:25)]
+;[2217:the time was ]
+;
+; Residual combat messages..
+;;[2230:the body of] ; as in 'the body of a troll'
+;;[2231:, but]
+;
+; Score messages..
+[2240:%Lancelot scored ]
+[2241:% %you seem to have got Lancelot killed.%]
+[2242: out of 1000] ;  and was a ] 
+;
+; ratings..
+;[2250:tenderfoot]
+;[2251:novice]
+;[2252:rookie]
+;[2253:pioneer]
+;[2254:journeyman]
+;[2255:pathfinder]
+;[2256:woodsman]
+;[2257:forester]
+;[2258:leader]
+;[2259:big cheese]
+;[2260:superhero]
+;
+[2300:oops and ram save//restore don't work in this version. ]
+[2301:%please insert save disk and press a key. %]
+[2302:%please insert game disk.%]
+[2308:I can't use OOPS to go back further than this. ]
+[2309:%(This version allows you to use RAM SAVE and RAM RESTORE to 
+save a position in memory, and OOPS to take back bad moves).%]
+[2310:can't return to that saved position in memory. Perhaps you've 
+turned off the computer, or reloaded the game, since it was saved. ]
+;
+;
+[2311:% %Lancelot is about to start another part of the game. Do you 
+want to save his position first, just in case? ] ; tape ***
+[2312:that data was not saved from Lancelot. ]
+[2313:play the game tape to load part ] ; tape ***
+[2314:% %Lancelot is about to start another part of the game. Do you 
+want to go ahead? ]
+
+;
+[2319:you've started in the middle of the game. Please 
+restore a position saved from this part. ] ; tape ***
+;;
+; misc jokey messages (slightly more complex than echo verbs)..
+[2401:that might end up with Lancelot getting hurt] ; attack me
+[2404:Lancelot could smell nothing of interest]
+[2405:Lancelot found nothing much to write about]
+[2406:Lancelot normally smelled OK, but at that 
+stage of his journey he just smelled]
+; smell player
+[2407:Lancelot said hello]
+[2416:to be, or not to be, that is the question]
+;
+; add your messages for special cases here....
+;
+; additions to Lancelot's name...
+;[2798:of the round table]
+;[2799:squire]
+;[2800:Sir] ; comes first
+;[2801:the filthy]
+;
+
+; "Pet" messages... (table driven)
+; some remarks made by Damosel Maledisant on various occurances...
+;[2850:ugh, not enough garlic] ; try soup
+;[2851:very clever]
+;[2852:take some music lessons] ;play harp
+;
+;---------
+; messages when people refuse an order. 3000+n
+; Use ACTORM1Dot
+
+;[2902:] ; Tristram
+;[2903:] ; Galahad
+;[2904:] ; Bors de Ganis
+;[2905:] ; Sir Question Mark ;***
+;[2906:] ; Gawain
+;[2907:] ; the Red Knight
+;[2908:] ; Meliot
+;[2909:] ; Lamorak
+;
+;[2910:] ; Ector de Maris
+;[2911:] ; Agravain
+;[2912:] ; Aliduke
+;[2913:] ; Brandiles
+;[2914:] ; Brian
+;[2915:] ; Geheris
+;[2916:] ; Gareth
+;[2917:] ; Lionel
+;[2918:] ; Marhaus
+
+
+;
+;[2952:smelt awful, and Lancelot decided not to ask
+;for any more help] ; peasants
+;[2953:seemed very unfriendly] ; crowd
+;[2954:squawked and ignored Lancelot] ; hawks
+;[2955:ignored Lancelot completely] ; Queen's knights
+ 
+;--------
+;
+;
+; comments made by people when they encounter Lancelot for the first time
+; 3000+
+;[3002:Tristram said, "Hello Galahad, have you brought my harp?" ]
+;[3056:the black knight said, "Hold fast, traveller. Only worthy
+;knights may pass me". ]
+
+; don't be silly group...
+[3100:don't be silly. That's my job]
+[3101:well, that's a novel concept]
+[3102:you must be mad if you really mean that]
+[3103:now there's a peculiar thing to want to do]
+[3104:daft I call it]
+;
+; nice try group...
+[3110:nice try, my friend] 
+[3111:a truly valiant attempt at a solution. Shame it won't work]
+[3112:no chance]
+[3113:that really does deserve some credit, though it doesn't actually 
+work]
+[3114:with ideas like that, you'll go far - eventually]
+;
+; just scenery group...
+[3120:you might as well leave it alone]
+[3121:I suggest that you forget about it]
+[3122:that's not important to the game]
+[3123:forget it. It's only scenery]
+[3124:that was just put there to confuse you. I see it has]
+;
+; missing object...
+[3130:now what was the object of that? Try again]
+[3131:sorry, I couldn't find an object in that]
+[3132:please be more specific]
+[3133:I don't like to object, but there was no object in that command]
+[3134:do it to what? You didn't say]
+;
+; Nothing happened group...
+[3140:I don't know what that was suppose to achieve, but nothing happened]
+[3141:that didn't seem to work]
+[3142:there had no effect on anything]
+[3143:that was outstandingly ineffective]
+[3144:that did nothing at all, I'm afraid]
+;
+; the following are printed after the object name..
+;
+[3150:wouldn't move] ; try to move static object group
+[3151:didn't budge]
+[3152:refused to be moved]
+[3153:seemed fixed in place]
+[3154:was unmoved]
+;
+[3160:don't bother, it would do nothing] ; don't bother group
+[3161:that would be a waste of time]
+[3162:that would be pointless]
+[3163:that won't get you anywhere]
+[3164:don't expect any results from that]
+;
+; groupsay messages for hello responses
+[3170:said, "Hello, Sir"]
+[3171:said, "Greetings"]
+[3172:said, "Hello, what brings you here"]
+[3173:greeted his with an inscrutable smile]
+[3174:said, "How do you do?" politely]
+;
+; groupsay messages for npc's being unable to carry out an order
+[3180:said, "sorry, Sir, but I couldn't do everything you asked"]
+[3181:said, "sorry, Sir, but I couldn't do everything you asked"]
+[3182:said, "sorry, Sir, but I couldn't do everything you asked"]
+[3183:said, "sorry, Sir, but I couldn't do everything you asked"]
+[3184:said, "sorry, Sir, but I couldn't do everything you asked"]
+;
+
+; groupsay messages for npc's being unable to carry out an order
+[3190:said, "sorry, Sir, but I couldn't do everything you asked with]
+[3191:said, "sorry, Sir, but I couldn't do everything you asked with]
+[3192:said, "sorry, Sir, but I couldn't do everything you asked with]
+[3193:said, "sorry, Sir, but I couldn't do everything you asked with]
+[3194:said, "sorry, Sir, but I couldn't do everything you asked with]
+
+
+; messages for people recovering things they need
+;; [3190:said, "I'll take that, thank you very much"]
+;; [3191:said, "Give that to me"]
+;; [3192:said, "That's mine"]
+;; [3193:said, "Ah-ha! now I'll get it back"]
+;; [3194:said, "Let me have it this minute"]
+;
+;; responses for npcs - those who can talk and those who can't.
+;; first - npc refuses an order
+;[3210:said, "Find someone else, I'm tired"]
+;[3211:said, "Don't try to order me around, good knight"]
+;[3212:said, "No I won't"]
+;[3213:refused, saying "That is not the sort of thing I do"]
+;[3214:exclaimed, "Why should I? Do it yourself"]
+;
+; now, npc accepts an order
+[3230:said, "Very well. It would be a pleasure"]
+[3231:said, "Of course, I'll be right there"]
+[3232:said, "Yes, certainly"]
+[3233:agreed, saying "Anything to oblige"]
+[3234:nodded and said, "Right away, Sir"]
+;
+; now response to questions when not obedient...
+[3250:said, "You'll have to find that out for yourself, Sir"]
+[3251:said, "You won't get any help from me, young Sir"]
+[3252:pretended to ignore his question]
+[3253:demurred, saying "Sorry, but I really can't say"]
+[3254:spread sorrowful hands and said, "Ah, if only I could help.."]
+;
+; response to requests to give anything(s) to anyone
+[3270:said, "You'll have to fight me for that"]
+[3271:said, "I'd rather die than part with that"]
+[3272:said, "I'm not about to give anything away"]
+[3273:clutched at it, saying "It's mine! Clear off"]
+[3274:stared back in silent refusal]
+;
+; npc wants to obey orders just given, but can't understand any of them!
+[3290:said, "Sorry Sir, I don't understand"]
+[3291:said, "It must be me, Sir, I can't understand what you're 
+saying"]
+[3292:said, "Pardon? Could you rephrase that"]
+[3293:looked blank and said, "Eh?.."]
+[3294:said, "Can we try that again? My grasp of English isn't quite what it 
+should be"]
+;
+; again used following a command referring to scenery
+[3530:the previous command was not repeatable]
+[3531:you can't do that again]
+[3532:it wouldn't help to try that again]
+[3533:that was a once-only command. It doesn't do seconds]
+[3534:oh, not again! I've been through that once already]
+;
+;; npc is blocked in a racetrack *********** used?
+;[3540:stopped, looking confused]
+;[3541:looked puzzled]
+;[3542:seemed uncertain of what to do next]
+;[3543:ground to a confused halt]
+;[3544:stood stock still and said, "Now what?"]
+
+;; messages when the player tries to take things from others...
+;[3550:wouldn't let Lancelot] ;?????
+;[3551:slapped his hand away]
+;[3552:stopped him from taking it]
+;[3553:held onto it and said, "This is mine. You can't have it"]
+;[3554:refused to give it to Lancelot]
+;
+[3560:dead] ; printed by follow code
+;
+[3600:a voice in the distance shouted, "wow!
+A stack overflow". ] ;>>mike 28/3/88 - merged from 3 messages
+;;>>mike 28/3/88 [3603:don't panic! normal service will be resumed shortly] ; a panic
+;;>>mike 28/3/88 [3604:sorry, I can't get Lancelot there from here]
+[3605:sorry, Lancelot will have to find his own way from here]
+;
+; conversational fragments...
+[3610:I am perfect in every way] ; must be capital at start
+[3611:you are a knight]
+[3612:cleared its throat and said.. "]
+;
+[3614:Lancelot yelled "ARRRGGGGGHHHHH"! ]
+;
+; 'npc, rude' word for talking people
+[3620:swore back at Lancelot]
+[3621:swore loudly]
+[3622:seemed very offended]
+[3623:said, "@@*!#/\*&@!!, to you too"]
+[3624:gave Lancelot a mouthful in reply]
+;
+; 'npc, help' for talking people
+[3640:said, "Help yourself, my dear Sir"]
+[3641:said, "I'd love to, but I wouldn't be any use to you"]
+[3642:said, "You'll get no help from me, my liege"]
+[3643:said, "I would if I could, but I can't so I shan't"]
+[3644:said, "Stand on your own two feet.. Oh, you are standing, sorry"]
+;
+; 'npc, echo verb' for talking people
+[3660:said, "You must be nuts"]
+[3661:said, "Sorry Sir, but I think you've cracked"]
+[3662:said, "That isn't possible. And if it is, it shouldn't be allowed"]
+[3663:laughed, "Oh! You are a hoot, Sir Lancelot"]
+[3664:looked askance at Lancelot]
+;
+;-----------
+; gold-singing for various people...
+
+; rescued knights
+;
+;[3700:looked virtuous]
+;[3701:sharpened his sword]
+;[3702:polished his armour]
+;[3703:told tales of past battles]
+;[3704:made a rather poor joke about a maiden's favours]
+
+
+;
+;----------
+;
+; Garbage words..
+[4000:^N the ^N this ^N these ^N that ^N some ^N and ^N also
+^N before ^N wade ^N jog ^N plod ^N rush ^N dash ^N march ^N amble
+^N good ^N of ^N cute ^N there]
+[4001:^N therefore ^N am ^N my ^N your ^N try ^N carefully ^N slowly
+^N warily ^N quickly ^N rapidly ^N following ^N around]
+[4002:^N please]
+;
+; Book protection code...
+;
+[4200:%A funny little rock appeared from under a plant and stopped Lancelot 
+by waving waved a copy of a rather tattered book. ]
+[4201:page ]
+[4202:, line ]
+[4203:, word ]
+[4204:?"%]
+[4205:The rock vibrated nastily and Lancelot knew he was wrong. ]
+[4206:The rock crawled back under its plant.%]
+[4207:Lancelot thought that the rock probably wanted to know the word at ]
+[4208:Wrong again! The rock picked up a convenient troll and stunned 
+Lancelot with it. ]
+;
+
+; DO NOT MARK ANY NUMBERS (digits) e.g. 20
+
+[4301:^C half]
+;; [4302:]
+;; [4303:]
+[4304:^C about]
+[4305:^C grandma]
+[4306:^C the]
+[4307:^C a]
+[4308:^C the]
+[4309:^C whipped]
+;
+[4310:^C on]
+[4311:^C hay]
+[4312:^C my]
+[4313:^C to]
+[4314:^C it]
+[4315:^C and]
+[4316:^C treesday]
+[4317:^C so]
+[4318:^C with]
+[4319:^C toothmarks]
+;
+;; [4320:^C]
+[4321:^C grandma]
+[4322:^C have]
+[4323:^C hole]
+[4324:^C weekend]
+[4325:^C whipped]
+[4326:^C the]
+[4327:^C the]
+[4328:^C on]
+[4329:^C gift ^N gift-wrapped]
+;
+[4330:^C the]
+[4331:^C a]
+[4332:^C everyone]
+[4333:^C and]
+[4334:^C made]
+;; [4335:^C]
+[4336:^C this]
+[4337:^C last]
+[4338:^C Bottomlow]
+[4339:^C Sosmall]
+;
+[4340:^C sandwiches]
+[4341:^C even]
+[4342:^C this]
+[4343:^C her]
+[4344:^C mother]
+[4345:^C gift ^C gift-wrapped]
+[4346:^C know]
+[4347:^C the]
+[4348:^C in]
+[4349:^C morning]
+;
+[4350:^C flour]
+[4351:^C coach]
+[4352:^C the]
+[4353:^C something]
+[4354:^C good ^C odd]
+[4355:^C he]
+[4356:^C them]
+;;[4357:^C 20th ^C th ^C 20]
+[4358:^C tipped]
+[4359:^C tipped]
+;
+[4360:^C at]
+[4361:^C provide]
+[4362:^C nose]
+[4363:^C better]
+[4364:^C oh]
+[4365:^C morning]
+[4366:^C the]
+[4367:^C were]
+;; [4368:^C]
+[4369:^C floated]
+;
+[4370:^C my]
+[4371:^C he]
+[4372:^C weekend]
+[4373:^C is]
+;; [4374:^C]
+[4375:^C in]
+;; [4376:^C]
+[4377:^C provide]
+[4378:^C count]
+[4379:^C while]
+;
+[4380:^C well]
+[4381:^C the]
+;; [4382:^C]
+[4383:^C him]
+[4384:^C bed]
+[4385:^C to]
+[4386:^C the]
+[4387:^C it]
+[4388:^C remember]
+[4389:^C should]
+;
+[4390:^C on]
+[4391:^C he]
+;; [4392:^C]
+;; [4393:^C]
+[4394:^C had]
+[4395:^C fish]
+[4396:^C father]
+[4397:^C the]
+[4398:^C so]
+;; [4399:^C]
+[4400:^C the]
+;

@@ -1,0 +1,188 @@
+; Knight Orc special code handlers
+;
+; ASPECIAL.TXT
+;
+; M.J.Austin 20/9/86
+;
+;
+; Known bugs:
+;
+; compiler: DATA statements must be followed by comments
+;  	    else line numbers for errors go wrong
+VAR
+ WEAPON
+ WEAPONSTRENGTH
+ GENERALSAVE ADDSCORESAVE
+ OTPOS OTHIPOS
+ m1save
+ hitpoints
+ actorsave
+ hermitnotalert hermitstunned
+ timeinlab
+ verbsave
+BEGIN
+; now print any messages to be printed after certain movements
+.AFTERMOVE
+ if room<>28 then amnotdungeon
+ object=jailor
+ gosub checkifpresent
+ if result=false then amnotdungeon
+ m1=2775 ; jailor greets you
+ gosub reportm1
+
+.amnotdungeon
+ if room<>33 then amnotbarrow
+ m1=2826 ; you notice that door won't open from inside.
+ gosub reportm1
+
+.amnotbarrow
+.amret
+ RETURN
+;---
+.SPECIALMOVES
+;
+; Given ROOM, HIDEST, DEST, ACTOR is to move that way
+; and exit has been validated as possible (and hence described)
+; in SPECIALEXITS. The purpose of code here is when something
+; happens on moving. If exit is to be blocked, code here should
+; print the appropriate message and set RESULT=FALSE.
+;
+ if actor<>user then smnotuser
+ GOSUB @SAVEOOPS
+
+.smnotuser
+;
+ RESULT=FALSE ; blocked unless get to end
+ if actor=valkyrie then smok
+;
+; any hostile NPCs to block motion?
+; IF DEST=LASTROOM THEN SMNBLOCKED ; going back, so NPC not bothered
+; OBJECT=minnpc
+;.SMCNPC1
+; GOSUB @CHECKIFPRESENT
+; IF RESULT=FALSE THEN SMCNPC2
+;
+; creatures which can be scared by objects
+
+;.SMCNPCNBAT
+; GOSUB @GETNPCATTRIBUTES
+; X1=NPCCURRENT(X4)
+; IF X1<>ACTOR THEN SMCNPC2 ; not hostile to ACTOR
+;; X1=SPELLTIME(IBMSPELLTARGET)
+;; IF X1=OBJECT THEN SMCNPC2 ; NPC is afraid
+;
+; GOSUB @DESCTHEOBJECT
+; MESSAGE 2071 ; won't let you
+; RESULT=FALSE ; ensure movement in blocked
+; RETURN
+;
+;.SMCNPC2
+; ADD OBJECT,C1
+; IF OBJECT<maxnpc THEN SMCNPC1
+
+.SMNBLOCKED
+; one-way exit ?
+; X4=FROM
+; X5=DEST
+; X6=DIR
+; FROM=X5
+; TO=X4
+; GOSUB @CALCDIRECTION
+; GOSUB @CHECKEXIT
+; IF DEST<>0 THEN SMNCHUTE
+; MESSAGE 2149 ; slide down a chute
+;
+;.SMNCHUTE
+;; restore
+; FROM=X4
+; DEST=X5
+; DIR=X6
+;
+ if dest<>2 then smnotkitchen
+; moving up stairs into kitchen - Brainz will knock
+; out anyone not wearing a helmet
+; is brainz in position?
+ x1=currentpos(brainz)
+ if x1<>2 then smnotkitchen
+; does brainz have the club?
+ x1=currentpos(club)
+ if x1<>brainz then smnotkitchen
+ x1=currentpos(helmet)
+ if x1=actor then smsurvive
+ if actor=user then smbrainzuser
+ object=actor
+ gosub desctheobject
+ m1=2703 ; is stunned
+ gosub reportm1
+; and describe brainz doing his stuff..
+ if currentuserroom<>2 then smprevent ; user not in kitchen to see
+ forceprinting=true
+ object=actor
+ lastwordprinted=0
+ gosub desctheobject
+ message 2715 ; emerges, and brainz hits them.
+ forceprinting=false
+ goto smprevent
+
+.smbrainzuser
+ m1=2701 ; brainz stuns you
+ gosub reportm1 ; only executed by user
+ goto smprevent
+
+.smsurvive
+ m1=2702 ; brainz hits you, helmet protects you
+ gosub reportm1 ; only executed by user
+ goto smok
+
+.smnotkitchen
+ if dest<>19 then smnotbridge
+ if trollpaid=true then smcrossbridge
+ if actor=troll then smnotbridge ; troll can cross!
+ object=troll
+ gosub checkifpresent
+ if result=true then trollstopsyou
+ gosub createobject ; make troll appear
+ m1=2716 ; troll appears and demands a treasure!
+ gosub reportm1
+ goto smprevent
+
+.trollstopsyou
+ x1=troll
+ verb=ipast
+ object=nullobject
+ gosub x1wontletactorverb
+ goto smprevent
+
+.smcrossbridge
+ trollpaid=false
+.smnotbridge
+ if dest<>21 then smnotlair
+ if boltsopen=3 then smok
+ m1=2772 ; the door is locked
+ gosub nointerestm1
+ goto smprevent
+
+.smnotlair
+ if dest<>31 then smnotlibrary
+ if from<>30 then smnotlibrary
+ if dooropen<>false then smnotlibrary
+ m1=2116 ; the door is securely closed
+ gosub errorm1
+ goto smprevent
+
+.smnotlibrary
+ if from<>33 then smnotbarrow
+ if dooropen=true then smnotbarrow
+ m1=2825 ; the door won't open.
+ gosub reportm1
+ goto smprevent
+
+.smnotbarrow
+.smok
+ RESULT=TRUE
+ RETURN
+;
+.smprevent
+ result=false
+ return
+;---

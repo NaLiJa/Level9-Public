@@ -1,0 +1,121 @@
+            AEON THINGS. COPYRIGHT (C) 1988. LEVEL 9 
+            ---------------------------------------- 
+
+CREATURES are displayed by means of big sprites (48 by 16 or 24), 
+which means we can't show too many at once. Thus Aeon is a game 
+with a few, fairly powerful opponents on screen, rather than 
+swarms of fragile ones. 
+
+Where possible, initially "sleeping" creatures can be displayed as 
+background objects (e.g a statue which wakes and is replaced by a 
+sprite only as you get close), but this is unusual. 
+
+Similary, Aeon has a few very large creatures, such as the dragons 
+at the end of each level. These "guardians" are built into their 
+rooms and are only partially animated - e.g the body of a giant 
+snake would be static on the background, but the head might move 
+about and spit poison. 
+
+Jester   \
+Warrior  |- Player sprites 
+Wizard   /  
+
+NPC..    \  Much as player equivalents, but with different 
+ Warrior |- palettes etc. They used both as enemies (e.g wizards 
+ Wizard  /  can create elementals) and as captives to rescue. 
+
+Orc     Annoying little creature, armed with a bow. 
+Goblin  Like an orc, but an unarmed worker. 
+
+Demon   Found near Fire   Throws fire missiles. 
+Troll     "    "   Earth  Carries a big club. 
+Leaper    "    "   Water  Big frog with flip-top head and teeth. 
+Ghost     "    "   Air    Drains energy. 
+
+Fire Elem.  \  Elementals; only really found on the corresponding 
+Dust Storm  |_ levels. They are either (relatively weak) wandering 
+Water Spounumber of sprites. 
+
+As they have to go on the floor, modifying the background, these 
+objects use limited colours to avoid attribute clashes (probably 
+monochrome). And as they have to be small (typically 8*8 or 8*16) 
+to be in scale with the people, no attempt is made to distinguish 
+between the objects of a type - e.g all potion bottles look alike. 
+
+This does not matter because, when an object is picked up, or 
+selected on the possessions screen, an enlarged picture is shown 
+and this makes itnumber of sprites. 
+
+As they have to go on the floor, modifying the background, these 
+objects use limited colours to avoid attribute clashes (probably 
+monochrome). And as they have to be small (typically 8*8 or 8*16) 
+to be in scale with the people, no attempt is made to distinguish 
+between the objects of a type - e.g all potion bottles look alike. 
+
+This does not matter because, when an object is picked up, or 
+selected on the possessions screen, an enlarged picture is shown 
+and this makes its its function clear. E.g a ring of sight has a 
+gem like an eye, and a wand of lightning is shown with a jagged 
+spark at the tip. 
+
+
+OBJECT CLASS  TO ACTIVATE  NOTES
+
+Axe           Hold & use   Weapon. Also best for cutting obstacles. 
+Spear         Hold & use   Long, thrusting weapon. 
+Sword         Hold & use   Slashing weapon.
+Bow           Hold & use   Range weapon. One arrow in air at once. 
+
+Armour        Own          Best armour carried adds to defence.
+Helmet        Own          Best helmet carried adds to defence. 
+Shield        Hold         "Use" to raise it. Blocks attack if hit. 
+
+Potion        Drink        Vanishes when used. Acts on player. 
+Ring          Hold         Act on player. 
+Scroll        Hold & use   Vanishes when used. Casts any spell. 
+Wand          Hold & use   Range weapon. Phutts if used when dead. 
+
+
+
+
+
+
+OBJECT CLASS  PICTURE      LABELLED ON BIG PICTURE   
+
+Axe           Axe          +number. Weapons good against specific 
+Spear         Long rod     creatures include a crossed out picture 
+Sword         Sword        of these.
+Bow           Bow 
+
+Armour        Breastplate  +number. Armour good against specific 
+Helmet        Helmet       dangers (e.g fire) include a crossed 
+Shield        Shield       out picture of these. 
+
+Potion        Round flask  Icon on the flask label. 
+Ring          Circle+blob  Icon beside the ring.
+Scroll        Swiss roll   Icon on part-unrolled top end. 
+Wand          Short rod    Icon emerging from wand end. The number 
+                           of zaps remaining is also displayed.  
+
+Icons are combined from a deliberately limited vocabulary. E.g the 
+big picture of a wand of fire has an animated flame at the tip; a 
+potion of fire-protection has the same flame crossed out, Ghost- 
+busters style; and a wall-of-fire scroll has a row of flames. 
+
+Types... 
+  Cold: snowflake 
+  Detection (and hence invisibility): eye 
+  Hearing (and hence stealth): ear 
+  Fire: flame
+  Flight: wings 
+  Growth: 
+  Healing: red cross
+  Light: candle 
+  Lightning: zig-zag bolt 
+  Map: 
+  Opening: key 
+  Strength: arm + biceps 
+  Poison: skull 
+  Teleport: n-shaped arrow 
+  Water: blue drop 
+

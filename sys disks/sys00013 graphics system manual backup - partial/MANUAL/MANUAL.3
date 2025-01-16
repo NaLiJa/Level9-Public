@@ -1,0 +1,658 @@
+Graphics Structure Editor. Copyright (C) 1989 Level 9 Computing Ltd 
+-------------------------------------------------------------------
+
+This editor is not for drawing pictures, but to let you take 
+Neochrome format graphics (eg from Art Studio) and combine them 
+into space-efficient 3D rooms, animation sequences etc. 
+
+It handles four types of objects (graphics data)... 
+
+* Cell: a 16x16 pixel square, in 16 colours (with colour 0 meaning  
+  transparent). This is the way in which real pixels are stored: 
+  the other objects are basically collections of cells. 
+
+* Raster: a rectangle of cells, any number of cells wide by any 
+  number high. Any cell can be used anywhere within a raster, and 
+  the same cell can be used many times (to save space). 
+
+* XZH object. These are built from any number of any of the four 
+  types of objects, each at its own 3D position. Objects within an 
+  XZH object are also known as "items". 
+
+  The co-ordinate system is: 
+
+         ^  H        (H is the height above the "floor") 
+         | 
+         | 
+         +----->  X  (X is the left/right position) 
+          \ 
+           \ 
+            Z        (bigger Z means it's nearer to the viewer)
+
+  XZH objects can be used for a picture on a wall (i.e slightly 
+  in front of it), an animated bird in a gilded cage (i.e slightly 
+  behind the bars), or a 3D room made up from dozens of objects. 
+
+* Animation sequence. This is a list of animation instructions: 
+  object (display any of the four types of objects), shift (move), 
+  repeat next instruction, and fork (start another animation 
+  sequence, to run simulteneously). These instructions are processed 
+  one-at-a-time in order.  
+
+                             EDITING 
+                             ------- 
+
+The screen normally displays two windows, one at the top and one at 
+the bottom, and each shows one object. 
+
+To the right of each window is a column of status information 
+for the corresponding object. For example: 
+
+20        Current object number. 
+4110      Current item (only used when editing an XZH object). 
+0  0  64  3D position (X Z H) of current item (ditto). 
+xzh       Type of object. 
+x 144     X position of cursor object. 
+z 16      Z position of cursor object. 
+h 64      H position of cursor object. 
+4x0x0     X, H, "unused" sizes of current object, if raster. 
+Scr0,0    How far window is scrolled (X,Y). Use for big XZH objects.  
+OqfHR     Status display (capital=on, lower case=off): 
+            O=raster Offset (only affects preview mode),  
+            Q=Quick mode (use when editing very big XZH objects), 
+            F=Fast mode (do not use), 
+            H=auto Height mode (for placing rasters on XZH floor), 
+            R=Reflect. 
+
+The cursor is a twinkling dot, which you can move anywhere with the 
+mouse. Normally, when it is in one window (half of the screen), a 
+copy of the object from the other window follows it about and can 
+be placed at its current position by pressing the left mouse button 
+or space - this is the usual way of building objects. 
+
+Only XZH objects have truly 3D cursor movement. For these, the mouse 
+controls movement along the ground (changing X and Z). And, provided 
+you're not in auto height mode (toggled on/off by "H"), you press 
+keyboard "-" and "+" (with or without shift), or move the mouse with 
+its right button pressed, to change the height H above the ground. 
+
+
+                  DISPLAYING ANOTHER OBJECT 
+                  ------------------------- 
+
+To change which object is displayed in the current window.. 
+
+7/9 Numeric keypad 7 or 9 display the previous or next object. This 
+    is not intended for moving from object 1 to 500, but is ideal if 
+    e.g animation frames of a person running are stored in adjacent 
+    objects, because you can step through them quickly for a check. 
+
+.   Dot makes the editor ask you for a new object number. Type a 
+    number, press return and the chosen object is displayed. 
+
+1/3 Numeric keypad 1 or 3 display the previous or next object in the 
+    other window. (The other window doesn't visibly alter, because 
+    it is not being redisplayed, but the object number and therefore 
+    the object following the cursor are changed). This is useful if, 
+    e.g, you are copying adjacent cells into a raster. 
+
+
+                              EDITING 
+                              ------- 
+
+* CELL EDITING. Cells cannot be edited or copied, except by saving 
+them in a Neochrome file (S) and importing (I) them later. Normally 
+pressing the left mouse button means "copy the object in the other 
+window to here". But because you can't copy onto a cell, moving the 
+cursor onto a cell and pressing the left button has been reused as 
+a quick way to select that cell as the current one. 
+
+
+* RASTER EDITING. To create a raster, choose an object number in the 
+range allowed for rasters (press "Help", "N" and "N" for information) 
+and display it, e.g by pressing keypad "." and entering the number. 
+
+Initialise the raster using the "R" (raster) command, e.g: 
+  R4 (return)   set the width to 4 cells 
+  3 (return)    set the height to 3 cells 
+  (return)      initially use some blank cells. 
+This raster is now 12 cells big; you can see the numbers of the 
+(blank) cells it contains by moving the mouse dot over the raster 
+space, near the top left of the window. 
+
+To copy cells into the raster, display the raster in the upper window 
+and choose a cell object in the lower window. Move the cursor onto the 
+raster (followed by the image of the chosen cell) and press space or 
+the left mouse button to place it. Repeat until the raster is full. 
+
+To copy a raster into a raster, display the destination in the upper 
+window and the source in the lower. Move the cursor across the upper 
+raster (followed by the image of the source raster) and press space 
+or the left mouse button to place it. All cells which overlap the 
+target raster are copied. 
+
+(Note however that no cells or pixels are really changed or copied 
+by any of the above, as rasters really just contain cell numbers. 
+Much the same applies to XZH and animation objects too.) 
+
+Arrow keys change the size of an existing raster: press up/down to 
+increase/decrease height, or left/right to increase/decrease width. 
+
+
+* XZH EDITING. You do not create XZH objects as such (only Rasters 
+need initialising); just pick a number in the range allowed. 
+
+Any kind of object can be copied into an XZH object. It is better 
+to have the destination in the upper window, so display the XZH 
+object there, and the source object in the lower window. 
+
+Now move the cursor around the destination XZH, and it is followed 
+by the object you are copying. Note that this copy does not follow 
+smoothly, but moves in jumps - this is because it can usually only 
+be positioned on a cell boundary (every 16th pixel). 
+
+The mouse controls movement along the ground, changing X and Z. If 
+auto height mode is set (toggle it on/off by pressing "H"), the copy 
+automatically sits with its lowest pixels at height H=0. If not in 
+this mode, you can change the height H by keyboard "-" and "+" (with 
+or without shift), or moving the mouse with its right button pressed. 
+
+Press the left mouse button, or space to copy the object into the 
+XZH object. Space is better, as it is easier to get a single press.
+
+Accurate positioning. Normally, objects can only be positioned on a 
+16x16x16 boundaries within XZH objects. Press keypad "*" to toggle 
+"four pixel mode", in which you can position them accurate to 4x4x4, 
+though positions are still rounded to 16 pixels on display. This 
+allows several layers of objects to be placed at what the game will 
+think is the same Z coordinate (when rounded to 16x16x16), allowing 
+for things such as a picture on a wall or an expression on a face. 
+
+Preview mode. Enter preview mode by pressing "P" and leave by "Esc". 
+This mode shows the current window as it will appear in a finished 
+game, and therefore an XZH object is shown in 3D. It allows you to 
+check, for example, that a midground object really is between fore- 
+and background objects as you copy it into place. Preview mode also 
+shows animation objects (if rapid animation makes editing difficult, 
+press "S" in preview mode for single step mode.. thereafter, press 
+any key to step on the animation). See later for more information. 
+Note: space is NOT the same as left mouse button in preview mode. 
+
+To edit an existing XZH object, e.g to delete one of the objects 
+it contains (items), press: 
+   Esc    to go to the start of the current XZH object, 
+   Tab    to step on to the next item (the current item flashes), 
+   D      to delete the current item, 
+   Delete to delete the XZH object and all its contents. 
+You will notice that items are stored in order of their Z positions: 
+background objects first and working towards the foreground. 
+
+
+* ANIMATION SEQUENCE EDITING. Animation sequences are just lists of 
+instructions; use preview mode (see just above) to reveal what the 
+animation looks like. 
+
+To enter new instructions, press: 
+   F  Fork  (start another animation sequence AND continue) 
+   O  display Object 
+   R  Repeat next instruction: 0,1=forever, 2-16=2-16 times, 17+=pick 
+      a random number 16-31 and do-the-next-instruction-and-repeat 
+      unless it exceeds yours. "Repeat m, repeat n, object o" means 
+      "Repeat m+n, object o"; this allows for bigger repeat numbers. 
+   S  Shift (move) 
+To change a number in an instruction: move the cursor onto it; the 
+old number is highlit; type the new number and press return. 
+
+To delete an instruction: move the cursor on to its name, and when 
+this is highlit, press "D". To delete the sequence, press Delete. 
+
+To copy an animation sequence into another, display the source one in 
+the lower window, move the cursor on to the destination sequence in 
+the upper window and press the left mouse button, or space. Normally 
+the animation instructions are copied before those in the destination 
+sequence; to copy them after an instruction in the middle, first move 
+the cursor on to its name so that this is highlit. 
+
+The other types of objects can be copied into an animation sequence 
+in the same way, resulting in an appended or inserted Object command. 
+
+Example animation sequences for a man walking from left to right.. 
+
+2500: 
+   Repeat !                 ! is displayed for 0: repeat forever. 
+   Object # 2501            Display object 2501 (two strides).
+   End. 
+
+2501:
+   Object #100              Display object 100 (start of movement). 
+   Shift  x 4   z 0   h -1  Shift 4 pixels to the right and 1 down. 
+   Object #101 
+   Shift  x 4   z 0   h -1 
+   Object #102              Varying the height H for the "bobbing" 
+   Shift  x 4   z 0   h 1   action as the man walks along means 
+   Object #103              that, in the objects for the individual 
+   Shift  x 4   z 0   h 1   frames, we can keep his head and torso 
+   Object #104              in a constant position. This will make 
+   Shift  x 4   z 0   h -1  it easier for the game to super-impose
+   Object #105              facial expressions and possessions as
+   Shift  x 4   z 0   h -1  play continues. 
+   Object #106  
+   Shift  x 4   z 0   h 1 
+   Object #107              Display object 107 (end of movement). 
+   Shift  x 4   z 0   h 1   Shift 4 pixels to the right and 1 up. 
+   End. 
+
+
+             IMPORT AND EXPORT OF NEOCHROME PICTURES 
+             --------------------------------------- 
+
+Graphics for the Structure Editor are drawn using an arts package, 
+such as Neochrome or Art Studio, and must be imported. 
+
+* IMPORTING. To import a Neochrome picture file, move the cursor to 
+the upper window and press "I". Then type the picture filename, e.g: 
+MYPIC.NEO and press return. The picture is loaded into a temporary 
+area of memory known as "the Neochrome screen" and is displayed. (You 
+can see the Neochrome screen at other times by displaying object 0).  
+
+
+* GRABBING A RASTER. After importing, move to the lower window and 
+choose a raster (presumably an unused one, which means you must 
+dimension it with "R") which is the right size for one of the things 
+drawn on the Neochrome screen. 
+
+Now move the cursor to the upper window, where you will see two 
+parallel lines, indicating the size of the raster. Position this 
+"box" around the thing you want to grab, e.g the picture of a table. 
+Then press the mouse button to grab the graphics in the "box" and 
+swap them with the contents of the raster. 
+
+(Unlike normal "copy" operations, which leave cells and pixels 
+unchanged, grabbing data from the Neochrome screen in this way 
+actually changes the pixels in all of the cells used by the raster.) 
+
+
+* AUTO-IMPORTING is a faster method when you want to grab all the 
+graphics from the Neochrome screen which you have just imported. 
+
+Press "A" and the system asks for the number of the starting cell. 
+It will copy all the non-blank 16x16 pixels on the Neochrome screen 
+into cells, starting with your number and working upwards, so enter 
+a number which is clear of any already-used cells. (Because blank, 
+i.e all colour 0, parts of the picture are ignored, you should space 
+out things in a format easy to draw and not cram them together.)
+
+Press "N" (no) in reply to "Blank cells only?" and it goes ahead and 
+grabs the screen data into ALL of the specified range of cells. You 
+will presumably then go and copy the cells into rasters, yourself. 
+
+
+                        MISCELLANEOUS FEATURES
+                        ---------------------- 
+
+* SCROLLING THE WINDOW. Because lots of objects are too big to fit 
+into their window, the numeric keypad can be used to scroll them 
+around so that you can edit different parts: 
+
+      8       Use the keypad to scroll the window across the object. 
+      |       Press 8 to move the window up, 2 down, 4 left, 6 right. 
+   4--+--6    And 5 to centre it again. Because the window starts at 
+      |       the top left of the object, scrolling down and right 
+      2       are speeded up: 2 and 6 scroll in four-cell jumps. 
+
+
+* SAVE. Press "S" to save a Neochrome image of the entire screen on 
+disk. You are asked for a file name. 
+
+
+* PREVIEW MODE shows you the object in the current window as it will 
+appear in the game: an XZH object is shown in 3D, and an animation 
+sequence is animated. The other window is not shown, but the object 
+from it slowly follows the cursor as a sprite. 
+
+With an XZH object, you can move the cursor (and cursor object) 
+about through the 3D scene. If you press "P" again in preview mode, 
+the cursor object is positioned on the nearest 16x16 boundary to 
+the cursor. If you waggle the cursor dot, away from the cursor, the 
+cursor object slides towards it one pixel at a time. To change the 
+height H, press the mouse button and move the mouse as usual. 
+
+To copy the cursor object into an XZH object, just press the left 
+mouse button as normal. Because you can see the real appearance of 
+objects, this may be the best way of editing 3D scenes. 
+
+When an animation sequence is displayed in preview mode, the left 
+mouse button's function changes. Press it to restart the animation.
+
+You can slow or speed animation by pressing keyboard "-" or "+". 
+Press "S" in preview mode for single step mode.. thereafter, press 
+any key to step on the animation. See below for more information. 
+Note: space is NOT the same as left mouse button in preview mode. 
+
+Finally, press "Esc" to leave preview mode. 
+
+
+* HELP. Press "Help" for details of common commands. The help screen 
+ends with, "Leave Editor?": press "Y" (yes) to quit (you are warned 
+and can change your mind if if this could lose data), or "N" (no) 
+to display the next help screen, showing object information. This 
+tells you the ranges of numbers allowed for the various types of 
+objects, and ends by asking if you want the 'special functions' 
+menu: press "Y" to see this menu, or "N" to return to editing. 
+
+
+* PANIC PIXEL. Move the cursor to the extreme top right of the screen 
+and press the left mouse button to hit the panic button. This is an 
+extreme form of "Esc"; it should stop everything and restart the 
+editor with object 1 in both windows. 
+
+
+* REFLECTION. Press "Return" to toggle reflection on/off. When an 
+object is copied into a graphical object (a cell into a raster, 
+or anything cell/raster/XZH into an XZH), the current reflection 
+status is stored along with it. Thus, to set up an XZH object for 
+something symmetrical, you would set reflection off, copy in one 
+half, set reflection on and copy in the same half, now reflected). 
+
+
+* RASTER OFFSET. This is a constant, added to the object numbers of 
+all rasters displayed in preview mode, or by the game. It is set by 
+pressing "O", for Offset, (but note: "O" means something different 
+while editing an animation sequence, and in preview mode itself (!)). 
+This allows several groups of graphics to be displayed using the 
+same animation sequences and/or game logic - e.g a dozen game people 
+who all have the same range of actions.  
+
+
+* SPECIAL FUNCTIONS are on a menu accessed via "Help" - see above. 
+As the menu warns, the potential for disaster is quite great, so 
+make a backup copy of your disk first. 
+
+1..add new objects. Add some unused/blank objects and shuffle all 
+the higher objects up. It asks you where to add the new objects, 
+which are all the same type as the one before; the idea is to make 
+room for you to e.g set up more rasters. The range of numbers used 
+for object types change, but that for cells is NOT changed by this 
+command. So the starting position for cells MUST be changed first, 
+by "6", if there is any danger of existing objects overlapping them. 
+Addition takes several minutes; use "Help" to see what the ranges 
+of object types are afterwards. 
+
+2..remove objects. Deletes some objects (blank and otherwise) and 
+shuffles all the higher objects down. It asks you which objects to 
+delete; please make sure they are all of the same type. The range 
+used for cells remains the same, but the range of numbers for other 
+object types are changed. Remove takes several minutes; "Help" 
+shows the ranges of object types afterwards.  
+
+3..find and delete unused objects (not just cells). It asks you 
+which objects to check; please make sure they are all of the same 
+type. Object type ranges, and numbers of remaining objects are 
+unchanged. It takes several minutes. 
+
+4..scrunch objects together. This renumbers objects, and changes 
+object ranges - sliding them all down to fill in any gaps and make 
+the numbers as small as possible. Numbers of objects, and object 
+type ranges, are all changed (even cells). It takes a long time. 
+
+5..make maps. No longer used. Generates a set of rasters as a basis 
+for the floor plan map used for collision detection in the game (i.e 
+showing where people can walk). The rasters can then be modified in 
+map mode (press "t" while over a suitable raster) and the keypad used 
+to change entries to add floorpointers and add/delete free squares. 
+
+6..move cells. Change the starting number of the cells and 
+renumber all references to them. It takes several minutes. Use 
+this to make room for other objects, or to avoid clashes when e.g 
+preparing to import structures which use overlapping numbers.
+
+7..set number of cells. Sets the finishing number of the cells, so 
+determining how much memory is saved/loaded by the editor. Do not 
+set this too high, as even "empty" cells take 128 bytes each. 
+
+8..print structures. Print objects in a text form to RS232, 
+Centronics, a file, or to the screen. It is useful for, e.g debugging 
+if funny things happen with an XZH object (perhaps it gets very slow 
+to edit), and to keep a paper record. 
+
+9..set auto cell range. When "R" is pressed to dimension a raster, 
+if you just press return the program automatically chooses blank 
+cells for the raster. This function sets the upper and lower limits 
+of the range of cells chosen from, though the highest cell of the 
+range may be overshot. 
+
+0..change misc settings. Display a further menu to: 
+   1..toggle safe mode. When safe mode is set, the editor protects 
+      itself slightly more against corrupted structure files, but 
+      runs slower. (Safe mode is also set by pressing "S" after the 
+      editor loads). Leave it off unless you have problems. 
+   2..enable Neochrome screen. This does NOT refer to the memory 
+      used when grabbing cells, but to some cosmetic graphics which 
+      show the border between screens, panic "button" etc. These 
+      graphics are only loaded when the program is, so after using 
+      this option, you need to save the data (with "Undo"), quit 
+      from the editor (from "Help") and run the program again. 
+   3..disable Neochrome screen. See just above. 
+   4..toggle information. Switch the information at the right of 
+      the screen on/off (the object number, status display etc). 
+      You will almost always want the information shown, but it can 
+      be a pain when editing wide objects, and switching it off 
+      slightly speeds the editor. 
+   Esc..return to editor screen (as usual). 
+
+-..set x size for implied raster. When the object displayed in a 
+   window is a cell, it is not displayed alone, but in a rectangle 
+   of perhaps eighty adjacent cells. The width of the rectangle is 
+   initially 13 cells, but you can change it with the "-" function. 
+   For example, if you have imported cells which matched up 
+   vertically on a Neochrome screen, setting the width to 20 will 
+   mean that they match up in the window displaying cells, as well. 
+
+q..export objects. Write out a range of objects to a file. Only 
+   select one type of object: if you want to export several types, 
+   export each to a seperate file. Export/Import can be used to copy 
+   objects from one structure file to another, but you may need to 
+   do some renumbering (e.g by 1..add new objects) before exporting, 
+   or perhaps before importing, to avoid overwriting necessary 
+   objects in the destination file. Take care and full backups. 
+
+w..import objects. Read a file previously created by export. It asks 
+   what range of objects you want to overwrite with the objects from 
+   the disk file. Enter two numbers, which must be the same as those 
+   used for the export. Bear in mind that references within the 
+   imported objects may not work, because the objects they use have 
+   been deleted or replaced by objects with different functions. 
+
+e..truncate structures. Delete all objects above a specified number. 
+   This is a debugging command, for amputating the end of the object 
+   data if it has become corrupted. 
+
+r..delete objects. Like "2..remove objects", but does not shuffle 
+   later objects down and so does no renumber. It is a bit faster 
+   than removing, but not much. 
+
+t..read text-form structures from disk. The format is the same as 
+   for "8..print structures", and it can read files produced by this. 
+
+
+
+€                         WHAT ALL THE KEYS DO 
+                         -------------------- 
+KEYBOARD...  
+
+A = Auto-import graphics after "I"
+B 
+C 
+D = Delete current raster or animation item 
+E
+F = toggle Fast mode (refreshes less screen) 
+G 
+H = toggle auto Height mode 
+I = Import neochrome screen 
+J 
+K 
+L 
+M = toggle Magnify window (disabled) 
+N 
+O = display Object in animation sequence 
+P = select Preview mode (Esc leaves it) 
+Q = toggle Quick mode (experts only) 
+R = dimension Raster / Repeat animation 
+S = save screen in Neochrome file / Shift animation 
+T = toggle map mode (not worth using) 
+
+U, V, W, X, Y, Z = nothing 
+
+- = slow animation in preview mode / decrease H in XZH 
++ = speed animation in preview mode / increase H in XZH 
+
+Up arrow    = Increase height of raster 
+Down arrow  = Decrease height of raster 
+Left arrow  = Increase width of raster 
+Right arrow = Decrease width of raster  
+
+0 = toggle single window mode 
+Esc = to start of current XZH / cancel input, preview etc. 
+Tab = step on to next item of current XZH  
+Delete = Delete items in current raster or animation 
+
+Space  = place object (acts as left mouse button) 
+Return = toggle reflection 
+Help   = help and status information 
+Undo   = save all the structure data
+
+left mouse  = place object 
+right mouse = press and move mouse to adjust H in XZH object 
+
+
+NUMERIC KEYPAD...
+
+* toggle 4-pixel mode. 
+- decrease Z size for raster objects (not worth using) 
++ increase Z size for raster objects (not worth using) 
+
+7 current object -1.   8 scroll window up.    9 current object +1 
+4 scroll window left.  5 centralise scroll.   6 scroll window right 
+1 other object -1.     2 scroll window down.  3 other object +1
+
+. (dot) ask for object number and change to displaying that object 
+
+
+€                             HINTS & TIPS
+                             ------------ 
+
+Save your work, using "Undo", about every 5 minutes of active work. 
+Backup your disk several times a day. And don't say I didn't warn you. 
+
+If funny things happen, first check the options on the status line. 
+
+You are advised not to try and recover from errors in the structure 
+file. Go back to an earlier version. 
+
+Efficient animation. Graphics that move, e.g anything displayed by 
+an animation sequence, are called "sprites" and take much more 
+processing power to display than static objects. Please bear this 
+in mind when designing objects which sometimes move, or where only 
+part moves. For example: 
+* A wall lamp with a flickering flame is more efficient if set up 
+  as an XZH object, which contains an animation structure for just 
+  the flame. Likewise a clock with a pendulum, a spectator who 
+  constantly waves a flag, etc. 
+* A man who occasionally cheers is more efficiently shown with his 
+  resting expression on his face - this can be overlayed when he 
+  cheers. Linewise a candle which flickers only very occasionally. 
+
+Efficient objects. XZH objects use 5 bytes per item, while Rasters 
+use 2 bytes per cell. Both have a 2 byte overhead. Thus it is 
+clearly more efficient to use a Raster if possible. However, a 
+full-screen raster would still take 484 bytes, and it would almost 
+certainly be better to use an XZH object made up from several 
+standard rasters for large areas, such as the back wall. Don't 
+forget reflection either (all objects can be reflected, even cells).  
+
+Object 0 is special. If you display object 0 in the editor, e.g via 
+the dot command, this is taken to mean the Neochrome screen used for 
+importing sprites. In structures, however, object 0 has another 
+meaning and it displays nothing: the effect is as though a blank cell 
+had been displayed, but NO processing power is wasted. 
+
+Always dimension a Raster (using "R") to a group of non-blank cells; 
+either with cells off the end of the file (greater than MaxCell), or 
+as a specific group of cells containing something recognisable for 
+this purpose. If you let the "R" (Raster) command pick a lot of blank 
+cells for you, you can be sure that sometime later you will forget 
+which cells it chose, use the once-blank cells for storing graphics 
+and not notice until bugs are reported in the pictures. 
+
+The 3D system assumes that each thing displayed is at one distance 
+from the observer, and this works pretty well for flat, rectangular 
+or small objects, where you are always looking at the front face. 
+But it does not work at all for big irregular objects, or objects 
+at an angle such as the diagonal side walls of a stage set, where 
+the surface that you can see is at a wide range of distances. E.g 
+a diagonal wall should be set up as an XZH object, like a Venetian 
+blind with vertical slats, each one cell wide: 
+   --       A diagonal wall appears on the screen as a continuous
+     --     diagonal surface, but its internal structure is an XZH 
+       --   object, built up from vertical 1-cell-thick slats. 
+
+To create an empty structure file, use special functions to truncate 
+it at object 1; set 0 cells; and then add new objects. (This has not 
+been tested).  
+
+When editing animation sequences, remember that some of the useful 
+keys, e.g "O", change their meanings. 
+
+For animations, assume the game will run at about 8 frames per sec. 
+
+
+                               FEATURES 
+                               -------- 
+
+While the program loads, do not use the cursor dot to draw graffiti 
+or the system will crash. (Presumably all your thousands of mouse 
+moves are stored up, ready to be passed on to the program, and space 
+runs out). The same applies when the system is carrying out lengthy 
+operations at other times. 
+
+3D graphics (in preview mode and the game), need a background in 
+order to be shown properly. Without one, they are displayed all 
+right but the 3D impression is not perfect. In a game, make sure 
+that moving objects always have something to move in front of. 
+
+Save creates a Neochrome image of the entire screen on disk. It is 
+not perfect, as the "Filename?" prompt is also saved, while the 
+palette is not (it's left set to black). However, these problems 
+are easily corrected by e.g Art Studio until we have a better 
+version of Save. Please say if you would like one. 
+
+You should theoretically be able to edit anything in either window, 
+but it is a great deal safer to only edit the object in the top one. 
+
+
+                                 BUGS 
+                                 ---- 
+
+Special function 4, "scrunch", does not work. 
+
+Special function t, "read text structures", is not yet quite 
+compatible with files produced by s.f 8, "print structures". 
+
+Object numbers can not be greater than 8000. 
+
+Be careful not to move the mouse when copying a cell into a raster, 
+as if you move the cursor outside the raster, just as you press the 
+left button, the program crashes. 
+
+Rasters are not displayed correctly when scrolling is set, but you 
+can edit them, and the numbers on the right are correct, except for 
+item (cell) numbers. 
+
+Animation objects cannot yet be reflected. 
+
+A raster's size can sometimes get corrupted while working on it. (The 
+size is shown as, e.g 4x3x0 on the right). If the first two numbers 
+change to silly values, it may be best to delete the raster (use the 
+"Delete" key) and start again. 
+
+Auto import ignores "Y" after "Blank cells only?", treating it as "N". 

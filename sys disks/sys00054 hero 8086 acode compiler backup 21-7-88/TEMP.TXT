@@ -1,0 +1,11 @@
+
+ if x3=x4 then forward2
+ if x3=x3 then @forward2
+ if x3=x2 then backward1
+ if x3=x1 then @backward1
+
+ if x2=1000 then forward2
+ if x2=1000 then @forward2
+ if x2=1000 then backward1
+ if x2=1000 then @backward1
+

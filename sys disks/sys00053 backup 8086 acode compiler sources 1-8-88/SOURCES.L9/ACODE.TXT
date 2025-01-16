@@ -1,0 +1,662 @@
+; Acode controller for Hero
+;
+;
+; known acode compiler bugs:
+; short forward branch in MC mode is compiled as $6000
+; (Which is actually the sign to 68000 to expect a subsequent
+; 16 bit argument)
+;
+ var
+ V1 ; must be first var
+ V2 ; must be second var
+ v3 v4 v5 ; etc..
+
+ x1 x2 x3 x4 ; misc temporary vars
+ c0 c1 c2 c3
+ HighlightedLine Line NumEntries RepeatCount SelectedLine
+ l0 l1 l2 ; Linked list temporary workspace
+ LLFree ; pointer to Linked list free space chain
+ CurrentMenu HS0 HS1
+ PreviousObjectInfo ObjectInfo
+
+table
+ LL=3
+ MenuTable=4
+ TempMovedSprite=20
+ PermMovedSprite=21
+ TempFixedSprite=22
+ PermFixedSprite=23
+
+ SpriteTable=28
+ LongWS=29
+ WordWS=30
+ ByteWS=31
+
+const
+; offsets within LongWs
+; offsets within WordWs
+ WordCursorXPos=0
+ WordCursorYPos=2
+; offsets within ByteWs
+ ByteJoystickStatus=0
+ ByteLastKeyPressed=1
+ ByteFrameReadyFlag=2
+ ByteInvertFlag=3
+ ByteBreakPointArmed=4
+ ByteScrollStep=5
+ ByteCurrentWeapon=6
+
+; offsets within permament sprite data block
+ TypeOffset=28
+;CDWithPlayer equ 0 * bit 0
+;CDWithMissiles equ 1
+;CDWithMonsters equ 2
+;CDWithBG equ 3 * bit 3
+;CDWithObject equ 4
+;CDWithInvisibles equ 5
+;CDWithMonsterMissile equ 6
+ PlayerType=1
+ MissileType=2
+ MonsterType=4
+ BGType=8
+ ObjectType=16
+ InvisibleType=32
+ MonsterMissileType=64
+
+; offsets within temporary sprite data block
+ xspeedOffset=4
+ YSpeedOffset=6
+ XPosOffset=8
+ YPosOffset=10
+ NameOffset=24
+
+; offsets of linked list pointers within LL list.
+; note that many of these are referenced by MenuTable
+ LLPlayerInv=0 ; ll showing player's inventory
+ LLRangedWeapons=2 ; ll giving available ranged weapons
+ LLEntrySize=10
+ LLTableSize=250
+
+; offsets of entries in LL table.
+ InvNameOffset=2 ; contains a word giving the "name" of the
+ RWNameOffset=2 ; holds word value
+ RWTypeOffset=4 ; holds byte value
+; object held. This will usually by the same as the number
+; of the sprite data.
+
+ begin
+ data @Start,@Start ; Dummy - overwritten by "ToMCEnd" vector
+.Start
+ code +
+
+ data @AcodeFns,@MCFns ; pointers to the major jump blocks
+
+
+.AcodeFns
+; jump table for acode functions called from MC
+ goto @AcodeStart
+ goto @FGSpecials
+ goto @FGSpecialsMovedSprite
+ goto @BGSpecials
+ goto @Dummy ; SpecialCollision
+
+.MCFns
+; jump table for MC functions called from Acode
+; reserve 6 bytes per jump - absolute, long jumps
+; poked in by MC
+.MCHeroOnceOnlyInit            data @Dummy,@Dummy,@Dummy ;0
+.MCHeroInit                    data @Dummy,@Dummy,@Dummy ;1
+.MCClearScreen                 data @Dummy,@Dummy,@Dummy ;2
+
+.MCMoveScreen                  data @Dummy,@Dummy,@Dummy ;3
+.MCSpecials                    data @Dummy,@Dummy,@Dummy ;4
+.MCBuildBackground             data @Dummy,@Dummy,@Dummy ;5
+.MCDisplayDestroyedWalls       data @Dummy,@Dummy,@Dummy ;6
+.MCMoveAllSprites              data @Dummy,@Dummy,@Dummy ;7
+.MCDisplayAllSprites           data @Dummy,@Dummy,@Dummy ;8
+.MCTrimEdges                   data @Dummy,@Dummy,@Dummy ;9
+.MCDisplayTextLine             data @Dummy,@Dummy,@Dummy ;a
+.MCDisplayUpperTextLine        data @Dummy,@Dummy,@Dummy ;b
+.MCDoAllTimers                 data @Dummy,@Dummy,@Dummy ;c
+.MCDisplayMemoryFree           data @Dummy,@Dummy,@Dummy ;d
+.MCDisplayHitPOints            data @Dummy,@Dummy,@Dummy ;e
+.MCDisplayFreeSprites          data @Dummy,@Dummy,@Dummy ;f
+.MCDisplayFrameTime            data @Dummy,@Dummy,@Dummy ;10
+.MCHeroInput                   data @dummy,@Dummy,@Dummy ;11
+.MCOswrchV1                    data @Dummy,@Dummy,@Dummy ;12
+.MCInvertedOswrchV1            data @Dummy,@Dummy,@Dummy ;13
+.MCDestroyTempMoved            data @Dummy,@Dummy,@Dummy ;14
+.MCDestroyTempFixed            data @Dummy,@Dummy,@Dummy ;15
+.MCCloseDown                   data @Dummy,@Dummy,@Dummy ;16
+.MCFindSprite                  data @Dummy,@Dummy,@Dummy ;17
+.MCSetUpNewSprite              data @Dummy,@Dummy,@Dummy ;18
+.MCHandlePlayerInput           data @Dummy,@Dummy,@Dummy ;19
+
+.Dummy
+ code -
+ prs " bug!"
+
+ code +
+.AcodeDelay
+ gosub @Delay
+ goto HeroLoop
+
+.AcodeStart
+ c0=0
+ c1=1
+ c2=2
+ c3=3
+ gosub @MCHeroOnceOnlyInit
+
+.RestartHero
+; code -
+; stack
+; code +
+ gosub @MCHeroInit
+ code - ; reset address registers.
+ code +
+ gosub @InitLL
+.HeroLoop
+ gosub @MCHeroInput
+ gosub @MCHandlePlayerInput
+ gosub @HandleKeyPress
+ gosub @MCMoveAllSprites
+ gosub @WaitForFrame
+
+ gosub @AllHero
+; code -
+; code +
+ gosub DisplayFrame
+ goto @HeroLoop
+
+;-------
+.DisplayFrame
+ V1=1
+ ByteWS(ByteFrameReadyFlag)=V1
+ return
+;------
+; wait for frame to be displayed
+.WaitForFrame
+ V1=ByteWS(ByteFrameReadyFlag)
+ if V1<>0 then WaitForFrame
+ return
+;----
+.LongDelay
+ V2=10
+.LongDelay1
+ gosub Delay
+ sub V2,c1
+ if V2<>0 then LongDelay1
+ return
+;---
+.Delay
+ V1=60000
+.DelayV1
+ c1=1
+
+.Delay1
+ sub V1,c1
+ if V1>0 then Delay1
+ return
+;------
+.AllHero
+; call main routines for normal Hero display.
+; Note that most of these routines corrupt a3-a5, so should
+; do a code-, code+ to reset them if you want to do
+; any acode processing in-between calls.
+ gosub @MCMoveScreen
+ gosub @MCSpecials
+ gosub @MCBuildBackground
+ gosub @MCDisplayDestroyedWalls
+; gosub @MCMoveAllSprites
+ gosub @MCDisplayAllSprites
+ gosub @MCTrimEdges
+ gosub @MCDisplayTextLine
+ gosub @MCDisplayUpperTextLine
+ gosub @MCDoALlTimers
+ gosub @MCDisplayMemoryFree
+ gosub @MCDisplayHitPoints
+ gosub @MCDisplayFreeSprites
+ gosub @MCDisplayFrameTime
+ code -
+ code +
+ return
+;------
+.DoMenu
+ HighlightedLine=1
+ CurrentMenu=2 ; 0 is not present.
+
+.DoMenuLoop
+ if CurrentMenu=0 then @HeroLoop
+ gosub DisplayCurrentMenu
+ gosub @DisplayFrame
+ gosub @MakeMenuSelection
+ if SelectedLine=0 then NoSelection
+ gosub @HandleSelection
+.NoSelection
+ gosub @WaitForFrame
+
+ gosub @MCHeroInput ;*****
+ V1=ByteWS(ByteLastKeyPressed) ;***
+ if V1=13 then @MCCloseDown ;***
+
+ goto DoMenuLoop
+;---
+.DisplayCurrentMenu
+; Display CurrentMenu
+; 3 bytes per entry
+ gosub @DoFirstMenuLine ; clear screen, set up Line etc.
+ &l0=MenuTable(CurrentMenu) ; start with verbs table
+.DM1
+
+ V1=MenuTable(l0)
+ if V1=255 then DisplaymenuEnd
+ add l0,c3 ; get message number offset for this entry
+ V1=MenuTable(l0)
+ l1=100 ; base of messages
+ add l1,V1
+ gosub @PrintMenuLineL1 ; handles highlighted line etc., increments Line.
+ add l0,c1 ; on to next entry
+ goto DM1
+
+.DisplayMenuEnd
+ NumEntries=Line
+ SUB NumEntries,c1
+ return
+
+;---
+.GetObject
+; display inventory/whatever, using linked list starting with LL(L2)
+ HighlightedLine=1
+
+.GetObjectLoop
+ gosub @PrintInv
+ gosub @DisplayFrame
+ gosub @MCHeroInput
+ gosub MakeMenuSelection
+ gosub @WaitForFrame
+ if SelectedLine=0 then GetObjectLoop
+ HighLightedLine=1 ; reset for higher menu level
+ return
+;---
+.MakeMenuSelection
+; code -
+
+ SelectedLine=0
+ V1=ByteWS(ByteJoystickStatus)
+ if V1<>1 then NotUp
+ if HighlightedLine=1 then NotUp
+ if RepeatCount>0 then @JoystickDelay
+ RepeatCount=1
+ sub HighLightedLine,c1
+ return
+
+.NotUp
+ if V1<>2 then NotDown
+ if HighlightedLine=NumEntries then NotDown
+ if RepeatCount>0 then @JoystickDelay
+ RepeatCount=1
+ add HighLightedLine,c1
+ return
+
+.NotDown
+ if v1<>8 then NotRight
+ if RepeatCount>0 then @JoystickDelay
+ RepeatCount=1
+ x1=5
+ add HighlightedLine,x1
+ if HighLightedLine<NumEntries then NoLimitRight
+ HighlightedLine=NumEntries
+.NoLimitRight
+ return
+
+.NotRight
+ if v1<>4 then NotLeft
+ if RepeatCount>0 then @JoystickDelay
+ RepeatCount=1
+ x1=5
+ sub HighLightedLine,x1
+ if highlightedLine>32000 then LimitLeft
+ if HighLightedLine<>0 then NoLimitLeft
+.LimitLeft
+ HighlightedLine=1
+.NoLimitLeft
+ return
+
+.NotLeft
+ if V1<>128 then NotButton
+ SelectedLine=HighLightedLine
+; code +
+  gosub @WaitForJoystick ;  return
+; code -
+ goto JDRet
+
+.NotButton
+; no joystick input, so clear delay flag
+ RepeatCount=0
+
+.NotJoystick
+ goto JdRet
+;-
+.JoystickDelay
+; stop joystick movements being too rapid
+ add RepeatCount,c1
+ if RepeatCount<5 then JDRet
+ RepeatCount=0
+.JDRet
+; code +
+ return
+;---
+.CursorTopLeft
+ c0=0 ; x co-ord
+ &WordWs(WordCursorXPos)=c0
+ &WordWs(WordCursorYPos)=c0
+ return
+;---
+.DoCR
+ &V1=WordWs(WordCursorYPos)
+ V2=8
+ add V1,V2
+ &WordWs(WordCursorYPos)=V1
+ c0=0
+ &WordWs(WordCursorXPos)=c0
+ return
+;---
+.FGSpecials
+; TempFixedSprite=20
+; PermFixedSprite=21
+; TempMovedSprite=22
+; PermMovedSprite=23
+; the above give the sprite control blocks for the two sprites
+; involved in a collision.
+ return
+;---
+.FGSpecialsMovedSprite
+; TempFixedSprite=20
+; PermFixedSprite=21
+; TempMovedSprite=22
+; PermMovedSprite=23
+; the above give the sprite control blocks for the two sprites
+; involved in a collision.
+; MovedSPrite is guaranteed to have been the one that moved so as
+; to cause the collision.
+ V1=PermMovedSprite(TypeOffset)
+ if V1<>PlayerType then fgsmsNotPlayer
+
+ V1=PermFixedSprite(TypeOffset)
+ if V1<>ObjectType then fgsmsNotObject
+
+ &v1=TempFixedSprite(NameOffset)
+; set up LL(LLFree) from the object the player is picking up.
+ L0=InvNameOffset
+ add L0,LLFree
+ &LL(L0)=V1 ; record object type
+ gosub @AddToPlayerInv
+ gosub @MCDestroyTempFixed ; destroy the object
+
+.fgsmsNotObject
+.fgsmsNotPlayer
+ return
+;---
+.BGSpecials
+ return
+;---
+.RemoveFromLL
+; remove Entry LL(ObjectInfo)
+; (Previous entry in chain was LL(PreviousObjectInfo))
+ &x1=LL(ObjectInfo)
+ &LL(PreviousObjectInfo)=x1
+; and add to the start of the free space list.
+ &LL(ObjectInfo)=LLFree
+ &LLFree=ObjectInfo
+ return
+;---
+.InitRangedWeapons
+; set up names of ranged weapons
+ x1=40 ; weapon with name 40
+ x2=0 ; weapon type
+ gosub AddRangedWeapon
+ x1=41
+ x2=1
+ gosub AddRangedWeapon
+ x1=42
+ x2=2
+; fall through to AddRangedWeapons
+
+.AddRangedWeapon
+; add ranged weapon with name x1
+ L0=LLRangedWeapons
+ v1=RWNameOffset
+ add v1,LLFree
+ &LL(V1)=x1
+ v1=RWTypeOffset
+ add v1,LLFree
+ LL(V1)=x2
+ goto AddToLL
+;---
+.AddToPlayerInv
+; Add LL(LLFree) to the inventory chain: LL(PlayerInv)
+ L0=LLPlayerInv
+; drop through to AddToLL
+;
+.AddToLL
+; add LL(LLFree) to LL(L0)
+ &l1=LL(L0)
+ &l2=LL(LLFree)
+; save next item in free space chain
+ if l2=0 then NoLLSpace
+ &LL(LLFree)=l1 ; insert entry in LL chain
+ &LL(L0)=LLFree
+ LLFree=L2 ; remove entry from free space chain
+ return
+;---
+.NoLLSpace
+ code -
+  prs " No LL Space. "
+ code +
+ gosub @DisplayFrame
+ gosub @LongDelay
+ goto @RestartHero
+;---
+.InitLL
+ L2=LLEntrySize
+ L0=0 ; first entry pointer
+ L1=LLEntrySize ; second entry pointer
+.InitLL1
+ &LL(L0)=L1
+ add L0,L2
+ add L1,L2
+ if L1<LLTableSize then InitLL1
+
+; the initial pointers for the LL occupy the first
+; few bytes of the LL (and therefore overlap with what would
+; otherwise by the first entry). Therefore make free space
+; point after this point:
+ &LLFree=LL(LLPlayerInv)
+ &LL(LLPlayerInv)=c0
+
+ &LL(LLRangedWeapons)=c0 ; no ranged weapons yet
+ gosub @InitRangedWeapons
+
+ return
+;----
+.PrintInv
+; print contents of Linked list which starts with LL(L2)
+ gosub @DoFirstMenuLine
+ L1=100 ; "BACK"
+ gosub PrintMenuLineL1
+ ObjectInfo=L2
+ &L0=LL(L2)
+; PreviousObjectInfo will be overwritten before it may be needed
+ 
+.PrintInv1
+ if L0=0 then PrintInvEnd
+ L1=InvNameOffset
+ add L1,L0
+ &L1=LL(L1) ; get object type
+ if Line<>HighlightedLine then PrintInv2
+ PreviousObjectInfo=ObjectInfo
+ ObjectInfo=L0 ; preserve the object the user MAY select
+
+.PrintInv2
+ gosub @PrintMenuLineL1
+
+ &L0=LL(L0)
+ goto PrintInv1
+
+.PrintInvEnd
+ NumEntries=Line
+ SUB NumEntries,c1
+ return
+;---
+.PrintMenuLineL1
+ ByteWS(ByteInvertFlag)=c0
+ if Line<>HighLightedLine then PML1
+ ByteWS(ByteInvertFlag)=c1 ; set up mc to print inverted text
+
+.PML1
+ code -
+  message l1
+ code +
+ gosub @DoCr
+ add line,c1
+ ByteWS(ByteInvertFlag)=c0
+ return
+;----
+.DoFirstMenuLine
+ gosub @MCClearScreen
+ gosub @CursorTopLeft
+ Line=1 ; Back is first line, 2 is first generated one.
+ return
+;---
+.WaitForJoystick
+ V1=ByteWS(ByteJoystickStatus)
+ if V1<>0 then WaitForJoystick
+ return
+;---
+.HandleKeyPress
+; handle any key press
+ x1=ByteWS(ByteLastKeyPressed)
+ if x1=32 then @DoMenu ; space -> menu
+ if x1=82 then @RestartHero ; 'R'
+ if x1=114 then @RestartHero ; 'r'
+ if x1<65 then NotChangeMissile
+ if x1>67 then NotChangeMissile
+ x2=65
+ sub x1,x2
+ ByteWS(ByteCurrentWeapon)=x1
+
+.NotChangeMissile
+ if x1=112 then Pause1
+ if x1<>80 then NotPause ; 'P'
+.Pause1
+ gosub @MCHeroInput
+ x1=ByteWS(ByteLastKeyPressed)
+ if x1=0 then Pause1
+
+.NotPause
+ if x1=33 then @AcodeDelay
+ return
+;---
+.HandleSelection
+ &HS0=MenuTable(CurrentMenu)
+ code -
+; given SelectedLine, CurrentMenu, take the appropriate action
+ HS1=SelectedLine
+ sub HS1,c1 ; give offset within menu
+; multiply by 4 and add (size of each entry in MenuTable)
+; to give position of the selection in MenuTable
+
+ add HS1,HS1
+ add HS1,HS1
+ add HS0,HS1
+; MenuTable(HS0) tells us what to do
+ V1=MenuTable(HS0)
+ if V1=0 then DoJump
+
+ if V1<>2 then NotChangeMenu
+ HighlightedLine=1
+ V1=1
+ add V1,HS0
+ CurrentMenu=MenuTable(V1)
+ goto @HandleSelectionEnd
+
+.NotChangeMenu
+ if V1<>1 then NotGetObject
+; get object/other item from linked list (e.g. spell) first
+ v1=2
+ add v1,HS0
+ L2=MenuTable(V1) ; get LL number to use in selection
+
+ code +
+  gosub @GetObject
+ code -
+ if SelectedLine=1 then @HandleSelectionEnd ; "BACK" instead of object
+; LL(ObjectInfo) is object to act upon
+
+.NotGetObject
+.DoJump
+ V1=1 ; extract which jump entry to use from MenuTable.
+ add V1,HS0
+ V1=MenuTable(V1)
+ jump @JumpTable V1 ; dummy comment!
+
+.JumpTable
+ data @Null,@Quit,@Examine,@Drop,@Wield,@Range,@Eat,@System ;
+
+.Null
+ goto @HandleSelectionEnd
+
+.Quit
+ code +
+  goto @MCCloseDown
+ code -
+
+.Examine
+ goto @HandleSelectionEnd
+
+.Drop
+ code +
+ v1=PlayerType ;name of sprite to find
+ v2=0 ; start search at start of sprite table
+ gosub @MCFindSprite
+; now SpriteTable(V2) is the temp player sprite block
+ x1=v2
+; set up args: v1=xpos, v2=ypos, v3=xspeed, v4=yspeed, v5=sprite num
+ v1=XPosOffset
+ add v1,x1
+ &v1=SpriteTable(v1) ; get x-coord of player
+
+ v2=YPosOffset
+ add v2,x1
+ &v2=SpriteTable(v2) ; get x-coord of player
+ v3=0 ; xspeed
+ v4=0 ; yspeed
+ v5=InvNameOffset
+ add v5,ObjectInfo
+ &v5=LL(v5) ; name of object from inventory
+ x1=16 ; get clear of player
+ add v1,x1
+ gosub @MCSetUpNewSprite
+
+; and lose the sprite from the inventory
+ gosub @RemoveFromLL
+ code -
+
+.Wield
+ goto HandleSelectionEnd
+
+.Range
+ v5=RWTypeOffset
+ add v5,ObjectInfo
+ v5=LL(V5)
+ ByteWS(ByteCurrentWeapon)=v5
+ goto HandleSelectionEnd
+
+.Eat
+.system
+
+.HandleSelectionEnd
+ code +
+ return
+;---

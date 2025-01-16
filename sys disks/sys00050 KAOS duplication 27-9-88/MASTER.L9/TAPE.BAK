@@ -1,0 +1,382 @@
+06601090305800
+1
+2
+F0110030
+9[...................................................................]011
+€
+AllinstructionsCopyright(C)Level9Computing
+
+DATEreplacewithtodaysdate.e.g."27th.September1988."
+GAMENAMEthenameofthegame.e.g."KnightOrc"
+FILENAME10atencharacterfile-name.e.g."KNIGHT1"
+LONGFILENAMEasixteencharacterfilename.e.g."KNIGHTORC1"
+
+
+€DATE.
+
+ˆGAMENAMEmasterfortheAtariXL/XEtape€
+
+ThemasterfortheAtariXL/XEversionofGAMENAMEissuppliedon
+threenormalsingle-densityAtariXL/XEdiscs.Theseinstructions
+useanAtariXL/XEwithbothdatacorderanddiscdrivetoproducea
+tapemasterreadyforduplication.Someduplicatorsareableto
+connecthigh-qualitytaperecorderstoanAtariXL/XE,sothismethod
+allowshigh-qualitytapestobeproduced.
+
+ThemasterdiscisnotprotectedandtheDOS'D'uplicatecommandcan
+beusedtocopythediscforsecurity.
+
+TorunthemastertapeonanAtariXL/XEswitchonwhileholding
+downOPTIONandSTARTkeys.StartthetapeonplayandpressRETURN.
+NotethatsomeAtari'sareabletoholdtheirmemorycontents
+forsometimeevenwhenswitched-off,soiftheAtarihaspreviously
+beenrunningDOSitmaybenecessarytoswitchoffforupto30
+secondstogettheAtaritocorrectlybootfromtape.
+
+ˆDuplication€
+
+GAMENAMEisathree-partgame,suppliedonthreediscs.Thethreeparts
+ofGAMENAMEaremasteredinexactlythesameway,usingadifferent
+discforeachpart.Underliningisusedforthekeysyouhavetopress.
+
+1.SwitchofftheAtari,removeallcartridges,switchonthedisk
+drive,choosethediskforthepartofGAMENAMEtobemasteredand
+putthisinthedrive,holddownOPTIONandthenswitchonagain.
+Afterapprox20secondstheDOSmenuappears.
+
+2.Tomasterthetape,loadandrunthethreemachine-codeprograms:
+SAVE1,SAVE2,SAVE3andSAVE4inthatorder.Eachprogram
+requiresRETURNtobepressedonceortwice(toinitiatesavingto
+tape)thenwhensavingfinisheseachprogramreturnstotheDOSmenu.
+Thisprocessissummarizedbelow:
+
+ˆL€ˆSAVE1€ˆY€ˆY€(Loadsfor40seconds)
+pressRETURNtwice(Savesfor90seconds)
+ˆL€ˆSAVE2€ˆY€ˆY€(Loadsfor45seconds)
+pressRETURN.(Savesfor35seconds)
+ˆL€ˆSAVE3€ˆY€ˆY€(Loadsfor55seconds)
+pressRETURN.(Savesfor4mins)
+ˆL€ˆSAVE4€ˆY€ˆY€(Loadsfor45seconds)
+pressRETURN.(Savesfor11mins)
+
+3.Testing.WhensavingiscompleteswitchofftheAtarifor30
+seconds(toexitDOSandclearmemory),thenloadthemastertape
+(describedabove)totestthanthemasterhasbeenproduced
+correctly.Eachpartwhenloadeddisplaysaboutascreen-fullof
+text.
+
+€DATE.
+
+ˆGAMENAMEMasterfortheCommodore64tape€
+
+ThemasterfortheCommodore64versionofGAMENAMEissuppliedon
+anormalsingle-sidedCBM64disc.TheseinstructionsuseaCommodore
+64withbothdatacorderanddiscdrive(orCBM128with
+datacorder)toproduceatapemasterreadyforduplication.Some
+duplicatorsareabletoconnecthigh-qualitytaperecorderstoaCBM
+64,sothismethodallowshigh-qualitytapestobeproduced.
+
+Themasterdiscisnotprotectedandanydisccopyutilitycanbeused
+tocopythedisc.Thedisccontainsatapeturbo-loaderwhichis
+copyrightof"ChoiceSoftware".Thefinalmastertapehoweveris
+onlycopyrightofLevel9Computing.
+
+Turbo-loadersotherthanthe'Choice'turbomaybeusedwith
+GAMENAME.Detailsaregivenlater.
+
+TorunthemastertapeonaCommodore64justafterswitch-onhold
+downSHIFTandpressRUN/STOP.
+
+TorunthemastertapeonaCommodore128enter'64'mode,thenhold
+downSHIFTandpressRUN/STOP.
+
+ˆDuplication€
+
+Theseinstructionswillassumethatthe'choice'turbo-loaderis
+beingusedtoproducethemastertape.
+
+ThethreepartsofGAMENAMEaremasteredinexactlythesameway.
+Onlyfilenamesdiffer.Underliningisusedforthekeysyouhaveto
+press.
+
+1.Loadtheturbo-loader:
+ˆLOAD"!",8,1€
+Onceloadedtheturbo-loadermenuappears.
+
+2.Selectthebaudratewithoptionˆ8€thenpressˆ2€(speedis7
+timesnormal)
+
+3.Savetheturbo-headerusingoptionˆ1€
+forthefirstpartusethefilenameˆLONGFILENAME€
+forthesecondpartusethefilenameˆLONGFILENAME€
+forthelastpartusethefilenameˆLONGFILENAME€
+
+4.Select'Loadprogrampart'ˆ2€andloadfileˆGAMEA€
+
+5.Select'Saveprogrampart'ˆ3€withoutrelocationˆN€
+
+6.Select'Loadprogrampart'ˆ2€
+forthefirstpartloadthefileˆGAME1€
+forthesecondpartloadthefileˆGAME2€
+forthelastpartloadthefileˆGAME3
+€
+7.Select'Saveprogrampart'ˆ3€withoutrelocationˆN€
+
+8.Select'Loadprogrampart'ˆ2€andloadfileˆGAMEB€
+
+9.Select'Savelastprogrampart'ˆ4€tosavemachine-codeˆM€
+Useanexecute-addressofˆ4867€andrelocateˆY€toaddressˆ57344€
+
+ˆTesting€
+
+WhensavingiscompleteswitchofftheCommodore(toexittheturbo-
+loaderandclearmemory),thenloadthemastertape(described
+above)totestthanthemasterhasbeenproducedcorrectly.Each
+partwhenloadeddisplaysaboutascreen-fulloftext.
+
+ˆOtherturboloaders€
+
+The'choice'turboloaderdefaultsfilestart-andend-addressesto
+thosestoredinthefile-headerondisc.Notallturbo'sdothis,
+sothisinformationisduplicatedbelow:
+
+ˆFilename€ˆStartaddress€ˆLength€
+
+GAMEA13000540
+
+GAME11840B7C0
+GAME21840B7C0
+GAME31840B7C0
+
+GAMEBE0001700
+
+Alsoonthediscisthefile"TITLEMPIC"whichistheloadingscreen
+usedonthediscversionofCBM64GAMENAME.Thisisstoredin"CBM64
+AdvancedOCPArtStudio"format,andshouldbedisplayedduring
+loadingfromtapeonlyiftheturbo-loaderusedallowsthis;Otherwise
+thisfileshouldbeignored.
+
+€DATE.
+
+ˆGAMENAMEMasterfortheAmstradCPC464/6128tape€
+
+ThemasterfortheAmstradCPC464/6128tapeversionofGAMENAME
+issuppliedonanormalsingle-sidedCPCdisc.Theseinstructions
+useanAmstradwithbothtaperecorderanddiscdrivetoproducea
+tapemasterreadyforduplication.Someduplicatorsareableto
+connecthigh-qualitytaperecorderstoaCPC,sothismethodallows
+high-qualitytapestobeproduced.
+
+ThemasterdiscisnotprotectedandtheCP/Mutilityˆdisccopy€can
+beusedtocopythediscforsecurity.
+
+TorunthemasteronanAmstradCPC464typeˆRUN""€andplaythetape.
+
+TorunthemasteronanAmstradCPC6128typeˆ|TAPE€thenˆRUN""€.
+
+ˆDuplication
+€
+ThethreepartsofGAMENAMEaremasteredinexactlythesameway.
+Onlyfilenamesdiffer.Underliningisusedforthekeysyouhaveto
+press.
+
+1.SwitchofftheAmstrad,waitafewsecondsthenswitchonagain.
+
+2.Copythe'loader'program.
+ˆLOAD"LOAD"
+€ˆTAPE
+€ForthefirstpartofGAMENAMEˆSAVE"LONGFILENAME",P€
+ForthesecondpartofGAMENAMEˆSAVE"LONGFILENAME",P€
+ForthelastpartofGAMENAMEˆSAVE"LONGFILENAME",P€
+
+3.Copythe'machine-code'
+ˆ|DISC
+€ˆMEMORY&3FFF
+€ˆLOAD"TBOOT4T.BIN",&4000
+€ˆ|TAPE
+€ˆSAVE"game",B,&4000,&100
+€
+4.Copythe'data'files
+ˆ|DISC
+€ˆRUN"CREATE"
+€ForthefirstpartofGAMENAMEpressˆ1€
+ForthesecondpartofGAMENAMEpressˆ2€
+ForthelastpartofGAMENAMEpressˆ3€
+PressˆS€
+PressSPACE.
+
+5.Afterthe'data'hasloadedfromdisc"PressSPACEtosave:"appears.
+StartrecordingandpressSPACE.Savingiscompletewhenthe
+computerresets(i.e.returnstoBasic)
+
+6.Testthemaster.SwitchofftheAmstrad,thenloadthemastertape
+(describedabove)totestthatthemasterhasbeenproduced
+correctly.Eachpartwhenloadeddisplaysaboutascreen-fullof
+text.
+
+€DATE.
+
+ˆGAMENAMEmasterfortheSpectrum+2€
+
+ThemasterfortheSpectrum+2versionofGAMENAMEissuppliedona
+single3-inchdisc.TheseinstructionsuseaSpectrum+3withtape
+recordertoproduceatapemasterreadyforduplication.
+
+Thediscisnotprotectedandmaybecopiedforsecuritypurposes.
+
+OnceatapemasterhasbeenproduceditmayberunonaSpectrum128K+2
+withthecommandˆLOAD""2€.OnaSpectrum+3removethediscfromthe
+drive,pressRESETandselect'loader'.
+
+ˆDuplication€
+
+GAMENAMEisathree-partgame.Thereareonlyminordifferences
+inmasteringeachpart,sotheseinstructionsneedtoberepeated
+threetimes,withdifferencesonlywhereindicated.Underliningisused
+forthekeysyouhavetopress.
+
+1.SwitchofftheSpectrum,waitafewsecondsthenswitchonagain.
+Selectˆ+3BASIC
+€
+2.LoadtheBasictitlepage,ˆLOAD"TITLE"€
+
+3.Saveittothemastertape:
+ˆSAVE"T:"€
+Leavespaceforthecassetteleader.Themessage"PressREC&PLAY,
+thenanykey."precedessaving.
+ForthefirstpartofGAMENAMEˆSAVE"FILENAME10"LINE1€
+ForthesecondpartofGAMENAMEˆSAVE"FILENAME10"LINE1€
+ForthelastpartofGAMENAMEˆSAVE"FILENAME10"LINE1€
+
+4.Savethefirstmachinecodefile.
+PressRETURN(togettheSpectrumequivalentofacommand
+prompt)
+ˆLOAD"A:STAGE1"
+€ForthefirstpartofGAMENAMEpressˆ1€thenˆRETURN€.
+ForthesecondpartofGAMENAMEpressˆ2€thenˆRETURN€.
+ForthelastpartofGAMENAMEpressˆ3€thenˆRETURN€.
+Themessage"PressREC&PLAY,thenanykey."precedessaving,
+whichtakesaboutXXseconds.
+
+5.Savethesecondmachinecodefile.
+PressRETURN.
+ˆLOAD"STAGE2"€
+Whenloadedashort'menu'appears.Startrecordingandpressˆ1€
+€SavingtakesaboutXXseconds.
+
+6.WhensavingfinishespressRESETandre-selectˆ+3BASIC€.
+
+7.Savethefirstdatafile(s)
+ˆLOAD"STAGE3"€
+Thisasksforinput('Acode"?"'isdisplayed)
+ForthefirstpartofGAMENAMEenterˆACODE1.HED€
+ForthesecondpartofGAMENAMEenterˆACODE2.HED€
+ForthelastpartofGAMENAMEenterˆACODE3.HED€
+(Thebottomlineshouldlooklike'Acode"acodex.hed"')
+Whenloadedthemenure-appears.Startrecording
+ForthefirstpartofGAMENAMEpressˆ5€
+ForthesecondpartofGAMENAMEpressˆ6€
+ForthelastpartofGAMENAMEenterˆ7€
+SavingtakesaboutXXseconds.
+
+8.WhensavingfinishespressRESETandre-selectˆ+3BASIC€.
+
+9.Savetheseconddatafile.
+ˆLOAD"STAGE4"€
+Thisasksforinput('Game"?"'isdisplayed)
+ForthefirstpartofGAMENAMEenterˆGAMEDAT1.HED€
+ForthesecondpartofGAMENAMEenterˆGAMEDAT2.HED€
+ForthelastpartofGAMENAMEenterˆGAMEDAT3.HED€
+(Thebottomlineshouldlooklike'Game"gamedat1.hed"')
+Whenloadedthemenure-appears.Startrecording
+ForthefirstpartofGAMENAMEpressˆ2€
+ForthesecondpartofGAMENAMEpressˆ3€
+ForthelastpartofGAMENAMEenterˆ4€
+SavingtakesaboutXXseconds.
+
+ˆTesting€
+
+WhensavingiscompleteswitchofftheSpectrum(toexitthecopy
+programandclearmemory),thenloadthemastertape(described
+above)totestthatthemasterhasbeenproducedcorrectly.Each
+partwhenloadeddisplaysabouttwo-thirdsofascreenoftext.
+
+€DATE.
+
+ˆGAMENAMEmasterfortheSpectrum48€
+
+ThemasterfortheSpectrum48versionofGAMENAMEissuppliedona
+single3-inchdisc.TheseinstructionsuseaSpectrum+3withtape
+recordertoproduceatapemasterreadyforduplication.
+
+Thediscisnotprotectedandmaybecopiedforsecuritypurposes.
+
+OnceatapemasterhasbeenproduceditmayberunonaSpectrum48K
+withthecommandˆLOAD""
+€
+TorunthemasteronaSpectrum+2/+3enter'48'modeandenterˆLOAD""€
+
+ˆDuplication€
+
+GAMENAMEisathree-partgame.Thereareonlyminordifferences
+inmasteringeachpart,sotheseinstructionsneedtoberepeated
+threetimes,withdifferencesonlywhereindicated.Underliningisused
+forthekeysyouhavetopress.
+
+1.SwitchofftheSpectrum,waitafewsecondsthenswitchonagain.
+Selectˆ+3BASIC
+€
+2.LoadtheBasictitlepage,ˆLOAD"TITLE"€
+
+3.Saveittothemastertape:
+ˆSAVE"T:"€
+ForthefirstpartofGAMENAMEˆSAVE"FILENAME10"LINE1€
+ForthesecondpartofGAMENAMEˆSAVE"FILENAME10"LINE1€
+ForthelastpartofGAMENAMEˆSAVE"FILENAME10"LINE1€
+Leavespaceforthecassetteleader.Themessage"PressREC&PLAY,
+thenanykey."precedessaving.
+
+4.Savethefirstmachinecodefile.
+PressRETURN(togettheSpectrumequivalentofacommand
+prompt)
+ˆLOAD"A:STAGE1"
+€Themessage"PressREC&PLAY,thenanykey."precedessaving,
+whichtakesabout20seconds.
+
+5.Savethesecondmachinecodefile.
+PressRETURN.
+ˆLOAD"STAGE2"€
+ForthefirstpartofGAMENAMEpressˆ1€thenˆRETURN€.
+ForthesecondpartofGAMENAMEpressˆ2€thenˆRETURN€.
+ForthelastpartofGAMENAMEpressˆ3€thenˆRETURN€.
+€Savingtakesabout10seconds.
+
+6.Savethecommondatafile(s)
+PressRETURN
+ˆLOAD"STAGE3"€
+Whenloadedashort'menu'appears.Startrecordingthenpressˆ1€
+Savingtakesabout30seconds.
+
+7.WhensavingfinishespressRESETandre-selectˆ+3BASIC€.
+
+8.Savethe'gamedata'file.
+ˆLOAD"STAGE4"€
+Thisasksforinput('Game"?"'isdisplayed)
+ForthefirstpartofGAMENAMEenterˆGAMEDAT1.HED€
+ForthesecondpartofGAMENAMEenterˆGAMEDAT2.HED€
+ForthelastpartofGAMENAMEenterˆGAMEDAT3.HED€
+(Thebottomlineshouldlooklike'Game"gamedat1.hed"')
+(pressRETURN)
+The'menu'appearsagain.
+ForthefirstpartofGAMENAMEpressˆ2€thenˆRETURN€.
+ForthesecondpartofGAMENAMEpressˆ3€thenˆRETURN€.
+ForthelastpartofGAMENAMEpressˆ4€thenˆRETURN€.
+Savingtakesabout3minutes30seconds.
+
+ˆTesting€
+
+WhensavingiscompleteswitchofftheSpectrum(toexitthecopy
+programandclearmemory),thenloadthemastertape(described
+above)totestthatthemasterhasbeenproducedcorrectly.Each
+partwhenloadeddisplaysabouttwo-thirdsofascreenoftext.
+

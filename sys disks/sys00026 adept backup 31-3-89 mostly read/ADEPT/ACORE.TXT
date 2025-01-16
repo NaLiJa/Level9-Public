@@ -1,0 +1,1935 @@
+; Acode controller for Hero
+;
+;
+; known acode compiler bugs:
+; short forward branch in MC mode is compiled as $6000
+; (Which is actually the sign to 68000 to expect a subsequent
+; 16 bit argument)
+;
+ var
+ V1 ; must be first var
+ V2 ; must be second var
+ v3 v4 v5 v6 v7 ; etc..
+ x1 x2 x3 x4 x5 x6 x7 x8 ; misc temporary vars
+ m1 ; message number
+ LoopCounter1 LoopCounter2
+ c0 c1 c2 c3 c4
+ LeftMargin TopMargin HighlightedLine Line NumEntries RepeatCount SelectedLine
+ FirstLine
+ l0 l1 l2 ; Linked list temporary workspace
+ LLFree ; pointer to Linked list free space chain
+ CurrentMenu HS0 HS1
+ PreviousObjectInfo ObjectInfo
+ StarCounter
+ xmax ymax x y speed result xsize ysize
+ RoomX RoomY
+ room
+ size
+ PlayerSpriteOffset
+ StraightLength
+ xDigStep yDigStep
+ DigStep
+ dir
+ RoomsPlaced
+ TrialPlacements AttemptedNewRooms
+ CharactersInBuffer OutputBufferReadPtr
+ AmountOfScroll
+ TimeTillSampleBuffer SampledCharInBuffer
+ verb
+ PlayerX PlayerY
+ MouseHasMoved MOuseX MouseY
+ PixelCursorX PixelCursorY PixelCursorZ PixelCursorH
+ PixelX PixelZ PixelH PixelY
+ vblx1 vblx2 vblx3 vblx4 vblInitialised
+;=====
+; used for teleport control
+ teleportx teleporty
+ teleporttimer ; countdown for teleport control
+ actor
+ randomcount ; used as a count for generating objects
+ goldpieces ; amount of gold pieces owned
+ minsearch ; used in @findvacantsquare
+ maxsearch ; ditto
+ xoffset ; ditto
+ yoffset ; ditto
+ VacancyType ; ditto
+ PlayerShieldCounter ; countdown shield
+ BlackHandFlag ; set by scroll
+ FireScrollFlag ; set by scroll
+ Wielded ; extended message number for wielded/worn objects in LL
+ ArmourClass ; see calcarmourclass
+ WeaponClass ; see calcweaponclass
+ Magic ; extended message number for magic adjustments
+ Level ; dungeon level
+ RingTimer ; interval timer for ring activations
+ RingSave ; workspace in RingSpecials
+ experience ; counter to increase xp when reached a value
+ xp ; experience level determines max hit points allowed
+ MaxPlayerHitPoints ; varies future depending on xp
+ PlayerHiDataPtr ; to save ptr for flashing user when invisible etc.
+ PlayerLoDataPtr
+; countdown timers for duration of potions...
+ paralysistimer
+ invisibilitytimer
+ boozetimer
+ confusiontimer
+ speedtimer
+ slowtimer
+ heroismtimer
+ heroismvalue
+;=====
+
+;::::::::::::::::::::::::
+
+ HighestMonster ; highest monster permissible for current level.
+ RandomMask ; mask for current level - to generate monsters. Like
+; RandomMask really, both these come from LevelsGr table in List7
+
+ FirstDig
+ g1 g2 g3 g4 g5 g6 g7 g8 ; Graeme's misc temporary vars 
+
+;::::::::::::::::::::::::
+ WalkingAnimationBase
+ StairsDissolve ; controls dissolve when move onto some stairs
+ LLOverflowReported
+ MouseOn
+ MinMouseX MaxMouseX MinMouseY MaxMouseY
+ InvisLoDataPtr InvisHiDataPtr
+ MapHiRandomSeed MapLoRandomSeed
+
+table
+ Workspace=1
+ OutputBuffer=2 ; used solely by acode
+ LL=3
+ List3=3
+ MenuTable=4
+ RoomDefns=5
+ RoomMap=6 ; map giving room numbers etc. for follow. Word Based.
+ List7=7
+;; List8=8 ; permament data special to each game
+ list9=9
+ list11=11
+ list17=17
+ list18=18
+ list19=19
+ list20=20
+ TempMovedSprite=20
+ PermMovedSprite=21
+ TempFixedSprite=22
+ PermFixedSprite=23
+ TextBuffer=24 ; filled whenever WordWs(TextBufferOffset)<>0
+ Map=27 ; map giving block numbers for display etc. Word Based.
+ SpriteTable=28
+ LongWS=29
+ WordWS=30
+ ByteWS=31
+
+const
+; conditional code...
+ UseMouse=0
+ UseJoystick=1
+ NotPC=1 ; principally determines vbl handler.
+
+ MinWall=64
+
+ cr=598
+ dot=599
+ false=0
+ true=1
+ ScreenXBlocks=50
+ ScreenXBlocksTimes2=100
+ ScreenYBlocks=50
+ ScreenXBlocksM1=49 ;*****
+ ScreenYBlocksM1=49 ;*****
+ MapSize=5000 ; ScreenXBlocks*ScreenYBlocks*2 (word based map table)
+ UpMapStep=65546 ; -ScreenXBlocks*2
+ RightMapStep=2 ; word-based map
+ DownMapStep=100 ; ScreenXBlocks*2
+ LeftMapStep=65534 ; word-based map
+ SpriteTableSize=3600 ; MaxMovingSprites*SpriteCurrentSize ; 48
+ MaxNumSprites=75 ;*****
+ SpriteAllowance=16 ;***** safe limit of free sprites for creating monsters
+ SpriteAllowancePlus1=17
+ SpriteCurrentSize=48 ; size of SpriteTable entries.
+
+; output buffer offsets (i.e. list 2 offsets)
+ StartOutputBuffer=0
+ EndOutputBufferPlus1=256 ; offset of first byte after used area of buffer
+ SizeOutputBuffer=256 ; EndOutputBufferPlus1-StartOutputBuffer
+ StartScreenLineBuffer=256
+ EndScreenLineBuffer=296
+
+; offsets within LongWs
+ HiLongRandomSeed=8 ; long value
+ LoLongRandomSeed=10 ; long value
+HiLongLogicalBase=12
+LoLongLogicalBase=14
+; holds address 8 less than the real physical base
+; to allow the leftmost 16 pels to be clipped in an elegant fashion
+
+
+LongPhysicalBase=16
+HiLongPhysicalBase=16
+LoLongPhysicalBase=18
+; holds address of currently displayed screen
+
+LongOSScreenAddress=20
+; screen address when game started
+
+HiLongTextScreenBase=24
+LoLongTextScreenBase=26
+; base address for writing text to.
+
+ HiLongCurrentTaskMTCB=28
+ LoLongCurrentTaskMTCB=30
+ HiLongNextTaskMTCB=32
+ LoLongNextTaskMTCB=34
+
+ HiLongSpriteDataPtr=108
+ LoLongSpriteDataPtr=110
+
+ HiLongFreeWorkSpace=124
+ LoLongFreeWorkSpace=126
+
+
+; offsets within WordWs
+ WordCursorXPos=0
+ WordCursorYPos=2
+ WordFrameTime=4
+ WordPlayer1SpriteOffset=6
+ WordScreenXPos=8
+ WordScreenYPos=10
+ WordScreenXMax=12
+ WordScreenYMax=14
+ WordPlayerXMax=16
+ WordPlayerYMax=18
+ WordScreenXBlocks=20
+ WordScreenYBlocks=22
+ WordXPosSave=24
+ WordYPosSave=26
+ WordTextBufferOffset=28
+ WordFreeSprites=30
+
+ WordMouseXDistance=32
+ WordMouseYDistance=34
+ WordSuspendTaskSwap=36
+
+
+
+
+; offsets within ByteWs
+ ByteJoystickStatus=0
+ ByteLastKeyPressed=1
+; ByteFrameReadyFlag=2
+ ByteInvertFlag=3
+ ByteBreakPointArmed=4
+ ByteScrollStep=5
+ ByteCurrentWeapon=6 ; i.e. exploding missile (3)
+ ByteFrameReadyFlag=9
+ ByteStarPhase=10
+ ByteWordWrapWidth=11
+ ByteSourceWeapon=21 ; i.e. fire storm wand (72) *****
+; SpecialMissile usually contains the value of the wand used to 
+; produce a non-missile effect, such as "create monster"
+ ByteSpecialMissile=22
+
+;=====
+ ByteTrueJoystickStatus=0 ;23 ; see SpecialMovements
+; Used as an indication to players speed, that is seperate from the 
+; sprite parameters...
+ BytePlayerSpeed=24
+;=====
+
+
+; offsets within permament sprite data block
+ StationaryAnimationOffset=14
+ MovingAnimationOffset=16
+ FightAnimationOffset=18
+ ThrowAnimationOffset=20
+ InitialHitPointOffset=22
+ InitialBlowStrengthOffset=24
+ TimeBetweenBlowsOffset=26
+ NumAnimationOffset=27
+ TypeOffset=28
+ SpeedOffset=29
+ NullMovesOffset=30
+ DistanceOffset=35
+ AddDirOffset=37
+
+;CDWithPlayer equ 0 * bit 0
+;CDWithMissiles equ 1
+;CDWithMonsters equ 2
+;CDWithBG equ 3 * bit 3
+;CDWithObject equ 4
+;CDWithInvisibles equ 5
+;CDWithMonsterMissile equ 6
+
+ PlayerMask=1
+ MissileMask=2
+ MonsterMask=4
+ BGMask=8
+ ObjectMask=16
+ InvisibleMask=32
+ MonsterMissileMask=64
+
+ PlayerType=1
+ MissileType=2
+ MonsterType=4
+ BGType=8
+ ObjectType=16
+ InvisibleType=32
+ MonsterMissileType=64
+
+; offsets within temporary sprite data block
+ xspeedOffset=4
+ YSpeedOffset=6
+ XPosOffset=8
+ YPosOffset=10
+ DataPtrOffset=12 ; LONG
+ LoDataPtrOffset=14
+ NameOffset=24
+ HitPointOffset=26
+ BlowStrengthOffset=28
+ TimeToNextBlowOffset=30
+ ViewOffset=31
+ StageOffset=32 ; animation stage
+ LifeCounterOffset=36
+ AnimationOffset=38
+ WealthOffset=40 ; ***** WORD amount of gold pieces owned (for leprechaun)
+ SourceWeaponOffset=42 ;***** BYTE used for source of missiles (i.e. wand type)
+ MagicOffset=43 ; ***** BYTE for magic adjustment to armour/weapons
+ CursedOffset=44 ; ***** BYTE of which BIT 0 determines curse
+ SlowCounterOffset=45 ;***** BYTE countdown timer for cursed with slowness
+ RunAwayOffset=46 ; ***** BYTE countdown timer for retreating
+ SpriteNumOffset=47 ; byte giving original sprite number.
+;
+; offsets of linked list pointers within LL list.
+; note that many of these are referenced by MenuTable
+ LLPlayerInv=0 ; ll showing player's inventory
+ LLRangedWeapons=2 ; ll giving available ranged weapons
+ LLLevel0Save=40 ; save list for first level
+ LLMaxLevelSave=40 ; last save list to be used.
+ LLEntrySize=16
+ LLLevelSaveSize=672 ; (LLMaxLevelSave+2)*LLEntrySize
+ LLTableSize=16000 ; 980 ;***** 250
+
+;*****
+; offsets within list 3
+ discoveryoffset=16000  ; 1000 ; =LLTablesize
+ discoveryoffsetminus40=15960 ; 960 ; (discoveryoffset-minring)
+ discoveryend=16071 ; 1071 ; table of names for dummy object names (BYTES)
+ ringtable=16080 ; 1080
+ ringtableminus40=16040 ; 1040 ; (ringtable-minring)
+ ringtableend=16094 ; 1094 ; table of flags for rings worn/not worn
+ spareword=16096 ; 1096 ; used for a div16 in @createmonster
+;
+; offsets of entries in LL table.
+ InvNameOffset=2	; WORD message number for name
+ InvWieldedOffset=4	; BYTE offset for (wielded) message type
+ InvCursedOffset=5	; BIT 0 cursed? 1/0
+  CurseMask=1
+  UnCurseMask=254
+
+; entries in LL table for preserving level data...
+ LevelNameOffset=2 ; WORD message number for name (65535 for destroyed wall entries)
+ LevelWieldedOffset=4	; BYTE offset for (wielded) message type
+ LevelCursedOffset=5	; BIT 0 cursed? 1/0
+ LevelXOffset=6 ; x pos (byte - by cell)
+ LevelYOffset=7 ; y pos (byte - by cell)
+ LevelMagicOffset=8
+ LevelWealthOffset=9 ; for people
+
+;=====
+ InvPoisonOffset=5	; BIT 1 poisoned food? 1/0
+  PoisonMask=2
+  UnPoisonMask=253
+;=====
+
+ InvMagicOffset=6	; BYTE contains magic adjustment (+/- 5)
+ InvStrOffset=7		; BYTE strength of weapon/armour
+;
+ RWNameOffset=2		; WORD message number for name
+ RWWieldedOffset=4	; BYTE offset for (wielded) message type
+ RWTypeOffset=7		; BYTE contains missile type for ranged weapon
+;*****
+
+ MenuDelay=300 ; slow down menu to prevent flickering display
+
+; offsets within RoomData
+ ExitOffsetBase=4
+ North=2
+ East=4
+ South=6
+ West=8
+
+; offsets within Workspace List
+ RoomTableOffset=0 ; gives number of exits used from each
+ RoomTableEntrySize=8 ; room - used in maze drawing
+
+; offsets within list7
+ NextAddDirTableOffset=10
+ ConvertViewToXY=38 ; 18+20 because index into table is -5..+5
+ ConvertViewToView=67 ; 62+5 """     ""    ""    ""  ""    ""
+;*****
+ rangeoffset=74 ; link table of sprite/true object numbers
+ statisticoffset=118 ; table of statistics for objects
+ vacantoffset=610 ; x,y offsets to find nearest vacant square
+;
+; Some sprite data pointers
+; InvisHiDataPtr=0
+; InvisLoDataPtr=528 ; invisible player
+;
+; Sprite numbers (for object categories)
+;=====
+ Food=10
+;=====
+ Bottle=14
+ Sword=15
+ Shield=16
+ Ring=17
+ Wand=18
+ Scroll=19
+ SpriteGold=20
+ Club=21 ; now used for ranged weapons
+;
+ stairsdown=250
+ user=256
+;
+; Additional Combat Stats
+ InitialArmourClass=17
+ InitialWeaponClass=0
+;
+; Monster (NameOffset) Numbers
+;
+;::::::::::::::::::::::::
+
+ Ghost=26
+ Ghoul=27
+ Leprechaun=29
+ Mummy=32
+ Demon=36
+ Skeleton=34
+ Nymph=35
+
+ AbsHighestMonster=19 ; different from Highest Monster (a var)
+; which contains the highest monster permissible for current level.
+
+;::::::::::::::::::::::::
+;
+; Actual object numbers ( for use with STATISTIC table )
+ minarmour=1
+ maxarmour=7
+ minarmourA=8
+ maxarmourA=13
+ minhand=20
+ maxhand=28
+ minrange=35
+ maxrange=37
+ minring=40
+ ringpoison=44 ; poison protection
+ ringfireprotect=45 ; fire protection
+ ringcoldprotect=46 ; cold protection
+ ringdamage=47 ; plus damage
+ ringteleportc=49 ; teleport control
+ ringinvis=51 ; invisibility
+ ringstrength=52 ; strength
+ ringundead=53 ; undead protection
+ maxring=53
+ maxringplus1=54
+ minwand=60
+ maxwand=74
+ maxwandplus1=75
+ minscroll=80
+ maxscroll=91
+ maxscrollplus1=92
+ minpotion=95
+ maxpotion=110
+ maxpotionplus1=111
+ gold=120
+;*****
+
+;=====
+ minfoodminus1=124
+ minfood=125
+ maxfood=129
+ maxfoodplus1=130
+;=====
+WandCreateMonster=60 ; dc.b 0,0,0,0		; 60 create monster
+WandMagicMissile=61 ; dc.b 50,0,0,missile	; 61 magic missile
+WandSlowMonster=62 ; dc.b 0,0,0,missile	; 62 slow monster
+WandPolymorph=63 ;  dc.b 0,0,0,missile	; 63 polymorph
+WandTeleport=64 ;  dc.b 0,0,0,missile	; 64 teleport
+WandDigging=65 ;  dc.b 0,0,0,digging	; 65 digging
+WandFire=66 ;  dc.b 20,0,0,missile	; 66 fire
+WandCold=67 ; dc.b 20,0,0,missile	; 67 cold
+WandDeath=68 ; dc.b 255,0,0,missile	; 68 death
+WandExorcism=69 ; dc.b 0,0,0,missile	; 69 exorcism
+WandCloning=70 ; dc.b 0,0,0,missile	; 70 cloning
+WandDynamite=71 ; dc.b 50,0,0,0		; 71 dynamite
+WandFireStorm=72 ; dc.b 50,0,0,explosive	; 72 fire storm
+WandShield=73 ; dc.b 0,0,0,0		; 73 shield
+WandRevealTraps=74 ; dc.b 0,0,0,0		; 74 reveal traps
+
+;----
+ MenuHeight=16
+ MenuPixelWidth=224
+ MenuPixelHeight=128
+;=====
+; prevents going off edge of screen in teleport control
+ leftboundary=60 ; 120 ; half screen width
+ rightboundary=560 ; screenxblocks*16-screen width
+ topboundary=64 ; 96 ; half screen height
+ bottomboundary=592 ; 608 ; screenyblocks*16-screen height
+; defines middle of screen, offset to top left of player sprite
+ midscreenx=112 ; half screen width-8
+ midscreeny=88 ; half screen height-8
+;=====
+
+ begin
+ data @Start,@Start ; Dummy - overwritten by "ToMCEnd" vector
+.Start
+ code +
+
+ data @AcodeFns,@MCFns ; pointers to the major jump blocks
+
+
+.AcodeFns
+; jump table for acode functions called from MC
+ goto @AcodeStart
+ goto @FGSpecials
+ goto @FGSpecialsMovedSprite
+ goto @BGSpecials
+ goto @Dummy ; SpecialCollision
+ goto @DAMSSpecials
+; goto @VBL
+; goto @VBL
+; goto @HandleCR
+ goto @Scheduler
+ goto @VBL
+ goto @HandleCR
+ goto @ExtraTask
+ goto @ExtraTask2 ; DummyVector
+ goto @SpecialMissile ; DummyVector
+ goto @DummyVector
+
+
+.MCFns
+; jump table for MC functions called from Acode
+; reserve 6 bytes per jump - absolute, long jumps
+; poked in by MC
+.MCHeroOnceOnlyInit            data @Dummy,@Dummy,@Dummy ;0
+.MCHeroInit                    data @Dummy,@Dummy,@Dummy ;1
+.MCClearScreen                 data @Dummy,@Dummy,@Dummy ;2
+
+.MCMoveScreen                  data @Dummy,@Dummy,@Dummy ;3
+.MCSpecials                    data @Dummy,@Dummy,@Dummy ;4
+.MCBuildBackground             data @Dummy,@Dummy,@Dummy ;5
+.MCDisplayDestroyedWalls       data @Dummy,@Dummy,@Dummy ;6
+.MCMoveAllSprites              data @Dummy,@Dummy,@Dummy ;7
+.MCDisplayAllSprites           data @Dummy,@Dummy,@Dummy ;8
+.MCTrimEdges                   data @Dummy,@Dummy,@Dummy ;9
+.MCDisplayTextLine             data @Dummy,@Dummy,@Dummy ;a
+.MCDisplayUpperTextLine        data @Dummy,@Dummy,@Dummy ;b
+.MCDoAllTimers                 data @Dummy,@Dummy,@Dummy ;c
+.MCCalculateMemoryFree         data @Dummy,@Dummy,@Dummy ;d
+.MCHeroInput                   data @dummy,@Dummy,@Dummy ;e
+.MCOswrchV1                    data @Dummy,@Dummy,@Dummy ;f
+.MCInvertedOswrchV1            data @Dummy,@Dummy,@Dummy ;10
+.MCDestroyTempMoved            data @Dummy,@Dummy,@Dummy ;11
+.MCDestroyTempFixed            data @Dummy,@Dummy,@Dummy ;12
+.MCCloseDown                   data @Dummy,@Dummy,@Dummy ;13
+.MCFindSprite                  data @Dummy,@Dummy,@Dummy ;14
+.MCSetUpNewSprite              data @Dummy,@Dummy,@Dummy ;15
+.MCSprite                      data @Dummy,@Dummy,@Dummy ;16
+.MCHandlePlayerInput           data @Dummy,@Dummy,@Dummy ;17
+.MCReturnFrameTime             data @Dummy,@Dummy,@Dummy ;18
+.MCUpdateFrameTime             data @Dummy,@Dummy,@Dummy ;19
+.MCClearRectangle              data @Dummy,@Dummy,@Dummy ;1d
+.MCMapBuildBackground          data @Dummy,@Dummy,@Dummy ;1a
+.MCPreScrollMap                data @Dummy,@Dummy,@Dummy ;1b
+.MCSpecialCheck                data @Dummy,@Dummy,@Dummy ;1c
+.MCStartBigExplosion           data @Dummy,@Dummy,@Dummy ;1d
+.MCScrollTextLine              data @Dummy,@Dummy,@Dummy ;1e
+.MCReCalcSpriteGraphics        data @Dummy,@Dummy,@Dummy ;1f
+.MCOsrdch                      data @Dummy,@Dummy,@Dummy ;20
+.MCChecksum                    data @Dummy,@Dummy,@Dummy ;21
+.MCInit3D                      data @Dummy,@Dummy,@Dummy ;22
+.MCDrawObjectV1                data @Dummy,@Dummy,@Dummy ;23
+.MCBuildViewMap                data @Dummy,@Dummy,@Dummy ;24
+.MCDisplayViewMap              data @Dummy,@Dummy,@Dummy ;25
+.MCInitBootPrg                 data @Dummy,@Dummy,@Dummy ;26
+.MCReturnSpriteAddress         data @Dummy,@Dummy,@Dummy ;27
+.MCNoClipSprite                data @Dummy,@Dummy,@Dummy ;28
+.MCCalcScreenAddress           data @Dummy,@Dummy,@Dummy ;29
+.MCSaveFile                    data @Dummy,@Dummy,@Dummy ;2a
+.MCLoadFile                    data @Dummy,@Dummy,@Dummy ;2b
+.MCCopy                        data @Dummy,@Dummy,@Dummy ;2c
+.MCAbsChangeListPtr            data @Dummy,@Dummy,@Dummy ;2d
+.MCLoadCells                   data @Dummy,@Dummy,@Dummy ;2e
+.MCSetUpPtrs                   data @Dummy,@Dummy,@Dummy ;2f
+.MCParseInputWord              data @Dummy,@Dummy,@Dummy ;30
+.MCInitTask                    data @Dummy,@Dummy,@Dummy ;31
+.MCSnooze                      data @Dummy,@Dummy,@Dummy ;32
+.MCAddToListPtr                data @Dummy,@Dummy,@Dummy ;33
+.MCReserveMemory               data @Dummy,@Dummy,@Dummy ;34
+.MCSetUpVariablePtrs           data @Dummy,@Dummy,@Dummy ;35
+.MCPreLoadCells                data @Dummy,@Dummy,@Dummy ;36
+ data @Dummy,@Dummy,@Dummy ;37
+
+
+
+
+
+;.AcodeFns
+;; jump table for acode functions called from MC
+; goto @AcodeStart
+; goto @FGSpecials
+; goto @FGSpecialsMovedSprite
+; goto @BGSpecials
+; goto @Dummy ; SpecialCollision
+; goto @DAMSSpecials
+; goto @SpecialMissile
+;
+;.MCFns
+;; jump table for MC functions called from Acode
+;; reserve 6 bytes per jump - absolute, long jumps
+;; poked in by MC
+;.MCHeroOnceOnlyInit            data @Dummy,@Dummy,@Dummy ;0
+;.MCHeroInit                    data @Dummy,@Dummy,@Dummy ;1
+;.MCClearScreen                 data @Dummy,@Dummy,@Dummy ;2
+;
+;.MCMoveScreen                  data @Dummy,@Dummy,@Dummy ;3
+;.MCSpecials                    data @Dummy,@Dummy,@Dummy ;4
+;.MCBuildBackground             data @Dummy,@Dummy,@Dummy ;5
+;.MCDisplayDestroyedWalls       data @Dummy,@Dummy,@Dummy ;6
+;.MCMoveAllSprites              data @Dummy,@Dummy,@Dummy ;7
+;.MCDisplayAllSprites           data @Dummy,@Dummy,@Dummy ;8
+;.MCTrimEdges                   data @Dummy,@Dummy,@Dummy ;9
+;.MCDisplayTextLine             data @Dummy,@Dummy,@Dummy ;a
+;.MCDisplayUpperTextLine        data @Dummy,@Dummy,@Dummy ;b
+;.MCDoAllTimers                 data @Dummy,@Dummy,@Dummy ;c
+;.MCCalculateMemoryFree         data @Dummy,@Dummy,@Dummy ;d
+;.MCHeroInput                   data @dummy,@Dummy,@Dummy ;e
+;.MCOswrchV1                    data @Dummy,@Dummy,@Dummy ;f
+;.MCInvertedOswrchV1            data @Dummy,@Dummy,@Dummy ;10
+;.MCDestroyTempMoved            data @Dummy,@Dummy,@Dummy ;11
+;.MCDestroyTempFixed            data @Dummy,@Dummy,@Dummy ;12
+;.MCCloseDown                   data @Dummy,@Dummy,@Dummy ;13
+;.MCFindSprite                  data @Dummy,@Dummy,@Dummy ;14
+;.MCSetUpNewSprite              data @Dummy,@Dummy,@Dummy ;15
+;.MCSprite                      data @Dummy,@Dummy,@Dummy ;16
+;.MCHandlePlayerInput           data @Dummy,@Dummy,@Dummy ;17
+;.MCReturnFrameTime             data @Dummy,@Dummy,@Dummy ;18
+;.MCUpdateFrameTime             data @Dummy,@Dummy,@Dummy ;19
+;.MCClearRectangle              data @Dummy,@Dummy,@Dummy ;1a
+;.MCMapBuildBackground          data @Dummy,@Dummy,@Dummy ;1b
+;.MCPreScrollMap                data @Dummy,@Dummy,@Dummy ;1c
+;.MCSpecialCheck                data @Dummy,@Dummy,@Dummy ;1d
+;.MCStartBigExplosion           data @Dummy,@Dummy,@Dummy ;1e
+;.MCScrollTextLine              data @Dummy,@Dummy,@Dummy ;1f
+;.MCReCalcSpriteGraphics        data @Dummy,@Dummy,@Dummy ;20
+;.MCOsrdch                      data @Dummy,@Dummy,@Dummy ;21
+;.MCCheckSum                    data @Dummy,@Dummy,@Dummy ;22
+;.MCInit3D                      data @Dummy,@Dummy,@Dummy ;23
+;.MCDrawObject                  data @Dummy,@Dummy,@Dummy ;24
+;.MCBuildViewMap                data @Dummy,@Dummy,@Dummy ;25
+;.MCDisplayViewMap              data @Dummy,@Dummy,@Dummy ;26
+;.MCDisplay3DSprite             data @Dummy,@Dummy,@Dummy ;27
+;.MCReturnSpriteAddress         data @Dummy,@Dummy,@Dummy ;28
+;.MCNoClipSprite                data @Dummy,@Dummy,@Dummy ;29
+;
+; data @Dummy,@Dummy,@Dummy ;25
+; data @Dummy,@Dummy,@Dummy ;25
+; data @Dummy,@Dummy,@Dummy ;25
+; data @Dummy,@Dummy,@Dummy ;25
+
+.Dummy
+ code -
+ prs " bug!"
+
+ code +
+.AcodeDelay
+ gosub @Delay
+ goto @HeroLoop
+
+.AcodeStart
+ c0=0
+ c1=1
+ c2=2
+ c3=3
+ c4=4
+
+ gosub @MCHeroOnceOnlyInit
+
+.RestartGame
+ gosub @MCHeroInit
+ code -
+ code +
+;---
+;; reserve space for driver block ...
+; &x1=list11(72) ; hi word of list18's ptr
+; &list11(68)=x1 ; list 17's ptr
+; &x1=list11(74) ; lo word of list18's ptr
+; &list11(70)=x1
+;
+; reserve space for list17 (driver block)
+; v1=4096 ; reserve 4K of memory for driver block
+; gosub @MCReserveMemory
+;
+;; skip list 18 over list 17's area(32K)
+; v1=18
+; v2=0 ; 30720+32K for neo screen. hi word
+; v3=4096 ; 30720 ; lo word
+; gosub @MCAddToListPtr
+;---
+; set up list18 to point to free memory...
+ &x1=longws(HiLongFreeWorkspace)
+ &list11(72)=x1 ; list 18's ptr
+ &x1=longws(LoLongFreeWorkspace)
+ &list11(74)=x1
+
+; load side screen...
+ v1=18 ; load into list 18
+ v2=0 ; offset within list
+ x1=66 ; load filename 'b.dat' i.e. side screen
+ gosub @LoadFile
+; copy line-by-line to the real screen...
+ &WordWS(WordCursorXPos)=c0
+ &WordWS(WordCursorYPos)=c0
+ v1=19 ; logical base in list 19
+ v2=20 ; physical base in list 20
+ gosub @MCCalcScreenAddress ; get List19 as start of screen
+ x4=28 ; read offset in list18
+ x5=120 ; write offset in list 19/20
+.CSS2
+ x6=20 ; words to copy per pixel line
+ push x5
+ push x4
+.CSS1
+ &x1=list18(x4)
+ &list19(x5)=x1
+ &list20(x5)=x1
+ add x4,c2
+ add x5,c2
+ sub x6,c1
+ if x6>0 then CSS1
+ pop x4
+ x1=40
+ add x4,x1
+ pop x5
+ x1=160
+ add x5,x1
+ if x5<32000 then @CSS2
+
+
+; list18 points to FreeMemory at this point in time.
+ v1=18 ; load into list 18
+ v2=0 ; offset within list
+;; x1=4 ; load file with filename LIST8((x1)) - i.e. A.DAT
+ x1=65  ;'a'
+ gosub @LoadFile
+
+; set up ptr to sprites for MC...
+ &x1=list11(72) ; 18*4 - i.e.list18
+ &LongWS(HiLongSpriteDataPtr)=x1
+ &List11(112)=x1
+ &x1=list11(74) ; 18*4 - i.e.list18
+ &LongWS(LoLongSpriteDataPtr)=x1
+ &list11(114)=x1
+
+; reserve memory for sprites just loaded...
+ v1=32768 ; reserve 32K of memory...
+ gosub @MCReserveMemory
+ v1=32768 ; reserve 32K of memory...
+ gosub @MCReserveMemory
+ v1=32768 ; reserve 32K of memory...
+ gosub @MCReserveMemory
+ v1=32768 ; reserve 32K of memory...
+ gosub @MCReserveMemory
+
+; set up list 17...
+ &x1=longws(HiLongFreeWorkspace)
+ &list11(68)=x1 ; list 17's ptr
+ &x1=longws(LoLongFreeWorkspace)
+ &list11(70)=x1
+; reserve space for list17 (driver block)
+ v1=1000 ; 4096 ; reserve memory for driver block
+ gosub @MCReserveMemory
+
+;; skip list 18 over list 17's area(32K)
+; v1=18
+; v2=0 ; 1 ; 30720+32K for neo screen. hi word
+; v3=4000 ; 4096 ; 30720 ; lo word
+; gosub @MCAddToListPtr
+
+; set up list 27 (map)...
+ &x1=longws(HiLongFreeWorkspace)
+ &list11(108)=x1 ; list 27's ptr
+ &LongWS(152)=x1 ; MapLayoutPtr
+ &x1=longws(LoLongFreeWorkspace)
+ &list11(110)=x1
+ &LongWS(154)=x1 ; MapLayoutPtr
+; reserve space for list27 (map)
+ v1=12000 ; MapSize
+ gosub @MCReserveMemory
+
+; set up ptr for list 18.
+ &x1=longws(HiLongFreeWorkspace)
+ &list11(72)=x1 ; list 18
+ &x1=longws(LoLongFreeWorkspace)
+ &list11(74)=x1 ; list 18
+
+;*** gosub @LoadBackdrop
+
+ gosub @SetUpTextPtr
+ &WalkingAnimationBase=list9(0) ; base for walking animation data.
+
+; gosub @MCInit3D
+; v1=100
+; v2=0 ; x
+; v3=0 ; z
+; v4=0 ; h
+; gosub @MCDrawObject
+; gosub @MCBuildViewMap
+;.HLoop
+; gosub @MCDisplayViewMap
+; gosub @MCDisplay3DSprite
+; gosub @MCHeroInput
+;;; gosub @MCHandlePlayerInput
+; gosub @HandleKeyPress
+; goto @HLoop
+
+
+
+
+
+ x1=0
+ LongWS(HiLongRandomSeed)=x1
+ LongWS(LoLongRandomSeed)=x1
+
+
+;*****
+; clear table of flags for "ring worn"
+ x1=ringtable
+.RingWornLoop
+ list3(x1)=c0
+ add x1,c1
+ if x1<ringtableend then RingWornLoop
+;
+ code -
+ random x1
+ code +
+ x3=15
+ and x3,x1				; x3=rnd(15) for rnd name selection
+;
+; choose dummy names for rings before identified
+ x1=minring
+ x2=140					; dummy messages for rings
+ x4=0					; zero message counter
+.RingLoop
+ gosub @choosenamex1
+ if x1<maxringplus1 then RingLoop
+;
+; choose dummy names for wands before identified
+ x1=minwand
+ x2=160					; dummy messages for wands
+ x4=0					; zero message counter
+.WandLoop
+ gosub @choosenamex1
+ if x1<maxwandplus1 then WandLoop
+;
+; choose dummy names for scrolls before identified
+ x1=minscroll
+ x2=180					; dummy messages scrolls
+ x4=0					; zero message counter
+.ScrollLoop
+ gosub @choosenamex1
+ if x1<maxscrollplus1 then ScrollLoop
+;
+; choose dummy names for potions before identified
+ x1=minpotion
+ x2=200					; dummy messages potions
+ x4=0					; zero message counter
+.PotionLoop
+ gosub @choosenamex1
+ if x1<maxpotionplus1 then PotionLoop
+;
+; initialise general workspace etc.
+ x1=255 ; must be longer than longest message to be output
+; to scrolling text line.
+ ByteWS(ByteWordWrapWidth)=x1
+
+; init first level
+ level=1				; produce a reasonable map!
+ gosub @InitLL
+;
+ gosub @CalcACWC
+ gosub @InitOutputBuffer
+
+.NewLevel
+ gosub @DisplayLevelNumber
+
+ gosub @RestoreLevelContents
+
+ gosub @MCPreScrollMap
+;
+; gosub @MCClearRectangle			; clear old level screen
+; gosub @DisplayTits				; stat titles on screen 1
+; gosub @displayframe
+; gosub @WaitForFrame ; waitfornextframe
+; gosub @MCClearRectangle			; clear "level n" screen
+; gosub @DisplayTits				; stat titles on screen 2
+;
+ VBLInitialised=true ; enable mouse ptr etc.
+ StairsDissolve=false ; not going up/down.
+
+.RestartHero
+ code - ; reset address registers.
+ code +
+; gosub @CalcACWC
+;*****
+
+.HeroLoop
+ VBLInitialised=false
+ MouseOn=false
+
+ gosub @MCHeroInput
+cif UseMouse
+ gosub @DecodeMouse
+cend
+ Gosub @SpecialMovements
+ gosub @MCHandlePlayerInput
+
+ cif UseMouse
+; prevent mouse moves auto-repeating
+ x1=ByteWS(ByteJoystickStatus)
+ x2=192
+ and x1,x2 ; mask off directions
+ ByteWS(ByteJoystickStatus)=x1
+ cend
+
+ gosub @HandleKeyPress
+ gosub @MCMoveAllSprites
+ gosub @AllHero
+
+; v1=1
+; v2=32
+; v3=32
+; gosub @MCSprite
+ gosub @DisplayFrame
+ gosub @WaitForFrame
+ gosub @LimitFrameRate
+;; prevent mouse moves auto-repeating
+; x1=ByteWS(ByteJoystickStatus)
+; x2=192
+; and x1,x2 ; mask off directions
+; ByteWS(ByteJoystickStatus)=c0
+ LLOverflowReported=false
+ goto @HeroLoop
+;---
+cif useMouse
+.DecodeMouse
+; convert mouse movement to joystick-type moves
+ x1=ByteWS(ByteJoystickStatus) ; new joystick status
+ x2=240 ; $f0
+ and x1,x2
+ &v1=WordWS(WordMouseXDistance)
+ &v2=WordWS(WordMouseYDistance)
+
+; move up?
+ x2=1
+ if v2>65535 then DMNoUp ; not negative enough
+ if v2<32767 then DMNoUp ; positive
+; negative
+ or x1,x2
+ add v2,c1
+ if v2>32767 then DMNoUp
+ v2=0
+
+.DMNoUp
+; move down?
+ x2=2
+ if v2>32767 then DMNoDown ; negative
+ if v2<1 then DMNoDown ; not positive enought
+; positive
+ or x1,x2
+ sub v2,c1
+ if v2<32767 then DMNoDown
+ v2=0
+
+.DMNoDown
+; move left?
+ x2=4
+ if v1<32767 then DMNoLeft ; positive
+ if v1>65535 then DMNoLeft ; not negative enough
+; negative
+ or x1,x2
+ add v1,c1
+ if v1>32767 then DMNoLeft
+ v1=0
+
+.DMNoLeft
+; move right?
+ x2=8
+ if v1>32767 then DMNoRight ; negative
+ if v1<1 then DMNoRight ; not positive enough
+; positive
+ or x1,x2
+ sub v1,c1
+ if v1<32767 then DMNoRight
+ v1=0
+
+.DMNoRight
+ ByteWS(ByteJoystickStatus)=x1 ; new joystick status
+ &WordWS(WordMouseXDistance)=v1 ; c0
+ &WordWS(WordMouseYDistance)=v2 ; c0
+ return
+
+; if v1>32767 then MinusX
+; if v1<4 then ZeroX
+; if v2<32768 then PlusXPlusY
+;
+; if v2>65532 then PlusXOnly
+;; plus x, minus y
+; x2=9
+; goto DecodeMouseOk
+;
+;.PlusXOnly
+; x2=8
+; goto DecodeMouseOk
+; 
+;.PlusXPlusY
+; if v2<4 then PlusXOnly
+; x2=10
+; goto DecodeMouseOk
+;;---
+;.ZeroX
+; if v2>32767 then ZeroXMinusY
+; if v2<4 then DecodeMouseOk ; no movement
+; x2=2 ; move down
+; goto DecodeMouseOk
+;
+;.ZeroXMinusY
+; if v2>65532 then DecodeMouseOk ; no move
+
+
+;
+
+
+.NoPlusX
+ ByteWS(ByteJoystickStatus)=x1
+ return
+
+cend
+
+;---
+.DisplayLevelNumber
+; Display level number
+ x1=0
+ &WordWs(WordCursorXPos)=x1
+ &WordWs(WordCursorYPos)=x1
+ v1=248
+ v2=191 ; 200
+ gosub @MCClearRectangle			; clear new level screen
+ x1=72
+ &WordWs(WordCursorXPos)=x1
+ x1=80
+ &WordWs(WordCursorYPos)=x1
+ CODE -
+ MESSAGE 620 ; "LEVEL "
+ CODE +
+ x1=120
+ &WordWs(WordCursorXPos)=x1
+ v1=level
+ gosub @MyPrintV1
+ gosub @displayframe
+; gosub @delay
+; gosub @delay
+ return
+;---
+;---
+.LimitFrameRate
+ gosub @MCReturnFrameTime
+ if v1>800 then LimitFrameRate1 ; often returns very high values
+; which seem totally spurious.
+
+; time is in 5ms ticks, so multiply by 5 to give ms display
+ x1=v1
+ add v1,v1
+ add v1,v1
+ add v1,x1
+; display it
+ x1=260
+ &WordWS(WordCursorXPos)=x1
+ x1=164
+ &WordWS(WordCursorYPos)=x1
+;code -
+; print V1
+;code +
+; v1=32
+; gosub @MCOswrchV1
+ gosub MyPrintV1
+
+.LimitFrameRate1
+ gosub @MCReturnFrameTime
+; v1 is the time taken so far by this frame
+ if v1<16 then LimitFrameRate1
+; in 5 ms ticks (200 Hz timer)
+ gosub @MCUpdateFrameTime
+ return
+;---
+; choose a dummy name for object x1 and set this in DiscoverOffset table.
+; On entry: x2 contains start of group messages for type of object
+; x3 contains random addition to be added to message counter each time
+; x4 contains message counter (0-16) to be added to start of message group
+; On exit: name is set and x1 is incremented
+.choosenamex1
+ add x4,x3
+ if x4<17 then choosename1		; counter out of range?
+ x5=17
+ sub x4,x5				; if so, reset counter
+.choosename1
+ x5=x4					; keep x4 preserved
+ add x5,x2				; add start of message group
+ x6=DiscoveryOffsetMinus40
+ add x6,x1				; x6 points to dummy name byte
+ list3(x6)=x5 ; set to c0 for cheat mode, x5 for normal. ;&*&*&*&*&*&x5				; set dummy name
+ add x1,c1
+ return
+;---
+; Print v1, with no leading zeros OR spaces
+.MyPrintV1NoLeaders
+ x5=2
+ goto MPV1
+;
+.MyPrintV1
+; routine created due to frustration with word-wrap etc.
+; only works for smallish-numbers for debugging etc.
+; Fixed Number of significant figures - 4
+ x5=1 ; ok to supress 0s (i.e. leading zeros) whilst x5 is non-zero
+.MPV1
+ x1=v1
+ x2=1000
+ gosub @MyPrintV1Digit
+ x2=100
+ gosub @MyPrintV1Digit
+ x2=10
+ gosub @MyPrintV1Digit
+ x2=1
+ x5=0 ; don't supress final 0 as a leading zero.
+
+.MyPrintV1Digit
+ v1=48 ; '0'
+.MyPrintV1Digit1
+ sub x1,x2
+ if x1>32000 then MyPrintV1Digit2
+ add v1,c1
+ goto MyPrintV1Digit1
+
+.MyPrintV1Digit2
+ add x1,x2 ; make it positive again
+ if x5=0 then NoSupress
+ if v1=48 then MaybeSupressLeading
+.NoSupress
+ x5=0 ; don't supress leading zeros from now on
+ goto @MCOswrchV1
+
+.MaybeSupressLeading
+; convert leading 0's to spaces
+ v1=32
+ if x5<>2 then @MCOswrchV1 ; if x5=2, then no leading zeros OR spaces
+ return
+;---
+;*****
+;=====
+; Display Titles Above Player Statistic Positions
+;.DisplayTits
+; x1=268
+; &WordWS(WordCursorXPos)=x1
+; x1=64
+; &WordWS(WordCursorYPos)=x1
+;; V1=621 ; "HIT "
+;; Gosub @EntryNumbertoPtr
+;; Gosub @Gprint
+;code -
+; message cr
+; prs "HIT "
+; message cr
+;code +
+;;
+; x1=260
+; &WordWS(WordCursorXPos)=x1
+; x1=124
+; &WordWS(WordCursorYPos)=x1
+; V1=622 ; "GOLD "
+; Gosub @EntryNumbertoPtr
+; Gosub @Gprint
+;;
+; x1=276
+; &WordWS(WordCursorXPos)=x1
+; x1=84
+; &WordWS(WordCursorYPos)=x1
+; V1=623 ; "AC "
+; Gosub @EntryNumbertoPtr
+; Gosub @Gprint
+;;
+; x1=276
+; &WordWS(WordCursorXPos)=x1
+; x1=104
+; &WordWS(WordCursorYPos)=x1
+; V1=624 ; "WC "
+; Gosub @EntryNumbertoPtr
+; Gosub @Gprint
+;;
+; x1=276
+; &WordWS(WordCursorXPos)=x1
+; x1=144
+; &WordWS(WordCursorYPos)=x1
+; V1=625 ; "XP "
+; Gosub @EntryNumbertoPtr
+; Gosub @Gprint
+; return
+;;---
+; Display Hit Points, Gold Pieces, Armour Class & Weapon Class
+.DisplayPlayerStats
+ gosub @DisplayArmourClass
+ gosub @DisplayWeaponClass
+ gosub @DisplayExperience
+ gosub @DisplayGold
+;---
+.DisplayHitPoints
+ x1=272 ; 260
+ &WordWS(WordCursorXPos)=x1
+ x1=104 ; 72
+ &WordWS(WordCursorYPos)=x1
+ &x1=WordWS(WordPlayer1SpriteOffset)
+ x2=HitPointOffset
+ add x1,x2
+ &v1=SpriteTable(x1)
+ goto @MyPrintV1
+;---
+.Displaygold
+ x1=272 ; 260
+ &WordWS(WordCursorXPos)=x1
+ x1=79 ; 132
+ &WordWS(WordCursorYPos)=x1
+ v1=goldpieces
+ goto @MyPrintV1
+;---
+.DisplayArmourClass
+ x1=272 ;260
+ &WordWS(WordCursorXPos)=x1
+ x1=155 ; 92
+ &WordWS(WordCursorYPos)=x1
+ v1=ArmourClass
+ goto @MyPrintV1
+;---
+.DisplayWeaponClass
+ x1=272  ;260
+ &WordWS(WordCursorXPos)=x1
+ x1=178 ; 112
+ &WordWS(WordCursorYPos)=x1
+ v1=WeaponClass
+ goto @MyPrintV1
+;---
+.DisplayExperience
+ x1=272 ; 260
+ &WordWS(WordCursorXPos)=x1
+ x1=130 ; 152
+ &WordWS(WordCursorYPos)=x1
+ v1=xp
+ goto @MyPrintV1
+;=====
+;---
+.DisplayFreeSprites
+ x1=260
+ &WordWS(WordCursorXPos)=x1
+ x1=172
+ &WordWS(WordCursorYPos)=x1
+; &x1=WordWS(WordPlayer1SpriteOffset)
+; x2=HitPointOffset
+; add x1,x2
+; &v1=SpriteTable(x1)
+ &v1=WordWS(WordFreeSprites)
+ goto @MyPrintV1
+;---
+.DisplayMemoryFree
+ gosub @MCCalculateMemoryFree
+ x1=260
+ &WordWS(WordCursorXPos)=x1
+ x1=180
+ &WordWS(WordCursorYPos)=x1
+; &x1=WordWS(WordPlayer1SpriteOffset)
+; x2=HitPointOffset
+; add x1,x2
+; &v1=SpriteTable(x1)
+; &v1=WordWS(WordFreeSprites)
+ gosub @MyPrintV1
+ v1=75 ; 'K'
+ goto @MCOswrchV1
+;---
+.DisplayFrame
+;;* debugging stuff:
+; x1=ByteWS(7) ; text line cleared?
+; if x1<>0 then df1
+; brEak ;*
+; gosub @MCDisplayUpperTextLine ;*
+; goto DisplayFrame
+;; brEak ;*
+;
+;.df1
+;;* end debugging
+ ByteWS(ByteFrameReadyFlag)=c1
+ return
+;---
+; wait for next frame, checking that the current frame has 
+; alredy been displayed
+.WaitForNextFrame
+ V1=ByteWS(ByteFrameReadyFlag)
+ if V1=0 then WaitForNextFrame
+.wfnf1
+ V1=ByteWS(ByteFrameReadyFlag)
+ if V1<>0 then WFNF1
+ return
+;---
+; wait for frame to be displayed
+.WaitForFrame
+ V1=ByteWS(ByteFrameReadyFlag)
+ if V1<>0 then WaitForFrame
+ gosub @SetUpTextPtr
+ return
+;---
+.LongDelay
+ V2=10
+.LongDelay1
+ gosub Delay
+ sub V2,c1
+ if V2<>0 then LongDelay1
+ return
+;---
+.Delay
+ V1=60000
+.DelayV1
+ c1=1
+
+.Delay1
+ sub V1,c1
+ if V1>0 then Delay1
+ return
+;---
+.AllHero
+; call main routines for normal Hero display.
+; Note that most of these routines corrupt a3-a5, so should
+; do a code-, code+ to reset them if you want to do
+; any acode processing in-between calls.
+ gosub @MCMoveScreen
+ gosub CyclicSpecials
+.AllHero2
+ gosub @MCSpecials
+ gosub @RingSpecials
+ gosub @MCBuildBackground
+ gosub @MCDisplayDestroyedWalls
+ gosub @MCDisplayAllSprites
+ gosub @MCTrimEdges
+ gosub @DisplayTextLine
+ gosub @MCDisplayUpperTextLine
+ gosub @MCDoALlTimers
+ gosub @DisplayMemoryFree
+ gosub @DisplayPlayerStats
+ gosub @DisplayFreeSprites
+ code -
+ code +
+ return
+;---
+.CyclicSpecials
+code -
+ add StarCounter,c1
+ if StarCounter<>2 then CsRet
+ StarCounter=0
+ x1=ByteWS(ByteStarPhase)
+ add x1,c1
+ if x1<8 then CsEnd
+ x1=0
+.CsEnd
+ ByteWS(ByteStarPhase)=x1
+.CsRet
+code +
+ return
+;---
+.EqualiseFrames
+; first ensure both frames have same display...
+ V1=1000
+ gosub @DelayV1
+ gosub @AllHero2
+ gosub @DisplayFrame
+ gosub @WaitForFrame
+ gosub @AllHero2
+ goto @LimitFrameRate ; gosub, return
+;---
+.DoDamageX1
+; subtract X1 hit points from sprite TempFixedSprite
+ &x2=TempFixedSprite(HitPointOffset)
+ sub x2,x1
+ &TempFixedSprite(HitPointOffset)=x2
+ if x2>50000 then DoDamageDestroy
+ if x2=0 then DoDamageDestroy
+ return
+
+.DoDamageDestroy
+ &TempFixedSprite(HitPointOffset)=c0
+ gosub @MCDestroyTempFixed
+
+;*****
+ &x8=TempFixedSprite(WealthOffset)	; does monster leave any gold?
+ if x8=0 then dodamageexplosion		; no, sorry!
+ &v1=TempFixedSprite(XPosOffset)	; gold x
+ &v2=TempFixedSprite(YPosOffset)	; gold y
+ v3=0					; speed=0
+ v4=0
+ v5=SpriteGold
+ gosub @generateobject			; replace monster with gold
+ v1=WealthOffset
+ add v1,v6
+ &SpriteTable(v1)=x8			; amount of gold dropped
+;*****
+
+.DoDamageExplosion
+ v5=13 ; death-explosion
+
+;=====
+ gosub @StartExplosionV5 ; gosub, return
+;---
+; increment experience counter, and if we reach a high enough 
+; target, then add to xp.
+; the targets to gain each next level are...
+; xp2 = 1*50 = 50
+; xp3 = 2*50 = 100
+; xp4 = 3*50 = 150 ...etc...
+;; .addexperience
+ &x4=PermFixedSprite(InitialHitPointOffset) ; hit points of monster we killed
+; divide hp by 16 to give experience gained...
+ asr x4
+ asr x4
+ asr x4
+ asr x4
+ add experience,x4
+
+.AddExpLoop
+; first, work out the target of points since last level gain.
+ x1=xp
+ x2=0
+ x3=50
+.addexp1
+ add x2,x3
+ sub x1,c1
+ if x1<32768 then addexp1
+
+ if experience<x2 then NoGainLevel
+ push x4
+  gosub @addxp		; gain a level!
+ pop x4
+; may gain several levels in one go if we kill a big monster.
+ goto AddExpLoop
+
+.NoGainLevel
+ return
+;---
+; increment xp level by one
+.addxp
+ experience=0				; reset experience counter
+ add xp,c1
+ m1=767
+ gosub @AddMessageToOutputBuffer	; welcome to xp level
+ v1=xp
+ gosub @AddNumberToOutputBuffer		; <xp>
+ m1=dot
+ gosub @AddMessageToOutputBuffer ; '.'
+; adjust the maximim hit points allowed...
+.calcmaxhitpoints
+ maxplayerhitpoints=0
+ x1=xp
+ x2=100
+.addxp1
+ add MaxPlayerHitPoints,x2		; xp*100
+ sub x1,c1
+ if x1>0 then addxp1
+ x2=900
+ add MaxPlayerHitPoints,x2		; (xp*100)+900
+; now, if hit points are greater than maxhitpoints, then adjust them...
+ &v6=WordWS(WordPlayer1SpriteOffset)
+ v1=hitpointoffset
+ add v1,v6
+ &x1=SpriteTable(v1)
+ if x1>MaxPlayerHitPoints then @RHP1	; force hp=maxhp
+ return
+;---
+; decrement xp level by one
+.subxp
+ experience=0				; reset experience counter
+ if xp>1 then oksubxp			; can't have xp=0
+ return
+.oksubxp
+ sub xp,c1
+; adjust the maximim hit points allowed...
+ goto @calcmaxhitpoints
+;=====
+
+
+;---
+.StartExplosion
+; start an explosion at (TempFixedSprite)
+ v5=3 ; sprite no. for explosion
+
+.StartExplosionV5
+ &v1=TempFixedSprite(XPosOffset)
+ &v2=TempFixedSprite(YPosOffset)
+ v3=0 ; xspeed
+ v4=0 ; yspeed
+; x1=ByteWS(ByteCurrentWeapon)
+; if x1=2 then StartBigExplosion
+ gosub @MCSetUpNewSprite
+; and set up explosion to self-destruct in 8 frames...
+ if v7>250 then HFE1 ; couldn't set up sprite
+ x1=8
+ x2=LifeCounterOffset
+ add x2,v6
+ SpriteTable(x2)=x1
+.HFE1
+ return
+
+.StartBigExplosion
+ &v1=TempFixedSprite(XPosOffset)
+ &v2=TempFixedSprite(YPosOffset)
+ v3=0 ; xspeed
+ v4=0 ; yspeed
+ v5=3 ; sprite no. for explosion
+ goto @MCStartBigExplosion
+
+;;code +
+;---
+.WaitForJoystick
+ V1=ByteWS(ByteJoystickStatus)
+ if V1<>0 then WaitForJoystick
+ return
+;---
+.HandleKeyPress
+; handle any key press
+ x1=ByteWS(ByteTrueJoystickStatus)
+ x2=64
+ and x1,x2
+ if x1<>0 then @DoMenu ; right mouse button -> menu
+
+ x1=ByteWS(ByteLastKeyPressed)
+ if x1=32 then @DoMenu ; space -> menu
+ if x1=82 then @RestartHero ; 'R'
+ if x1=114 then @RestartHero ; 'r'
+
+;*****
+; missiles are now governed by their SOURCE weapon, and must be chosen 
+; from the range weapon menu.
+; if x1<65 then NotChangeMissile
+; if x1>67 then NotChangeMissile
+; x2=65
+; sub x1,x2
+; ByteWS(ByteCurrentWeapon)=x1
+;*****
+
+;.NotChangeMissile ;*****
+ if x1=112 then Pause1
+ if x1<>80 then NotPause ; 'P'
+.Pause1
+ gosub @MCHeroInput
+ x1=ByteWS(ByteLastKeyPressed)
+ if x1=0 then Pause1
+
+.NotPause
+ if x1=33 then @AcodeDelay
+ return
+;---
+.MultX1X2
+; x1=x1*x2
+;*****
+ if x2<x1 then smallestisx2
+ x3=x1
+ x1=x2 ; do a swap so that x2 (multiplier) is the smallest number
+ x2=x3
+.smallestisx2
+;*****
+ x3=x1
+ if x2<2 then MultX1X2Ret
+.MultX1X2Loop
+ add x1,x3
+ sub x2,c1
+ if x2>1 then MultX1X2Loop
+.MultX1X2Ret
+ return
+;---
+.SignExtendX1
+; X1 contains a byte: sign-extend to a full word
+ x2=255
+ and x1,x2
+ if x1<128 then SignExtendRet
+ x2=65280 ; 65536-256
+ add x1,x2
+.SignExtendRet
+ return
+;---
+code -
+.SetUpNewSprite
+; Set up a sprite with v1=xpos, v2=ypos,
+; v3=xspeed, v4=yspeed, v5=object sprite block number.
+; Returns v6 as offset of new sprite within SpriteTable
+; and v7 as negative if we couldn't set up the sprite.
+code +
+ gosub @MCSetUpNewSprite
+code -
+ return
+;---
+ code +
+.DebugShowMap
+ gosub @MCMapBuildBackground
+code -
+code +
+ gosub @DisplayFrame
+; v1=5000
+; gosub @DelayV1
+ gosub @WaitForFrame
+.DSMLoop
+ gosub @MCOsrdch
+ if v1=0 then DSMLoop
+ return
+;---
+.DebugWaitKey
+ gosub @MCHeroInput ;****
+ V1=ByteWS(ByteLastKeyPressed) ;*
+ if V1=13 then @MCCloseDown ;*
+ if v1<>32 then @DebugWaitKey
+ return
+;---
+.Pause
+; nice debugging code...
+ gosub @CalcMapAddress
+ x2=40
+ &Map(x1)=x2
+ gosub @DebugShowMap
+ gosub @DebugWaitKey
+ &Map(x1)=c0
+ return
+;---
+.Scheduler
+.HandleCR
+.ExtraTask
+.ExtraTask2 ; DummyVector
+.DummyVector
+ return
+;---
+
+.SetUpTextPtr
+ &x1=LongWS(HiLongLogicalBase)
+ &LongWS(HiLongTextScreenBase)=x1
+
+ &x1=LongWS(LoLongLogicalBase)
+ &LongWS(LoLongTextScreenBase)=x1
+ return
+;---
+.SetUpPhysicalTextPtr
+ &x1=LongWS(HiLongPhysicalBase)
+ &LongWS(HiLongTextScreenBase)=x1
+
+ &x1=LongWS(LoLongPhysicalBase)
+ &LongWS(LoLongTextScreenBase)=x1
+ return
+
+;---
+;--------
+.LoadFile
+; load file with single char filename 'x1'.dat
+; at v2 bytes into listv1()
+; Set up filename...
+ List17(8)=x1
+ x1=46 ; '.'
+ list17(9)=x1
+ x1=68 ; 'd'
+ list17(10)=x1
+ x1=65 ; 'a'
+ list17(11)=x1
+ x1=84 ; 't'
+ list17(12)=x1
+ goto @MCLoadFile ; and load it...
+;----
+.LoadBackdrop
+code - ; reset registers etc.
+code +
+; load 'editor.neo' - a neochrome format file into
+; scratchpad area (64K)
+; which starts at List18
+ v1=18 ; load into list 18
+ v2=0 ; EditorNeoOffset ; offset within list
+;; v5=0 ; hi length  (redundant)
+;; v6=0 ; lo length  (    "    )
+ x1=84 ; load file with filename 't.dat'
+ gosub @LoadFile
+
+ cif NotPc
+; copy palette to hardware
+; save list 19 ptr
+&x1=list11(76) ; list 19's ptr
+push x1
+&x1=list11(78)
+push x1
+ v1=19 ; change list19
+ v2=255 ; hi abs address of palette registers. (FF8240)
+ v3=33344 ; hi abs address of palette registers. (FF8240)
+ gosub @MCAbsChangeListPtr
+ x2=4 ; 32772 ; read ptr
+ x3=0 ; write ptr
+.PaletteLoop
+ &x1=List18(x2)
+ &list19(x3)=x1
+ add x2,c2
+ add x3,c2
+ if x3<32 then PaletteLoop
+pop x1
+&list11(78)=x1 ; list 19's ptr
+pop x1
+&list11(76)=x1
+ cend
+ return
+;-----------
+;----
+.AccelerateMouse
+ if v1=0 then AMSNoMove
+ if v1<3 then AMSlow
+ if v1>65533 then AMSlow
+; x1=v1
+ add v1,v1
+; add v1,v1
+; add v1,x1
+
+.AMSlow
+ MouseHasMoved=true
+
+.AMSNoMove
+ return
+;------
+.MoveMouse
+; do mouse ptr
+; if MouseX<32 then MMNoKludge
+; sub MouseX,c4
+;.MMNoKludge
+; return
+; if MouseHasMoved=false then MM1
+; vblx1=4
+; add vblx1,CursorACB
+; &ACBList(vblx1)=MouseX
+; add vblx1,c2
+; &ACBList(vblx1)=MouseY
+;
+;.MM1
+ MouseHasMoved=false
+ &v1=WordWS(WordMouseXDistance)
+ gosub @AccelerateMouse
+ add MouseX,v1
+ &WordWS(WordMouseXDistance)=c0
+
+ &v1=WordWS(WordMouseYDistance)
+ gosub @AccelerateMouse
+ &WordWS(WordMouseYDistance)=c0
+
+; right mouse button down?
+ vblx1=ByteWS(ByteJoystickStatus)
+ vblx2=64
+ and vblx1,vblx2
+ if vblx1=0 then MMNoZMove
+; yup - so JUST move in Z direction.
+ add PixelCursorZ,v1
+ if PixelCursorZ<32000 then MMZMoveOk
+ PixelCursorZ=0
+.MMZMoveOk
+ return
+
+.MMNoZMove
+ add MouseY,v1
+ if MouseX<32000 then MMNotLimitX
+ MouseX=16
+
+.MMNotLimitX
+ if MouseX>15 then MMNotLowLimitX
+ MouseX=16
+
+.MMNotLowLimitX
+ if MouseX<329 then MMNotLimitX2
+ MouseX=329
+.MMNotLimitX2
+ if MouseY<32000 then MMNotLimitY
+ MouseY=0
+
+.MMNotLimitY
+ if MouseY<199 then MMNotLimitY2
+ MouseY=199
+.MMNotLimitY2
+; calculate h coord from z-y (remember, y=z-h)
+ PixelCursorH=PixelCursorZ
+ sub PixelCursorH,MouseY
+ if PixelCursorH<32000 then MMNotValid
+ PixelH=0
+
+.MMNotValid
+ return
+;------
+;---
+.VBL
+ if VBLInitialised=false then @VBLRet
+
+cif NotPC
+
+; prevent task swaps during this code...
+; gosub @SuspendTaskSwap
+; add ticks,c1
+push x1
+push x2
+push x3
+push v1
+push v2
+&x1=WordWS(WordCursorXPos)
+push x1
+&x1=WordWS(WordCursorYPos)
+push x1
+; save list 19 ptr
+&x1=list11(76) ; list 19's ptr
+push x1
+&x1=list11(78)
+push x1
+&x1=list11(80) ; list 20's ptr
+push x1
+&x1=list11(82)
+push x1
+
+ gosub @MoveMouse
+ if MouseOn=false then @NoMouse
+
+ if MouseX>MinMouseX then XMinOk
+ MouseX=MinMouseX
+.XMinOk
+ if MouseX<MaxMouseX then XMaxOk
+ MouseX=MaxMouseX
+.XMaxOk
+ if MouseY>MinMouseY then YMinOk
+ MouseY=MinMouseY
+.YMinOk
+ if MouseY<MaxMouseY then YMaxOk
+ MouseY=MaxMouseY
+.YMaxOk
+
+
+; display mouse ptr (a single pixel)
+ x1=Mousex
+; x2=16
+; sub x1,x2
+ x2=65520 ; $fff0 - i.e. word boundaries only, please.
+ and x1,x2
+code -
+code +
+ &WordWS(WordCursorXPos)=x1
+ &WordWS(WordCursorYPos)=MouseY
+ v1=19 ; logical base in list 19
+ v2=20 ; physical base in list 20
+ gosub @MCCalcScreenAddress ; get list20 as address on physical screen
+ x1=MouseX
+ x2=15
+ and x1,x2
+ gosub @CalcPixelMaskX1
+ &x1=list20(0)
+ or x1,x3
+ &list20(0)=x1
+ &x1=list20(2)
+ or x1,x3
+ &list20(2)=X1
+.NoMouse
+pop x1
+&list11(82)=x1 ; list 20's ptr
+pop x1
+&list11(80)=x1
+
+pop x1
+&list11(78)=x1 ; list 19's ptr
+pop x1
+&list11(76)=x1
+
+pop x1
+&WordWS(WordCursorYPos)=x1
+pop x1
+&WordWS(WordCursorXPos)=x1
+pop v2
+pop v1
+pop x3
+pop x2
+pop x1
+; gosub @ResumeTaskSwap
+cend ; not pc
+
+.vblret
+ return
+;-----
+.CalcPixelMask
+; calculate x3 as mask for pixel x horizontally along in cell
+ x1=x
+ x2=16
+ gosub @ModX1X2
+
+.CalcPixelMaskX1
+ x3=32768
+ if x1=0 then @WP1
+ x3=16384
+ if x1=1 then @WP1
+ x3=8192
+ if x1=2 then @WP1
+ x3=4096
+ if x1=3 then @WP1
+ x3=2048
+ if x1=4 then @WP1
+ x3=1024
+ if x1=5 then @WP1
+ x3=512
+ if x1=6 then @WP1
+ x3=256
+ if x1=7 then @WP1
+ x3=128
+ if x1=8 then @WP1
+ x3=64
+ if x1=9 then @WP1
+ x3=32
+ if x1=10 then @WP1
+ x3=16
+ if x1=11 then @WP1
+ x3=8
+ if x1=12 then @WP1
+ x3=4
+ if x1=13 then WP1
+ x3=2
+ if x1=14 then WP1
+ x3=1
+;; if x=15 then WP1
+.WP1
+.EBRet
+ return 
+;----
+.DivX1X2
+; x1:=x1/x2
+ x3=65535 ; result = 0 if x2>x1
+.DivLoop
+ add x3,c1
+ sub x1,x2
+ if x1<50000 then DivLoop
+ x1=x3
+ return
+;---
+.ModX1X2
+; x1:=x1 mod x2
+.ModLoop
+ x3=x1 ; trial result
+ sub x1,x2
+ if x1<50000 then ModLoop
+ x1=x3
+ return
+;---

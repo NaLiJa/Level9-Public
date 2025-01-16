@@ -1,0 +1,104 @@
+
+
+              AEON DESIGN. COPYRIGHT (C) 1988. LEVEL 9 
+              ---------------------------------------- 
+
+                              OUTLINE 
+                              -------
+
+Aeon combines the fast action and simple joystick control of arcade 
+games with the rich puzzles and scenery of fantasy adventures. 
+
+DISPLAY: Aeon has two displays, for action and for possessions.
+* Action display. Aeon has an aerial 3D view, similar to "Double 
+  Dragon", with large sprites (hopefully 48 by 16) and detailed, 
+  animated backgrounds. The joystick moves the player about and 
+  buttons A and B use whatever is in his left and right hand.  
+* The possessions display shows all your belongings, and action 
+  pauses until you return to the game. The joystick moves a 
+  pointer about among them, and a window at the top left shows an 
+  enlarged view of whichever object it points at. 
+
+PLOT SUMMARY. Climb the mountain to regain the head dragon's crown. 
+The mountain has nine levels, each starting on a mountainside ledge 
+with a shop run by a giant, neutral bird; continuing through many 
+passages defended by trolls etc; and ending by confronting the 
+dragon lord of the level. Defeat the nineth dragon to win. 
+
+The map is partly fixed and partly random, with four alternative 
+designs for each level, some random puzzles and a lot of random 
+objects and monsters. This means that the game will be different 
+each time - and people will want to play again even when they've 
+completed it once.
+
+Level themes are based around the four alchemical elements, as 
+appropriate for the dragon in charge: 
+9: Fire. Maze of Fire: Master Dragon's Realm. 
+8: Air. Mist and Smoke. 
+7: Water. Flooded Tunnels: Underwater Travel, Weed, Fish. 
+6: Earth. Necropolis. 
+5: Fire. Volcanic Crater, Fire Crevasses. 
+4: Air. Ventillation, Wind Machinery, Flags.  
+3: Water. Fish Lakes, Canals, Waterfalls. 
+2: Earth. Underground Farms: Mushrooms, Animal Pens, Mines.   
+1: Fire. Entrance Halls: Torches, Flame Jets. 
+
+COMMUNICATION BY PICTURES. Aeon is an adventure entirely without 
+words; graphic sequences replace all messages. 
+* When an object is collected, or when an interesting static 
+  object (scenery) is approached, a large picture of it will be 
+  displayed for a few seconds. This picture will often be labelled 
+  graphically. For example, a potion of strength might have a 
+  picture of a muscled arm, a fire resistance potion might have a 
+  flame crossed out. Tunes/sound effects and animation may be also 
+  be useful to emphasise the point.
+* Suppose a creature wants something - for example a troll demanding 
+  payment for crossing a troll bridge. A thought bubble will appear 
+  above the troll when the player approaches - in cartoon fashion - 
+  showing what is required.
+
+                              DETAILS 
+                              -------
+
+COMBAT 
+
+To fight, hold a weapon and push the button for that hand. A 
+long-range weapon (bow, wand etc) acts machine-gun fashion, but 
+with only one missile in flight at once; a hand weapon (sword, 
+spear etc) goes through an appropriate stabbing or slashing 
+sequence; and a shield moves up/down to possibly block blows. 
+
+Aeon is not like those platform games where a single injury is 
+fatal; damage is subtracted from health instead, and death 
+results when this reaches zero. Even walking unprotected across 
+lava would take a few frames to kill you. 
+
+
+TELEPORT SYSTEMS 
+
+Rapid transport around a level is by teleport discs. Stand       ADVENTURES 
+         for 
+  Atari ST and XL/XE 
+Amstrad CPC,PCW,+3,PC 
+Apple II and Macintosh 
+ BBC 48K+ and Master
+Commodore 64 and Amiga 
+       IBM PC 
+    MSX, Spectrum 
+
+
+      LANCELOT
+ released September 
+
+   INGRID'S BACK
+  released October 
+
+  16-bit: #19.95 
+   8-bit: #14.95 
+unique graphics without the cost being too great. 
+
+
+BACKGROUND OBJECTS. All the sprites are needed for creatures, so 
+static objects are drawn onto the background. This includes the 
+magic itemscs. 
+

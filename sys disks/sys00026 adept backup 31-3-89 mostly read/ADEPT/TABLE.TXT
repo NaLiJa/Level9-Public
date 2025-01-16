@@ -1,0 +1,2033 @@
+; Hero source, copyright (C) 1988 Level 9 Computing.
+;
+; TABLE.TXT, assembler format data for tables, a.k.a lists/arrays. 
+; (Save the assembled data as TABLE.DAT). 
+;
+; You must start all DEFWs on EVEN boundaries, else subsequent code 
+; seems to be padded to make it even (according to the GENST listing, 
+; anyway). The EVEN directive inserts a padding byte if appropriate.
+;
+ ORG 0
+starttables
+ dc.l $8000
+ dc.l $8100 ; output buffer ($100 long, circular), etc....
+ dc.l $a700 * 8280 ; LL
+ dc.l LIST4-starttables
+ dc.l LIST5-startTables
+ dc.l $8280 * 700 ;*****8400 6 - room map
+ dc.l LIST7-startTables ; 7
+ dc.l $a700 ;*****9400 8 - general workspace. Not used at present.
+ dc.l list9-starttables ; 9
+ dc.l ENDTABLE-starttables
+;---
+LIST4
+; data for menus
+; format is:
+; first byte: 1=get object first, then do jump table entry
+; specified in second byte. 2=change current menu to specified one.
+; third byte: linked list to use if any selection was specified
+; fourth byte: message-100 to be printed when menu displayed
+
+ dc.w 0,Menu2-List4,Menu4-List4,Menu6-List4
+ dc.w 0,0,0,0,0
+ dc.w Text-list4
+ dc.w LevelsGR-list4
+
+Menu2
+ dc.b $2,0,0,0 * back from verbs menu
+ dc.b $1,0,0,1 * inventory - get an object, then back to this menu
+ dc.b $1,2,0,2 * examine - get an object, then jump table 2
+ dc.b $1,3,0,3 * drop - get an object, then jump table 3
+ dc.b $1,4,0,4 * wield - get an object, then jump table 4
+ dc.b $1,5,0,5 * wear - (same as wield)
+ dc.b $1,6,2,6 * range - get an object, then jump table 6
+ dc.b $1,7,0,7 * eat - get an object, then jump table 7
+ dc.b $1,8,0,8 * drink - (same as eat)
+ dc.b $2,4,0,9 * system - change current menu
+ dc.b $FF * indicate end of table
+ even
+
+Menu4
+; "System" menu
+ dc.b $2,2,0,20 * back option - back to previous menu
+ dc.b $0,0,0,21 * save - null routine
+ dc.b $0,0,0,22 * load - null routine
+ dc.b $0,10,0,23 * map display
+ dc.b $0,11,0,24 * restart game
+ dc.b $0,1,0,25 * quit
+ dc.b $FF
+ even
+
+Menu6
+
+; Not a menu as such but the list of pointers to the text, and  the
+; actual text as well.
+
+Text
+ dc.w M1-list4
+ dc.w M2-list4
+ dc.w M3-list4
+ dc.w M4-list4
+ dc.w M5-list4
+ dc.w M6-list4
+ dc.w M7-list4
+ dc.w M8-list4
+ dc.w M9-list4
+ dc.w M10-list4
+ dc.w M11-list4
+ dc.w M12-list4
+ dc.w M13-list4
+ dc.w M0-list4
+ dc.w M0-list4
+ dc.w M0-list4
+ dc.w M0-list4
+ dc.w M0-list4
+ dc.w M0-list4
+ dc.w M20-list4
+ dc.w M21-list4
+ dc.w M22-list4
+ dc.w M23-list4
+ dc.w M24-list4
+ dc.w M25-list4
+ dc.w M26-list4
+ dc.w M27-list4
+ dc.w M28-list4
+ dc.w M0-list4
+ dc.w M0-list4
+ dc.w M0-list4
+ dc.w M0-list4
+ dc.w M0-list4
+ dc.w M0-list4
+ dc.w M35-list4
+ dc.w M36-list4
+ dc.w M37-list4
+ dc.w M0-list4
+ dc.w M0-list4
+ dc.w M40-list4
+ dc.w M41-list4
+ dc.w M42-list4
+ dc.w M43-list4
+ dc.w M44-list4
+ dc.w M45-list4
+ dc.w M46-list4
+ dc.w M47-list4
+ dc.w M48-list4
+ dc.w M49-list4
+ dc.w M50-list4
+ dc.w M51-list4
+ dc.w M52-list4
+ dc.w M53-list4
+ dc.w M0-list4
+ dc.w M0-list4
+ dc.w M0-list4
+ dc.w M0-list4
+ dc.w M0-list4
+ dc.w M0-list4
+ dc.w M60-list4
+ dc.w M61-list4
+ dc.w M62-list4
+ dc.w M63-list4
+ dc.w M64-list4
+ dc.w M65-list4
+ dc.w M66-list4
+ dc.w M67-list4
+ dc.w M68-list4
+ dc.w M69-list4
+ dc.w M70-list4
+ dc.w M71-list4
+ dc.w M72-list4
+ dc.w M73-list4
+ dc.w M74-list4
+ dc.w M0-list4
+ dc.w M0-list4
+ dc.w M0-list4
+ dc.w M0-list4
+ dc.w M0-list4
+ dc.w M80-list4
+ dc.w M81-list4
+ dc.w M82-list4
+ dc.w M83-list4
+ dc.w M84-list4
+ dc.w M85-list4
+ dc.w M86-list4
+ dc.w M87-list4
+ dc.w M88-list4
+ dc.w M89-list4
+ dc.w M90-list4
+ dc.w M91-list4
+ dc.w M0-list4
+ dc.w M0-list4
+ dc.w M0-list4
+ dc.w M95-list4
+ dc.w M96-list4
+ dc.w M97-list4
+ dc.w M98-list4
+ dc.w M99-list4
+ dc.w M100-list4
+ dc.w M101-list4
+ dc.w M102-list4
+ dc.w M103-list4
+ dc.w M104-list4
+ dc.w M105-list4
+ dc.w M106-list4
+ dc.w M107-list4
+ dc.w M108-list4
+ dc.w M109-list4
+ dc.w M110-list4
+ Rept 9
+ dc.w M0-list4
+ Endr
+ dc.w M120-list4
+ Rept 19
+ dc.w M0-list4
+ Endr
+ dc.w M140-list4
+ dc.w M141-list4
+ dc.w M142-list4
+ dc.w M143-list4
+ dc.w M144-list4
+ dc.w M145-list4
+ dc.w M146-list4
+ dc.w M147-list4
+ dc.w M148-list4
+ dc.w M149-list4
+ dc.w M150-list4
+ dc.w M151-list4
+ dc.w M152-list4
+ dc.w M153-list4
+ dc.w M154-list4
+ dc.w M155-list4
+ dc.w M156-list4
+ Rept 3
+ dc.w M0-list4
+ Endr
+ dc.w M160-list4
+ dc.w M161-list4
+ dc.w M162-list4
+ dc.w M163-list4
+ dc.w M164-list4
+ dc.w M165-list4
+ dc.w M166-list4
+ dc.w M167-list4
+ dc.w M168-list4
+ dc.w M169-list4
+ dc.w M170-list4
+ dc.w M171-list4
+ dc.w M172-list4
+ dc.w M173-list4
+ dc.w M174-list4
+ dc.w M175-list4
+ dc.w M176-list4
+ Rept 3
+ dc.w M0-list4
+ Endr
+ dc.w M180-list4
+ dc.w M181-list4
+ dc.w M182-list4
+ dc.w M183-list4
+ dc.w M184-list4
+ dc.w M185-list4
+ dc.w M186-list4
+ dc.w M187-list4
+ dc.w M188-list4
+ dc.w M189-list4
+ dc.w M190-list4
+ dc.w M191-list4
+ dc.w M192-list4
+ dc.w M193-list4
+ dc.w M194-list4
+ dc.w M195-list4
+ dc.w M196-list4
+ Rept 3
+ dc.w M0-list4
+ Endr
+ dc.w M200-list4
+ dc.w M201-list4
+ dc.w M202-list4
+ dc.w M203-list4
+ dc.w M204-list4
+ dc.w M205-list4
+ dc.w M206-list4
+ dc.w M207-list4
+ dc.w M208-list4
+ dc.w M209-list4
+ dc.w M210-list4
+ dc.w M211-list4
+ dc.w M212-list4
+ dc.w M213-list4
+ dc.w M214-list4
+ dc.w M215-list4
+ dc.w M216-list4
+ Rept 283
+ dc.w M0-list4
+ Endr
+ dc.w M500-list4
+ dc.w M501-list4
+ dc.w M502-list4
+ dc.w M503-list4
+ dc.w M504-list4
+ dc.w M505-list4
+ dc.w M506-list4
+ dc.w M507-list4
+ dc.w M508-list4
+ dc.w M509-list4
+ Rept 10
+ dc.w M0-list4
+ Endr
+ dc.w M520-list4
+ dc.w M521-list4
+ dc.w M522-list4
+ dc.w M523-list4
+ dc.w M524-list4
+ dc.w M525-list4
+ Rept 72
+ dc.w M0-list4
+ Endr
+ dc.w M598-list4
+ dc.w M599-list4
+ dc.w M600-list4
+ dc.w M601-list4
+ dc.w M602-list4
+ dc.w M603-list4
+ Rept 16
+ dc.w M0-list4
+ Endr
+ dc.w M620-list4
+ dc.w M621-list4
+ dc.w M622-list4
+ dc.w M623-list4
+ dc.w M624-list4
+ Rept 76
+ dc.w M0-list4
+ Endr
+ dc.w M701-list4
+ dc.w M702-list4
+ dc.w M703-list4
+ dc.w M704-list4
+ dc.w M705-list4
+ Rept 15
+ dc.w M0-list4
+ Endr
+ dc.w M721-list4
+ dc.w M722-list4
+ dc.w M723-list4
+ dc.w M724-list4
+ dc.w M725-list4
+ Rept 4
+ dc.w M0-list4
+ Endr
+ dc.w M730-list4
+ dc.w M731-list4
+ dc.w M732-list4
+ dc.w M733-list4
+ dc.w M734-list4
+ dc.w M0-list4
+ dc.w M736-list4
+ dc.w M737-list4
+ dc.w M738-list4
+ dc.w M739-list4
+ dc.w M740-list4
+ Rept 9
+ dc.w M0-list4
+ Endr
+ dc.w M750-list4
+ dc.w M751-list4
+ dc.w M752-list4
+ dc.w M753-list4
+ dc.w M754-list4
+ dc.w M755-list4
+ dc.w M756-list4
+ dc.w M757-list4
+ dc.w M758-list4
+ dc.w M759-list4
+ Rept 40
+ dc.w M0-list4
+ Endr
+ dc.w M800-list4
+ dc.w M801-list4
+ dc.w M802-list4
+ dc.w M804-list4
+ dc.w M805-list4
+ dc.w M806-list4
+ dc.w M807-list4
+ dc.w M808-list4
+ dc.w M809-list4
+ dc.w M810-list4
+ dc.w M811-list4
+ Rept 8
+ dc.w M0-list4
+ Endr
+ dc.w M820-list4
+ Rept 179
+ dc.w M0-list4
+ Endr
+ dc.w M1000-list4
+ dc.w M1001-list4
+
+; Text file for Hero
+; Now to be turned into unsquashed text (becos of speed problems)
+; and addressed using acode table number 4. (which is actually a group
+; of tables all to do with the menu side of things.) GR14/10/88
+
+M0	dc.b ' ',0	 this is the dummy message,
+;			  which would have been blank on a 'Message 0' type 
+;			  call
+
+; body armour...
+M1       dc.b 'leather armour',0
+M2       dc.b 'studded armour',0
+M3       dc.b 'chain mail',0
+M4       dc.b 'splint mail',0
+M5       dc.b 'plate armour',0
+M6       dc.b "Pete's Perfect Plate",0
+M7       dc.b 'steel armour',0
+;
+; other armour accessories
+M8       dc.b 'a helmet',0
+M9       dc.b 'some gauntlets',0
+M10       dc.b 'a cloak',0
+M11       dc.b 'a shield',0
+M12       dc.b 'some boots',0
+M13       dc.b 'a shield of faith',0
+;
+; hand weapons...
+M20       dc.b 'a dagger',0
+M21       dc.b 'a club',0
+M22       dc.b 'a mace',0
+M23       dc.b 'a sword',0
+M24       dc.b 'a long sword',0
+M25       dc.b 'a two-handed sword',0
+M26       dc.b 'a flail',0
+M27       dc.b 'a lance of death',0
+M28       dc.b 'a flaming sword',0
+;
+; range weapons...
+M35       dc.b 'a bow',0
+M36       dc.b 'a crossbow',0
+M37       dc.b 'some throwing stars',0 ; inventory shows quantity
+;
+; rings...
+M40       dc.b 'a ring of adornment',0
+M41       dc.b 'a teleportation ring',0
+M42       dc.b 'a regeneration ring',0
+M43       dc.b 'a ring of hunger',0
+M44       dc.b 'a poison protect ring',0
+M45       dc.b 'a fire resistant ring',0
+M46       dc.b 'a cold resistant ring',0
+M47       dc.b 'a ring of increase damage',0
+M48       dc.b 'a ring of protection',0
+M49       dc.b 'a teleport control ring',0
+M50       dc.b 'a leech ring',0
+M51       dc.b 'a invisibility ring',0
+M52       dc.b 'a ring of strength',0
+M53       dc.b 'an undead protection ring',0
+;
+; wands...
+M60       dc.b 'a wand of create monster',0
+M61       dc.b 'a magic missile wand',0
+M62       dc.b 'a wand of slow monster',0
+M63       dc.b 'a polymorph wand',0
+M64       dc.b 'a wand of teleport away',0
+M65       dc.b 'a wand of digging',0
+M66       dc.b 'a wand of fire',0
+M67       dc.b 'a wand of cold',0
+M68       dc.b 'a wand of death',0
+M69       dc.b 'a wand of exorcism',0
+M70       dc.b 'a wand of cloning',0
+M71       dc.b 'a wand of dynamite',0
+M72       dc.b 'a wand of fire storm',0
+M73       dc.b 'a wand of protection',0
+M74       dc.b 'a wand of reveal traps',0
+;
+; scrolls...
+M80       dc.b 'a scroll of wishing',0
+M81       dc.b 'a scroll of improve armour',0
+M82       dc.b 'a scroll of destroy armour',0
+M83       dc.b 'a scroll of improve weapon',0
+M84       dc.b 'a scroll of destroy weapon',0
+M85       dc.b 'a scroll of remove curse',0
+M86       dc.b 'a teleportation scroll',0
+M87       dc.b 'an identify scroll',0
+M88       dc.b 'a scroll of fire',0
+M89       dc.b 'a blank scroll',0
+M90       dc.b 'a scroll of dispel magic',0
+M91       dc.b 'a scroll of black hand',0
+;
+; potions...
+M95       dc.b 'a potion of restore strength',0
+M96       dc.b 'a potion of booze',0
+M97       dc.b 'a potion of confusion',0
+M98       dc.b 'a potion of fruit juice',0
+M99       dc.b 'a potion of invisibility',0
+M100       dc.b 'a potion of healing',0
+M101       dc.b 'a potion of super healing',0
+M102       dc.b 'a potion of instant healing',0
+M103       dc.b 'a potion of paralysis',0
+M104       dc.b 'a potion of poison',0
+M105       dc.b 'a potion of gain strength',0
+M106       dc.b 'a potion of speed',0
+M107       dc.b 'a potion of gain level',0
+M108       dc.b 'a potion of heroism',0
+M109       dc.b 'a potion of super heroism',0
+M110       dc.b 'a potion of slowness',0
+;
+; treasure...
+M120       dc.b 'pieces of gold',0
+;
+; Randomly-chosen object names before identification
+;
+; These are set in groups of 17 (0-16) bacause it is a prime number.
+; Hence, to choose a list of individual names for each object, we 
+; keep adding the same random number, and subtract 16 if we get out 
+; of the list range. This method prevents the same name re-occuring, 
+; since the random number we are adding is never a factor of 17.
+;
+; NB: Do not move to message numbers that are > 255, since they are 
+; used in a table of BYTES.
+;
+; rings...
+M140       dc.b 'a gold ring',0
+M141       dc.b 'a brass ring',0
+M142       dc.b 'a shiny ring',0
+M143       dc.b 'a sparkling ring',0
+M144       dc.b 'a dull ring',0
+M145       dc.b 'a wedding ring',0
+M146       dc.b 'an engagement ring',0
+M147       dc.b 'a diamond ring',0
+M148       dc.b 'an emerald ring',0
+M149       dc.b 'a glowing ring',0
+M150       dc.b 'a thin ring',0
+M151       dc.b 'a pale ring',0
+M152       dc.b 'a heavy ring',0
+M153       dc.b 'a glittering ring',0
+M154       dc.b 'a zodiac ring',0
+M155       dc.b 'a large ring',0
+M156       dc.b 'a tiny ring',0
+;
+; wands...
+M160       dc.b 'a runed wand',0
+M161       dc.b 'a platinum wand',0
+M162       dc.b 'a shiny wand',0
+M163       dc.b 'a wand of ivory',0
+M164       dc.b 'a golden wand',0
+M165       dc.b 'a wooden wand',0
+M166       dc.b 'a warm wand',0
+M167       dc.b 'a cold wand',0
+M168       dc.b 'a dark wand',0
+M169       dc.b 'a glowing wand',0
+M170       dc.b 'a reflective wand',0
+M171       dc.b 'a green wand',0
+M172       dc.b 'a large red wand',0
+M173       dc.b 'a strong wand',0
+M174       dc.b 'a short wand',0
+M175       dc.b 'a blue wand',0
+M176       dc.b 'a long wand',0
+;
+; scrolls...
+M180       dc.b 'a scroll marked OOGI BOOGI',0
+M181       dc.b 'a scroll marked GRIBBLE',0
+M182       dc.b 'a scroll marked GROBBEL',0
+M183       dc.b 'a scroll marked BURP',0
+M184       dc.b 'a scroll marked FROOP',0
+M185       dc.b 'a scroll marked GURGLE',0
+M186       dc.b 'a scroll marked DANGLE',0
+M187       dc.b 'a scroll marked QUIBBLE',0
+M188       dc.b 'a scroll marked OOMPA',0
+M189       dc.b 'a scroll marked DOOBEEDOO',0
+M190       dc.b 'a scroll marked OH YUK',0
+M191       dc.b 'a scroll marked PLUGH',0
+M192       dc.b 'a scroll marked HUMKAAT',0
+M193       dc.b 'a scroll marked PLOVER',0
+M194       dc.b 'a scroll marked XXYZZ',0
+M195       dc.b 'a scroll marked SESAME',0
+M196       dc.b 'a scroll marked ABRACADABRA',0
+;
+; potions...
+M200       dc.b 'a bubbly potion',0
+M201       dc.b 'a cloudy potion',0
+M202       dc.b 'a sticky potion',0
+M203       dc.b 'a sweet-smelling potion',0
+M204       dc.b 'a clear potion',0
+M205       dc.b 'a steaming potion',0
+M206       dc.b 'a hot bubbling potion',0
+M207       dc.b 'a boiling potion',0
+M208       dc.b 'a frosty potion',0
+M209       dc.b 'a foul-smelling potion',0
+M210       dc.b 'a frothing potion',0
+M211       dc.b 'a colourful potion',0
+M212       dc.b 'a white potion',0
+M213       dc.b 'a strong-smelling potion',0
+M214       dc.b 'a smelly potion',0
+M215       dc.b 'a thick potion',0
+M216       dc.b 'a fizzy potion',0
+;
+; main menu text...
+M500       dc.b 'Back to Game',0
+M501       dc.b 'Objects carried',0
+M502       dc.b 'Examine or read',0
+M503       dc.b 'Drop',0
+M504       dc.b 'Wield as hand weapon',0
+M505       dc.b 'Wear',0
+M506       dc.b 'Ranged weapons',0
+M507       dc.b 'Eat',0
+M508       dc.b 'Drink',0
+M509       dc.b 'System features',0
+;
+; system menu...
+M520       dc.b 'System menu',0
+M521       dc.b 'Save game',0
+M522       dc.b 'Load game',0
+M523       dc.b 'Map of current level',0
+M524       dc.b 'Start a new game',0
+M525       dc.b 'Quit game',0
+;
+; standard scrolling text...
+M598       dc.b '%',0
+M599       dc.b '. ',0
+M600       dc.b 'Welcome to Hero, from Level 9 Computing. ',0
+M601       dc.b 'Ouch! ',0
+M602       dc.b 'Wowee! ',0
+M603       dc.b 'Got him! ',0
+;
+; Text for titles etc.
+M620       dc.b 'LEVEL ',0
+M621       dc.b 'HIT ',0
+M622       dc.b 'GOLD ',0
+M623       dc.b 'AC ',0
+M624       dc.b 'WC ',0
+;
+; Messages when selecting/wielding objects
+M701       dc.b 'You are now wearing ',0 ; wear body armour
+M702       dc.b 'You are now wearing ',0 ; wear accessory armour
+M703       dc.b 'You are now wielding ',0 ; wield hand weapon
+M704       dc.b 'You are now wearing ',0 ; wear ring
+M705       dc.b 'Your range weapon is ',0 ; select range weapon
+;
+; Extension messages for objects wielded etc
+M721       dc.b ' (wrn)',0 ; body armour
+M722       dc.b ' (wrn)',0 ; accessory armour
+M723       dc.b ' (wld)',0 ; hand weapon
+M724       dc.b ' (wrn)',0 ; ring
+M725       dc.b ' (r)',0 ; range
+;
+; Adjustments to magic weapons
+M730       dc.b ' -5',0
+M731       dc.b ' -4',0
+M732       dc.b ' -3',0
+M733       dc.b ' -2',0
+M734       dc.b ' -1',0
+M736       dc.b ' +1',0
+M737       dc.b ' +2',0
+M738       dc.b ' +3',0
+M739       dc.b ' +4',0
+M740       dc.b ' +5',0
+;
+; Misc. object messages inc. errors
+M750       dc.b 'You have just dropped ',0
+M751       dc.b 'You cannot wield or wear that. ',0
+M752       dc.b 'You cant remove your existing one. ',0 ; e.g. try to wear a second 
+; helmet, but existing one is cursed
+M753       dc.b 'Oops! It seems to be cursed! ',0 ; after first wielding an object
+M754       dc.b 'It seems to be cursed! ',0 ; when trying to drop cursed object
+M755       dc.b 'Your existing armour wont come off. ',0
+M756       dc.b 'Your cant let go of you existing weapon. ',0
+M757       dc.b 'You cannot carry any more. ',0
+M758       dc.b 'It vanishes as you drop it! ',0 ; no more sprites for drop
+M759       dc.b 'It looks cursed! ',0 ; on examining
+;
+; Examine messages for scrolls
+M800       dc.b 'I wish I was in Greenall Whitley Land... ',0 ; wishing
+M801       dc.b 'Your armour begins to glow! ',0 ; enchant armour
+M802       dc.b 'Your armour turns to dust... ',0 ; destroy armour
+M803       dc.b 'Your weapon glows brightly! ',0 ; enchant weapon
+M804       dc.b 'Your weapon turns to dust... ',0 ; destroy weapn
+M805       dc.b 'You feel free of all curses... ',0 ; remove curse
+M806       dc.b 'Your head begins to spin... ',0 ; teleport
+M807       dc.b 'Mistical runes now seem clearer... ',0 ; identify
+M808       dc.b 'Youre in for a scorcher! ',0 ; fire
+M809       dc.b 'Nothing happens... ',0 ; blank
+M810       dc.b 'You feel a lack of magic... ',0 ; dispel magic
+M811       dc.b 'Your hand turns a deathly black! ',0 ; black hand
+;
+; Scroll didn't work (e.g. enchant armour when no armour)
+M820       dc.b 'Nothing happens. ',0
+;
+; Monster-related messages
+M1000       dc.b 'Your purse feels lighter! ',0
+M1001       dc.b 'The Nymph charms off your armour! ',0
+;
+M2000       dc.b '0 ',0
+M2001       dc.b '1 ',0
+M2002       dc.b '2 ',0
+M2003       dc.b '3 ',0
+M2004       dc.b '4 ',0
+M2005       dc.b '5 ',0
+M2006       dc.b '6 ',0
+M2007       dc.b '7 ',0
+M2008       dc.b '8 ',0
+M2009       dc.b '9 ',0
+M2010       dc.b '0 ',0
+M2011       dc.b '11 ',0
+M2012       dc.b '12 ',0
+M2013       dc.b '13 ',0
+M2014       dc.b '14 ',0
+M2015       dc.b '15 ',0
+M2016       dc.b '16 ',0
+M2017       dc.b '17 ',0
+M2018       dc.b '18 ',0
+M2019       dc.b '19 ',0
+M2020       dc.b '20 ',0
+M2021       dc.b '21 ',0
+M2022       dc.b '22 ',0
+M2023       dc.b '23 ',0
+M2024       dc.b '24 ',0
+M2025       dc.b '25 ',0
+M2026       dc.b '26 ',0
+M2027       dc.b '27 ',0
+M2028       dc.b '28 ',0
+M2029       dc.b '29 ',0
+M2030       dc.b '30 ',0
+M2031       dc.b '31 ',0
+M2032       dc.b '32 ',0
+M2033       dc.b '33 ',0
+M2034       dc.b '34 ',0
+M2035       dc.b '35 ',0
+M2036       dc.b '36 ',0
+M2037       dc.b '37 ',0
+M2038       dc.b '38 ',0
+M2039       dc.b '39 ',0
+M2040       dc.b '40 ',0
+M2041       dc.b '41 ',0
+M2042       dc.b '42 ',0
+M2043       dc.b '43 ',0
+M2044       dc.b '44 ',0
+M2045       dc.b '45 ',0
+M2046       dc.b '46 ',0
+M2047       dc.b '47 ',0
+M2048       dc.b '48 ',0
+M2049       dc.b '49 ',0
+
+LevelsGR
+* for each level, 
+* highest monster allowed, random mask used for generating monster
+
+	dc.b 3,3	* Level 1...mask %00000011
+	dc.b 7,7	* Level 2...mask %00000111
+	dc.b 11,15	* Level 3...mask %00001111
+	dc.b 13,15	* Level 4...mask %00001111
+	dc.b 15,15	* Level 5...mask %00001111
+	dc.b 16,31	* Level 6...mask %00011111
+	dc.b 17,31	* Level 7...mask %00011111
+	dc.b 18,31	* Level 8...mask %00011111
+	dc.b 19,31	* Level 9...mask %00011111
+	dc.b 19,31	* Level 10...mask %00011111
+	dc.b 19,31	* Level 11..mask %00011111
+	dc.b 19,31	* Level 12..mask %00011111
+	dc.b 19,31	* Level 13..mask %00011111
+	dc.b 19,31	* Level 14..mask %00011111
+	dc.b 19,31	* Level 15...mask %00011111
+	dc.b 19,31	* Level 16...mask %00011111
+	dc.b 19,31	* Level 17...mask %00011111
+	dc.b 19,31	* Level 18...mask %00011111
+	dc.b 19,31	* Level 19...mask %00011111
+	dc.b 19,31	* Level 20...mask %00011111
+	dc.b 19,31	* Level 21...mask %00011111
+	dc.b 19,31	* Level 22...mask %00011111
+	dc.b 19,31	* Level 23...mask %00011111
+	dc.b 19,31	* Level 24...mask %00011111
+	dc.b 19,31	* Level 25...mask %00011111
+	dc.b 19,31	* Level 26...mask %00011111
+	dc.b 19,31	* Level 27...mask %00011111
+	dc.b 19,31	* Level 28...mask %00011111
+	dc.b 19,31	* Level 29...mask %00011111
+	dc.b 19,31	* Level 30...mask %00011111
+	dc.b 19,31	* Level 31...mask %00011111
+	dc.b 19,31	* Level 32...mask %00011111
+	dc.b 19,31	* Level 33...mask %00011111
+	dc.b 19,31	* Level 34...mask %00011111
+	dc.b 19,31	* Level 35...mask %00011111
+	dc.b 19,31	* Level 36...mask %00011111
+	dc.b 19,31	* Level 37...mask %00011111
+	dc.b 19,31	* Level 38...mask %00011111
+	dc.b 19,31	* Level 39...mask %00011111
+
+
+; tiles...
+ even
+Floor2 equ 4
+Floor3 equ 4
+Floor4 equ 4 * white tile
+Floor5 equ 4
+Wall76 equ 104
+
+LIST5
+; room defns
+Room0
+ dc.w Room1-Room0
+ dc.w 8 * x size in blocks. Size is NUMBER OF BLOCKS.
+ dc.w 7 * y size in blocks
+* possible connections:
+* first position, size on north wall, then east, south, west
+ dc.b 3,3
+ dc.b 1,3
+ dc.b 1,3
+ dc.b 2,2
+* and possible site for exit:
+ dc.b 3,3
+; now block data for room
+ dc.b Wall76,Wall76,Wall76,Wall76,Wall76,Wall76,Wall76,Wall76
+ dc.b Wall76, Floor4, Floor4, Floor4, Floor4, Floor4, Floor4,Wall76
+ dc.b Wall76, Floor4, Floor4, Floor4, Floor4, Floor4, Floor4,Wall76
+ dc.b Wall76, Floor4, Floor4, Floor4, Floor4, Floor4, Floor4,Wall76
+ dc.b Wall76, Floor4, Floor4, Floor4, Floor4, Floor4, Floor4,Wall76
+ dc.b Wall76, Floor4, Floor4, Floor4, Floor4, Floor4, Floor4,Wall76
+ dc.b Wall76,Wall76,Wall76,Wall76,Wall76,Wall76,Wall76,Wall76
+ even
+
+Room1
+
+ dc.w Room2-Room1
+ dc.w 12 * x size in blocks. Size is NUMBER OF BLOCKS.
+ dc.w 5 * y size in blocks
+* possible connections:
+* first position, size on north wall, then east, south, west
+ dc.b 4,6
+ dc.b 1,3
+ dc.b 4,4
+ dc.b 1,3
+* and possible site for exit:
+ dc.b 3,2
+; now block data for room
+ dc.b Wall76,Wall76,Wall76,Wall76,Wall76,Wall76,Wall76,Wall76,Wall76,Wall76,Wall76,Wall76
+ dc.b Wall76, Floor5, Floor5, Floor5, Floor5, Floor5, Floor5, Floor2, Floor5, Floor5, Floor5,Wall76
+ dc.b Wall76, Floor5, Floor2, Floor5, Floor5, Floor5, Floor5, Floor5, Floor5, Floor2, Floor5,Wall76
+ dc.b Wall76, Floor2, Floor5, Floor5, Floor5, Floor5, Floor2, Floor5, Floor5, Floor5, Floor5,Wall76
+ dc.b Wall76,Wall76,Wall76,Wall76,Wall76,Wall76,Wall76,Wall76,Wall76,Wall76,Wall76,Wall76
+ even
+
+Room2
+ dc.w Room3-Room2
+ dc.w 16 * x size in blocks. Size is NUMBER OF BLOCKS.
+ dc.w 10 * y size in blocks
+* possible connections:
+* first position, size on north wall, then east, south, west
+ dc.b 4,6
+ dc.b 2,3
+ dc.b 4,4
+ dc.b 2,3
+* and possible site for exit:
+ dc.b 2,2
+; now block data for room
+* add 96,86 to rh top corner, 96,87 to bottom left,
+* 96,92 to bottom left.
+
+ dc.b Wall76,Wall76,Wall76,Wall76,Wall76,Wall76,Wall76,Wall76,Wall76,Wall76,Wall76,Wall76,Wall76,Wall76,Wall76,Wall76
+ dc.b Wall76,Floor3,Floor3, Floor3, Floor3, Floor3, Floor3, Floor3, Floor3, Floor3, Floor3, Floor3, Floor3,Floor3,Floor3,Wall76
+ dc.b Wall76, Floor3, Floor5, Floor3, Floor3, Floor3, Floor3, Floor3, Floor3, Floor3, Floor3, Floor3, Floor3, Floor3, Floor3,Wall76
+ dc.b Wall76, Floor3, Floor3, Floor3, Floor5, Floor3, Floor3, Floor3, Floor3, Floor5, Floor3, Floor5, Floor3, Floor3, Floor3,Wall76
+ dc.b Wall76, Floor3, Floor5, Floor5, Floor3, Floor3, Floor3,72,73, Floor3, Floor3, Floor3, Floor3, Floor3, Floor3,Wall76
+ dc.b Wall76, Floor3, Floor3, Floor3, Floor3, Floor3, Floor3,74,75, Floor3, Floor3, Floor3, Floor3, Floor3, Floor3,Wall76
+ dc.b Wall76, Floor3, Floor3, Floor5, Floor3, Floor3, Floor3, Floor3, Floor3, Floor5, Floor3, Floor3, Floor3, Floor3, Floor3,Wall76
+ dc.b Wall76, Floor3, Floor3, Floor3, Floor3, Floor5, Floor3, Floor3, Floor3, Floor3, Floor3, Floor5, Floor3, Floor3, Floor3,Wall76
+ dc.b Wall76,Floor3,Floor3, Floor3, Floor3, Floor3, Floor3, Floor3, Floor3, Floor3, Floor3, Floor3, Floor3,Floor3,Floor3,Wall76
+ dc.b Wall76,Wall76,Wall76,Wall76,Wall76,Wall76,Wall76,Wall76,Wall76,Wall76,Wall76,Wall76,Wall76,Wall76,Wall76,Wall76
+ even
+
+Room3
+;*****
+ dc.w Room4-Room3
+ dc.w 12 * x size in blocks. Size is NUMBER OF BLOCKS.
+ dc.w 16 * y size in blocks
+* possible connections:
+* first position, size on north wall, then east, south, west
+ dc.b 5,4
+ dc.b 7,4
+ dc.b 4,5
+ dc.b 6,3
+* and possible site for exit:
+ dc.b 0,0 * none!
+
+; now block data for room
+ dc.b  0, 0,86,88,86,88,88,88,88,88, 0, 0
+ dc.b  0, 0,88, Floor4, Floor4, Floor4, Floor4, Floor4, Floor4,88, 0, 0
+ dc.b  0,86,86,86,88,88,88,88, Floor4,88,88, 0
+ dc.b  0,86, Floor4, Floor4, Floor4, Floor4, Floor4,86, Floor4, Floor4,88, 0
+ dc.b 86,86, Floor4,86,88,88, Floor4,88,88, Floor4,88,88
+ dc.b 88, Floor4, Floor4,88, Floor4, Floor4, Floor4, Floor4,86, Floor4, Floor4,88
+ dc.b 88, Floor4,88,88, Floor4,88,88,86,88,88, Floor4,88
+ dc.b 88, Floor4, Floor4,88, Floor4, Floor4, Floor4, Floor4, Floor4, Floor4, Floor4,88
+ dc.b 88,88, Floor4,88,88,88,86, Floor4,88,88, Floor4,88
+ dc.b 88,Floor4, Floor4, Floor4,88, Floor4, Floor4, Floor4,88, Floor4, Floor4,88
+ dc.b 88,86,88, Floor4,88, Floor4,88, Floor4,88, Floor4, Floor4,88
+ dc.b 88,88,88, Floor4, Floor4, Floor4,86, Floor4,86, Floor4,88,88
+ dc.b  0,88,88,88,88,88,88, Floor4, Floor4, Floor4,88, 0
+ dc.b  0,88,88, Floor4,86, Floor4,88, Floor4,86,88,88, 0
+ dc.b  0, 0,88, Floor4, Floor4, Floor4, Floor4, Floor4,86,88, 0, 0
+ dc.b  0, 0,86,88,86,86,88,88,86,88, 0, 0
+ even
+
+Room4
+; dc.w Room5-Room4
+; dc.w 25 * x size in blocks. Size is NUMBER OF BLOCKS.
+; dc.w 11 * y size in blocks
+;* possible connections:
+;* first position, size on north wall, then east, south, west
+; dc.b 8,6
+; dc.b 5,4
+; dc.b 8,6
+; dc.b 5,4
+;; now block data for room
+; dc.b 75,75,75,75,75,75,75,75,75,75,75,75,75,75,75,75,75,75,75,75,75,75,75,75,75
+; dc.b 75,75,75, Floor4, Floor4, Floor4, Floor4, Floor4, Floor4, Floor4, Floor4, Floor4, Floor4, Floor4, Floor4, Floor4, Floor4, Floor4, Floor4, Floor4, Floor4, Floor4, Floor4, Floor4,75
+; dc.b 75, Floor4,75, Floor4,75,75,75,75,75,75,75,75,75,75,75,75,75,75,75,75,75,75,75, Floor4,75
+; dc.b 75, Floor4,75, Floor4, Floor4, Floor4,75, Floor4,75, Floor4, Floor4, Floor4, Floor4, Floor4, Floor4, Floor4,75, Floor4, Floor4, Floor4,75,75,75, Floor4,75
+; dc.b 75, Floor4,75,75,75, Floor4,75, Floor4,75, Floor4,75,75,75, Floor4,75, Floor4,75, Floor4,75, Floor4,75,75,75, Floor4,75
+; dc.b 75, Floor4,75,75,75, Floor4, Floor4, Floor4,75, Floor4, Floor4, Floor4,75, Floor4, Floor4, Floor4,75, Floor4,75, Floor4,75,75,75, Floor4,75
+; dc.b 75, Floor4,75,75,75, Floor4,75, Floor4,75, Floor4,75,75,75, Floor4, Floor4,75,75, Floor4,75, Floor4,75,75,75, Floor4,75
+; dc.b 75, Floor4,75,75,75, Floor4,75, Floor4, Floor4, Floor4, Floor4, Floor4,75, Floor4,75, Floor4, Floor4, Floor4, Floor4, Floor4, Floor4, Floor4,75, Floor4,75
+; dc.b 75, Floor4,75,75,75,75,75,75,75,75,75,75,75,75,75,75,75,75,75,75,75, Floor4,75, Floor4,75
+; dc.b 75, Floor4, Floor4, Floor4, Floor4, Floor4, Floor4, Floor4, Floor4, Floor4, Floor4, Floor4, Floor4, Floor4, Floor4, Floor4, Floor4, Floor4, Floor4, Floor4, Floor4, Floor4,75,75,75
+; dc.b 75,75,75,75,75,75,75,75,75,75,75,75,75,75,75,75,75,75,75,75,75,75,75,75,75
+; even
+;
+;Room5
+;*****
+
+ dc.w 0 * end of room defn table.
+
+;---
+List7
+; reversal table for directions
+ dc.w 0,6,8,2,4
+
+
+;* offset of this point within list7 is 10
+
+NextAddDirTable * offset is 10
+ even
+ dc.b 2 * 0 - 1st
+ dc.b 7 * 1 - 
+ dc.b 6 * 2 - 2nd
+; byte-wise table that, given the current addition to the
+; movement direction, gives the new addition
+ dc.b 5 * 3 - 4th
+ dc.b 0 * 4 - 6th
+ dc.b 4 * 5 - 5th
+ dc.b 3 * 6 - 3rd
+ dc.b 2 * 7 - 
+
+
+
+; dc.b 1 * 0 - first attempt
+; dc.b 7 * 1 - second attempt
+; dc.b 6 * 2 - fourth attempt
+;; byte-wise table that, given the current addition to the
+;; movement direction, gives the new addition
+; dc.b 5 * 3 - sixth direction
+; dc.b 0 * 4 - eighth attempt - start sequence again
+; dc.b 4 * 5 - seventh attempt
+; dc.b 3 * 6 - fifth attempt
+; dc.b 2 * 7 - third atempt
+
+* offset of this point is 18
+ConvertViewToXY
+* x,y speeds for each value calculated from existing x,y
+* speed on basis of yspeed*4+xspeed i.e. -5 to +5
+ dc.w -1,-1 ; -5 is nw
+ dc.w 0,-1 ; -4 is n
+ dc.w 1,-1 ; -3 is ne
+ dc.w 0,0 ; -2 is not possible
+ dc.w -1,0 ; -1 is w
+ dc.w 0,0 ; 0 is not possible
+ dc.w 1,0 ; 1 is east
+ dc.w 0,0 ; 2 is not possible
+ dc.w -1,1 ; 3 is sw
+ dc.w 0,1 ; 4 is s
+ dc.w 1,1 ; 5 is se
+
+
+* offset of this point is 62
+ConvertViewToView
+* x,y speeds for each value calculated from existing x,y
+* speed on basis of yspeed*4+xspeed i.e. -5 to +5
+ dc.b 7 ; -5 is nw
+ dc.b 0 ; -4 is n
+ dc.b 1 ; -3 is ne
+ dc.b 0 ; -2 is not possible
+ dc.b 6 ; -1 is w
+ dc.b 0 ; 0 is not possible
+ dc.b 2 ; 1 is east
+ dc.b 0 ; 2 is not possible
+ dc.b 5 ; 3 is sw
+ dc.b 4 ; 4 is s
+ dc.b 3 ; 5 is se
+
+;*****
+ even
+;
+; offset of this table is 74
+;
+; pointers into object list for each category, followed by number of 
+; objects in the category.
+;
+; (byte 2 must be > 0 because it is used in a divide in .generateobject)
+ dc.b 0,1	; 0
+ dc.b 0,1	; 1
+ dc.b 0,1	; 2 stairs down
+ dc.b 0,1	; 3
+ dc.b 0,1	; 4
+ dc.b 0,1	; 5
+ dc.b 0,1	; 6
+ dc.b 0,1	; 7
+ dc.b 0,1	; 8
+ dc.b 0,1	; 9
+ dc.b 0,1	; 10
+ dc.b 0,1	; 11
+ dc.b 0,1	; 12
+ dc.b 0,1	; 13
+ dc.b 95,16	; 14 potions
+ dc.b 20,9	; 15 hand weapons
+ dc.b 1,13	; 16 armour
+ dc.b 40,14	; 17 rings
+ dc.b 60,15	; 18 wands
+ dc.b 80,12	; 19 scrolls
+ dc.b 120,1	; 20 gold pieces
+ dc.b 35,3	; 21 range weapons
+;---
+ even
+;
+; offset for this table is 114
+;
+; special data for each true object
+;
+ dc.b 0,0,0,0 ; 0 dummy object
+;
+; Body armour...
+; strength,null,null,null
+ dc.b 3,0,0,0		; 1 leather
+ dc.b 4,0,0,0		; 2 studded
+ dc.b 5,0,0,0		; 3 chain
+ dc.b 6,0,0,0		; 4 splint
+ dc.b 10,0,0,0		; 5 plate
+ dc.b 16,0,0,0		; 6 perfect plate
+ dc.b 14,0,0,0		; 7 stainless steel
+;
+; Other armour accessories...
+; strength,null,null,null
+ dc.b 1,0,0,0		; 8 helmet
+ dc.b 1,0,0,0		; 9 gauntlets
+ dc.b 1,0,0,0		; 10 cloak
+ dc.b 1,0,0,0		; 11 shield
+ dc.b 1,0,0,0		; 12 boots
+ dc.b 2,0,0,0		; 13 shield
+ dc.b 0,0,0,0
+ dc.b 0,0,0,0
+ dc.b 0,0,0,0
+ dc.b 0,0,0,0
+ dc.b 0,0,0,0
+ dc.b 0,0,0,0
+;
+; Hand weapons...
+; strength,null,null,null
+ dc.b 2,0,0,0		; 20 dagger
+ dc.b 4,0,0,0		; 21 club
+ dc.b 5,0,0,0		; 22 mace
+ dc.b 6,0,0,0		; 23 sword
+ dc.b 8,0,0,0		; 24 long sword
+ dc.b 10,0,0,0		; 25 two-handed sword
+ dc.b 4,0,0,0		; 26 flail
+ dc.b 50,0,0,0		; 27 lance of death
+ dc.b 14,0,0,0		; 28 flaming sword
+ dc.b 0,0,0,0
+ dc.b 0,0,0,0
+ dc.b 0,0,0,0
+ dc.b 0,0,0,0
+ dc.b 0,0,0,0
+ dc.b 0,0,0,0
+;
+; Missile sprite numbers
+missile equ 0		; standard missile
+digging equ 1		; digging missile
+explosive equ 2		; explosive missile
+;
+; Range weapons...
+; damage,null,null,missile sprite type
+ dc.b 20,0,0,missile	; 35 bow
+ dc.b 30,0,0,missile	; 36 crossbow
+ dc.b 20,0,0,missile	; 37 stars
+ dc.b 0,0,0,0
+ dc.b 0,0,0,0
+;
+; Rings...
+; null,null,null,null
+ dc.b 0,0,0,0		; 40 adjornment
+ dc.b 0,0,0,0		; 41 teleportation
+ dc.b 0,0,0,0		; 42 regenaration
+ dc.b 0,0,0,0		; 43 hunger
+ dc.b 0,0,0,0		; 44 poison protection
+ dc.b 0,0,0,0		; 45 fire resistance
+ dc.b 0,0,0,0		; 46 cold resistance
+ dc.b 0,0,0,0		; 47 increase damage
+ dc.b 0,0,0,0		; 48 protection
+ dc.b 0,0,0,0		; 49 teleport control
+ dc.b 0,0,0,0		; 50 leech
+ dc.b 0,0,0,0		; 51 invisibility
+ dc.b 0,0,0,0		; 52 strength
+ dc.b 0,0,0,0		; 53 undead protection
+ dc.b 0,0,0,0
+ dc.b 0,0,0,0
+ dc.b 0,0,0,0
+ dc.b 0,0,0,0
+ dc.b 0,0,0,0
+ dc.b 0,0,0,0
+;
+; Wands...
+; damage,life,null,missile sprite type
+ dc.b 0,0,0,0		; 60 create monster
+ dc.b 50,0,0,missile	; 61 magic missile
+ dc.b 0,0,0,missile	; 62 slow monster
+ dc.b 0,0,0,missile	; 63 polymorph
+ dc.b 0,0,0,missile	; 64 teleport
+ dc.b 0,0,0,digging	; 65 digging
+ dc.b 20,0,0,missile	; 66 fire
+ dc.b 20,0,0,missile	; 67 cold
+ dc.b 255,0,0,missile	; 68 death
+ dc.b 0,0,0,missile	; 69 exorcism
+ dc.b 0,0,0,missile	; 70 cloning
+ dc.b 50,0,0,0		; 71 dynamite
+ dc.b 50,0,0,explosive	; 72 fire storm
+ dc.b 0,0,0,0		; 73 shield
+ dc.b 0,0,0,0		; 74 reveal traps
+ dc.b 0,0,0,0
+ dc.b 0,0,0,0
+ dc.b 0,0,0,0
+ dc.b 0,0,0,0
+ dc.b 0,0,0,0
+;
+; Scrolls...
+ dc.b 0,0,0,0 ; 80
+ dc.b 0,0,0,0
+ dc.b 0,0,0,0
+ dc.b 0,0,0,0
+ dc.b 0,0,0,0
+ dc.b 0,0,0,0
+ dc.b 0,0,0,0
+ dc.b 0,0,0,0
+ dc.b 0,0,0,0
+ dc.b 0,0,0,0
+ dc.b 0,0,0,0 ; 90
+ dc.b 0,0,0,0
+ dc.b 0,0,0,0
+ dc.b 0,0,0,0
+ dc.b 0,0,0,0
+;
+; Potions...
+ dc.b 0,0,0,0 ; 95
+ dc.b 0,0,0,0
+ dc.b 0,0,0,0
+ dc.b 0,0,0,0
+ dc.b 0,0,0,0
+ dc.b 0,0,0,0 ; 100
+ dc.b 0,0,0,0
+ dc.b 0,0,0,0
+ dc.b 0,0,0,0
+ dc.b 0,0,0,0
+ dc.b 0,0,0,0
+ dc.b 0,0,0,0
+ dc.b 0,0,0,0
+ dc.b 0,0,0,0
+ dc.b 0,0,0,0
+ dc.b 0,0,0,0 ; 110
+ dc.b 0,0,0,0
+ dc.b 0,0,0,0
+ dc.b 0,0,0,0
+ dc.b 0,0,0,0
+ dc.b 0,0,0,0
+ dc.b 0,0,0,0
+ dc.b 0,0,0,0
+ dc.b 0,0,0,0
+ dc.b 0,0,0,0
+;
+; Treasure...
+; null,null,null,null
+ dc.b 0,0,0,0		; gold pieces (amount is random)
+;---
+ even
+;
+; offset for this table is 610
+;
+;*****
+
+list9
+ dc.w WalkingAnimation-list9
+ dc.w 0,0,0,0,0
+
+WalkingAnimation
+;; dc.w 0 * 0 - not used
+ dc.w WPlayer-list9 * 0 player
+ dc.w WMissile-list9 * 1 missile
+ dc.w WSkull-list9 * 2 skull monster
+ dc.w WExplosion-list9	* 3 explosion animation
+ dc.w WSkull-list9 * 4 skull monster for space invaders
+ dc.w WSI-list9		* 5 space invader monsters
+ dc.w WSIMissile-list9	* 6 missile to fire at space invaders
+ dc.w WRainbird-list9	* 7 rainbird monster
+ dc.w WExplosiveMissile-list9
+ dc.w WDiggingMissile-list9
+ dc.w WBottle-list9	* 10 bottle
+ dc.w WInvisible-list9	* 11 invisible object
+ dc.w WSIDownMissile-list9 * 12 missile the invaders fire
+ dc.w WExplosion-list9	* 13 explosion effect
+ dc.w WNBottle-list9	* 14 new bottle
+ dc.w WSword-list9	* 15 sword
+ dc.w WArmour-list9	* 16 armour
+ dc.w WRing-list9	* 17 ring
+ dc.w WWand-list9	* 18 wand
+ dc.w WScroll-list9	* 19 scroll
+ dc.w WGold-list9	* 20 pot of gold
+ dc.w WClub-list9	* 21 club
+ dc.w WFloatingEye-list9 * 22 eye.
+ dc.w WAcidBlob-list9	* 23 acid
+ dc.w WJelly-list9	* 24 jelly monster
+ dc.w WFogCloud-list9	* 25 fog cloud
+ dc.w WGhost-list9	* 26 ghost
+ dc.w WGhoul-list9	* 27 ghoul
+ dc.w WSpider-list9	* 28 spider
+ dc.w WLeprecaun-list9	* 29 leprecaun
+ dc.w WWillOWisp-list9	* 30 will 'o wisp
+ dc.w WGorgon-list9	* 31 gorgon
+ dc.w WMummy-list9	* 32 mummy
+ dc.w WfreezingSphere-list9	* 33 freezing sphere
+ dc.w WSkeleton-list9	* 34 skeleton
+ dc.w WNymph-list9	* 35 nymph
+ dc.w WDemon-list9	* 36 demon
+ dc.w WSnake-list9	* 37 snake
+ dc.w WBee-list9	* 38 killer bee
+ dc.w WMinotaur-list9		* 39 minotaur
+ dc.w WVampire-list9	* 40 vampire
+ dc.w WBalrog-list9	* 41 balrog
+
+
+
+WPlayer	 		* 1 player
+ dc.w WPlayerN-list9
+ dc.w WPlayerNE-list9
+ dc.w WPlayerE-list9
+ dc.w WPlayerSE-list9
+ dc.w WPlayerS-list9
+ dc.w WPlayerSW-list9
+ dc.w WPlayerW-list9
+ dc.w WPlayerNW-list9
+
+WPlayerN	dc.w 640,641,642,643,642,641,-1
+WPlayerNE	dc.w 644,645,646,647,646,645,-1
+WPlayerE	dc.w 648,649,650,651,650,649,-1
+WPlayerSE	dc.w 652,653,654,655,654,653,-1
+WPlayerS	dc.w 656,657,658,659,658,657,-1
+WPlayerSW	dc.w 660,661,662,663,662,661,-1
+WPlayerW	dc.w 664,665,666,667,666,665,-1
+WPlayerNW	dc.w 668,669,670,671,670,669,-1
+
+
+WMissile		 * 2 missile
+ dc.w WMissileN-list9
+ dc.w WMissileNE-list9
+ dc.w WMissileE-list9
+ dc.w WMissileSE-list9
+ dc.w WMissileS-list9
+ dc.w WMissileSW-list9
+ dc.w WMissileW-list9
+ dc.w WMissileNW-list9
+
+WMissileN
+WMissileNE
+WMissileE
+WMissileSE
+WMissileS
+WMissileSW
+WMissileW
+WMissileNW
+ dc.w 40,41,42,43,44,45,46,47,-1 *********** actually big missile
+
+
+
+
+WExplosion		* 3 explosion animation
+ dc.w WexplosionN-list9
+ dc.w WexplosionNE-list9
+ dc.w WexplosionE-list9
+ dc.w WexplosionSE-list9
+ dc.w WexplosionS-list9
+ dc.w WexplosionSW-list9
+ dc.w WexplosionW-list9
+ dc.w WexplosionNW-list9
+
+WexplosionN
+WexplosionNE
+WexplosionE
+WexplosionSE
+WexplosionS
+WexplosionSW
+WexplosionW
+WexplosionNW
+ dc.w 56,57,58,59,60,61,62,63,-1
+
+
+WSkull	 		* 4 skull monster
+ dc.w WskullN-list9
+ dc.w WskullNE-list9
+ dc.w WskullE-list9
+ dc.w WskullSE-list9
+ dc.w WskullS-list9
+ dc.w WskullSW-list9
+ dc.w WskullW-list9
+ dc.w WskullNW-list9
+
+WskullN
+WskullNE
+WskullE
+WskullSE
+WskullS
+WskullSW
+WskullW
+WskullNW
+ dc.w -1
+
+WSI			* 5 space invader monsters
+ dc.w WsiN-list9
+ dc.w WsiNE-list9
+ dc.w WsiE-list9
+ dc.w WsiSE-list9
+ dc.w WsiS-list9
+ dc.w WsiSW-list9
+ dc.w WsiW-list9
+ dc.w WsiNW-list9
+
+WsiN
+WsiNE
+WsiE
+WsiSE
+WsiS
+WsiSW
+WsiW
+WsiNW
+ dc.w -1
+
+WSIMissile		* 6 missile to fire at space invaders
+ dc.w WsiMissileN-list9
+ dc.w WsiMissileNE-list9
+ dc.w WsiMissileE-list9
+ dc.w WsiMissileSE-list9
+ dc.w WsiMissileS-list9
+ dc.w WsiMissileSW-list9
+ dc.w WsiMissileW-list9
+ dc.w WsiMissileNW-list9
+
+WsiMissileN
+WsiMissileNE
+WsiMissileE
+WsiMissileSE
+WsiMissileS
+WsiMissileSW
+WsiMissileW
+WsiMissileNW
+
+WRainbird		* 7 rainbird monster
+ dc.w WRainbirdN-list9
+ dc.w WRainbirdNE-list9
+ dc.w WRainbirdE-list9
+ dc.w WRainbirdSE-list9
+ dc.w WRainbirdS-list9
+ dc.w WRainbirdSW-list9
+ dc.w WRainbirdW-list9
+ dc.w WRainbirdNW-list9
+
+WRainbirdN
+WRainbirdNE
+WRainbirdE
+WRainbirdSE
+WRainbirdS
+WRainbirdSW
+WRainbirdW
+WRainbirdNW
+
+
+WExplosiveMissile	
+ dc.w WExplosiveMissileN-list9
+ dc.w WExplosiveMissileNE-list9
+ dc.w WExplosiveMissileE-list9
+ dc.w WExplosiveMissileSE-list9
+ dc.w WExplosiveMissileS-list9
+ dc.w WExplosiveMissileSW-list9
+ dc.w WExplosiveMissileW-list9
+ dc.w WExplosiveMissileNW-list9
+
+WExplosiveMissileN
+WExplosiveMissileNE
+WExplosiveMissileE
+WExplosiveMissileSE
+WExplosiveMissileS
+WExplosiveMissileSW
+WExplosiveMissileW
+WExplosiveMissileNW
+ dc.w 40,41,42,43,44,45,46,47,-1
+
+WDiggingMissile	
+ dc.w WDiggingMissileN-list9
+ dc.w WDiggingMissileNE-list9
+ dc.w WDiggingMissileE-list9
+ dc.w WDiggingMissileSE-list9
+ dc.w WDiggingMissileS-list9
+ dc.w WDiggingMissileSW-list9
+ dc.w WDiggingMissileW-list9
+ dc.w WDiggingMissileNW-list9
+
+WDiggingMissileN
+WDiggingMissileNE
+WDiggingMissileE
+WDiggingMissileSE
+WDiggingMissileS
+WDiggingMissileSW
+WDiggingMissileW
+WDiggingMissileNW
+ dc.w 40,41,42,43,44,45,46,47,-1
+
+WBottle			* 10 bottle
+ dc.w WBottleN-list9
+ dc.w WBottleNE-list9
+ dc.w WBottleE-list9
+ dc.w WBottleSE-list9
+ dc.w WBottleS-list9
+ dc.w WBottleSW-list9
+ dc.w WBottleW-list9
+ dc.w WBottleNW-list9
+
+WBottleN
+WBottleNE
+WBottleE
+WBottleSE
+WBottleS
+WBottleSW
+WBottleW
+WBottleNW
+ dc.w 64,-1
+
+WInvisible		* 11 invisible object
+ dc.w WInvisibleN-list9
+ dc.w WInvisibleNE-list9
+ dc.w WInvisibleE-list9
+ dc.w WInvisibleSE-list9
+ dc.w WInvisibleS-list9
+ dc.w WInvisibleSW-list9
+ dc.w WInvisibleW-list9
+ dc.w WInvisibleNW-list9
+
+WInvisibleN
+WInvisibleNE
+WInvisibleE
+WInvisibleSE
+WInvisibleS
+WInvisibleSW
+WInvisibleW
+WInvisibleNW
+ dc.w -1
+
+WSIDownMissile	 * 12 missile the invaders fire
+ dc.w WsiDownMissileN-list9
+ dc.w WsiDownMissileNE-list9
+ dc.w WsiDownMissileE-list9
+ dc.w WsiDownMissileSE-list9
+ dc.w WsiDownMissileS-list9
+ dc.w WsiDownMissileSW-list9
+ dc.w WsiDownMissileW-list9
+ dc.w WsiDownMissileNW-list9
+
+WsiDownMissileN
+WsiDownMissileNE
+WsiDownMissileE
+WsiDownMissileSE
+WsiDownMissileS
+WsiDownMissileSW
+WsiDownMissileW
+WsiDownMissileNW
+
+
+WExplosion2		* 13 Explosion2 effect
+ dc.w WExplosion2N-list9
+ dc.w WExplosion2NE-list9
+ dc.w WExplosion2E-list9
+ dc.w WExplosion2SE-list9
+ dc.w WExplosion2S-list9
+ dc.w WExplosion2SW-list9
+ dc.w WExplosion2W-list9
+ dc.w WExplosion2NW-list9
+
+WExplosion2N
+WExplosion2NE
+WExplosion2E
+WExplosion2SE
+WExplosion2S
+WExplosion2SW
+WExplosion2W
+WExplosion2NW
+ dc.w 48,49,50,51,52,53,54,55,-1 *80,81,82,83,84,85,86,87,88,-1
+
+WNBottle		* 14 new bottle
+ dc.w WNBottleN-list9
+ dc.w WNBottleNE-list9
+ dc.w WNBottleE-list9
+ dc.w WNBottleSE-list9
+ dc.w WNBottleS-list9
+ dc.w WNBottleSW-list9
+ dc.w WNBottleW-list9
+ dc.w WNBottleNW-list9
+
+WNBottleN
+WNBottleNE
+WNBottleE
+WNBottleSE
+WNBottleS
+WNBottleSW
+WNBottleW
+WNBottleNW
+ dc.w 64,-1
+
+
+WSword		* 15 sword
+ dc.w WSwordN-list9
+ dc.w WSwordNE-list9
+ dc.w WSwordE-list9
+ dc.w WSwordSE-list9
+ dc.w WSwordS-list9
+ dc.w WSwordSW-list9
+ dc.w WSwordW-list9
+ dc.w WSwordNW-list9
+
+WSwordN
+WSwordNE
+WSwordE
+WSwordSE
+WSwordS
+WSwordSW
+WSwordW
+WSwordNW
+ dc.w 30,-1
+
+WArmour		* 16 armour
+ dc.w WArmourN-list9
+ dc.w WArmourNE-list9
+ dc.w WArmourE-list9
+ dc.w WArmourSE-list9
+ dc.w WArmourS-list9
+ dc.w WArmourSW-list9
+ dc.w WArmourW-list9
+ dc.w WArmourNW-list9
+
+WArmourN
+WArmourNE
+WArmourE
+WArmourSE
+WArmourS
+WArmourSW
+WArmourW
+WArmourNW
+ dc.w 17,-1
+
+WRing		* 17 ring
+ dc.w WRingN-list9
+ dc.w WRingNE-list9
+ dc.w WRingE-list9
+ dc.w WRingSE-list9
+ dc.w WRingS-list9
+ dc.w WRingSW-list9
+ dc.w WRingW-list9
+ dc.w WRingNW-list9
+
+WRingN
+WRingNE
+WRingE
+WRingSE
+WRingS
+WRingSW
+WRingW
+WRingNW
+ dc.w 67,-1 **********
+
+WWand		* 18 wand
+ dc.w WWandN-list9
+ dc.w WWandNE-list9
+ dc.w WWandE-list9
+ dc.w WWandSE-list9
+ dc.w WWandS-list9
+ dc.w WWandSW-list9
+ dc.w WWandW-list9
+ dc.w WWandNW-list9
+
+WWandN
+WWandNE
+WWandE
+WWandSE
+WWandS
+WWandSW
+WWandW
+WWandNW
+ dc.w 74,-1
+
+WScroll		* 19 scroll
+ dc.w WScrollN-list9
+ dc.w WScrollNE-list9
+ dc.w WScrollE-list9
+ dc.w WScrollSE-list9
+ dc.w WScrollS-list9
+ dc.w WScrollSW-list9
+ dc.w WScrollW-list9
+ dc.w WScrollNW-list9
+
+WScrollN
+WScrollNE
+WScrollE
+WScrollSE
+WScrollS
+WScrollSW
+WScrollW
+WScrollNW
+ dc.w 69,-1
+
+WGold		* 20 pot of gold
+ dc.w WGoldN-list9
+ dc.w WGoldNE-list9
+ dc.w WGoldE-list9
+ dc.w WGoldSE-list9
+ dc.w WGoldS-list9
+ dc.w WGoldSW-list9
+ dc.w WGoldW-list9
+ dc.w WGoldNW-list9
+
+WGoldN
+WGoldNE
+WGoldE
+WGoldSE
+WGoldS
+WGoldSW
+WGoldW
+WGoldNW
+ dc.w 70,70,70,70,70,70,70,70,71,-1
+
+WClub		* 21 club
+ dc.w WclubN-list9
+ dc.w WclubNE-list9
+ dc.w WclubE-list9
+ dc.w WclubSE-list9
+ dc.w WclubS-list9
+ dc.w WclubSW-list9
+ dc.w WclubW-list9
+ dc.w WclubNW-list9
+
+WclubN
+WclubNE
+WclubE
+WclubSE
+WclubS
+WclubSW
+WclubW
+WclubNW
+ dc.w 26,-1
+
+WFloatingEye	 * 22 eye.
+ dc.w WEyeN-list9
+ dc.w WEyeNE-list9
+ dc.w WEyeE-list9
+ dc.w WEyeSE-list9
+ dc.w WEyeS-list9
+ dc.w WEyeSW-list9
+ dc.w WEyeW-list9
+ dc.w WEyeNW-list9
+
+WEyeN
+WEyeNE
+WEyeE
+WEyeSE
+WEyeS
+WEyeSW
+WEyeW
+WEyeNW
+ dc.w 128,128,129,130,131,131,130,129,-1
+
+WAcidBlob	* 23 acid
+ dc.w WAcidN-list9
+ dc.w WAcidNE-list9
+ dc.w WAcidE-list9
+ dc.w WAcidSE-list9
+ dc.w WAcidS-list9
+ dc.w WAcidSW-list9
+ dc.w WAcidW-list9
+ dc.w WAcidNW-list9
+
+WAcidN
+WAcidNE
+WAcidE
+WAcidSE
+WAcidS
+WAcidSW
+WAcidW
+WAcidNW
+ dc.w 136,136,137,137,138,138,137,137,-1
+
+WJelly		* 24 jelly monster
+ dc.w WJellyN-list9
+ dc.w WJellyNE-list9
+ dc.w WJellyE-list9
+ dc.w WJellySE-list9
+ dc.w WJellyS-list9
+ dc.w WJellySW-list9
+ dc.w WJellyW-list9
+ dc.w WJellyNW-list9
+
+WJellyN
+WJellyNE
+WJellyE
+WJellySE
+WJellyS
+WJellySW
+WJellyW
+WJellyNW
+ dc.w 140,140,141,141,142,142,143,143,142,142,141,141,-1
+
+WFogCloud	* 25 fog cloud
+ dc.w WFogCloudN-list9
+ dc.w WFogCloudNE-list9
+ dc.w WFogCloudE-list9
+ dc.w WFogCloudSE-list9
+ dc.w WFogCloudS-list9
+ dc.w WFogCloudSW-list9
+ dc.w WFogCloudW-list9
+ dc.w WFogCloudNW-list9
+
+WFogCloudN
+WFogCloudNE
+WFogCloudE
+WFogCloudSE
+WFogCloudS
+WFogCloudSW
+WFogCloudW
+WFogCloudNW
+ dc.w 144,144,145,145,146,146,147,147,-1
+
+WGhost		* 26 ghost
+ dc.w WGhostN-list9
+ dc.w WGhostNE-list9
+ dc.w WGhostE-list9
+ dc.w WGhostSE-list9
+ dc.w WGhostS-list9
+ dc.w WGhostSW-list9
+ dc.w WGhostW-list9
+ dc.w WGhostNW-list9
+
+WGhostN	dc.w 480,481,482,483,482,481,-1
+WGhostNE	dc.w 484,485,486,487,486,485,-1
+WGhostE		dc.w 488,489,490,491,490,489,-1
+WGhostSE	dc.w 492,493,494,495,495,493,-1
+WGhostS		dc.w 496,497,498,499,498,497,-1
+WGhostSW	dc.w 500,501,502,503,502,501,-1
+WGhostW		dc.w 504,505,506,507,506,505,-1
+WGhostNW	dc.w 508,509,510,511,510,509,-1
+
+
+WGhoul		* 27 ghoul
+ dc.w WGhoulN-list9
+ dc.w WGhoulNE-list9
+ dc.w WGhoulE-list9
+ dc.w WGhoulSE-list9
+ dc.w WGhoulS-list9
+ dc.w WGhoulSW-list9
+ dc.w WGhoulW-list9
+ dc.w WGhoulNW-list9
+
+WGhoulN		dc.w 156,157,158,159,158,157,-1
+WGhoulNE	dc.w 160,161,162,163,162,161,-1
+WGhoulE		dc.w 164,165,166,167,166,165,-1
+WGhoulSE	dc.w 168,169,170,171,170,169,-1
+WGhoulS		dc.w 172,173,174,175,174,173,-1
+WGhoulSW	dc.w 176,177,178,179,178,177,-1
+WGhoulW		dc.w 180,181,182,183,182,181,-1
+WGhoulNW	dc.w 184,185,186,187,186,185,-1
+
+WSpider		* 28 spider
+ dc.w WSpiderN-list9
+ dc.w WSpiderNE-list9
+ dc.w WSpiderE-list9
+ dc.w WSpiderSE-list9
+ dc.w WSpiderS-list9
+ dc.w WSpiderSW-list9
+ dc.w WSpiderW-list9
+ dc.w WSpiderNW-list9
+
+WSpiderN
+WSpiderNE
+WSpiderE
+WSpiderSE
+WSpiderS
+WSpiderSW
+WSpiderW
+WSpiderNW
+ dc.w 132,133,134,135,134,-1
+
+WLeprecaun	* 29 leprecaun
+ dc.w WLeprecaunN-list9
+ dc.w WLeprecaunNE-list9
+ dc.w WLeprecaunE-list9
+ dc.w WLeprecaunSE-list9
+ dc.w WLeprecaunS-list9
+ dc.w WLeprecaunSW-list9
+ dc.w WLeprecaunW-list9
+ dc.w WLeprecaunNW-list9
+
+WLeprecaunN	dc.w 188,189,190,191,190,189,-1
+WLeprecaunNE	dc.w 192,193,194,195,194,193,-1
+WLeprecaunE	dc.w 196,197,198,199,198,197,-1
+WLeprecaunSE	dc.w 200,201,202,203,202,201,-1
+WLeprecaunS	dc.w 204,205,206,207,206,205,-1
+WLeprecaunSW	dc.w 208,209,210,211,210,209,-1
+WLeprecaunW	dc.w 212,213,214,215,214,213,-1
+WLeprecaunNW	dc.w 216,217,218,219,218,217,-1
+
+
+WWillOWisp	* 30 will 'o wisp
+ dc.w WWillN-list9
+ dc.w WWillNE-list9
+ dc.w WWillE-list9
+ dc.w WWillSE-list9
+ dc.w WWillS-list9
+ dc.w WWillSW-list9
+ dc.w WWillW-list9
+ dc.w WWillNW-list9
+
+WWillN
+WWillNE
+WWillE
+WWillSE
+WWillS
+WWillSW
+WWillW
+WWillNW
+ dc.w 148,149,150,151,152,153,154,155,-1
+
+WGorgon		* 31 gorgon
+ dc.w WGorgonN-list9
+ dc.w WGorgonNE-list9
+ dc.w WGorgonE-list9
+ dc.w WGorgonSE-list9
+ dc.w WGorgonS-list9
+ dc.w WGorgonSW-list9
+ dc.w WGorgonW-list9
+ dc.w WGorgonNW-list9
+
+WGorgonN	dc.w 256,257,258,259,258,257,-1
+WGorgonNE	dc.w 260,261,262,263,262,261,-1
+WGorgonE	dc.w 264,265,266,267,266,265,-1
+WGorgonSE	dc.w 268,269,270,271,270,269,-1
+WGorgonS	dc.w 272,273,274,275,274,273,-1
+WGorgonSW	dc.w 276,277,278,279,278,277,-1
+WGorgonW	dc.w 280,281,282,283,282,281,-1
+WGorgonNW	dc.w 284,285,286,287,286,285,-1
+
+WMummy		* 32 mummy
+ dc.w WMummyN-list9
+ dc.w WMummyNE-list9
+ dc.w WMummyE-list9
+ dc.w WMummySE-list9
+ dc.w WMummyS-list9
+ dc.w WMummySW-list9
+ dc.w WMummyW-list9
+ dc.w WMummyNW-list9
+
+WMummyN		dc.w 672,673,674,675,674,673,-1
+WMummyNE	dc.w 676,677,678,679,678,677,-1
+WMummyE		dc.w 680,681,682,683,682,681,-1
+WMummySE	dc.w 684,685,686,687,686,685,-1
+WMummyS		dc.w 688,689,690,691,690,689,-1
+WMummySW	dc.w 692,693,694,695,694,693,-1
+WMummyW		dc.w 696,697,698,699,698,697,-1
+WMummyNW	dc.w 700,701,702,703,702,701,-1
+
+WfreezingSphere	* 33 freezing sphere
+ dc.w WFreezingN-list9
+ dc.w WFreezingNE-list9
+ dc.w WFreezingE-list9
+ dc.w WFreezingSE-list9
+ dc.w WFreezingS-list9
+ dc.w WFreezingSW-list9
+ dc.w WFreezingW-list9
+ dc.w WFreezingNW-list9
+
+WFreezingN
+WFreezingNE
+WFreezingE
+WFreezingSE
+WFreezingS
+WFreezingSW
+WFreezingW
+WFreezingNW
+ dc.w 624,625,626,627,628,629,630,631,-1
+
+WSkeleton	* 34 skeleton
+ dc.w WSkeletonN-list9
+ dc.w WSkeletonNE-list9
+ dc.w WSkeletonE-list9
+ dc.w WSkeletonSE-list9
+ dc.w WSkeletonS-list9
+ dc.w WSkeletonSW-list9
+ dc.w WSkeletonW-list9
+ dc.w WSkeletonNW-list9
+
+WSkeletonN	dc.w 544,545,546,547,546,545,-1
+WSkeletonNE	dc.w 548,549,550,551,550,549,-1
+WSkeletonE	dc.w 552,553,554,555,554,553,-1
+WSkeletonSE	dc.w 556,557,558,559,558,557,-1
+WSkeletonS	dc.w 560,561,562,563,562,561,-1
+WSkeletonSW	dc.w 564,565,566,567,566,565,-1
+WSkeletonW	dc.w 568,569,570,571,570,569,-1
+WSkeletonNW	dc.w 572,573,574,575,574,573,-1
+
+WNymph		* 35 nymph
+ dc.w WNymphN-list9
+ dc.w WNymphNE-list9
+ dc.w WNymphE-list9
+ dc.w WNymphSE-list9
+ dc.w WNymphS-list9
+ dc.w WNymphSW-list9
+ dc.w WNymphW-list9
+ dc.w WNymphNW-list9
+
+WNymphN
+WNymphNE
+WNymphE
+WNymphSE
+WNymphS
+WNymphSW
+WNymphW
+WNymphNW
+
+
+WDemon		 * 36 Demon
+ dc.w WDemonN-list9
+ dc.w WDemonNE-list9
+ dc.w WDemonE-list9
+ dc.w WDemonSE-list9
+ dc.w WDemonS-list9
+ dc.w WDemonSW-list9
+ dc.w WDemonW-list9
+ dc.w WDemonNW-list9
+
+WDemonN		dc.w 384,385,386,387,386,385,-1
+WDemonNE	dc.w 388,389,390,391,390,389,-1
+WDemonE		dc.w 392,393,394,395,394,393,-1
+WDemonSE	dc.w 396,397,398,399,398,397,-1
+WDemonS		dc.w 400,401,402,403,402,401,-1
+WDemonSW	dc.w 404,405,406,407,406,405,-1
+WDemonW		dc.w 408,409,410,411,410,409,-1
+WDemonNW	dc.w 412,413,414,415,414,413,-1
+
+
+WSnake		* 37 snake
+ dc.w WSnakeN-list9
+ dc.w WSnakeNE-list9
+ dc.w WSnakeE-list9
+ dc.w WSnakeSE-list9
+ dc.w WSnakeS-list9
+ dc.w WSnakeSW-list9
+ dc.w WSnakeW-list9
+ dc.w WSnakeNW-list9
+
+WSnakeN	dc.w 608,609,-1
+WSnakeNE	dc.w 610,611,-1
+WSnakeE		dc.w 610,611,-1
+WSnakeSE	dc.w 612,613,-1
+WSnakeS		dc.w 612,613,-1
+WSnakeSW	dc.w 613,614,-1
+WSnakeW		dc.w 614,615,-1
+WSnakeNW	dc.w 616,610,-1
+
+WBee		* 38 killer bee
+ dc.w WBeeN-list9
+ dc.w WBeeNE-list9
+ dc.w WBeeE-list9
+ dc.w WBeeSE-list9
+ dc.w WBeeS-list9
+ dc.w WBeeSW-list9
+ dc.w WBeeW-list9
+ dc.w WBeeNW-list9
+
+WBeeN	dc.w 616,617,-1
+WBeeNE	dc.w 618,619,-1
+WBeeE	dc.w 618,619,-1
+WBeeSE	dc.w 620,621,-1
+WBeeS	dc.w 620,621,-1
+WBeeSW	dc.w 622,623,-1
+WBeeW	dc.w 622,623,-1
+WBeeNW	dc.w 616,617,-1
+
+WMinotaur	* 39 minotaur
+ dc.w WMinotaurN-list9
+ dc.w WMinotaurNE-list9
+ dc.w WMinotaurE-list9
+ dc.w WMinotaurSE-list9
+ dc.w WMinotaurS-list9
+ dc.w WMinotaurSW-list9
+ dc.w WMinotaurW-list9
+ dc.w WMinotaurNW-list9
+
+WMinotaurN	dc.w 288,289,290,291,290,289,-1
+WMinotaurNE	dc.w 292,293,294,295,294,293,-1
+WMinotaurE	dc.w 296,297,298,299,298,297,-1
+WMinotaurSE	dc.w 300,301,302,303,302,301,-1
+WMinotaurS	dc.w 304,305,306,307,306,305,-1
+WMinotaurSW	dc.w 308,309,310,311,310,309,-1
+WMinotaurW	dc.w 312,313,314,315,314,313,-1
+WMinotaurNW	dc.w 316,317,318,319,318,317,-1
+
+
+WVampire	* 40 vampire
+ dc.w WVampireN-list9
+ dc.w WVampireNE-list9
+ dc.w WVampireE-list9
+ dc.w WVampireSE-list9
+ dc.w WVampireS-list9
+ dc.w WVampireSW-list9
+ dc.w WVampireW-list9
+ dc.w WVampireNW-list9
+
+WVampireN	dc.w 416,417,418,419,418,417,-1
+WVampireNE	dc.w 420,421,422,423,422,421,-1
+WVampireE	dc.w 424,425,426,427,426,425,-1
+WVampireSE	dc.w 428,429,430,431,430,429,-1
+WVampireS	dc.w 432,433,434,435,434,433,-1
+WVampireSW	dc.w 436,437,438,439,438,437,-1
+WVampireW	dc.w 440,441,442,443,442,441,-1
+WVampireNW	dc.w 444,445,446,447,446,445,-1
+
+
+WBalrog		* 41 Balrog
+ dc.w WBalrogN-list9
+ dc.w WBalrogNE-list9
+ dc.w WBalrogE-list9
+ dc.w WBalrogSE-list9
+ dc.w WBalrogS-list9
+ dc.w WBalrogSW-list9
+ dc.w WBalrogW-list9
+ dc.w WBalrogNW-list9
+
+WBalrogN	dc.w 512,513,514,515,514,513,-1
+WBalrogNE	dc.w 516,517,518,519,518,517,-1
+WBalrogE	dc.w 516,517,518,519,518,517,-1
+WBalrogSE	dc.w 520,521,522,523,522,521,-1
+WBalrogS	dc.w 520,521,522,523,522,521,-1
+WBalrogSW	dc.w 520,521,522,523,522,521,-1
+WBalrogW	dc.w 524,525,526,527,526,525,-1
+WBalrogNW	dc.w 528,529,530,531,530,529,-1
+
+
+
+ENDTABLE
+;---------
+ END

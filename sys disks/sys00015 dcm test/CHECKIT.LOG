@@ -1,0 +1,48 @@
+                            CheckIt Activity Log
+                             4/16/1991 09:20:26
+
+                                    john
+                                  cummins
+
+
+                            === MEMORY TEST ===
+
+MEMORY CONFIGURATION:
+
+    Known Memory:
+        Base        640K   From      0K to    640K   (000000h to 09FFFFh)
+        Extended  None
+
+    Selected for Test:
+        Base        640K   From      0K to    640K   (000000h to 09FFFFh)
+        Extended  None
+
+MEMORY TEST RESULTS: (QUICK TEST ONLY)
+
+    Program Buffers..............................................Passed
+    Base Memory..................................................Passed
+    Extended Memory..............................................Not Tested
+
+
+                  *** END TESTS: NO ERRORS ENCOUNTERED ***
+
+                         === SYSTEM BOARD TEST ===
+
+CPU Functions:
+    CPU General Functions........................................Passed
+    CPU Math Instructions........................................Passed
+    CPU Logic Instuctions........................................Passed
+    CPU Protected Mode...........................................Passed
+
+NPU Functions:
+    NPU Arithmetic Functions.....................................Skipped
+    NPU Comparison Functions.....................................Skipped
+    NPU Trigonometric Functions..................................Skipped
+
+Controllers:
+    DMA Controller...............................................Passed
+    Interrupt Controller.........................................Passed
+
+
+                  *** END TESTS: NO ERRORS ENCOUNTERED ***
+

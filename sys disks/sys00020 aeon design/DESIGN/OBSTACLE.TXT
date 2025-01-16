@@ -1,0 +1,114 @@
+
+
+            AEON OBSTACLES. COPYRIGHT (C) 1988. LEVEL 9 
+            ------------------------------------------- 
+
+GENERAL NOTES 
+
+The underlying system allows "free" use of 3D graphic effects and 
+so there will be a great many solid objects - especially things 
+like banisters and wrought-iron which are see-through and show off 
+the 3D system to best effect. 
+
+However, many obstacles will still be set in the floor or walls. 
+
+
+USES OF OBSTACLES 
+
+A major feature of Aeon is that objects interect wherever possible. 
+It is not feasible to completely list such effects without the 
+design becoming hopelessly unwieldy, but here are some examples. 
+
+On fire levels, there will be gratings in the floor through which 
+flames occasionally emerge. The idea is to work out the pattern 
+involved and cross the gratings between bursts of fire, but if you 
+leave things on the grating then the following might happen.. 
+ Inflamable object (eg scroll, chest): burns, leaving any contents; 
+ Fireball wand: recharged;  Food: cooked; Torch: lit; 
+ Ice: melted, leaving any contents.
+
+On water levels, rain drips down. It fills any bottle below, and 
+can be used to water plants, or thrown as a weapon (if acid rain). 
+Acid water corodes metal, destroying locks etc. 
+
+ON GROUND 
+
+Trigger tiles: put enough weight on one of these to open/close 
+door, release monster, fire missile from side or roof, remove 
+section of floor etc. 
+ 
+Rivers of Water/Lava/Mud: cross when frozen or bridged. 
+
+Canyons: cross when bridged. 
+
+Gratings: emit jets of fire/wind in a pattern.  
+
+Trapdoor: return you/monster to previous level. 
+
+Areas of mist/grass/mud which you wade slowly through - feet 
+invisible. They act to slow movement and hence pursuit, and hide 
+things on the ground. 
+
+Teleport discs (see elsewhere). 
+
+
+ON WALL 
+
+Triggers: press..
+
+Doors of Rock/Ice/Fire which block access unless removed (e.g by 
+trigger, or opposing magic). 
+ 
+Waterfall/Fog which hides doorway.  
+
+Bells to ring. Correct tune pacifies monster. 
+
+Torches to light place; to take, move up to one. 
+
+Doors to: open with key; choose correct one of; wedge shut by 
+putting object on ground; remotely opened (eg from balcony or 
+defensible place); 
+
+Gargoyles/statues which come to life. 
+
+Walls which hide doors (just walk through). 
+
+Shiny walls which reflect magic back. 
+
+Door which is really a mouth (and v.v). 
+
+Level changes (e.g balconies) to be crossed by e.g beanstalk. 
+
+
+PUZZLES CATEGORIES 
+
+Aeon can be thought of as a dungeon construction set, linked to 
+a random number generator, as it tries to ensure that the game 
+is different every time it is played. One method used is to have 
+room templates, which specify the category of a puzzle at any 
+place, but not which one - for example that there is a bridge, 
+but now whether it is a troll bridge, or one activated by a 
+button, or one that breaks if you carry possessions across etc.. 
+Categories of puzzle follow: 
+
+Bridge. Troll bridge, button-activated, appearing/disappearing, 
+weak, only there when npc crossing, 
+
+Vertical Climb. Grow Beanstalk, trigger rising platform, 
+
+Trigger. Press on/press off, keep pressed for on, 
+
+Door triggers. Press, use same colour key, use trigger elsewhere, 
+opens this door and closes others,  
+
+Door knocker. Rings bell/buzzer/sounds knocking. Wakes statue(s), 
+wakes picture, summons npc of chosen type, 
+
+
+
+
+
+
+
+
+
