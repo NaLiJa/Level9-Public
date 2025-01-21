@@ -1,0 +1,134 @@
+ Grange Murders Animation
+
+2500-2601 People Animation
+  2500-2509 walk
+  2510-2519 Stand
+  2520-2529 Reach (left)
+  2530-2539 Reach (right)
+  2540-2549 Sit
+  2550-2559 Reach up
+  2560-2569 Crouch
+  2570-2579 Get Up
+  2580-2589 Reading paper (sitting)
+  2590-2599
+
+2600-2609 People (special) animation
+  2600 (2601) Walk up stairs
+  2602 (2603) Walk down stairs
+
+2600-2649 COURTROOM animation
+  2600 Defence laywers head, looking right and talking
+  2602 Defence laywers head, looking up    and talking
+  2604 Defance lawyers body, facing right and gesturing.
+ (2608) demo
+  2610 Judge arms @ rest
+  2611 Judge using hammer
+  2613 Judge looking at Jury
+  2614 Judge looking at witness
+  2615 Judge talking
+  2617 Judge talking to jury
+  2619 Judge talking to witness
+  2621 Judge, putting on gloves and black cap
+  2622 Judge, wearing cap & looking at jury
+  2623 Judge, wearing cap & looking at witness
+  2624 Judge, wearing cap & talking to jury
+  2626 Judge, wearing cap & talking to witness
+  2628 Camera sequence
+   2629 Camera lift
+   2630 Camera lower
+  2631 Ear-Scratch sequence
+   2632 scratch
+   2633 lift hand
+   2634 lower hand
+  2635 Fly
+  2636 Scratch head
+   2637 scratch
+  2638 (2639) Courtroom forground sequence
+  2640 Judges head blinking
+  2642 Judges head blinking and looking at jury
+  2644 Judges head blinking and looking at witness
+  2646 Clerks pen
+  
+2610 butterfly for room ****
+2612 butterfly for room ****
+2614 pecking bird
+
+2650 (2651) tap dripping
+2652 (2653) tap running
+2654 (2655) candelabra
+2656 (2658) Fire
+2657 **** not used
+2659 (2660) glass-cased clock
+2661 (2662) washing machine
+2663 (2664) fountain
+
+   2665 (2666,2667) part of frog/2676
+   2668 ** not used
+   2669 ** not used
+   2670 part of frog/2676
+   2671 ** not used
+
+   2672 part of 2678
+2673 (2674) Cigarette smoke #1
+2675 (2674) Cigarette smoke #2
+   2676 (2665,2666,2667,2670,2677) Was a frog/ Not used
+2678 (2670,2672,2679,2681) Frog for room 43
+   2680,2681,2682 part of 2693
+   2684,2685,2686 part of 2693
+   2688,2689,2690 part of 2693
+2693 (2680,2681,2682,2684,2685,2686,2688,2689,2690,2694) butterfly for room 38
+   2694 part of 2693
+2695 (2696) butterfly for room 40
+2697 (2698) butterfly for room 46
+   2699 ** not used
+
+2700-2709 Portrait Animation
+  2700 (2701) Blink
+  2702 Smile
+  2703 Face #1
+  2704 Face #2
+  2705 (6) Talk
+  2707 Angry
+  2708 Surprise
+  2709 Sad
+  2712 Drop monacle (Rasteroffset=0, Anthony only)
+  2713 Replace monacle (Rasteroffset=0, Anthony only)
+  2714 Fire gun
+  2717 Lift notepad
+  2719 Write upon notepad
+  2722 Lower notepad
+  2724 Life cigaratte holder
+  2725 Puff of smoke
+  2726 Lower cigarette holder
+  2730 lift (large) book
+  2733 Hold book
+  2734 (2735,2736) Lower (large) book
+
+2737 (2738) Globe spinning fast
+   2739 not used
+
+2740 (2741) Pick up phone
+2742        Put down phone
+
+2743 (2744) Mobile (wind chime)
+2745 (2746) Chicken on oven
+2747 (2748) top    half of wind chime
+2749 (2750) bottom half of wind chime
+   2751 (2752) bubbles/not used
+2753 steam (with SHIFT)
+2754 steam (with SHIFT)
+2755 bees
+2757 Goldfish #1
+2766 Bubbles
+2768 food mixer
+2770 kettle
+2772 oil lamp
+2773         *** Not used
+2774 oil lamp (with SHIFT)
+2775 oil lamp (with SHIFT)
+2776 Goldfish #2
+2777 coffee pot
+
+2800-2809 Basic 'Raise hand to mouth' and back
+2810-2819 Drink from cup
+

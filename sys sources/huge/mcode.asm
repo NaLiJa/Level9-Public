@@ -1,0 +1,2297 @@
+ page 128,122 ;length,width
+;IBM KAOS DRIVER. Machine Code Interface (Originally for HERO)
+
+;MCODE.ASM
+
+;Copyright (C) 1988,1989 Level 9 Computing
+
+;-----
+
+name mcode
+
+;...sInclude files:0:
+
+;These include files must be named in MAKE.TXT:
+ include consts.asm
+ include common.asm
+ include structs.asm
+
+;...e
+
+;...sPublics and externals:0:
+
+;* extrn counter:word ;>
+
+ public AcodeOverlay
+ public CS_ClipPosition
+ public CS_LastTopLine
+ public CS_TextDestination
+ public Game_AcodeStart
+ public Game_BGSpecials
+ public Game_DAMSSpecials
+ public Game_ErrorHandler
+ public Game_FGSpecials
+ public Game_FGSpecialsMovedSprite
+ public Game_HandleCR
+ public Game_Scheduler
+ public Game_SpecialMissile
+ public Game_VBL
+ public GrabAllMemory
+ public GrabHighMemory
+ public GrabLowMemory
+ public GSX_ReadPtr
+ public MachineCode
+ public MCreturn
+ public SetUpHeroLists
+
+;In AINT.ASM:
+ extrn prgstr:word
+ extrn start:near
+ extrn MCcontinue:near
+
+;In BIN.ASM:
+   IFE TwoD
+ extrn AddrBuildRoom:dword
+ extrn AddrClearChangeMaps:dword
+ extrn AddrClearRectangle:dword
+ extrn AddrCopyTextArea:dword
+ extrn AddrFindObject:dword
+ extrn AddrScreenFlip:dword
+ extrn AddrSetGraphicsWindow:dword
+ extrn AddrSetUpPalette:dword
+ extrn AddrUpdateScreen:dword
+ extrn Addr3DEmptyRoom:dword
+ extrn Addr3DInitDisc:dword
+ extrn Addr3DObjectHandler:dword
+ extrn Addr3DPlotLogicalScreen:dword
+ extrn Addr3DPlotPhysicalScreen:dword
+ extrn Addr3DPreLoadCells:dword
+ extrn Addr3DSetupPointers:dword
+ extrn Addr3DSetupVariablePointers:dword
+ extrn Addr3DUnplotScreen:dword
+ extrn AddrPurgeAllCells:dword
+ extrn AddrSetMaxFrameRate:dword
+   ENDIF ;TwoD
+ if Scroll
+ extrn AddrInitialiseScrolling:dword
+ extrn AddrScrollDirection:dword
+ endif ;Scroll
+
+;In DRIVER.ASM:
+ extrn DisplayDosDecimal:near
+ extrn InLineDos:near
+ extrn GeneralLoadFile:near
+ extrn GeneralSaveFile:near
+ extrn MCClearRectangle:near
+ extrn MCInvertedOSwrchV1:word
+ extrn MCOSwrchV1:word
+
+;In GAME.ASM:
+ extrn ByteWS:word
+ extrn B_LastKeyPressed:byte
+ extrn CGA_MustRebuild:byte
+ extrn HiLo_RasterIndex:word
+ extrn HiLo_ScreenXblocks:word
+ extrn HiLo_ScreenYblocks:word
+ extrn LoLongFreeWorkSpace:word
+ extrn LoLongLogicalBase:word
+ extrn LoLongPhysicalBase:word
+ extrn List28:byte
+ extrn LongWS:word
+ extrn MCCalculateMemoryFree:near
+ extrn MCDisplayAllSprites:near
+ extrn MCDoAllTimers:near
+ extrn MCHandlePlayerInput:near
+ extrn MCHeroInit:near
+ extrn MCHeroInput:near
+ extrn MCHeroOnceOnlyInit:near
+ extrn MCMoveAllSprites:near
+ extrn MCScrollTextLine:near
+ extrn MCSpecials:near
+ extrn TextBuffer:word
+ extrn WordWS:word
+ if TraceCode              ;@
+  extrn debugword:word      ;@
+ endif ;TraceCode          ;@
+   IF TwoD
+ if TraceCode              ;@
+ extrn CheckChain:near     ;@
+ extrn CheckCD:near        ;@
+ extrn CheckSTaddress:near ;@
+ endif ;TraceCode          ;@
+   ENDIF ;TwoD
+
+;In HUGE.ASM:
+;! extrn CS_CGA_CellSegment:word
+ extrn CS_Acode:word
+ extrn CS_GameData:word
+ extrn CS_FreeParagraphs:word
+;! extrn CS_ScreenMode:byte
+   IF TwoD
+ extrn CS_ViewSegment:word
+   ENDIF ;TwoD
+ extrn MCCloseDown:near
+ extrn SafeShutDown:near
+ extrn TopOfMemoryAllocated:word
+
+;In INTRPT.ASM:
+ extrn CS_Hero_Clock:word
+ extrn DisplayVisibleString:near
+ extrn GSX_Down:byte
+ extrn GSX_Queue:word
+ extrn GSX_WritePtr:word
+ extrn MCInitTask:near
+ extrn MCSnooze:near
+ if DosKeyboard
+ extrn ConvertRealKeyboard:near
+ endif ;DosKeyboard
+
+;In MOVE.ASM:
+ extrn MCDestroyList20:near
+ extrn MCDestroyList22:near
+ extrn MCFindSprite:near
+ extrn MCSetUpNewSprite:near
+ extrn MCSpecialCheck:near
+ extrn MCStartBigExplosion:near
+
+;...e
+
+;-----
+
+code segment public 'code'
+ assume cs:code,ds:code
+
+;-----
+
+;...sSubroutines:0:
+
+CS_Entry0  dw 0,0           ;IP,CS values for Acode_Start
+CS_Entry1  dw 0,0           ;IP,CS values for FGSpecials
+CS_Entry2  dw 0,0           ;IP,CS values for FGSpecialsMovedSprite
+CS_Entry3  dw 0,0           ;IP,CS values for BGSpecials
+                            ;             was SpecialCollision
+CS_Entry5  dw 0,0           ;IP,CS values for DAMSSpecials
+CS_Entry6  dw 0,0           ;IP,CS values for IRQ/Scheduler
+CS_Entry7  dw 0,0           ;IP,CS values for VBL
+CS_Entry8  dw 0,0           ;IP,CS values for HandleCR
+CS_Entry11 dw 0,0           ;IP,CS values for SpecialMissile/Error Handler
+
+CS_TextDestination dw 0     ;Bit mask, 1=buffers, 2=logical, 4=physical
+CS_ClipPosition    dw 0     ;Top pixel line of text
+CS_LastTopLine     dw 0     ;buffer line at top of text window
+
+;-----
+
+;Transfer control from machine code to compiled-acode.
+
+Jump_Acode macro p1
+
+ mov ds,cs:CS_Acode
+ assume ds:nothing
+ mov dh,0 ;Machine code assumes this, for 8 to 16 bit conversions.
+ mov di,offset p1 ;p1 = 4 bytes in CS: set-up with new IP and CS
+ db 02Eh,0FFh,02Dh ;JMP FAR CS:[DI]
+
+ endm ;Jump_Acode
+
+;-----
+
+;Stack current 32-bit register equivalents likely to be corrupted
+;by call, then stack return address in a format compatable with the
+;code generated by the 8086 acode cross-compiler.
+
+Call_Acode macro p1
+
+ push bp
+ push di
+ push si
+;Transfer control from machine code to compiled-acode.
+ push cs                    ;Segment address for CompAcodeRet
+ mov ax,offset CompAcodeRet ;IP absolute for CompAcodeRet
+ push ax
+ mov ax,PCretf+1
+ push ax                    ;return address for compiled acode
+ Jump_Acode p1
+
+ endm ;Call_Acode
+
+CompAcodeRet:
+ mov ax,seg vars
+ mov ds,ax
+ assume ds:vars
+ pop si
+ pop di
+ pop bx
+ ret
+
+;-----
+
+;Interpreted ACODE has executed '0Ch' - call to transfer 
+;to machine code at es:[bx]
+
+MachineCode proc far
+
+ pop ax
+ cmp ax,offset start
+ je mc02
+
+;stack is screwed
+
+ call SafeShutDown ;restore vectors
+ mov ax,0003h ;Set screen mode 3 (80x25 text)
+ int 10h
+ call InLineDos
+ db "Invalid CODE+ ;stack corrupted$"
+ mov ah,04Ch                ;Terminate process
+ int 21h
+
+;Set up required to execute compiled-code (must be re-entrant)
+
+mc02:
+ mov ds,cs:CS_Acode    ;registers ds,dh required in compiled code
+ mov dh,0
+ push ds               ;execute JMP DS:BP
+ push bp
+ retf
+
+;NOTE: the assembler compiles as... JMP WORD PTR ES:[BX]
+;NOTE: memory orientated jump-indirect instructions are non-renetrant
+
+ assume ds:nothing
+
+
+MachineCode endp
+
+;-----
+
+SetUpHeroLists proc near
+
+ mov es,cs:CS_Acode ;segment containing LIST11
+
+;Lists 0 thru 9 are set up from the header in TABLE.TXT
+
+ mov di,PCListVector+10*4 ;about to write list 10 ptr
+
+ xor ax,ax                  ;List entry not used
+ stosw ;mov es:[di],ax      ;list 10
+ stosw                      ;list 10
+
+ mov ax,offset PCListVector ;Table 11 is List Vectors
+ stosw ;mov es:[di],ax
+ mov ax,cs:CS_Acode
+ stosw
+
+ xor ax,ax                  ;List entry not used
+ stosw ;mov es:[di],ax      ;list 12
+ stosw
+
+ stosw ;mov es:[di],ax      ;list 13
+ stosw
+
+ stosw ;mov es:[di],ax      ;list 14
+ stosw
+
+ stosw ;mov es:[di],ax      ;list 15
+ stosw
+
+ stosw ;mov es:[di],ax      ;list 16
+ stosw
+
+ stosw ;mov es:[di],ax      ;list 17
+ stosw
+
+ stosw ;mov es:[di],ax      ;list 18
+ stosw
+
+ stosw ;mov es:[di],ax      ;list 19
+ stosw
+
+ stosw ;mov es:[di],ax      ;list 20
+ stosw
+
+ stosw ;mov es:[di],ax      ;list 21
+ stosw
+
+ stosw ;mov es:[di],ax      ;list 22
+ stosw
+
+ stosw ;mov es:[di],ax      ;list 23
+ stosw
+
+ mov ax,offset TextBuffer
+ stosw ;mov es:[di],ax      ;list 24
+ mov ax,seg vars
+ stosw
+
+ xor ax,ax
+ stosw ;mov es:[di],ax      ;list 25
+ stosw
+
+ xor ax,ax
+ stosw ;mov es:[di],ax      ;list 26
+ stosw
+
+ xor ax,ax
+ stosw ;mov es:[di],ax      ;list 27
+   IF TwoD
+ mov ax,cs:CS_ViewSegment
+   ENDIF ;TwoD
+ stosw
+
+ mov ax,offset List28
+ stosw ;mov es:[di],ax      ;list 28
+ mov ax,seg vars
+ stosw
+
+ mov ax,offset LongWS
+ stosw ;mov es:[di],ax      ;list 29
+ mov ax,seg vars
+ stosw
+
+ mov ax,offset WordWS
+ stosw ;mov es:[di],ax      ;list 30
+ mov ax,seg vars
+ stosw
+
+ mov ax,offset ByteWS
+ stosw ;mov es:[di],ax      ;list 31
+ mov ax,seg vars
+ stosw
+
+ mov ax,offset MCcontinue
+ mov word ptr es:[0],ax     ;Set up address for jmp cs:[0]
+ mov word ptr es:[2],cs
+
+ mov al,0C3h
+ mov byte ptr es:0[PCretf],al ;Opcode for "RET"
+ mov al,0CBh
+ mov byte ptr es:1[PCretf],al ;Opcode for "RETF"
+ ret
+
+SetUpHeroLists endp
+
+;-----
+
+GrabAllMemory:
+
+ mov bx,cs:CS_FreeParagraphs
+
+GrabLowMemory proc near
+
+;bx=Number of paragraphs required.
+;returns ax=address of allocation.
+;bx,cx,dx,si,di,bp,ds,es - preserved.
+
+ push ds
+ push bx
+
+ mov ax,seg vars
+ mov ds,ax
+ assume ds:vars
+
+ cmp bx,cs:CS_FreeParagraphs
+ jbe rm01
+ jmp rm02                   ;run out of memory
+
+rm01:
+ mov ax,ds:LoLongFreeWorkSpace
+ sub cs:CS_FreeParagraphs,bx
+ add ds:LoLongFreeWorkSpace,bx
+
+ pop bx
+ pop ds
+ assume ds:nothing
+ ret
+
+GrabLowMemory endp
+
+;-----
+
+;  Top of Memory ---------->
+;  Stack Base ------------->  ss:0
+;  Top of Free ------------>
+;  Bottom of Free Memory -->  ds:LoLongFreeWorkspace
+
+;        Top of Free   - Bottom of Free = CS_FreeParagraphs
+;        Top of Memory - Top of Free    = ds:TopOfMemoryAllocated
+
+;-----
+
+;bx is allocation required
+;cx is stack base correction
+
+GrabHighMemory proc near
+
+ cmp bx,(01000h-(MultiTaskStackSize/16))
+ jbe gh02
+
+;Distance between lowest point in High-Memory allocation and the
+;highest point on the stack has exceeded 64K.
+
+;    1234567890123456789012345678901234567890
+ call SafeShutDown ;restore vectors
+ mov ax,0003h ;Set screen mode 3 (80x25 text)
+ int 10h
+ call InLineDos
+ db "Invalid GRABHIGH (stack segment) call$"
+ mov ah,04Ch                ;Terminate process
+ int 21h
+
+gh02:
+ push bx                    ;Save original request, required by caller
+ push cx
+ push ds
+
+ mov ax,seg vars
+ mov ds,ax
+ assume ds:vars
+
+ mov ax,ds:TopOfMemoryAllocated
+ add cs:CS_FreeParagraphs,ax ;Add previous allocation back to Memory Pool
+
+ add bx,(MultiTaskStackSize/16) ;Add amount required by multi-tasking stack.
+ mov ds:TopOfMemoryAllocated,bx
+ cmp bx,cs:CS_FreeParagraphs
+ jbe gh03
+ jmp rm02                   ;Out of memory
+
+gh03:
+ sub cs:CS_FreeParagraphs,bx
+ mov dx,ds:LoLongFreeWorkSpace
+ add dx,cs:CS_FreeParagraphs ;Top of memory/Top of stack = New segment address
+
+ add dx,cx                  ;adjust for stack-base offset
+
+ mov ax,ss
+ sub ax,dx                  ;distance stack has to move
+ rept 4
+ shl ax,1                   ;distance in bytes
+ endm ;rept
+
+ mov cx,sp                  ;ss:sp is current stack
+ add cx,ax                  ;ss:sp and dx:cx refer to same location
+
+;protected move - stack valid all the time
+ mov ss,dx                  ;Set up stack at top of Transparency segment
+ mov sp,cx
+
+ mov ax,ss ;Return newly allocated segment
+
+ pop ds
+ pop cx
+ sub ax,cx                  ;adjust for stack-base offset
+ pop bx
+ ret
+
+GrabHighMemory endp
+
+;-----
+
+ if DosKeyboard
+
+;When running under SYMDEB, set TraceCode=1 (this displays the
+;values of all the segment registers during initialisation. Then
+;execute up to this point and single-step the Jump_Acode macro,
+;this will then give you the offset into the GameData segment of
+;the ACODE jump-table.
+
+ db "ABC - Game_AcodeStart " ;For SYMDEB
+
+ endif ;DosKeyboard
+
+Game_AcodeStart:
+ Jump_Acode CS_Entry0
+
+;-----
+
+;Overwrite start of acode in GAMEDATA with vectors to interface
+;machine-code and compiled machine-code. The main problem here
+;is that cs: will be different for the two sections of code.
+
+AcodeOverlay proc near
+
+ push ds
+ push es
+
+;Create jump table for 'hero system -> compiled acode'.
+
+ mov ax,PCretf
+ mov word ptr cs:0[MenuSeg1],ax
+ mov ax,cs:CS_Acode
+ mov word ptr cs:2[MenuSeg1],ax
+
+ mov cs:CS_Entry0+2,ax ;AcodeStart
+ mov cs:CS_Entry1+2,ax ;FGSpecials
+ mov cs:CS_Entry2+2,ax ;MovedSprite
+ mov cs:CS_Entry3+2,ax ;BGSpecials
+ mov cs:CS_Entry5+2,ax ;DAMSSpecials
+ mov cs:CS_Entry6+2,ax ;Scheduler
+ mov cs:CS_Entry7+2,ax ;VBL
+ mov cs:CS_Entry8+2,ax ;HandleCR
+ mov cs:CS_Entry11+2,ax ;SpecialMissile
+ mov di,offset CS_Entry0
+
+ mov ax,seg vars
+ mov ds,ax
+ assume ds:vars
+
+ mov es,cs:CS_Acode
+ mov bx,cs:prgstr
+
+;es:bx is now start of acode. For Hero/Adept this will be:
+;   0,1  data @Dummy
+;   2,3  data @Dummy
+;   4    code +
+;   5,6  data @AcodeFns
+;   7,8  data @McFns
+
+ mov ax,bx
+ add ax,es:5[bx]            ;Get value of 'AcodeFns'
+ mov cs:CS_Entry0,ax
+
+ add ax,3
+ mov cs:CS_Entry1,ax
+
+ add ax,3
+ mov cs:CS_Entry2,ax
+
+ add ax,3
+ mov cs:CS_Entry3,ax
+ 
+ add ax,6 ;skip entry 4
+ mov cs:CS_Entry5,ax
+
+ add ax,3
+ mov cs:CS_Entry6,ax
+
+ add ax,3
+ mov cs:CS_Entry7,ax
+
+ add ax,3
+ mov cs:CS_Entry8,ax
+
+ add ax,9 ;skip entry 9,10
+ mov cs:CS_Entry11,ax
+
+;Now put jump table for 'compiled code -> hero system'
+
+;es is CS_Acode, ds:=cs:, bx is prgstr.
+ mov ax,cs
+ mov ds,ax
+ assume ds:code
+ mov di,es:7[bx]            ;Read value of 'MCFns' defined in acode source
+ add di,bx
+ mov si,offset MCFnsTable
+ mov cx,MCFnsLength
+ rep movsb
+
+ mov si,cs:CS_Entry0        ;address of .MCfns in acode source
+ cmp byte ptr es:[si],0E9h  ;Read acode JMP opcode
+ jne BadAcode
+
+ pop es
+ pop ds
+ assume ds:nothing
+ ret
+
+AcodeOverlay endp
+
+BadAcode:
+ call SafeShutDown ;restore vectors
+ mov ax,0003h ;Set screen mode 3 (80x25 text)
+ int 10h
+ call InLineDos
+ db "Jump table invalid/Gamedata not 8086$"
+ mov ah,04Ch                ;Terminate process
+ int 21h
+
+;-----
+
+Game_FGSpecials:
+ Call_Acode CS_Entry1
+
+Game_FGSpecialsMovedSprite:
+ Call_Acode CS_Entry2
+
+Game_BGSpecials:
+ Call_Acode CS_Entry3
+
+Game_DAMSSpecials:
+ Call_Acode CS_Entry5
+
+Game_Scheduler:
+ Call_Acode CS_Entry6
+
+Game_VBL:
+ Call_Acode CS_Entry7
+
+Game_HandleCR:
+ Call_Acode CS_Entry8
+
+Game_ErrorHandler:
+Game_SpecialMissile:
+ Call_Acode CS_Entry11
+
+ purge Call_Acode           ;speed up assembly
+ purge Jump_Acode           ;speed up assembly
+
+;-----
+
+;      SEG CODE             GAMEDATA
+;      --- ----             --------
+
+;Acode executes GOSUB:
+;                           GOSUB @MCentry
+;                           JMP CODE:address
+;      execute subroutine
+;      JMP GAMEDATA:44
+;                           RET
+;                           instruction after gosub
+
+;Acode executes GOTO:
+;                           GOTO @MCentry
+;                           JMP CODE:address
+;      execute subroutine
+;      JMP GAMEDATA:44
+;                           RET
+
+;Overwrite start of ACODE with the jumps from compiled-acode to
+;machine-code, the acode-source reserves six bytes per jump.
+;On the PC I overwrite each entry with a five-byte intra-segment
+;jump to anywhere in memory.
+
+FnsEntry macro p1
+
+;Acode expects each entry to be padded up to 6 bytes
+ db 0EAh                    ;opcode for JMP FAR PTR
+ dw p1,seg code
+ db 0
+
+ endm ;FndEntry
+
+;-----
+
+MCFnsTable:
+;jump table for MC functions called from Acode
+;reserve 6 bytes per jump - absolute, long jumps
+;poked in by MC
+ FnsEntry MCHeroOnceOnlyInit      ;0
+ FnsEntry MCHeroInit              ;1
+ FnsEntry MCClearScreen           ;2
+ FnsEntry MCMoveScreen            ;3
+ FnsEntry MCSpecials              ;4
+ FnsEntry MCBuildBackground       ;5
+ FnsEntry MCDisplayDestroyedWalls ;6
+ FnsEntry MCMoveAllSprites        ;7
+ FnsEntry MCDisplayAllSprites     ;8
+ FnsEntry MCTrimEdges             ;9
+ FnsEntry MCDisplayTextLine       ;10
+ FnsEntry MCDisplayUpperTextLine  ;11
+ FnsEntry MCDoAllTimers           ;12
+ FnsEntry MCCalculateMemoryFree   ;13
+ FnsEntry MCHeroInput             ;14
+ FnsEntry MCOswrchV1              ;15
+ FnsEntry MCInvertedOSwrchV1      ;16
+ FnsEntry MCDestroyList20         ;17 Destroy moved sprite
+ FnsEntry MCDestroyList22         ;18 Destroy fixed sprite
+ FnsEntry MCCloseDown             ;19
+ FnsEntry MCFindSprite            ;20
+ FnsEntry MCSetUpNewSprite        ;21
+ FnsEntry MCSprite                ;22
+ FnsEntry MCHandlePlayerInput     ;23
+ FnsEntry MCReturnFrameTime       ;24
+ FnsEntry MCUpdateFrameTime       ;25
+ FnsEntry MCClearRectangle        ;26
+ FnsEntry MCMapBuildBackground    ;27
+ FnsEntry MCPreScrollMap          ;28
+ FnsEntry MCSpecialCheck          ;29
+ FnsEntry MCStartBigExplosion     ;30
+ FnsEntry MCScrollTextLine        ;31
+ FnsEntry MCReCalcSpriteGraphics  ;32
+ FnsEntry MCOsrdch                ;33
+ FnsEntry MCChecksum              ;34
+ FnsEntry MCInit3D                ;35
+ FnsEntry MCDrawObjectV1          ;36
+ FnsEntry MCBuildViewMap          ;37
+ FnsEntry MCDisplayViewMap        ;38
+ FnsEntry MCInitBootPrg           ;39
+ FnsEntry MCReturnSpriteAddress   ;40
+ FnsEntry MCNoClipSprite          ;41
+ FnsEntry MCCalcScreenAddress     ;42
+ FnsEntry MCSaveFile              ;43
+ FnsEntry MCLoadFile              ;44
+ FnsEntry MCCopy                  ;45
+ FnsEntry MCAbsChangeListPtr      ;46
+ FnsEntry MCLoadCells             ;47
+ FnsEntry MCSetUpPtrs             ;48
+ FnsEntry MCParseInputWord        ;49
+ FnsEntry MCInitTask              ;50
+ FnsEntry MCSnooze                ;51
+ FnsEntry MCAddToListPtr          ;52
+ FnsEntry MCReserveMemory         ;53
+ FnsEntry MCSetUpVariablePtrs     ;54
+ FnsEntry MCPreLoadCells          ;55
+
+IFE TwoD
+ FnsEntry MCPlotLogicalScreen     ;56
+ FnsEntry MCPlotPhysicalScreen    ;57
+ FnsEntry MCUpdateScreen          ;58
+ FnsEntry MCUnplotScreen          ;59
+ FnsEntry MCSetPalette            ;60
+ FnsEntry MCSetTextWindow         ;61
+ FnsEntry MCSetGraphicWindow      ;62
+ FnsEntry MCClearChangeMaps       ;63
+ FnsEntry MCClearTextBuffer       ;64
+ FnsEntry MCCopyTextBuffer        ;65
+ FnsEntry MCEnableBuffer          ;66
+ENDIF ;TwoD
+ FnsEntry MCInitSound             ;67
+ FnsEntry MCStartSound            ;68
+ FnsEntry MCFindObj               ;69
+ FnsEntry MCInitGraphics          ;70
+ FnsEntry MCCalcMatrix            ;71
+ FnsEntry MCDrawVector            ;72
+ FnsEntry MCkeyDown               ;73
+ FnsEntry MCinstallJoystick       ;74
+ FnsEntry MCReserveChip           ;75
+ FnsEntry MCSaveProtected         ;76
+ FnsEntry MCInitialiseScrolling   ;77
+ FnsEntry MCScrollDirection       ;78
+ FnsEntry MCPurgeAllCells         ;79
+ FnsEntry MCSetMaxFrameRate       ;80 ********
+
+MCFnsLength=this byte-MCFnsTable
+
+ purge FnsEntry             ;speed up assembly
+
+;-----
+
+;The next three lines of assembler source were the only method I
+;could find to make the MicroSoft Assembler generate a
+;'far-return' instruction...
+
+IRQSwapTaskEnd proc far 
+
+ ret ;disassembles as 'RETF'
+
+IRQSwapTaskEnd endp
+
+;-----
+
+;Each subroutine is called from a gosub @MC instruction, via the
+;jump-block at the start of the acode, and exits by JMP MCreturn
+;(or an optimised equivalent.)
+
+MCreturn:
+ mov es,cs:CS_GameData ;*
+ mov ds,cs:CS_Acode     ;allow compiled acode to access vars and list11.
+ assume ds:nothing
+ mov dh,0                  ;For 8 to 16 bit conversions.
+
+;Note: All compiled acode requires ds=cs and dh=0 at all times,
+;so this must be set for the first time acode is run, when a new
+;acode task starts, and when returning from machine-code to
+;compiled acode.
+
+ db 0EAh                   ;Dissassembles as "JMP xxxx:PCretf"
+MenuSeg1:                  ;Self-modifying code.
+ dw offset PCretf          ;(intra-segment jump)
+ dw 0000h                  ;xxxx
+
+;...e
+
+;-----
+
+;...sAcode Subroutines:0:
+
+;-------------------------------------
+;Call only from compiled-machine code.
+;Subroutine number 2
+;-------------------------------------
+
+MCClearScreen proc near
+
+;This should clear all buffers associated with the screen and
+;the actual screen, including the LogicalScreen when 'flipping'
+
+ if TraceCode          ;@
+ mov cs:debugword,509h ;@
+ endif ;TraceCode      ;@
+
+ jmp MCReturn
+
+MCClearScreen endp
+
+;-------------------------------------
+;Call only from compiled-machine code.
+;Subroutine number 3
+;-------------------------------------
+
+MCMoveScreen proc near
+
+;Redundant
+ if TraceCode          ;@
+ mov cs:debugword,50Ah ;@
+ endif ;TraceCode      ;@
+
+ jmp MCReturn
+
+MCMoveScreen endp
+
+;-------------------------------------
+;Call only from compiled-machine code.
+;Subroutine number 5
+;-------------------------------------
+
+MCBuildBackground proc near
+
+;ST calls this in ADEPT every frame to copy the current
+;pre-scrolled background to the LogicalScreen.
+ if TraceCode          ;@
+ mov cs:debugword,50Bh ;@
+ endif ;TraceCode      ;@
+
+ jmp MCReturn
+
+MCBuildBackground endp
+
+;-------------------------------------
+;Call only from compiled-machine code.
+;Subroutine number 6
+;-------------------------------------
+
+MCDisplayDestroyedWalls proc near
+
+;ST uses this to set up sprites covering wall tiles which have
+;changed in the MAP Segment, but not in the pre-scroll background.
+ if TraceCode          ;@
+ mov cs:debugword,50Ch ;@
+ endif ;TraceCode      ;@
+
+ jmp MCReturn
+
+MCDisplayDestroyedWalls endp
+
+;-------------------------------------
+;Call only from compiled-machine code.
+;Subroutine number 9
+;-------------------------------------
+
+MCTrimEdges proc near
+
+;Sprite and background clipping
+ if TraceCode          ;@
+ mov cs:debugword,50Dh ;@
+ endif ;TraceCode      ;@
+
+ jmp MCReturn
+
+MCTrimEdges endp
+
+;-------------------------------------
+;Call only from compiled-machine code.
+;Subroutine number 10
+;-------------------------------------
+
+MCDisplayTextLine proc near
+
+;Redundant
+ if TraceCode          ;@
+ mov cs:debugword,50Eh ;@
+ endif ;TraceCode      ;@
+
+ jmp MCReturn
+
+MCDisplayTextLine endp
+
+;-------------------------------------
+;Call only from compiled-machine code.
+;Subroutine number 11
+;-------------------------------------
+
+MCDisplayUpperTextLine proc near
+
+;Redundant
+ if TraceCode          ;@
+ mov cs:debugword,50Fh ;@
+ endif ;TraceCode      ;@
+
+ jmp MCReturn
+
+MCDisplayUpperTextLine endp
+
+;-------------------------------------
+;Call only from compiled-machine code.
+;Subroutine number 22
+;-------------------------------------
+
+MCSprite proc near
+
+;Redundant
+ if TraceCode          ;@
+ mov cs:debugword,510h ;@
+ endif ;TraceCode      ;@
+
+ jmp MCReturn
+
+MCSprite endp
+
+;-------------------------------------
+;Call only from compiled-machine code.
+;Subroutine number 24
+;-------------------------------------
+
+;Return V1 as number of 'ticks' (5 ms) since last UpdateFrameTime.
+
+MCReturnFrameTime proc near
+
+ if TraceCode          ;@
+ mov cs:debugword,502h ;@
+ endif ;TraceCode      ;@
+
+ mov ax,seg vars
+ mov ds,ax
+ assume ds:vars
+
+ mov ax,cs:CS_Hero_Clock
+
+ mov es,cs:CS_Acode
+ mov es:V1,ax
+
+ jmp MCReturn
+
+MCReturnFrameTime endp
+
+;-------------------------------------
+;Call only from compiled-machine code.
+;Subroutine number 25
+;-------------------------------------
+
+;Reset 'ticks' count
+
+MCUpdateFrameTime proc near
+
+ if TraceCode          ;@
+ mov cs:debugword,503h ;@
+ endif ;TraceCode      ;@
+
+ mov cs:CS_Hero_Clock,0
+
+ jmp MCReturn
+
+MCUpdateFrameTime endp
+
+;-------------------------------------
+;Call only from compiled-machine code.
+;Subroutine number 27
+;-------------------------------------
+
+; A0 = bx
+; A1 = di
+; A6 = si
+
+MCMapBuildBackground proc near
+
+ if TraceCode          ;@
+ mov cs:debugword,504h ;@
+ endif ;TraceCode      ;@
+
+ mov ax,seg vars
+ mov ds,ax
+ assume ds:vars
+
+;! cmp cs:CS_ScreenMode,0
+;! jne EGA_Map
+;!
+;! mov si,0                   ;index into map/cells
+;! mov di,0                   ;offset into screen
+;!
+;! mov dx,0                   ;Y
+;!mp01:
+;! mov cx,0                   ;X position
+;!
+;!mp02:
+;!;Plot cell...
+;! push ds
+;!
+;! mov es,cs:CS_ViewSegment
+;! mov ah,0
+;! mov al,es:1[si]
+;! cmp ax,NumberOfCells
+;! jb CellOK
+;! mov ax,NumberOfCells
+;!CellOK:
+;!
+;! mov bx,CellWidth*CellHeight/4
+;! push dx
+;! mul bx                     ;Get index into sprite table
+;! pop dx
+;! mov bx,ax
+;!
+;! mov ds,cs:CS_CGA_CellSegment
+;! mov ax,0B800h
+;! mov es,ax
+;! mov ax,ds:1[bx]            ;get 4 pixels from top line
+;! mov es:[di],ax
+;! mov ax,ds:5[bx]            ;4 pixels from 2nd row
+;! mov es:2000h[di],ax
+;! mov ax,ds:9[bx]            ;4 pixels from 3rd row.
+;! mov es:50h[di],ax
+;! mov ax,ds:13[bx]           ;4 pixels from 4th row.
+;! mov es:2050h[di],ax
+;!
+;! pop ds
+;!
+;!;Next cell....
+;! inc cx                     ;next X coord
+;! add si,2                   ;Next MAP word
+;! inc di                     ;next screen byte (4 pixels)
+;!
+;! mov ax,ds:HiLo_ScreenXblocks
+;! xchg ah,al
+;! cmp cx,ax
+;! jb mp02
+;!
+;! sub di,ax                  ;back to start of current line
+;! add di,2*80                ;skip 2 pairs of interleaved lines
+;! inc dx                     ;next row
+;!
+;! mov ax,ds:HiLo_ScreenYblocks
+;! xchg ah,al
+;! cmp dx,ax
+;! jb mp01
+;!
+;!EGA_Map:
+ mov ds:CGA_MustRebuild,1   ;Next frame must be a complete re-build.
+
+;++++ The next instruction is different in ST machine code....
+;Map build is frequently followed by wait-for-keyboard:
+ mov ds:B_LastKeyPressed,0
+
+ jmp MCReturn
+
+MCMapBuildBackground endp
+
+;-------------------------------------
+;Call only from compiled-machine code.
+;Subroutine number 28
+;-------------------------------------
+
+MCPreScrollMap proc near
+
+;Only on ST; Set up pre-scrolled map
+ if TraceCode          ;@
+ mov cs:debugword,519h ;@
+ endif ;TraceCode      ;@
+
+ jmp MCReturn
+
+MCPreScrollMap endp
+
+;-------------------------------------
+;Call only from compiled-machine code.
+;Subroutine number 32
+;-------------------------------------
+
+MCReCalcSpriteGraphics proc near
+
+;Move_Animation now holds a valid sprite-number to be displayed for ALL
+;FUTURE screen displays. This is copied to Move_DataPtr (my workspace)
+
+ if TraceCode          ;@
+ mov cs:debugword,512h ;@
+ endif ;TraceCode      ;@
+
+ mov ax,seg vars
+ mov ds,ax
+ assume ds:vars
+
+   IF TwoD
+ if TraceCode          ;@
+ mov cs:debugword,513h ;@
+ call CheckChain       ;@
+ endif ;TraceCode      ;@
+   ENDIF ;TwoD
+
+ mov es,cs:CS_ACode     ;read list11
+ mov si,word ptr es:PCListVector+(20*4) ;table 20 = Move_Structure.
+
+   IF TwoD
+ if TraceCode        ;@
+ call CheckSTaddress ;@
+ endif ;TraceCode    ;@
+   ENDIF ;TwoD
+
+ mov di,ds:Move_InfoPtr[si] ;di=Perm_Structure
+
+   IF TwoD
+ if TraceCode     ;@
+ mov ax,di        ;@
+ call CheckCD     ;@
+ endif ;TraceCode ;@
+   ENDIF ;TwoD
+
+;! cmp cs:CS_ScreenMode,0
+;! je rc01 ;CGA?
+
+ mov ax,ds:Move_Animation_HiLo[si] ;add current animation offset
+ xchg ah,al
+ mov Move_DataPtr[si],ax    ;ax=displayed sprite number
+ 
+;!rc01:
+   IF TwoD
+ if TraceCode          ;@
+ mov cs:debugword,514h ;@
+ call CheckChain       ;@
+ endif ;TraceCode      ;@
+   ENDIF ;TwoD
+
+ jmp MCReturn
+
+MCReCalcSpriteGraphics endp
+
+;-------------------------------------
+;Call only from compiled-machine code.
+;Subroutine number 33
+;-------------------------------------
+
+MCOsrdch proc near
+
+ if TraceCode          ;@
+ mov cs:debugword,500h ;@
+ endif ;TraceCode      ;@
+
+ mov ax,seg vars
+ mov ds,ax
+ assume ds:vars
+
+ if DosKeyboard
+ call ConvertRealKeyboard
+ endif ;DosKeyboard
+
+ xor ax,ax                  ;Default is no key press
+ mov si,ds:GSX_ReadPtr
+ cmp si,ds:GSX_WritePtr
+ je NoKey
+ mov ax,ds:GSX_Queue[si]    ;Codes: al=ascii, ah=GSX
+ add byte ptr ds:GSX_ReadPtr,2
+NoKey:
+
+;>>>>>>>>>>>>>>>>>>>
+;ax is scan code
+;* cmp ax,0
+;* je debugnoscan
+;* push ax
+;* push bx
+;* push es
+;* push di
+;* mov ah,0Fh ;bright
+;* mov bx,0B000h ;monochrome
+;* mov es,bx
+;* mov di,cs:counter
+;* stosw
+;* add cs:counter,2
+
+;* pop di
+;* pop es
+;* pop bx
+;* pop ax
+;*debugnoscan:
+
+;>>>>>>>>>>>>>>>>>>
+
+ mov bh,0
+ mov bl,ah                  ;bx=GSX code
+ mov ah,0                   ;ax=ascii code
+
+ mov es,cs:CS_Acode
+ mov es:V1,ax
+ mov es:V2,bx
+
+ if TraceCode          ;@
+ mov cs:debugword,501h ;@
+ endif ;TraceCode      ;@
+
+ jmp MCReturn
+
+MCOsrdch endp
+
+;-------------------------------------
+;Call only from compiled-machine code.
+;Subroutine number 35
+;-------------------------------------
+
+MCInit3D proc near
+
+ if TraceCode          ;@
+ mov cs:debugword,515h ;@
+ endif ;TraceCode      ;@
+
+   IFE TwoD
+ call cs:Addr3DEmptyRoom
+
+ if TraceCode          ;@
+ mov cs:debugword,525h ;@
+ endif ;TraceCode      ;@
+   ENDIF ;TwoD
+
+ if TraceCode          ;@
+ mov cs:debugword,52Bh ;@
+ endif ;TraceCode      ;@
+
+ jmp MCReturn
+
+MCInit3D endp
+
+;-------------------------------------
+;Call only from compiled-machine code.
+;Subroutine number 36
+;-------------------------------------
+
+MCDrawObjectV1 proc near
+
+ if TraceCode          ;@
+ mov cs:debugword,516h ;@
+ endif ;TraceCode      ;@
+
+ mov ax,seg vars
+ mov ds,ax
+ assume ds:vars
+
+   IFE TwoD
+ mov ax,ds:HiLo_RasterIndex
+ xchg ah,al
+
+ mov ds,cs:CS_Acode
+ assume ds:nothing
+
+ mov bp,ax                  ;Raster
+ mov ax,ds:V2               ;X coord
+ mov bx,ds:V3               ;Z
+ mov cx,ds:V4               ;H
+ mov dx,ds:V1               ;object number
+ mov si,ds:V5               ;insert(1)/remove(-1)/preload(3) flag
+ mov di,ds:V6               ;reflect flag
+
+ call cs:Addr3DObjectHandler
+   ENDIF ;TwoD
+
+ if TraceCode          ;@
+ mov cs:debugword,52Ah ;@
+ endif ;TraceCode      ;@
+
+ jmp MCReturn
+
+MCDrawObjectV1 endp
+
+ assume ds:nothing
+
+;-------------------------------------
+;Call only from compiled-machine code.
+;Subroutine number 37
+;-------------------------------------
+
+MCBuildViewMap proc near
+
+ if Scroll
+ mov es,cs:CS_Acode
+ mov ax,es:V1 ;X position
+ mov bx,es:V2 ;Y position
+ endif ;Scroll
+
+   IFE TwoD
+ call cs:AddrBuildRoom
+   ENDIF ;TwoD
+
+ jmp MCReturn
+
+MCBuildViewMap endp
+
+;-------------------------------------
+;Call only from compiled-machine code.
+;Subroutine number 38
+;-------------------------------------
+
+MCDisplayViewMap proc near
+
+;Perhaps ought to be PlotLogicalScreen ? or something?
+ if TraceCode          ;@
+ mov cs:debugword,518h ;@
+ endif ;TraceCode      ;@
+
+ jmp MCReturn
+
+MCDisplayViewMap endp
+
+;-------------------------------------
+;Call only from compiled-machine code.
+;Subroutine number 40
+;-------------------------------------
+
+MCReturnSpriteAddress:  ;40
+
+;kludge, to allow Graphics Editor to execute
+
+ mov bx,es:V1               ;Sprite number
+
+ mov bx,19*4 ;list 19 (offset)
+ mov word ptr es:PCListVector[bx],0
+ mov es:PCListVector+2[bx],0A800h ;paragraph for sprite
+
+ jmp MCReturn
+
+;-------------------------------------
+;Call only from compiled-machine code.
+;Subroutine number 41
+;-------------------------------------
+
+MCInitBootPrg proc near
+
+ if TraceCode          ;@
+ mov cs:debugword,511h ;@
+ endif ;TraceCode      ;@
+
+   IFE TwoD
+ call cs:Addr3DInitDisc
+   ENDIF ;TwoD
+
+ jmp MCReturn
+
+MCInitBootPrg endp
+
+;-------------------------------------
+;Call only from compiled-machine code.
+;Subroutine number 42
+;-------------------------------------
+
+MCCalcScreenAddress proc near
+
+ if TraceCode          ;@
+ mov cs:debugword,524h ;@
+ endif ;TraceCode      ;@
+
+ mov ax,seg vars
+ mov ds,ax
+ assume ds:vars
+
+ mov es,cs:CS_Acode
+
+ mov bx,es:V1               ;List number for logical base
+ and bx,01Fh                ;only 32 lists
+ shl bx,1
+ shl bx,1
+ mov word ptr es:PCListVector[bx],0 ;offset always 0 for screen(s)
+ mov ax,ds:LoLongLogicalBase
+ mov es:PCListVector+2[bx],ax ;Paragraph for LogicalScreen
+
+ mov bx,es:V2               ;List number for physical base
+ and bx,01Fh                ;only 32 lists
+ shl bx,1
+ shl bx,1
+ mov word ptr es:PCListVector[bx],0  ;offset always 0 for screen(s)
+ mov ax,ds:LoLongPhysicalBase
+ mov es:PCListVector+2[bx],ax ;Paragraph for PhysicalScreen
+
+ jmp MCReturn
+
+MCCalcScreenAddress endp
+
+;-----
+
+AdjustList macro p1,p2,p3,p4
+;p1:p2 = list. p3, p4 = temp
+ mov p3,p2                 ;Adjust points so offset (p2) is small
+ rept 4
+ shr p3,1
+ endm ;rept
+ mov p4,p1
+ add p4,p3
+ mov p1,p4
+ and p2,0Fh
+ endm ;AdjustList
+
+;-------------------------------------
+;Call only from compiled-machine code.
+;Subroutine number 43
+;-------------------------------------
+
+;Save file, name in list 17, to list V1 offset V2 length V4 V5
+
+MCSaveFile proc near
+
+ mov ds,cs:CS_Acode
+ assume ds:nothing
+
+ mov cx,ds:V6
+ mov dx,ds:V5 ;Length
+
+ mov bx,ds:V1 ;Destination list
+ and bx,01Fh                ;only 32 lists
+ shl bx,1
+ shl bx,1
+
+;ds:PCListVector+0[bx] is list offset
+;ds:PCListVector+2[bx] is list paragraph number
+
+;set es:si as address to save from
+ les si,dword ptr ds:PcListVector[bx]
+
+ AdjustList es,si,bx,ax     ;Adjust points so offset (si) is small
+
+ add si,ds:V2 ;offset into list
+
+ AdjustList es,si,bx,ax     ;Adjust points so offset (si) is small
+
+;set ds:bx as file name
+ lds bx,dword ptr ds:PCListVector+(17*4)
+ add bx,8                   ;Filename offset in driver parameter block
+
+ call TerminateFileName
+
+;   es:si address
+;   ds:bx name
+;   dx,cx length
+
+ call GeneralSaveFile
+ cmp al,0
+ je SaveOK
+;   al=1, missing
+;   al=2, other error (e.g. write error)
+
+ mov dx,1700h               ;row=23, column=0
+ mov bx,offset lf02
+ call DisplayVisibleString
+ jmp MCReturn
+
+lf02:
+ db "MCSaveFile: write error$"
+
+SaveOK:
+
+ jmp MCReturn
+
+MCSaveFile endp
+
+;-------------------------------------
+;Call only from compiled-machine code.
+;Subroutine number 44
+;-------------------------------------
+
+;Load file, name in list 17, to list V1 offset V2
+
+MCLoadFile proc near
+
+ if TraceCode          ;@
+ mov cs:debugword,508h ;@
+ endif ;TraceCode      ;@
+
+ mov ds,cs:CS_Acode
+ assume ds:nothing
+ mov bx,ds:V1 ;Destination list
+ and bx,01Fh                ;only 32 lists
+ shl bx,1
+ shl bx,1
+
+;ds:PCListVector+0[bx] is list offset
+;ds:PCListVector+2[bx] is list paragraph number
+
+;set es:si as address to load
+ les si,dword ptr ds:PcListVector[bx]
+
+ AdjustList es,si,bx,ax     ;Adjust points so offset (si) is small
+
+ add si,ds:V2 ;offset into list
+
+ AdjustList es,si,bx,ax     ;Adjust points so offset (si) is small
+
+;set ds:bx as file name
+ lds bx,dword ptr ds:PCListVector+(17*4)
+ add bx,8                   ;Filename offset in driver parameter block
+ mov cx,0FFFFh              ;limit of length
+ mov dx,0FFFFh
+
+ call TerminateFileName
+
+;   es:si address
+;   ds:bx name
+;   dx,cx max length
+ call GeneralLoadFile
+;   al=1, missing
+;   al=2, other error (e.g. read error)
+
+ jmp MCReturn
+ 
+MCLoadFile endp
+
+;-----
+
+TerminateFileName:
+ push bx
+next:
+ mov al,ds:[bx]
+ cmp al,'.'
+ je founddot
+ inc bx
+ cmp al,' '
+ jae next
+ jmp short invalid
+founddot:
+ mov byte ptr ds:4[bx],0    ;terminator required by DOS
+invalid:
+ pop bx
+ ret
+
+;-------------------------------------
+;Call only from compiled-machine code.
+;Subroutine number 45
+;-------------------------------------
+
+MCCopy proc near
+
+;Atari ST-only call...
+
+ jmp MCReturn
+
+;> ;Copy V5 words from list V1, offset V2 to list V3 offset V4
+;> 
+;>  if TraceCode          ;@
+;>  mov cs:debugword,51Ah ;@
+;>  endif ;TraceCode      ;@
+;> 
+;> ;;To allow acode to access real screen, enable all bit planes.
+;>  mov dx,03C4h                       ;set port address
+;>  mov al,02                          ;set bitplane all
+;>  out dx,al
+;>  inc dx
+;>  mov al,0Fh
+;>  out dx,al
+;> 
+;>  mov es,cs:CS_Acode
+;>  mov cx,es:V5               ;length
+;>  mov bx,es:V1               ;source list
+;>  and bx,01Fh                ;only 32 lists
+;>  shl bx,1
+;>  shl bx,1
+;>  
+;>  mov si,es:PCListVector+0[bx] ;list offset
+;>  add si,es:V2
+;>  mov ds,es:PCListVector+2[bx] ;paragraph number
+;>  assume ds:nothing
+;> 
+;>  mov bx,es:V3               ;destination list
+;>  and bx,01Fh                ;only 32 lists
+;>  shl bx,1
+;>  shl bx,1
+;> 
+;>  mov di,es:PCListVector+0[bx] ;list offset
+;>  add di,es:V4
+;> ;(es=CS_Acode)
+;>  mov es,es:PCListVector+2[bx] ;paragraph number
+;> ;(es=destination para)
+;> 
+;> ;Copy cx words from ds:si to es:di
+;> 
+;> ;ACODE knows that all addresses are 4 bytes, but does not understand
+;> ;the 8086 'paragraph' system, so adjust the addresses given so that
+;> ;the offset is as low as possible (i.e. < 16)
+;> 
+;>  AdjustList ds,si,bx,ax
+;> 
+;>  AdjustList es,di,bx,ax
+;> 
+;>  rep movsw
+;> 
+;>  if TraceCode          ;@
+;>  mov cs:debugword,529h ;@
+;>  endif ;TraceCode      ;@ 
+;> 
+;>  jmp MCReturn
+
+MCCopy endp
+
+ purge AdjustList
+
+;-------------------------------------
+;Call only from compiled-machine code.
+;Subroutine number 46
+;-------------------------------------
+
+MCAbsChangeListPtr proc near
+
+;Set LIST V1 = V3*256+V2
+
+ if TraceCode          ;@
+ mov cs:debugword,505h ;@
+ endif ;TraceCode      ;@
+
+ mov es,cs:CS_Acode
+ mov bx,es:V1
+ and bx,01Fh                ;only 32 lists
+ shl bx,1
+ shl bx,1
+ mov word ptr es:PCListVector[bx],0 ;offset
+ mov es:PCListVector+2[bx],0B800h   ;paragraph
+
+ if TraceCode          ;@
+ mov cs:debugword,52Ch ;@
+ endif ;TraceCode      ;@
+
+ jmp MCReturn
+
+MCAbsChangeListPtr endp
+
+;-------------------------------------
+;Call only from compiled-machine code.
+;Subroutine number 47
+;-------------------------------------
+
+MCLoadCells proc near
+
+ call InvalidMC1
+ call InLineDos
+ db "MCLoadCells"
+ jmp InvalidMC2
+
+MCLoadCells endp
+
+;-------------------------------------
+;Call only from compiled-machine code.
+;Subroutine number 48
+;-------------------------------------
+
+MCSetUpPtrs proc near
+
+;Set up list 15 to point to STRUCTURE.DAT
+;V1 = list number to use
+;returns V1=number of cells
+
+   IFE TwoD
+ mov es,cs:CS_Acode
+ mov bx,es:V1 ;list number
+ and bx,01Fh                ;only 32 lists
+ shl bx,1
+ shl bx,1
+
+;es:PCListVector+0[bx] is list offset
+;es:PCListVector+2[bx] is list paragraph number
+
+ mov ax,es:PCListVector+0[bx] ;offset
+ mov bx,es:PCListVector+2[bx] ;paragraph
+ rept 4
+ shr ax,1
+ endm ;rept
+ add bx,ax
+ mov es,bx
+ call cs:Addr3DSetupPointers
+
+ mov es,cs:CS_Acode
+ mov es:V1,bp
+
+ if TraceCode          ;@
+ mov cs:debugword,51Bh ;@
+ endif ;TraceCode      ;@
+
+ jmp MCReturn
+   ENDIF ;TwoD
+
+MCSetUpPtrs endp
+
+;-------------------------------------
+;Call only from compiled-machine code.
+;Subroutine number 52
+;-------------------------------------
+
+;Add V2,V3 to list V1
+
+MCAddToListPtr proc near
+
+ if TraceCode          ;@
+ mov cs:debugword,506h ;@
+ endif ;TraceCode      ;@
+
+ mov es,cs:CS_Acode
+ mov bx,es:V1
+ and bx,01Fh                ;only 32 lists
+ shl bx,1
+ shl bx,1
+
+;es:PCListVector+0[bx] is list offset
+;es:PCListVector+2[bx] is list paragraph number
+
+ mov dx,es:V2               ;hi word (low nybble only)
+ mov cx,es:V3               ;lo word
+
+ mov ax,cx
+ and ax,0Fh                 ;is V3,V2 a multiple of 16 bytes?
+ add es:PCListVector+0[bx],ax ;if not add up to 15 bytes offset separately
+ jnc al01
+ add word ptr es:PCListVector+2[bx],01000h ;offset wrapped past 64K limit
+
+al01:
+;now paragraph is low nybble of DX and top 12 bits of CX
+
+ and cx,0FFF0h              ;get paragraph component of address
+ rept 4
+ rcr dx,1
+ rcr cx,1
+ endm ;rept
+ add word ptr es:PCListVector+2[bx],cx
+
+ jmp MCReturn
+
+MCAddToListPtr endp
+
+;-------------------------------------
+;Call only from compiled-machine code.
+;Subroutine number 53
+;-------------------------------------
+
+MCReserveMemory proc near
+
+;V1 is the number of bytes just allocated, so adjust
+;LoLongFreeWorkspace to be the new free space pointer.
+
+MCReserveChip:
+ mov ax,seg vars
+ mov ds,ax
+ assume ds:vars
+
+ mov es,cs:CS_Acode
+ mov bx,es:V1
+ add bx,15                  ;round up to next paragraph size
+ rept 4                     ;divide by 16 for bytes to paragraphs
+ shr bx,1
+ endm ;rept
+ call GrabLowMemory
+
+ jmp MCReturn
+
+rm02:
+ call SafeShutDown ;restore vectors
+ mov ax,0003h ;Set screen mode 3 (80x25 text)
+ int 10h
+ call InLineDos
+ db "Out of memory",13,10
+ db "DOS + Resident programs = $"
+
+;Calculate total space allocated to DOS and resident programs.
+ mov ax,seg code
+ rept 6                     ; size*16/1024 for Kbytes
+ shr ax,1
+ endm ;rept
+ call DisplayDosDecimal
+
+ call InLineDos
+ db " Kbytes$"
+ mov ah,04Ch                ;Terminate process
+ int 21h
+
+;-----
+
+MCReserveMemory endp
+
+;-------------------------------------
+;Call only from compiled-machine code.
+;Subroutine number 54
+;-------------------------------------
+
+MCSetUpVariablePtrs proc near
+
+;Alter values for # links, # composite cells, # masks.
+;Currently not used
+
+   IFE TwoD
+ mov es,cs:CS_Acode
+ mov ax,es:V1
+ mov cx,es:V2
+ mov dx,es:V3
+ mov bx,es:V4
+  if Scroll
+ mov bp,es:V5
+  endif ;Scroll
+;ax - Number of Cells
+;bx - Number of Transparencies
+;cx - Number of Links
+;dx - Number of Heap Entries
+;bp - Number of ground map links
+ call cs:Addr3DSetupVariablePointers
+   ENDIF ;TwoD
+
+ jmp MCReturn
+
+MCSetUpVariablePtrs endp
+
+;-------------------------------------
+;Call only from compiled-machine code.
+;Subroutine number 55
+;-------------------------------------
+
+MCPreLoadCells proc near
+
+ if TraceCode          ;@
+ mov cs:debugword,51Eh ;@
+ endif ;TraceCode      ;@
+
+   IFE TwoD
+ call cs:Addr3DPreLoadCells
+   ENDIF ;TwoD
+
+ jmp MCReturn
+
+MCPreLoadCells endp
+
+;-------------------------------------
+;Call only from compiled-machine code.
+;Subroutine number 56
+;-------------------------------------
+
+   IFE TwoD
+MCPlotLogicalScreen proc near
+
+ if TraceCode          ;@
+ mov cs:debugword,51Fh ;@
+ endif ;TraceCode      ;@
+
+ call cs:Addr3DPlotLogicalScreen
+
+ jmp MCReturn
+
+MCPlotLogicalScreen endp
+   ENDIF ;TwoD
+
+;-------------------------------------
+;Call only from compiled-machine code.
+;Subroutine number 57
+;-------------------------------------
+
+   IFE TwoD
+MCPlotPhysicalScreen proc near
+
+ if TraceCode          ;@
+ mov cs:debugword,520h ;@
+ endif ;TraceCode      ;@
+
+ call cs:Addr3DPlotPhysicalScreen
+
+ jmp MCReturn
+
+MCPlotPhysicalScreen endp
+   ENDIF ;TwoD
+
+;-------------------------------------
+;Call only from compiled-machine code.
+;Subroutine number 58
+;-------------------------------------
+
+MCUpdateScreen proc near
+
+ if TraceCode          ;@
+ mov cs:debugword,521h ;@
+ endif ;TraceCode      ;@
+
+   IFE TwoD
+ call cs:AddrUpdateScreen
+   ENDIF ;TwoD
+
+ if TraceCode          ;@
+ mov cs:debugword,522h ;@
+ endif ;TraceCode      ;@
+
+ jmp MCReturn
+
+MCUpdateScreen endp
+
+;-------------------------------------
+;Call only from compiled-machine code.
+;Subroutine number 59
+;-------------------------------------
+
+   IFE TwoD
+MCUnplotScreen proc near
+
+ if TraceCode          ;@
+ mov cs:debugword,523h ;@
+ endif ;TraceCode      ;@
+
+ call cs:Addr3DUnplotScreen
+ call cs:AddrScreenFlip
+
+ mov es,cs:CS_Acode ;*
+ mov es:V1,ax       ;*
+;* mov cx,seg vars
+;* mov ds,cx
+;* assume ds:vars
+;*
+;* mov ds:LoLongPhysicalBase,ax
+;* mov ds:LoLongLogicalBase,bx
+
+ jmp MCReturn
+
+MCUnplotScreen endp
+   ENDIF ;TwoD
+
+ assume ds:nothing
+
+;-----
+
+MCChecksum:             ;35
+ call InvalidMC1
+ call InLineDos
+ db "MCChecksum"
+ jmp short InvalidMC2
+
+MCNoClipSprite:         ;42
+ call InvalidMC1
+ call InLineDos
+ db "MCNoClipSprite"
+ jmp short InvalidMC2
+
+MCParseInputWord:       ;50
+ call InvalidMC1
+ call InLineDos
+ db "MCParse"
+ jmp short InvalidMC2
+
+MCSaveProtected:        ;76
+ call InvalidMC1
+ call InLineDos
+ db "MCSaveProtected"
+
+InvalidMC1:
+ call SafeShutDown ;restore vectors
+ mov ax,0003h ;Set screen mode 3 (80x25 text)
+ int 10h
+ ret
+
+InvalidMC2:
+ call InLineDos
+ db " not implemented$"
+ mov ah,04Ch                ;Terminate process
+ int 21h
+
+;-------------------------------------
+;Call only from compiled-machine code.
+;Subroutine number 60
+;-------------------------------------
+
+MCsetPalette proc near
+
+;palette is stored offset V2 list V1. V3=16/256
+
+  IFE TwoD
+
+ mov ax,seg vars
+ mov ds,ax
+ assume ds:vars
+
+ mov es,cs:CS_Acode
+ mov bx,es:V1               ;list number
+ and bx,01Fh                ;only 32 lists
+ shl bx,1
+ shl bx,1
+;es:PCListVector+0[bx] is list offset
+;es:PCListVector+2[bx] is list paragraph number
+
+ mov cx,es:V2 ;offset
+ mov ax,es:V3 ;size (=16 for all drivers)
+ mov dx,es:V4 ;shade
+
+ les si,es:PCListVector[bx]
+ add si,cx
+ mov bx,dx
+; si - start of palette in memory
+; es - segment containing palette
+; ax - number of colours
+; bx - palette 'shade'
+ call cs:AddrSetUpPalette
+
+  ENDIF ;TwoD
+
+ jmp MCReturn
+                    
+MCsetPalette endp
+
+ assume ds:nothing
+
+;-------------------------------------
+;Call only from compiled-machine code.
+;Subroutine number 61
+;-------------------------------------
+   IFE TwoD
+MCSetTextWindow proc near
+
+ mov es,cs:CS_Acode
+ mov cx,es:V1 ;Top
+ mov dx,es:V2 ;number of pixels
+ dec dx       ;change to inclusive 'length'
+ mov cs:CS_ClipPosition,cx
+ mov cs:CS_LastTopLine,cx
+; call cs:AddrSetTextWindow
+ jmp MCReturn
+
+MCSetTextWindow endp
+   ENDIF ;TwoD
+
+;-------------------------------------
+;Call only from compiled-machine code.
+;Subroutine number 62
+;-------------------------------------
+   IFE TwoD
+
+MCSetGraphicWindow proc near
+
+ mov es,cs:CS_Acode
+ mov ax,es:V1 ;X1
+ mov bx,es:V2 ;X2
+ mov cx,es:V3 ;Y1
+ mov dx,es:V4 ;Y2
+ call cs:AddrSetGraphicsWindow ;reset animated screen area
+ jmp MCReturn
+
+MCSetGraphicWindow endp
+   ENDIF ;TwoD
+
+;-------------------------------------
+;Call only from compiled-machine code.
+;Subroutine number 63
+;-------------------------------------
+   IFE TwoD
+MCClearChangeMaps proc near
+
+ call cs:AddrClearChangeMaps
+ jmp MCReturn
+
+MCClearChangeMaps endp
+   ENDIF ;TwoD
+
+;-------------------------------------
+;Call only from compiled-machine code.
+;Subroutine number 64
+;-------------------------------------
+   IFE TwoD
+MCClearTextBuffer proc near
+
+ mov es,cs:CS_Acode
+ mov ax,0
+ mov bx,es:V1               ;Recopy text buffer, 'AX' is first text line
+ add bx,cs:CS_ClipPosition
+ mov cx,320
+ mov dx,8
+ mov bp,1 ;buffer 2
+ call cs:AddrClearRectangle
+
+ jmp MCReturn
+
+MCClearTextBuffer endp
+   ENDIF ;TwoD
+
+;-------------------------------------
+;Call only from compiled-machine code.
+;Subroutine number 65
+;-------------------------------------
+   IFE TwoD
+MCCopyTextBuffer proc near
+
+ mov es,cs:CS_Acode
+ mov ax,cs:CS_ClipPosition
+ mov bx,ax
+ add bx,es:V1               ;Recopy text buffer, 'AX' is first text line
+ mov cs:CS_LastTopLine,bx
+ mov cx,199
+ call cs:AddrCopyTextArea
+ jmp MCReturn
+
+MCCopyTextBuffer endp
+   ENDIF ;TwoD
+
+;-------------------------------------
+;Call only from compiled-machine code.
+;Subroutine number 66
+;-------------------------------------
+   IFE TwoD
+MCEnableBuffer proc near
+
+ mov es,cs:CS_Acode
+ mov ax,es:V1
+ mov cs:CS_TextDestination,ax
+ jmp MCReturn
+
+MCEnableBuffer endp
+   ENDIF ;TwoD
+
+;-------------------------------------
+;Call only from compiled-machine code.
+;Subroutine number 67
+;-------------------------------------
+MCInitSound proc near
+ jmp MCReturn
+MCInitSound endp
+
+;-------------------------------------
+;Call only from compiled-machine code.
+;Subroutine number 68
+;-------------------------------------
+MCStartSound proc near
+ jmp MCReturn
+MCStartSound endp
+
+;-------------------------------------
+;Call only from compiled-machine code.
+;Subroutine number 69
+;-------------------------------------
+MCFindObj proc near
+
+;v1 Object Number
+;return v3 as offset
+
+ mov es,cs:CS_Acode
+ mov ax,es:V1
+ call cs:AddrFindObject
+ mov es,cs:CS_Acode
+ mov es:V3,bx
+ jmp MCReturn
+
+MCFindObj endp
+
+;-------------------------------------
+;Call only from compiled-machine code.
+;Subroutine number 70
+;-------------------------------------
+MCInitGraphics proc near
+
+ jmp MCReturn
+
+MCInitGraphics endp
+
+;-------------------------------------
+;Call only from compiled-machine code.
+;Subroutine number 71
+;-------------------------------------
+MCCalcMatrix proc near
+
+ jmp MCReturn
+
+MCCalcMatrix endp
+
+;-------------------------------------
+;Call only from compiled-machine code.
+;Subroutine number 72
+;-------------------------------------
+MCDrawVector proc near
+
+ jmp MCReturn
+
+MCDrawVector endp
+
+;-------------------------------------
+;Call only from compiled-machine code.
+;Subroutine number 73
+;-------------------------------------
+MCKeyDown proc near
+
+;v1 GSX key code
+
+ mov ax,seg vars
+ mov ds,ax
+ assume ds:vars
+ mov es,cs:CS_Acode
+
+ mov bx,es:V1
+ and bx,007Fh
+ mov al,ds:GSX_Down[bx]
+ mov ah,0
+ mov es:V1,ax
+ jmp MCReturn
+
+MCKeyDown endp
+
+;-------------------------------------
+;Call only from compiled-machine code.
+;Subroutine number 74
+;-------------------------------------
+MCInstallJoystick proc near
+
+ jmp MCReturn
+
+MCInstallJoystick endp
+
+;=============
+ if Scroll
+
+MCinitialiseScrolling proc near
+
+ mov es,cs:CS_Acode
+ mov ax,es:V1 ;map size X
+ mov bx,es:V2 ;map size Y
+ mov cx,es:V3 ;game mode
+; int 3 ;*
+ call cs:AddrInitialiseScrolling
+ jmp MCReturn
+
+MCinitialiseScrolling endp
+
+;-----
+
+MCScrollDirection proc near
+
+ mov es,cs:CS_Acode
+ mov ax,es:V1 ;X direction
+ mov bx,es:V2 ;Y direction
+ call cs:AddrScrollDirection
+ mov es,cs:CS_Acode
+ mov es:V1,ax ;actual X
+ mov es:V2,bx ;actual Y
+ jmp MCReturn
+
+MCScrollDirection endp
+
+;-----
+
+MCPurgeAllCells proc near
+
+ call cs:AddrPurgeAllCells
+ jmp MCReturn
+
+MCPurgeAllCells endp
+
+;-----
+
+MCSetMaxFrameRate proc near
+
+ mov es,cs:CS_Acode
+ mov ax,es:V1                ;in milliseconds
+ call cs:AddrSetMaxFrameRate
+ jmp MCReturn
+
+MCSetMaxFrameRate endp
+
+ endif ;Scroll
+;=============
+
+;...e
+
+;-----
+
+code ends
+
+;-----
+
+;...sVariables:0:
+
+vars segment word public 'data'
+
+GSX_ReadPtr dw 0
+
+D0 dw 0
+
+vars ends
+
+;...e
+
+;-----
+
+ end
+
+###########################################################################
+############################### END OF FILE ###############################
+###########################################################################

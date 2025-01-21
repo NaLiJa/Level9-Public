@@ -1,0 +1,92 @@
+# Assemble HERO
+
+# Copyright (C) 1988 Level 9 Computing
+
+# Do "make make.txt"
+
+#-----
+
+# Assemble each object file in turn, if named source files have been altered
+
+#debug1=/zi
+#debug2=/v
+debug1=
+debug2=
+
+assembler=masm
+linker=link
+#assembler=tasm
+#linker=tlink
+
+a1=aint.obj driver.obj intrpt.obj game.obj mcode.obj move.obj tables.obj 
+a2=aint+driver+intrpt+game+mcode+move+tables
+
+aint.obj: aint.asm common.asm
+    $(assembler) $(debug1) aint,aint;
+
+bin.obj: bin.asm consts.asm
+    $(assembler) $(debug1) bin,bin;
+
+#cga.obj : cga.asm structs.asm consts.asm
+#    $(assembler) $(debug1) cga,cga;
+
+driver.obj: driver.asm common.asm consts.asm
+    $(assembler) $(debug1) driver,driver;
+
+game.obj: game.asm consts.asm structs.asm common.asm
+    $(assembler) $(debug1) game,game;
+
+identify.obj : identify.asm
+    $(assembler) $(debug1) identify,identify;
+
+install.obj : install.asm
+    $(assembler) $(debug1) install,install;
+
+intrpt.obj : intrpt.asm common.asm consts.asm
+    $(assembler) $(debug1) intrpt,intrpt;
+
+joystick.obj : joystick.asm
+    $(assembler) $(debug1) joystick,joystick;
+
+mcode.obj: mcode.asm consts.asm common.asm structs.asm
+    $(assembler) $(debug1) mcode,mcode;
+
+huge.obj: huge.asm consts.asm common.asm structs.asm
+    $(assembler) $(debug1) huge,huge;
+
+move.obj: move.asm consts.asm structs.asm common.asm
+    $(assembler) $(debug1) move,move;
+
+quest.obj : quest.asm
+    $(assembler) $(debug1) quest,quest;
+
+scheck.obj: scheck.asm
+    $(assembler) scheck,scheck;
+
+tables.obj : tables.asm consts.asm
+    $(assembler) $(debug1) tables,tables;
+
+# tlink each runnable module. If named object code files have altered
+
+#huge.exe: huge.obj cga.obj bin.obj $(a1)
+#    $(linker) huge+cga+bin+$(a2)/c:1;
+#    exemod huge.exe /max 1
+
+install.exe: install.obj quest.obj
+    $(linker) $(debug2) install+quest/c:1;
+    exemod install.exe /max 1
+
+install.bin: install.exe
+    exe2bin install.exe
+
+huge.exe: huge.obj bin.obj identify.obj $(a1)
+    $(linker) $(debug2) huge+bin+identify+$(a2)/c:1;
+    exemod huge.exe /max 1
+
+scheck.exe: scheck.obj
+    $(linker) scheck/c:1;
+    exemod scheck.exe /max 1
+
+###########################################################################
+############################### END OF FILE ###############################
+###########################################################################

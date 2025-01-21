@@ -1,0 +1,43 @@
+NEAT 286 EXTENDED SETUP PROGRAM Ver 1.10 
+
+ Bank   Enabled/Disabled  DRAM type   Waitstate
+ ----   ----------------  ---------   ---------
+ 0      ENABLED           256K        0 WAIT STATE
+ 1      ENABLED           256K        0 WAIT STATE
+ 2      DISABLED                      0 WAIT STATE
+ 3      DISABLED                      0 WAIT STATE
+
+ Processor Clock   Bus Clock   DMA Clock
+ ---------------   ---------   ---------
+ CLK2IN            ATCLK       SCLK/2
+
+ Bios Shadow         Video Shadow          DMA clock
+ F0000H,64K      C0000H,16K  C4000H,16K
+ -----------     ----------  ----------    ---------
+ ENABLED         ENABLED     ENABLED       DISABLED
+
+
+ 82C211  60H -> 00  0 0 R 0 R 0
+         61H -> 1 1  00  01  01
+         62H -> RR   01  10  0
+
+ 82C212  64H -> 0    00    RRRR
+         65H -> 0 0 0 0 1 1 1 0
+         66H -> 1       RRRRRRR
+         67H -> 0 0 0 0 0 0 0 0
+         68H -> 1 1 1 1 0 0 0 0
+         69H -> 0 0 0 0 1 1 1 1
+         6AH -> 10  1     RRRRR
+         6BH -> 0 0 0 0  00  11
+         6CH -> 00    0   RRRRR
+         6DH -> 0100       0000
+         6EH => 00   00  00  00
+         6FH -> 000  RR   1 1 R
+
+ 82C206  01H -> 11  00  00  0 0
+
+   SET SHADOW RAM FOR 212
+ ------------------------------
+ MAIN  BIOS SHADOW AT F0000H,64K -> 1
+ VIDEO BIOS SHADOW AT C0000H,16K -> 1
+ VIDEO BIOS SHADOW AT C4000H,16K -> 1

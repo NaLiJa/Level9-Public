@@ -1,0 +1,1975 @@
+ page 128,122 ;length,width
+
+;IBM KAOS adventure system. memory allocator/loader
+
+;SCHECK.ASM
+
+;Copyright (C) 1989 Level 9 Computing
+
+;-----
+
+;******* INFO:    [OBJECT XXXX] MESSAGE
+;******* WARNING: [OBJECT XXXX] MESSAGE
+;******* SEVERE:  [OBJECT XXXX] MESSAGE
+;******* FATAL:   [OBJECT XXXX] MESSAGE
+;
+;-----
+;
+;unused bytes (for word-alignment) non-zero...
+; ********** ERROR IN OBJECT:
+; INFO:    ********** NON-ZERO PADDER BYTE ********** 
+; INFO:  ********** ANI DOES NOT END OBJECT,FORK OR SHIFT ********** 
+; INFO:  ********** NON-ZERO PADDER BYTE ********** 
+; INFO:  ********** LAST ANIMATION INVALID ********** 
+; INFO:  ********** LAST RASTER INVALID ********** 
+; INFO:  ********** LONG OBJECT (XXXX BYTES) ********** 
+; INFO:  ********** OBJECT IN RASTER NOT CELL OR 0 
+; INFO:  ********** TALL RASTER (XXXX) ********** 
+; INFO:  ********** WIDE RASTER (XXXX) ********** 
+; INFO:  ********** XZH CALLS 0 
+; INFO:  *********** ANIMATION OVERLAPS RASTERS ********** 
+; INFO:  *********** RASTERS OVERLAP XZH ********** 
+; INFO:  *********** XZH ADDRESS WRONG ********** 
+; INFO: ********** INSTRUCTION OVERRUNS ********** 
+; INFO: ********** NON-ZERO PADDER BYTE ********** 
+;
+;invalid animation sequence...
+; WARNING: ********** INVALID INSTRUCTION ********** 
+; WARNING: ********** ITEM NUMBER NOT 0,XZH,RASTER,ANIMATION OR CELL ********** 
+; WARNING: ********** LAST XZH INVALID ********** 
+;
+;Errors which allow execution, but may cause editor problems
+; SEVERE: ***** END OF XZH DOES NOT MATCH HEADER 
+; SEVERE: ***** END OF ANIMATION DOES NOT MATCH HEADER 
+; SEVERE: ***** END OF RASTERS DOES NOT MATCH HEADER 
+; SEVERE: ********** LENGTH NOT 2*W*H ********** 
+; SEVERE: ********** LENGTH NOT 4+5*NUMITEMS ********** 
+; SEVERE: ********** LENGTH NOT EVEN  ********** 
+;
+;errors which allow execution and crash editor...
+; ********** ERROR IN OBJECT:  
+; ********** FATAL: DATA/HEADER OVERLAP; OBJECT UNMODIFIABLE ********** 
+; FATAL: ********** OBJECT NOT WORD-ALIGNED
+; FATAL: ********** READ PAST EOF ********** 
+
+;-----
+
+;           Either   Signed   Unsigned
+;    <=              jle      jbe
+;    <               jl       jb/jc
+;    =      je/jz
+;    <>     jnz/jne
+;    >=              jge      jae/jnc
+;    >               jg       ja
+
+;-----
+
+ name scheck
+
+code segment public 'code'
+
+ assume cs:code
+ assume ds:code
+
+;-----
+
+;...sSubroutines:0:
+ 
+start:                      ;Stand alone entry point
+
+ call SetOptions            ;ds:[81h] are parameters
+
+ call Copyright
+
+ mov ax,seg vars
+ mov ds,ax
+ assume ds:vars
+
+ call AllocateMemory
+ call LoadStructures
+ call ValidateStructures
+
+ mov ah,04Ch                ;Terminate process
+ int 21h                    ;DOS Function
+
+;-----
+
+;Input:
+;   es:si address
+;   ds:bx name
+;   dx,cx max length
+
+;Return code:
+;   al=0, ok
+;   al=1, missing
+;   al=2, other error (e.g. read error)
+
+GeneralLoadFile proc near
+
+ push cx                    ;Length
+ push dx
+ push es                    ;Load address
+ push si
+
+ mov dx,bx                  ;filename
+ mov al,0                   ;non-private/compatable/read-only
+ mov ah,61                  ;Open file
+ int 21h                    ;extended DOS function
+
+ jnc GLFfileFound           ;file exists
+
+ pop si                     ;correct stack
+ pop es
+ pop dx
+ pop cx
+
+ mov al,1                   ;File not found
+ ret
+
+GLFfileFound:
+ push ax                    ;File handle
+
+ mov bx,ax
+ mov al,0                   ;relative to start of file
+ mov cx,0                   ;relative position (high)
+ mov dx,0                   ;relative position (low)
+ mov ah,66                  ;move file pointer
+ int 21h                    ;extended DOS function
+
+ pop ax                     ;file handle
+ pop si                     ;Load address
+ pop es
+ pop dx                     ;Length
+ pop cx
+
+GLFreadLessThan32K:
+ push ax                    ;File handle
+ push ds
+
+ cmp cx,0
+ jnz GLF01                  ;length not a multiple of 64K
+ cmp dx,0
+ jz GLFendOfLoad            ;length=0, reached limit of number of bytes to load
+
+;set CX as actual number of bytes (1 thru 32768) loaded this time...
+
+ cmp cx,0                   ;0 is 65536
+ je GLFreadNext32K
+ cmp cx,8000h
+ jc GLF01                   ;first, make remainder of file a multiple of 32K
+
+GLFreadNext32K:
+ push cx                    ;save requested length
+ push dx
+ mov cx,8000h               ;instead, load 32K bytes
+ jmp short GLF02
+
+GLF01:                      ;length not a multiple of 64K/32K
+ push cx                    ;length
+ push dx
+GLF02:
+
+;Load CX bytes
+
+ mov bx,ax                  ;file handle
+                            ;cx=length
+ mov ax,es
+ mov ds,ax
+ mov dx,si                  ;address DS:DX
+ mov ah,63                  ;Read from file
+ int 21h                    ;extended DOS function
+ jnc GLFloaded32K
+
+;Error
+
+ pop dx                     ;correct stack
+ pop cx
+ pop ds
+ pop bx                     ;File handle
+
+ mov ah,62                  ;Close file handle
+ int 21h                    ;extended DOS function
+
+ mov al,2                   ;read error
+ ret
+
+;OK
+
+GLFloaded32K:
+ pop dx                     ;length
+ pop cx
+
+ cmp ax,0
+ jz GLFendOfLoad            ;Reached EOF before 'max length'
+ 
+ sub cx,ax                  ;Number of bytes loaded
+ jnc GFL03
+ dec dx
+GFL03:
+
+ add si,ax
+;es:si is next load address...
+ push bx
+ mov bx,si
+ and si,0000Fh
+ and bx,0FFF0h
+ shr bx,1
+ shr bx,1
+ shr bx,1
+ shr bx,1
+ mov ax,es
+ add ax,bx
+ mov es,ax
+ pop bx
+;***
+
+ pop ds
+ pop ax                     ;File handle
+ jmp short GLFreadLessThan32K
+
+;End of file
+
+GLFendOfLoad:
+ pop ds
+ pop bx                     ;File handle
+
+ mov ah,62                  ;Close file handle
+ int 21h                    ;extended DOS function
+
+ mov al,0                   ;OK!
+ ret ;es:si is next free address
+
+GeneralLoadFile endp
+
+;-----
+
+PrintChar proc near
+
+ push bx
+ push cx
+ push dx
+ push es
+ push ds
+ push si
+ mov dl,al
+ mov ah,2 ;function 2: Write to standard output device
+ int 21h
+ pop si
+ pop ds
+ pop es
+ pop dx
+ pop cx
+ pop bx
+ ret
+
+PrintChar endp
+
+;-----
+
+SiSave dw 0
+
+;Inline Print-string terminated by "$"
+
+PRS proc near
+
+ mov cs:SiSave,si
+
+ pop si
+
+ mov ax,cs
+ mov ds,ax
+ assume ds:nothing
+
+Prs01:
+ mov al,cs:[si]
+ cmp al,"$"
+ jz Prs02
+
+ push si
+ call PrintChar
+ pop si
+ 
+ inc si
+ jmp short Prs01
+
+Prs02:
+ inc si
+ push si
+
+ mov si,seg vars
+ mov ds,si
+
+ mov si,cs:SiSave
+ ret
+
+PRS endp
+
+;-----
+
+;InLine Print-string if OptionAnotate<>0
+
+AnotatePRS proc near
+
+ cmp ds:OptionAnotate,0
+ jne PRS
+
+ mov cs:SiSave,si
+
+ pop si
+
+Prs03:
+ mov al,cs:[si]
+ cmp al,"$"
+ jz Prs04
+
+ inc si
+ jmp short Prs03
+
+Prs04:
+ inc si
+ push si
+
+ mov si,cs:SiSave
+ ret
+
+AnotatePRS endp
+
+;-----
+
+PrintDecimal proc near
+
+;Print number HL in decimal
+ mov al,bh
+ or al,bl
+ jz PD03
+ sub cl,cl                  ;Reset flag
+ mov dx,offset prntbl
+ mov ds:prntblpointer,dx
+;Find current digit value
+PD01:
+ push bx
+ mov bx,ds:prntblpointer
+ mov dx,cs:[bx]
+ inc bx
+ inc bx
+ mov ds:prntblpointer,bx
+ pop bx
+;Check 5 digits found
+ mov al,dh
+ or al,dl
+ jnz ain020
+ ret
+ain020:
+;Find current digit
+ mov ch,'0'
+PD02:
+ sub bx,dx
+ jb PD04
+ inc ch
+ mov al,1
+ mov cl,al
+ jmp short PD02
+
+PD04:
+ add bx,dx
+ mov al,cl
+ or al,cl
+ jz PD01
+ mov al,ch
+ call PrintChar
+ jmp short PD01
+
+PD03:
+ mov al,'0'
+ jmp PrintChar
+
+PrintDecimal endp
+
+;-----
+
+AnotatePrintDecimal proc near
+
+ cmp ds:OptionAnotate,0
+ jne PrintDecimal
+
+ ret
+
+AnotatePrintDecimal endp
+
+;-----
+
+prntbl proc near
+
+ dw 10000
+ dw 1000
+ dw 100
+ dw 10
+ dw 1
+ dw 0                       ;end
+
+prntbl endp
+
+;-----
+
+DisplaySignedByte proc near
+
+ cmp al,0
+ jns DSB01
+
+ push ax
+ mov al,"-"
+ call PrintChar
+ pop ax
+
+DSB01:
+ push bx
+ mov bh,0
+ mov bl,al
+ and bl,07Fh
+ call PrintDecimal
+ pop bx
+ ret
+
+DisplaySignedByte endp
+
+;-----
+
+AnotateDisplaySignedByte proc near
+
+ cmp ds:OptionAnotate,0
+ jne DisplaySignedByte
+
+ ret
+
+AnotateDisplaySignedByte endp
+
+;-----
+
+AllocateMemory proc near
+
+ mov bx,1000h               ;Request 64K bytes of memory
+ mov ah,048h                ;Allocate memory
+ int 21h                    ;Universal DOS function
+ jnc AM01
+
+ call PRS
+ db "Out of Memory",13,10,"$"
+
+ mov ah,04Ch                ;Terminate process
+ int 21h                    ;DOS Function
+
+AM01:
+ mov ds:StructureSegment,ax
+ mov es,ax
+ ret
+
+AllocateMemory endp
+
+;-----
+
+LoadStructures proc near
+
+ mov es,ds:StructureSegment
+ mov si,0                   ; es:si address
+ mov bx,offset StructurName ; ds:bx name
+ mov dx,1
+ mov cx,0                   ; load 64K (dx,cx max length)
+ call GeneralLoadFile
+ cmp al,0
+ je LS01
+
+ call PRS
+ db "No Structure File!",13,10,"$"
+
+ mov ah,04Ch                ;Terminate process
+ int 21h                    ;DOS Function
+
+LS01:
+ mov ds:StructureEOF,si     ;si=length is bytes, es=Offset is paragraphs
+ mov ax,es
+ mov es,ds:StructureSegment
+ sub ax,ds:StructureSegment ;ax=Length in paragraphs
+ shl ax,1
+ shl ax,1
+ shl ax,1
+ shl ax,1
+ add ds:StructureEOF,ax
+ ret
+
+LoadStructures endp
+
+;-----
+
+PrintHexChar proc near
+
+ and al,0Fh
+ cmp al,9
+ ja PHC01
+ add al,'0'
+ jmp short PHC02
+PHC01:
+ add al,'A'-10
+PHC02:
+ call PrintChar
+ ret
+
+PrintHexChar endp
+
+;-----
+
+PrintHexByte proc near
+
+ push ax
+ shr al,1
+ shr al,1
+ shr al,1
+ shr al,1
+ call PrintHexChar
+ pop ax
+ call PrintHexChar
+ ret
+
+PrintHexByte endp
+
+;-----
+
+PrintHexWord proc near
+
+ push ax
+ mov al,ah
+ call PrintHexByte
+ pop ax
+ call PrintHexByte
+ ret
+
+PrintHexWord endp
+
+;-----
+
+;es:[si] = byte
+OutputByte proc near
+
+ call PRS
+ db 13,10,"$"
+
+ mov ax,si
+ call PrintHexWord
+
+ call PRS
+ db ":$"
+
+ mov al,es:[si]
+ push ax
+ inc si
+ call PrintHexByte
+ pop ax
+
+ cmp si,ds:StructureEOF
+ jbe OB01
+ call ReportFatal
+ call PRS
+ db 13,10," FATAL: ********** READ PAST EOF **********$"
+ call pause
+OB01:
+ ret
+
+OutputByte endp
+
+;-----
+
+AnotateOutputByte proc near
+
+ cmp ds:OptionAnotate,0
+ jne OutputByte
+
+ mov al,es:[si]
+ inc si
+
+ cmp si,ds:StructureEOF
+ jbe OB02
+ call ReportFatal
+ call PRS
+ db 13,10," FATAL: ********** READ PAST EOF **********$"
+ call pause
+OB02:
+ ret
+
+AnotateOutputByte endp
+
+;-----
+
+SetOptions proc near
+
+ mov ax,ds
+ mov es,ax                  ;es=parameters
+ mov ax,seg vars
+ mov ds,ax
+ assume ds:nothing
+
+ mov ds:OptionAnotate,0     ;Default - Verbose listing off
+ mov ds:OptionPadder,0      ;Default - Do not check padder bytes/words
+ mov ds:OptionAniOverrun,0  ;Default - Do not check last item in ANI
+ mov ds:OptionMaxOffset,512 ;Default - Objects up to 1/2K
+ mov ds:OptionMaxWidth,22   ;Default - Screen width + 2 cells
+ mov ds:OptionMaxHeight,13  ;Default - Screen Height
+ mov ds:OptionMaxCell,16382 ;Default - Max Object Number
+
+ mov si,80h
+ mov bl,es:[si]
+ mov bh,0
+ inc si
+ mov byte ptr es:[si+bx],0  ;ensure command line arguments are terminated
+
+ mov ds:Pointer1,si         ;Pointer to next 'option'
+ mov word ptr ds:Pointer2,0
+
+SO01:
+ mov al,es:[si]
+ inc si
+ cmp al,0
+ je SO02                    ;no arguments
+ cmp al,' '
+ je SO01
+ cmp al,'?'
+ je SO03
+SO02:
+ jmp SO04
+
+SO03:
+ call PRS
+ db 13,10,"STRUCTUR.DAT must be in current directory"
+ db 13,10
+ db 13,10,"Try: SCHECK options"
+ db 13,10,"           /h #  Set max raster height (in cells)      default 13"
+ db 13,10,"           /l #  Set max Object Length (in bytes)      default 512"
+ db 13,10,"           /m #  Set max cell number                   default 16382"
+ db 13,10,"           /o    report truncated animation sequences "
+ db 13,10,"           /p    Verify unused (padder) bytes are zero"
+ db 13,10,"           /v    Verbose                              "
+ db 13,10,"           /w #  Set raster width (in cells)           default 22"
+ db 13,10,"$"
+
+ mov ah,04Ch                ;Terminate process
+ int 21h                    ;DOS Function
+
+SO04:
+;; dec si
+;; mov ds:Pointer2,si         ;Pointer to next 'number'
+
+;Pointer 1 - Next argument/Option
+
+; /v    Verbose
+; /o    Overrun
+; /p    Padder
+; /l #  length
+; /w #  width
+; /h #  height
+
+SO05:
+ mov si,ds:Pointer1
+ mov al,es:[si]
+ inc ds:Pointer1
+ cmp al,' '
+ je SO05                    ;spaces preceed first argument
+ cmp al,0
+ je SO05A                   ;no options given
+ cmp al,'/'
+ je SO11                    ;options given
+
+ call PRS
+ db 13,10,"Invalid option (SCHECK ? for list)$" 
+ 
+ mov ah,04Ch                ;Terminate process
+ int 21h                    ;DOS Function
+
+SO05A:
+ ret                        ;Options OK!
+
+SO11:
+SO09:
+ mov si,ds:Pointer1
+ inc ds:Pointer1
+ mov al,es:[si]
+ cmp al,0
+ je SO05A                   ;all options processed
+ cmp al,' '
+ jne SO70
+ jmp SO20                   ;end of this set of options
+
+;  /h # Set max raster height (in cells)
+;  /l # Set max Object Length (in bytes)
+;  /o   Verify truncated animation sequences
+;  /p   Verify unused (padder) bytes are zero
+;  /v   Verbose
+;  /w # Set raster width (in cells)
+
+SO70:
+ cmp al,'H'
+ je SO13
+ cmp al,'h'
+ je SO13
+ cmp al,'L'
+ je SO14
+ cmp al,'l'
+ je SO14
+ cmp al,'O'
+ je SO14A
+ cmp al,'o'
+ je SO14A
+ cmp al,'M'
+ je SO14Z
+ cmp al,'m'
+ je SO14Z
+ cmp al,'P'
+ je SO15
+ cmp al,'p'
+ je SO15
+ cmp al,'V'
+ je SO16
+ cmp al,'v'
+ je SO16
+ cmp al,'W'
+ je SO17
+ cmp al,'w'
+ je SO17
+
+SO99:
+ call PRS
+ db 13,10,"Invalid option (SCHECK ? for list)$"
+ 
+ mov ah,04Ch                ;Terminate process
+ int 21h                    ;DOS Function
+
+SO13:                       ;parse /h # Set max raster height
+ call ParseNumber
+ mov ds:OptionMaxHeight,ax
+ jmp SO11
+
+SO14:                       ;parse /l # Set max length
+ call ParseNumber
+ mov ds:OptionMaxOffset,ax
+ jmp SO11
+
+SO14Z:                      ;parse /m # Set max cell
+ call ParseNumber
+ mov ds:OptionMaxCell,ax
+ jmp SO11
+
+SO14A:                      ;parse /o Overrun on animation
+ mov ds:OptionAniOverrun,1
+ jmp SO11
+
+SO15:                       ;parse /p Verify padder bytes are zero
+ mov ds:OptionPadder,1
+ jmp SO11
+
+SO16:                       ;parse /v Verbose
+ mov ds:OptionAnotate,1
+ jmp SO11
+
+SO17:                       ;parse /w # Set raster width
+ call ParseNumber
+ mov ds:OptionMaxWidth,ax
+ jmp SO11
+
+SO20:                       ;end of '/' options
+ mov si,ds:Pointer2
+ cmp si,0
+ jne SO40
+ jmp SO05                   ;no # arguments read, scan for another '/'
+
+;Command was of form: e.g.   SCHECK /LW 13 20 /P
+;(Pointer1 has reached space after '/LW', Pointer2 has read arguments
+; '13 20'; Clear Pointer2 and position Pointer2 to read '/P')
+
+SO40:
+ mov ds:Pointer1,si
+ mov word ptr ds:Pointer2,0
+ jmp SO05
+
+;-----
+
+ParseNumber:
+; If # arguemnts have been read then Pointer2 is next # value, otherwise
+; # argument follows Pointer1
+
+ int 3 ;*****
+ cmp ds:Pointer2,0
+ jne PN01
+
+ mov si,ds:Pointer1
+ mov ds:Pointer2,si
+
+PN30:
+ mov si,ds:Pointer2
+ inc ds:Pointer2
+ mov al,es:[si]
+ cmp al,' '
+ je PN31                    ;Find start of #
+ cmp al,0
+ jne PN30                   ;Find end of current options
+
+PN32:
+ call PRS
+ db 13,10,"Invalid option (SCHECK ? for list)$"
+ 
+ mov ah,04Ch                ;Terminate process
+ int 21h                    ;DOS Function
+
+;Check # exists
+
+PN31:
+PN01:                       ;(follow previous #)
+ mov si,ds:Pointer2
+ mov al,es:[si]
+ cmp al,0
+ je PN32                    ;missing #
+ cmp al,' '
+ jne PN50
+ inc ds:Pointer2            ;continue search for start of #
+ jmp short PN01
+
+;..... Read number
+
+PN50:
+ mov ds:Number,0
+PN40:
+ mov si,ds:Pointer2
+ mov al,es:[si]
+ cmp al,' '
+ je PN34                    ;end of number
+ cmp al,0
+ je PN34                    ;end of number
+
+ mov ax,ds:Number
+ cmp ax,6552 ;65535/10
+ ja PN41
+ add ax,ax ;x2
+ mov bx,ax
+ add ax,ax ;x4
+ add ax,ax ;x8
+ add ax,bx ;x8+x2 = x10
+ mov ds:Number,ax
+
+ mov si,ds:Pointer2
+ mov al,es:[si]
+ inc ds:Pointer2
+ cmp al,'0'
+ jb PN35                    ;illegal digit
+ cmp al,'9'
+ ja PN35                    ;illegal digit
+
+ sub al,'0'
+ mov ah,0
+ add ds:Number,ax
+ jc PN41                    ;overflow
+ jmp short PN40
+
+PN34:                       ;Return Pointer2; for next argument start address
+ mov ax,ds:Number
+ ret
+
+PN35:
+ call PRS
+ db 13,10,"illegal character in number (SCHECK ? for list)$"
+
+ mov ah,04Ch                ;Terminate process
+ int 21h                    ;DOS Function
+
+PN41:
+ call PRS
+ db 13,10,"Number too big$"
+
+ mov ah,04Ch                ;Terminate process
+ int 21h                    ;DOS Function
+
+SetOptions endp
+
+;-----
+
+ReadHeader proc near
+
+ mov ax,word ptr es:[2]     ;XZH address
+ xchg ah,al
+ mov ds:XZHAddress,ax
+
+ mov ax,word ptr es:[4]     ;XZH object
+ xchg ah,al
+ mov ds:XZHEnd,ax
+
+ mov ax,word ptr es:[8]     ;Raster address
+ xchg ah,al                 
+ mov ds:RastersAddress,ax
+
+ mov ax,word ptr es:[10]    ;Raster object
+ xchg ah,al
+ mov ds:RastersEnd,ax
+
+ mov ax,word ptr es:[14]    ;Animated address
+ xchg ah,al
+ mov ds:AnimatedAddress,ax
+
+ mov ax,word ptr es:[16]    ;Animated object
+ xchg ah,al
+ mov ds:AnimatedEnd,ax
+
+ mov ax,word ptr es:[20]    ;Compressed address
+ xchg ah,al
+ mov ds:CompressedAddress,ax
+
+ mov ax,word ptr es:[22]    ;Compressed object
+ xchg ah,al
+ mov ds:CompressedEnd,ax
+   
+ mov ax,word ptr es:[28]    ;Cell object
+ xchg ah,al
+ mov ds:CellStart,ax
+
+ mov word ptr ds:MaxCell,0  ;header does not store maxcell;
+                            ;this is calculated...
+ ret
+
+ReadHeader endp
+
+;-----
+
+DisplayHeader proc near
+
+ call PRS
+ db 13,10,"        Structure Header...",13,10,"File is $"
+ mov ax,ds:StructureEOF
+ call PrintHexWord
+ call PRS
+ db " bytes$"
+
+ mov si,2
+ call AnotateOutputByte
+ call AnotatePRS
+ db " XZH address$"
+ call AnotateOutputByte
+
+ mov ax,ds:XZHaddress
+ cmp ax,0020h
+ je DH01
+ call PRS
+ db 13,10," INFO:  *********** XZH ADDRESS WRONG **********$"
+ call pause
+DH01:
+
+ mov si,4
+ call AnotateOutputByte
+ call AnotatePRS
+ db " XZH End           $"
+ mov bx,ds:XZHEnd
+ call AnotatePrintDecimal
+ call AnotateOutputByte
+
+ cmp ds:XZHEnd,1
+ jae DH02
+ call PRS
+ db 13,10," WARNING: ********** LAST XZH INVALID **********$"
+ call pause
+DH02:
+
+ mov si,8
+ call AnotateOutputByte
+ call AnotatePRS
+ db " Rasters address$"
+ call AnotateOutputByte
+
+ mov ax,ds:RastersAddress
+ cmp ax,ds:XZHAddress
+ jae DH03
+ call PRS
+ db 13,10," INFO:  *********** RASTERS OVERLAP XZH **********$"
+ call pause
+DH03:
+
+ mov si,10
+ call AnotateOutputByte
+ call AnotatePRS
+ db " Rasters End       $"
+ mov bx,ds:RastersEnd
+ call AnotatePrintDecimal
+ call AnotateOutputByte
+
+ mov ax,ds:RastersEnd
+ cmp ax,ds:XZHEnd
+ jae DH04
+ call PRS
+ db 13,10," INFO:  ********** LAST RASTER INVALID **********$"
+ call pause
+DH04:
+
+ mov si,14
+ call AnotateOutputByte
+ call AnotatePRS
+ db " Animation address$"
+ call AnotateOutputByte
+
+ mov ax,ds:AnimatedAddress
+ cmp ax,ds:RastersAddress
+ jae DH05
+ call PRS
+ db 13,10," INFO:  *********** ANIMATION OVERLAPS RASTERS **********$"
+DH05:
+
+ mov si,16
+ call AnotateOutputByte
+ call AnotatePRS
+ db " Animation End     $"
+ mov bx,ds:AnimatedEnd
+ call AnotatePrintDecimal
+ call AnotateOutputByte
+
+ mov ax,ds:AnimatedEnd
+ cmp ax,ds:RastersEnd
+ jae DH06
+ call PRS
+ db 13,10," INFO:  ********** LAST ANIMATION INVALID **********$"
+ call pause
+DH06:
+
+ mov si,20
+ call AnotateOutputByte
+ call AnotatePRS
+ db " Compressed address$"
+ call AnotateOutputByte
+
+ mov si,22
+ call AnotateOutputByte
+ call AnotatePRS
+ db " Compressed End    $"
+ mov bx,ds:CompressedEnd
+ call AnotatePrintDecimal
+ call AnotateOutputByte
+
+ mov si,28
+ call AnotateOutputByte
+ call AnotatePRS
+ db " Cell Start        $"
+ mov bx,ds:CellStart
+ call AnotatePrintDecimal
+ call AnotateOutputByte
+
+ call AnotatePRS
+ db 13,10,"$"
+ ret
+
+DisplayHeader endp
+
+;-----
+
+pause proc near
+
+ push ax
+ mov ah,8 ;Function 8:Read standard input device
+ int 21H
+ pop ax
+ ret
+
+pause endp
+
+;-----
+
+ReportInfo proc near
+
+ call PRS
+ db 13,10,"******* INFO:    [OBJECT $"
+ jmp short ReportObject
+
+ReportInfo endp
+
+;-----
+
+ReportWarning proc near
+
+ call PRS
+ db 13,10,"******* WARNING: [OBJECT $"
+ jmp short ReportObject
+
+ReportWarning endp
+
+;-----
+
+ReportSevere proc near
+
+ call PRS
+ db 13,10,"******* SEVERE:  [OBJECT $"
+ jmp short ReportObject
+
+ReportSevere endp
+
+;-----
+
+ReportFatal proc near
+
+ call PRS
+ db 13,10,"******* FATAL:   [OBJECT $"
+ jmp short ReportObject
+
+ReportFatal endp
+
+;-----
+
+;ReportCurrentObject proc near
+;
+; call PRS
+; db 13,10,"********** ERROR IN OBJECT: $"
+ReportObject:
+ mov bx,ds:CurrentObject
+ call PrintDecimal
+ call PRS
+ db "] $"
+ ret
+
+;ReportCurrentObject endp
+
+;-----
+
+SetMaxCell proc near
+
+ cmp bx,ds:OptionMaxCell
+ jbe SMC00
+ push bx
+ call ReportSevere
+ call PRS
+ db "CELL EXCEEDS $"
+ mov bx,ds:OptionMaxCell
+ call PrintDecimal
+ call pause
+ pop bx
+SMC00:
+
+ cmp bx,ds:AnimatedEnd
+ jb SMC01
+ cmp bx,ds:CellStart
+ jae SMC01
+ push bx
+ call ReportWarning
+ call PRS
+ db "ITEM NUMBER NOT 0,XZH,RASTER,ANIMATION OR CELL$"
+ call pause
+ pop bx
+
+SMC01:
+ cmp bx,ds:MaxCell
+ jbe SMC02
+ mov ds:MaxCell,bx
+SMC02:
+ ret
+
+SetMaxCell endp
+
+;-----
+
+DisplayXZH proc near
+
+ call PRS
+ db 13,10,"        XZH objects...$"
+
+ mov si,ds:XZHaddress
+ mov ds:CurrentObject,1
+
+DX01:
+ mov ax,ds:CurrentObject
+ dec ax
+ cmp ax,ds:XZHEnd
+ jne DX02
+ jmp DX15
+
+DX02:
+ call AnotatePRS
+ db 13,10,"        XZH object $"
+ mov bx,ds:CurrentObject
+ call AnotatePrintDecimal
+
+ test si,1
+ je DX03
+ call ReportFatal
+ call PRS
+ db "OBJECT NOT WORD-ALIGNED$"
+ call pause
+DX03:
+
+ call AnotateOutputByte
+ call AnotatePRS
+ db " Offset to next object        $"
+ call AnotateOutputByte
+
+ mov ax,es:[si-2]  ;offset
+ xchg ah,al ;must be a 4+N*5
+
+ cmp ax,4 ;*
+ jae DX04
+ push ax
+ call ReportFatal
+ call PRS
+ db "DATA/HEADER OVERLAP; OBJECT UNMODIFIABLE$"
+ pop ax
+DX04:
+ cmp ax,ds:OptionMaxOffset
+ jb DX05
+ push ax
+ call ReportInfo
+ call PRS
+ db "LONG OBJECT ($"
+ pop bx
+ push bx
+ call PrintDecimal
+ call PRS
+ db " BYTES)$"
+ call pause
+ pop ax
+DX05:
+
+ mov ds:NumberOfItems,0
+ sub ax,4
+DX06:
+ cmp ax,0                   ;exact fit
+ je DX08
+ cmp ax,1                   ;one byte padder for word-alignment
+ je DX08
+ cmp ax,5                   ;not enough bytes for an entry/too many for padder
+ jb DX07
+ sub ax,5
+ inc ds:NumberOfItems
+ jmp short DX06
+DX07:
+ call ReportSevere
+ call PRS
+ db "LENGTH NOT 4+5*NUMITEMS$"
+ call pause
+DX08:
+
+ call AnotateOutputByte
+ call AnotatePRS
+ db " width$"
+
+ cmp ds:OptionPadder,0
+ je DX09
+ mov al,es:[si]             ;padder (zero)
+ cmp al,0
+ je DX09
+ call OutPutByte
+ dec si
+ call ReportInfo
+ call PRS
+ db "NON-ZERO PADDER BYTE$"
+ call pause
+DX09:
+ inc si                     ;skip padder byte
+
+DX10:
+ cmp ds:NumberOfItems,0
+ jne DX11
+ jmp DX13
+DX11:
+ dec ds:NumberOfItems
+ call AnotateOutputByte
+ call AnotatePRS
+ db " X/4$"
+ call AnotateOutputByte
+ call AnotatePRS
+ db " Z/4$"
+ call AnotateOutputByte
+ call AnotatePRS
+ db " H/4$"
+
+ call AnotateOutputByte
+ call AnotatePRS
+ db " Object $"
+ mov bx,es:[si-1]
+ xchg bh,bl
+ cmp bx,0
+ jns DX12
+
+ and bx,07FFFh
+ push bx
+ call AnotatePRS
+ db "R $"
+ pop bx
+DX12:
+ call SetMaxCell
+ push bx                    ;object
+ call AnotatePrintDecimal
+ call AnotateOutputByte
+ pop bx                     ;object
+ cmp bx,0
+ jne DX10
+ call ReportInfo
+ call PRS
+ db "XZH CALLS 0$"
+ call pause
+ jmp DX10
+
+DX13:
+ test si,1
+ je DX14                    ;even address, already word aligned
+ inc si
+ cmp ds:OptionPadder,0
+ je DX14
+ dec si
+ mov al,es:[si]             ;padder byte
+ push ax
+ call AnotateOutputByte
+ call AnotatePRS
+ db " word-alignment padder$"
+ pop ax
+ cmp al,0
+ je DX14
+ call ReportInfo
+ call PRS
+ db "NON-ZERO PADDER BYTE$"
+ call pause
+DX14:
+ inc ds:CurrentObject
+ jmp DX01
+
+DX15:
+;si is end of XZH area
+ cmp si,ds:RastersAddress
+ je DX16
+
+ call ReportSevere
+ call PRS
+ db "END OF XZH DOES NOT MATCH HEADER$"
+ call pause
+
+DX16:
+ ret
+
+DisplayXZH endp
+
+;-----
+
+DisplayRaster proc near
+
+ call PRS
+ db 13,10,"        Raster objects...$"
+
+ mov si,ds:RastersAddress
+ mov ax,ds:XZHend
+ mov ds:CurrentObject,ax
+
+DR01:
+ mov ax,ds:CurrentObject
+ cmp ax,ds:RastersEnd
+ jne DR02
+ jmp DR20
+
+DR02:
+ inc ds:CurrentObject
+ call AnotatePRS
+ db 13,10,"        Raster object $"
+ mov bx,ds:CurrentObject
+ call AnotatePrintDecimal
+
+ test si,1
+ je DR03
+ call ReportFatal
+ call PRS
+ db "OBJECT NOT WORD-ALIGNED$"
+ call pause
+DR03:
+
+ call AnotateOutputByte
+ call AnotatePRS
+ db " Offset to next object        $"
+ call AnotateOutputByte
+
+ mov ax,es:[si-2]           ;offset
+ xchg ah,al
+ cmp ax,4
+ jae DR04
+ push ax
+ call ReportFatal
+ call PRS
+ db "DATA/HEADER OVERLAP; OBJECT UNMODIFIABLE$"
+ pop ax
+DR04:
+ cmp ax,ds:OptionMaxOffset
+ jb DR05
+ push ax
+ call ReportInfo
+ call PRS
+ db "LONG OBJECT ($"
+ pop bx
+ call PrintDecimal
+ call PRS
+ db " BYTES)$"
+ call pause
+DR05:
+
+ call AnotateOutputByte
+ call AnotatePRS
+ db " width$"
+
+ mov al,es:[si-1]
+ mov ah,0
+ cmp ax,ds:OptionMaxWidth
+ jbe DR06
+ call ReportInfo
+ call PRS
+ db "WIDE RASTER ($"
+ mov bl,es:[si-1]
+ mov bh,0
+ call PrintDecimal
+ call PRS
+ db ")$"
+ call pause
+DR06:
+
+ mov ax,es:[si-3]           ;offset
+ xchg ah,al                 ;must be a 4+H*Width*2
+ mov bl,es:[si-1]           ;width
+ sub ax,4                   ;must be H*Width*2
+ test ax,1
+ jne DR08                   ;non-even length (should be aligned)
+ mov bh,0
+ mov ds:RasterWidth,bx
+ add bx,bx                  ;width*2, then ax must be H*bx
+
+ mov ds:RasterHeight,0
+DR07:
+ cmp ax,0                   ;exact fit
+ je DR09
+ cmp ax,1                   ;1 byte padder
+ je DR09
+ cmp ax,bx
+ jb DR08                    ;too many bytes for padder, too few for raster width
+ cmp bx,0
+ je DR08                    ;division by zero  
+ sub ax,bx
+ inc ds:RasterHeight
+ jmp short DR07
+
+DR08:
+ call ReportSevere
+ call PRS
+ db "LENGTH NOT 2*W*H$"
+ call pause
+
+DR09:
+ cmp ds:OptionPadder,0
+ je DR10
+ mov al,es:[si]             ;padder (zero)
+ cmp al,0
+ je DR10
+ call OutPutByte
+ call ReportInfo
+ call PRS
+ db "NON-ZERO PADDER BYTE$"
+ call pause
+ dec si
+DR10:
+ inc si                     ;skip padder byte
+
+ mov ax,ds:RasterHeight
+ cmp ax,ds:OptionMaxHeight
+ jbe DR11
+ call ReportInfo
+ call PRS
+ db "TALL RASTER ($"
+ mov bx,ds:RasterHeight
+ call PrintDecimal
+ call PRS
+ db ")$"
+ call pause
+DR11:
+
+ call AnotatePRS
+ db 13,10,"        Height = $"
+ mov bx,ds:RasterHeight
+ call AnotatePrintDecimal
+
+ mov ds:CurrentX,0
+ mov ds:CurrentY,0
+DR12:
+ mov ax,ds:CurrentY
+ cmp ax,ds:RasterHeight
+ jne DR13
+ jmp DR18
+
+DR13:
+ mov ax,ds:CurrentX
+ cmp ax,ds:RasterWidth
+ jne DR14
+ jmp DR17
+
+DR14:
+ call AnotateOutputByte
+ call AnotatePRS
+ db " ($"
+ mov bx,ds:CurrentX
+ call AnotatePrintDecimal
+ call AnotatePRS
+ db ",$"
+ mov bx,ds:CurrentY
+ call AnotatePrintDecimal
+ call AnotatePRS
+ db ") Object $"
+
+ mov bx,es:[si-1]
+ xchg bh,bl
+ cmp bx,0
+ jns DR15
+
+ and bx,07FFFh
+ push bx
+ call AnotatePRS
+ db "R $"
+ pop bx
+DR15:
+ call SetMaxCell
+ push bx                    ;Object Number
+ call AnotatePrintDecimal
+ call AnotateOutputByte
+ pop bx                     ;Object Number
+ cmp bx,0
+ je DR16                    ;Raster calls object 0 (sparse raster)
+ cmp bx,ds:CellStart
+ jae DR16                   ;Raster calls CELL
+ call ReportInfo
+ call PRS
+ db "OBJECT IN RASTER NOT CELL OR 0$"
+ call pause
+DR16:
+
+ inc ds:CurrentX
+ jmp DR12
+
+DR17:
+ mov ds:CurrentX,0
+ inc ds:CurrentY
+ jmp DR12
+
+DR18:
+ test si,1
+ je DR19                    ;even address, already word aligned
+ inc si
+ cmp ds:OptionPadder,0
+ je DR19
+ dec si
+ mov al,es:[si]             ;padder byte
+ push ax
+ call AnotateOutputByte
+ call AnotatePRS
+ db " word-alignment padder$"
+ pop ax
+ cmp al,0
+ je DR19
+ call ReportInfo
+ call PRS
+ db "NON-ZERO PADDER BYTE$"
+ call pause
+DR19:
+ jmp DR01
+
+DR20:
+;si is end of XZH area
+ cmp si,ds:AnimatedAddress
+ je DR21
+
+ call ReportSevere
+ call PRS
+ db "END OF RASTERS DOES NOT MATCH HEADER$"
+ call pause
+
+DR21:
+ ret
+
+DisplayRaster endp
+
+;-----
+
+DisplayAnimated proc near
+
+ call PRS
+ db 13,10,"        Animation objects...$"
+
+ mov si,ds:AnimatedAddress
+ mov ax,ds:RastersEnd
+ mov ds:CurrentObject,ax
+
+DA01:
+ mov ax,ds:CurrentObject
+ cmp ax,ds:AnimatedEnd
+ jne DA02
+ jmp DA16
+
+DA02:
+ inc ds:CurrentObject
+
+ call AnotatePRS
+ db 13,10,"        Animation object $"
+ mov bx,ds:CurrentObject
+ call AnotatePrintDecimal
+
+ test si,1
+ je DA02Z
+ call ReportFatal
+ call PRS
+ db "OBJECT NOT WORD-ALIGNED$"
+ call pause
+DA02Z:
+
+ mov ds:LastAniItemOk,1
+ call AnotateOutputByte
+ call AnotatePRS
+ db " Offset to next object        $"
+ call AnotateOutputByte
+
+ mov ax,es:[si-2]           ;offset
+ xchg ah,al
+
+ cmp ax,4
+ jae DA02A
+ push ax
+ call ReportFatal
+ call PRS
+ db "DATA/HEADER OVERLAP; OBJECT UNMODIFIABLE$"
+ pop ax                     ;offset
+DA02A:
+ cmp ax,ds:OptionMaxOffset
+ jb DA02B
+ push ax
+ call ReportInfo
+ call PRS
+ db "LONG OBJECT ($"
+ pop bx
+ push bx
+ call PrintDecimal
+ call PRS
+ db " BYTES)$"
+ call pause
+ pop ax                     ;offset
+DA02B:
+
+ sub ax,4
+ mov ds:NumberOfItems,ax
+
+ test ax,1
+ je DA03
+
+ call ReportSevere
+ call PRS
+ db "LENGTH NOT EVEN$"
+ call pause
+
+DA03:
+ cmp ds:OptionPadder,0
+ je DA04
+ mov ax,es:[si]             ;padder (zero)
+ cmp ax,0
+ je DA04
+ call OutPutByte
+ call OutPutByte
+ call ReportInfo
+ call PRS
+ db "NON-ZERO PADDER WORD$"
+ call pause
+ sub si,2
+DA04:
+ add si,2                   ;skip padder byte
+
+DA05:
+ cmp ds:NumberOfItems,0     ;bytes left in sequence
+ jne DA07
+ jmp DA07A
+
+DA07:
+ mov al,es:[si]
+ cmp al,0
+ jne DA08
+ cmp ds:NumberOfItems,1     ;single byte of 00h is padder
+ jne DA08
+ dec cs:NumberOfItems
+ inc si
+
+DA07A:
+ cmp ds:LastAniItemOk,1
+ je DA07B
+ call ReportInfo
+ call PRS
+ db "ANIMATION DOES NOT END OBJECT,FORK OR SHIFT$"
+ call pause
+DA07B:
+ jmp DA01
+
+DA08:
+ call AnotateOutputByte
+ mov al,es:[si-1]
+
+; C0-FF Fork hi byte
+; A0-BF ?
+; 90-9F Random 17..Random 32
+; 81-8F Repeat 2..Repeat16
+; 80    Repeat !
+; 60-7F shift X Z -H
+; 40-5F shift X Z +H
+; 3FFF  toggle reflection
+; 01-3F object hi byte
+; 00    padder
+
+ cmp al,0C0h
+ ja ForkAnimation           ;Fork #
+ cmp al,0A0h
+ ja BadAnimation            ;invalid instruction
+ cmp al,090h
+ jae RandomAnimation        ;Random 17..32
+ cmp al,080h
+ ja RepeatAnimation         ;Repeat 2..16
+ je ForeverAnimation        ;Repeat !
+ cmp al,060H
+ jae ShiftANimation         ;Shift X Z -H
+ cmp al,040h
+ jae ShiftAnimation         ;Shift X Z H
+ mov ds:LastAniItemOk,1
+ jmp ObjectAnimation        ;Reflect/Object #
+
+ShiftAnimation:
+ mov ds:LastAniItemOk,1
+ jmp DA10
+ForkAnimation:
+ mov ds:LastAniItemOk,1
+ jmp DA30
+BadAnimation:
+ mov ds:LastAniItemOk,1
+ jmp DA14
+RandomAnimation:
+ mov ds:LastAniItemOk,0
+ jmp DA17
+ForeverAnimation:
+ mov ds:LastAniItemOk,0
+ jmp DA13
+RepeatAnimation:
+ mov ds:LastAniItemOk,0
+ jmp DA18
+
+DA30:
+ call AnotatePRS
+ db " Fork # $"
+ mov bx,es:[si-1]
+ xchg bh,bl
+ and bx,03FFFh
+ jmp short DA05B
+
+ObjectAnimation:
+ mov bx,es:[si-1]
+ cmp bx,0FF3Fh ;hi=03Fh lo=0FFh
+ jne DA05A
+ call AnotatePRS
+ db " Reflect$"
+ jmp short DA05C
+DA05A:
+ call AnotatePRS
+ db " Object # $"
+ mov bx,es:[si-1]
+ xchg bh,bl
+DA05B:
+ call SetMaxCell
+ call AnotatePrintDecimal
+DA05C:
+ cmp ds:NumberOfItems,1     ;sequence length
+ jne DA09
+ jmp DA15                   ;invalid length
+DA09:
+ sub ds:NumberOfItems,2     ;sequence length
+ call AnotateOutputByte
+ jmp DA05
+
+DA10:
+ call AnotatePRS
+ db " Shift $"
+ mov al,es:[si]
+ call AnotateDisplaySignedByte
+ call AnotatePRS
+ db " $"
+ mov al,es:[si+1]
+ call AnotateDisplaySignedByte
+ call AnotatePRS
+ db " $"
+ mov al,es:[si-1]
+ cmp al,060h
+ jae DA11
+ and al,01Fh
+ jmp DA12
+DA11:
+ or al,0FEh
+DA12:
+ call AnotateDisplaySignedByte
+
+ cmp ds:NumberOfItems,3     ;sequence length
+ jae DA12A
+ jmp DA15                   ;invalid length
+DA12A:
+ sub ds:NumberOfItems,3
+ call AnotateOutputByte
+ call AnotateOutputByte
+ jmp DA05
+
+DA13:
+ dec ds:NumberOfItems       ;sequence length
+ call AnotatePRS
+ db " Repeat ! (forever)$"
+ jmp DA05
+
+DA17:                       ;Random 17..32
+ call AnotatePRS
+ db " Random $"
+ mov al,es:[si-1]
+ or al,0F0h
+ call AnotateDisplaySignedByte
+ dec ds:NumberOfItems
+ jmp DA05
+
+DA18:                       ;Repeat 2..16
+ call AnotatePRS
+ db " Repeat $"
+ mov al,es:[si-1]
+ and al,00Fh
+ inc al
+ call AnotateDisplaySignedByte
+ dec ds:NumberOfItems
+ jmp DA05
+
+DA14:
+ dec ds:NumberOfItems       ;sequence length
+ call ReportWarning
+ call prs
+ db "INVALID INSTRUCTION$"
+ call pause
+ jmp DA05
+
+DA15:
+ dec ds:NumberOfItems       ;sequence length
+ cmp ds:OptionAniOverrun,0
+ je DA15A
+ call ReportInfo
+ call prs
+ db "INSTRUCTION OVERRUNS$"
+ call pause
+DA15A:
+ jmp DA05
+ 
+DA16:
+;si is end of Animation area
+ cmp si,ds:CompressedAddress
+ je DA19
+
+ call ReportSevere
+ call PRS
+ db "END OF ANIMATION DOES NOT MATCH HEADER$"
+ call pause
+
+DA19:
+ ret
+
+DisplayAnimated endp
+
+;-----
+
+FinalReport proc near
+
+ call PRS
+ db 13,10,13,10
+ db "Calculated... MaxCell = $"
+ mov bx,ds:MaxCell
+ call PrintDecimal
+ ret
+
+FinalReport endp
+
+;-----
+
+CopyRight proc near
+
+ call PRS
+ db 13,10,"SCHECK V0.0"
+ db 13,10,"Copyright (C) 12/10/1989 Level 9 Computing"
+ db 13,10,"$"
+ ret
+
+CopyRight endp
+
+;-----
+
+ValidateStructures proc near
+
+ call ReadHeader
+ call DisplayHeader
+ call DisplayXZH
+ call DisplayRaster
+ call DisplayAnimated
+ call FinalReport
+ ret
+
+ValidateStructures endp
+
+;-----
+
+;...e
+
+ code ends
+
+;-----
+
+;...sVariables:0:
+
+vars segment word public 'data'
+
+Pointer1          dw 0
+Pointer2          dw 0
+Number            dw 0
+
+StructurName      db 'STRUCTUR.DAT',0
+
+StructureSegment  dw 0      ;paragraph address of STRUCTUR.DAT
+
+StructureEOF      dw 0
+
+prntblpointer     dw 0
+
+CurrentObject     dw 0
+
+NumberOfItems     dw 0
+LastAniItemOk     dw 0
+
+RasterWidth       dw 0
+RasterHeight      dw 0
+CurrentX          dw 0
+CurrentY          dw 0
+
+XZHAddress        dw 0
+XZHEnd            dw 0
+RastersAddress    dw 0
+RastersEnd        dw 0
+AnimatedAddress   dw 0
+AnimatedEnd       dw 0
+CompressedAddress dw 0
+CompressedEnd     dw 0
+CellStart         dw 0
+MaxCell           dw 0
+
+OptionAnotate     dw 0      ;1=verbose output
+OptionPadder      dw 0      ;1=Report non-zero padder bytes errors
+OptionAniOverrun  dw 0      ;1=Report end of ANI not padded
+OptionMaxOffset   dw 0      ;Limit on number of bytes per Object
+OptionMaxWidth    dw 0      ;Limit of raster width
+OptionMaxHeight   dw 0      ;Limit of raster height
+OptionMaxCell     dw 0      ;Limit of cell/object numbers
+
+vars ends
+
+;...e
+
+;-----
+
+ end
+
+###########################################################################
+############################### END OF FILE ###############################
+###########################################################################
+
+
