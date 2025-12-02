@@ -1,0 +1,353 @@
+; Lords of Time Text, part 1 of "Time & Magik",
+; copyright (C) 1987/1988 Level 9 Computing.
+;
+; Time & Magik credits..
+; design: Sue Gazzard, David Williamson, Pete Austin.
+; program: Mike Austin, Pete Austin.
+; versions: Nick Austin, John Jones-Steele.
+; pictures: Godfrey Dowson, Neil Strudwick.
+; additional text: Ruth Pracey.
+; 
+[1: ] 
+[2:] 
+[3:, ] 
+[4:. ] 
+[5:%] 
+[6: and ] 
+[7:.%] 
+[8:north] 
+[9:northeast] 
+[10:east] 
+[11:south] 
+[12:southeast] 
+[13:southwest] 
+[14:west] 
+[15:northwest] 
+[16:up] 
+[17:down] 
+[18:in] 
+[19:out] 
+[20:across] 
+[21:exits are] 
+[22: through a door] ;>>mike 19/7/87 
+[23: through an open door] 
+[24:%you are] 
+[25:you own] 
+[26:and you're wearing] 
+[27:you can see] 
+[28:%what now? ] 
+;
+[53:really stop? ] 
+[54:another game? ] 
+[55:really restore? ] 
+[56:%YES or NO, please. ] 
+[57:%You score ] 
+[58: out of 1000.%] 
+[59:sorry, I can't tell you any more. ] 
+[60: nothing. ] 
+[61:you can't go in that direction. ] 
+[62:you bash your nose on a door. ] 
+[63:the door closes behind you. ] 
+[64:it's already open. ] 
+[65:it's already closed. ] 
+[66:there's nothing to open. ] 
+[67:there's nothing to close. ] 
+[68:only a fool would rush in and fight] 
+[69:you find nothing. ] 
+[70:the only visible exit is ] 
+; 
+[72:tied together] 
+[73:which is open] 
+[74:(one match is lit)] 
+[75:burning brightly] 
+[76:peering down from above] 
+[77:full of water] 
+[78:tied up] 
+[79:glowing white-hot] 
+;
+; Numbers for buttons etc 
+; 
+[1241:^N 1 ^N one] 
+[1242:^N 2 ^N two] 
+[1243:^N 3 ^N three] 
+[1244:^N 4 ^N four] 
+[1245:^N 5 ^N five] 
+[1246:^N 6 ^N six] 
+[1247:^N 7 ^N seven] 
+[1248:^N 8 ^N eight] 
+[1249:^N 9 ^N nine] 
+; 
+; Messages for ST loader. 
+[1270:%Welcome to the Time and Magik trilogy, copyright (C) 1988 
+from Level 9 and Mandarin. This recreates the three key episodes in 
+the struggle to defend creation. ] 
+[1271:%Enter 1 for Lords of Time, 2 for Red Moon, or 3 for Price of 
+Magik.%] 
+; 
+; and some additional special case messages... 
+[1280:the door is too stiff. You notice that the clock needs winding. ] 
+[1281:the door won't open. You notice that the pendulum swings easily. ] 
+[1282:A thunderbolt strikes beside you! ] ; rude word 
+; 
+;Parser messages: 
+; 
+[2002:it] 
+[2003:you can't use the word ] 
+[2004: like that] 
+[2005:I don't understand what you mean by the word ] 
+[2006:OK. ] 
+; 
+[2010:I don't understand] 
+[2011:you can't see] 
+[2012:you don't have] 
+[2013:you already have] 
+[2014:you'll have to drop it first. ] 
+; 
+[2017:it's not there. ] 
+; 
+[2020:I think that's somewhere else. ] ; Scenery elsewhere 
+ 
+[2030:I think that's just scenery. ] ; Scenery here (not examine).
+[2031:don't worry about it. ] 
+[2032:forget it! ] 
+; 
+[2053:it's not clear what IT refers to in that context.%] 
+; 
+;--- 
+[2200:really restore? ] 
+[2201:remove the Time and Magik disc, insert your formatted save 
+position disc and press a key. ] 
+[2202:now pull your save position disc out and stuff the Time and 
+Magik disc back in.% %] 
+; 
+[2208:I can't use UNDO to go back further than this. ] 
+[2209:(this version allows you to use RAM SAVE and RAM RESTORE 
+to save a position in memory, and UNDO to retrace your steps). ] 
+[2210:I can't find that saved position in memory. Perhaps 
+you've turned off the computer, or reloaded the game, since 
+it was saved. ] 
+; 
+[2211:you're about to move to another part of the game. Do you 
+want to save your position first, just in case? ] 
+[2212:that data was probably not saved from Time and Magik. ] 
+[2213:play the program cassette containing "] 
+[2214:Lords of Time". ] ; part 1 
+[2215:Red Moon". ] ; part 2 
+[2216:Price of Magik". ] ; part 3 
+[2217:% %do you want to go on to Red Moon? ]
+;--- 
+;Ram save messages: 
+; 
+; Duplicated messages (see also 2408)???... 
+[2300:Sorry, we couldn't fit that facility into this 
+version. ] ;OOPS or RAM 
+[2301:(this version allows you to use RAM SAVE and RAM RESTORE 
+to save a position in memory).%] 
+[2302:(this version allows you to use RAM SAVE and RAM RESTORE 
+to save a position in memory, and UNDO to "take back" wrong moves).%] 
+[2303:you must use RAM SAVE first. ] 
+[2304:you can't use UNDO to go back further than this. ] ;Oops command 
+; 
+;; [2310:%press SPACE to play again. ] ;trailing space is because 
+; osrdch driver call does not clear word-wrap. 
+[2311:%Which do you want to do, UNDO, RAM RESTORE, RESTART or RESTORE? ] 
+[2312:please answer YES or NO. ] 
+[2313:if you now SAVE this position to disc//cassette, and RESTORE 
+it at the start of the game, you can go on to achieve the maximum 
+score for the whole trilogy. Do you want to SAVE? ] ;>> 
+[2314:that position was not saved from this part of the adventure. ] ;>> 
+; 
+;Message as part of SCORE command: 
+;[2315:And you solved the previous part(s) of the game. ] 
+; 
+;At end of final game: 
+;[2316:%Well done! You have solved the entire trilogy with a 
+;display of supreme brilliance, cleverness, ingenuity, intelligence, 
+;perspicacity, insight, intuition, sagacity, imagination, wisdom and 
+;sheer genius. Not to mention enduring persistence. This proves you 
+;to be an intellectual, mastermind and mental giant, all rolled into 
+;one. In fact, I'm sure you'd be running the country right now, if you 
+;weren't so honest! Congratulations! ] 
+; 
+[2319:This game was designed and programmed by Mike, Nick and Pete 
+Austin, with additional text from Ruth Pracey and pictures by Godfrey 
+Dowson. It is copyright (C) 1988 Level 9 Computing, who can be 
+contacted at PO Box 39, Weston-super-Mare, Avon BS24 9UR, England. If 
+you want cluesheets, please enclose a self-addressed envelope and a 
+stamp or four international reply coupons.] 
+; 
+[2320:sorry, you're on your own here. ] 
+; 
+[2400:really restore? ] 
+[2401:remove the Time and Magik disc, insert your formatted save 
+position disc and press a key. ] 
+[2402:now pull your save position disc out and stuff the 
+Time and Magik disc back in.% %] 
+; 
+; Duplicated messages (see also 2300)???... 
+;
+[2408:I can't use UNDO to go back further than this. ] 
+[2409:(this version allows you to use RAM SAVE and RAM RESTORE 
+to save a position in memory, and UNDO to take back bad moves). ] 
+[2410:I can't find that saved position in memory. Perhaps 
+you've turned off the computer, or reloaded the game, since 
+it was saved. ] 
+; 
+[2411:you're about to move to another part of the game. Do you 
+want to save your position first, just in case? ] 
+[2412:that data was probably not saved from Time and Magik. ] 
+[2413:play the program cassette containing "] 
+[2414:Lords of Time". ] ; part 1 
+[2415:Red Moon". ] ; part 2 
+[2416:Price of Magik". ] ; part 3 
+; 
+[3000:, ] 
+[3001:. ] 
+[3002:: ] 
+[3003:%] 
+[3004:.%] 
+[3005:the ] 
+[3006:a ] 
+[3007:an ] 
+[3008:"] 
+[3009:the] 
+[3010:and] 
+[3011: ] 
+[3012::] 
+; 
+[3020:there seem to be exits leading ] 
+[3021:an exit leads ] 
+; 
+; Prepositions: 
+; 
+[3900:^P at ^P on ^P onto ^P underneath ^P below ^P behind ^P in 
+^P into ^P with ^P off ^P up ^P down ^P to] 
+; 
+; Garbage words 
+; 
+[4000:^N the ^N this ^N these ^N that ^N some ^N a ^N and ^N also 
+^N before ^N wade ^N jog ^N plod ^N rush ^N dash ^N march ^N amble 
+^N good ^N of ^N cute ^N there ^N at] 
+[4001:^N about ^N therefore 
+^N am ^N to ^N of ^N on ^N my ^N your ^N try ^N carefully ^N slowly 
+^N warily ^N quickly ^N rapidly ^N want ^N like ^N love 
+^N say ^N please ^N wait ^N water ^N together ^N silver] 
+;>>mike-water added to allow "DRINK WATER" to work 
+;------------------------------------------- 
+; 
+; Book protection code... 
+; 
+[4200:%A shadowy figure taps you on the shoulder, "Greetings! You 
+probably know the routine by now. Please tell me one word from the 
+book which accompanies this game. ] 
+[4201:page ] 
+[4202:, line ] 
+[4203:, word ] 
+[4204:?"%] 
+[4205:The shadow hisses, "Falssse! Try again. ] 
+[4206:The shadow fades away.%] 
+[4207:What is the word at ] 
+[4208:"That wasss your lassst missstake!" The shadow grins horribly 
+and reaches out to drag you away. ] 
+; 
+; 
+[4301:^C his] ;15/7/8
+[4302:^C but] ;6/6/5
+;; [4303:] ;10/3/6
+[4304:^C I] ;18/8/3
+[4305:^C certain] ;20/3/4
+[4306:^C Baskalos] ;14/2/1
+[4307:^C can] ;6/5/2
+[4308:^C course] ;7/2/7
+[4309:^C wore] ;7/1/8
+[4310:^C quill ^C cut] ;7/10/5
+;; [4311:] ;10/3/6
+[4312:^C a ^C almost] ;1/2/3
+[4313:^C we] ;22/5/4
+[4314:^C future] ;5/8/1
+[4315:^C were] ;16/3/2
+[4316:^C to] ;3/4/7
+[4317:^C of] ;22/5/8
+[4318:^C a] ;8/8/5
+[4319:^C his] ;7/3/6
+[4320:^C attempts] ;7/2/3
+[4321:^C and] ;4/1/4
+[4322:^C where] ;16/4/1
+[4323:^C passing] ;3/5/2
+[4324:^C the] ;19/6/7
+[4325:^C the] ;14/9/8
+[4326:^C in ^C had] ;9/6/5
+[4327:^C ten] ;4/3/6
+[4328:^C it] ;13/6/3
+[4329:^C to] ;6/7/4
+[4330:^C the] ;4/10/1
+[4331:^C his] ;13/3/2
+[4332:^C eventide] ;15/8/7
+[4333:^C that] ;6/7/8
+[4334:^C long] ;7/4/5
+[4335:^C for ^C at] ;1/9/6
+[4336:^C the] ;22/6/3
+[4337:^C through] ;11/9/4
+[4338:^C could] ;18/10/1
+[4339:^C back] ;20/1/2
+[4340:^C us] ;11/10/7
+;; [4341:] ;21/1/8
+[4342:^C a] ;8/8/5
+[4343:^C for ^C at] ;1/9/6
+;; [4344:] ;5/6/3
+[4345:^C upwards] ;16/5/4
+[4346:^C what] ;6/6/1
+[4347:^C set] ;7/3/2
+;; [4348:] ;4/2/7
+[4349:^C to] ;13/5/8
+[4350:^C in ^C had] ;9/6/5
+[4351:^C yet] ;21/9/6
+[4352:^C met] ;11/10/3
+[4353:^C came] ;18/7/4
+[4354:^C mine] ;20/2/1
+[4355:^C price ^C small] ;17/1/2
+[4356:^C shall] ;23/4/7
+[4357:^C ought] ;5/9/8
+[4358:^C trembling] ;10/4/5
+[4359:^C pyramids] ;18/9/6
+[4360:^C its ^C there] ;17/10/3
+[4361:^C against] ;23/3/4
+[4362:^C and] ;8/8/1
+[4363:^C the] ;4/9/2
+[4364:^C the] ;19/6/7
+;; [4365:] ;20/3/8
+[4366:^C the] ;11/8/5
+[4367:^C pyramids] ;18/9/6
+[4368:^C he] ;23/4/3
+[4369:^C light ^C the] ;2/9/4
+[4370:^C in] ;19/4/1
+[4371:^C a] ;14/1/2
+[4372:^C for] ;12/8/7
+[4373:^C focussed] ;12/7/8
+[4374:^C does] ;12/6/5
+[4375:^C fellow] ;15/9/6
+[4376:^C you] ;6/4/3
+[4377:^C and] ;7/1/4
+[4378:^C the] ;10/4/1
+[4379:^C could] ;21/9/2
+[4380:^C of] ;8/10/7
+[4381:^C them] ;4/1/8
+[4382:^C while] ;13/4/5
+;; [4383:] ;12/5/6
+[4384:^C took] ;15/8/3
+[4385:^C that ^C to] ;9/7/4
+[4386:^C second] ;21/10/1
+[4387:^C for] ;8/1/2
+[4388:^C the ^C day] ;1/2/7
+[4389:^C but] ;19/5/8
+[4390:^C afforded] ;14/2/5
+;; [4391:] ;9/5/6
+[4392:^C was] ;21/8/3
+[4393:^C was] ;14/9/4
+[4394:^C but] ;12/6/1
+[4395:^C them] ;18/9/2
+[4396:^C and] ;20/4/7
+[4397:^C darkness] ;11/9/8
+[4398:^C him] ;15/6/5
+;; [4399:^C it] ;9/5/6
+; ; 

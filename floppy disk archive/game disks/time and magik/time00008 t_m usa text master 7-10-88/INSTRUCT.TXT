@@ -1,0 +1,219 @@
+REFERENCE CARD FOR TIME AND MAGIK
+--------------------------------- 
+This card tells you how to load and run Time and Magik on your 
+computer, and lists the specific features of each version.
+
+
+DISK LOADING INSTRUCTIONS 
+-------------------------  
+Look down the alphabetical list of computer types and follow the 
+instructions for your computer. The underlined text is what you type, 
+and remember to press the ENTER or RETURN key after each command. 
+
+Amiga 500          Insert the game disk and turn on your Amiga. 
+Amiga 1000/2000    Insert your Kickstart disk and turn on your Amiga. 
+                   When it asks for Workbench, insert the game disk. 
+Amstrad CPC 6128   Turn on your CPC (6128 or 464/664 expanded to 128K) 
+                   and insert the game disk. Enter RUN"MENU"
+Amstrad PCW        Insert your usual CP/M+ disk and turn on your PCW. 
+                   Insert the game disk and enter MENU
+Apple II           Insert the game disk and turn on your Apple II. 
+Atari ST           Insert the game disk and turn on your ST. 
+Atari XE or 800XL  Remove any cartridges. Insert the game disk. While 
+                   holding down OPTION for at least 5 seconds, turn 
+                   the Atari on. If nothing happens, turn off the 
+                   Atari for 30 seconds and try again. 
+BBC master or 128K+Turn on your BBC micro, insert the game disk and 
+                   press SHIFT and BREAK together. 
+CBM 64 or 128 disk Turn on your Commodore (while holding down the 
+                   Commodore key, if you have a 128). Insert the game 
+                   disk and enter LOAD"*",8,1
+IBM PC and clones  Insert the normal operating system disk and turn on 
+                   your IBM PC. Replace it with the game disk, and 
+                   enter MENU
+Mac,Mac+           Insert the normal operating system disk and turn on 
+                   your Mac. Insert the game disk and double click on 
+                   the MENU icon.
+
+TAPE LOADING INSTRUCTIONS
+-------------------------  
+Put one of the game tapes in your recorder, look down the alphabetical 
+list of computer types and follow the instructions for your computer. 
+The underlined text is what you type, and remember to press the ENTER 
+or RETURN key after each command. 
+
+If the tape doesn't move, press ENTER or RETURN again.
+
+Amstrad CPC tape   Turn on your CPC. If it has a disk drive, enter 
+                   |TAPE 
+                   Type RUN"" start the tape on play and press SPACE. 
+Atari XE,800XL     Re  Turn on your MSX, enter RUN"CAS:" and play the tape. 
+Spectrum 48K       Turn on the Spectrum, type LOAD"" and play the tape.
+Spectrum 128/+2    Turn on the Spectrum, press ENTER and play the tape. 
+
+
+SAVE ON DISK
+------------ 
+To save game positions from the disk version of Time and Magik, you 
+first need a blank disk of your own. 
+
+Before playing Time and Magik, format (initialize) this disk, using 
+the ordinary software bought with your micro. (Exceptions to this are 
+Apple II and Atari XE,  Turn on your MSX, enter RUN"CAS:" and play the tape. 
+Spectrum 48K       Turn on the Spectrum, type LOAD"" and play the tape.
+Spectrum 128/+2    Turn on the Spectrum, press ENTER and play the tape. 
+
+
+SAVE ON DISK
+------------ 
+To save game positions from the disk version of Time and Magik, you 
+first need a blank disk of your own. 
+
+Before playing Time and Magik, format (initialize) this disk, using 
+the ordinary software bought with your micro. (Exceptions to this are 
+Apple II and Atari XE,800XL disks - Time and Magik uses its own disk 
+format on these computers and will initialize the disk itself.) 
+
+When playing the game, enter SAVE and follow the instructions displayed. 
+
+To return to a SAVEd position, enter RESTORE and YES, and follow any 
+instructions asking for one word from the story. When entering a file 
+name, you can either type a short word such as POS1, or use the full 
+format permitted by your particular computer. 
+
+
+SAVE ON TAPE 
+------------ 
+To save game positions from a cassette version of Time and Magik, you 
+need a blank cassette of your own. 
+
+When playing the game, start a blank tape on RECORD and enter SAVE 
+(if the cassette doesn't move, press ENTER or RETURN again). When the 
+game starts running again, e.g to prompt for your next command by 
+displaying ">" or "What now?", stop the tape. 
+
+To return to a SAVEd position, enter RESTORE and YES, then follow any 
+instructions asking for one word from the story. Finally, rewind the 
+tape on which the position was saved, and play it (if the cassette 
+doesn't move, press ENTER or RETURN again).
+
+
+SAVE IN MEMORY
+-------------- 
+To save your game position in memory (all but 48K Spectrums and 64K 
+Amstrad CPCs allow this), enter RAM SAVE
+
+To return to a SAVEd position, enter RAM RESTORE 
+
+Remember that saving in memory is very quick and convenient - it is 
+an ideal way of saving your position before trying something risky - 
+but a RAM SAVEd position will be lost if your computer is turned off 
+or crashes, so SAVE to disk or tape occasionally. 
+
+Note also that the UNDO command is available on all versions which have 
+RAM SAVE. UNDO takes you "back in time" to before you last moved: it's 
+a bit like RAM RESTORE where the corresponding RAM SAVEs are automatic, 
+except that UNDO can be used many times in succession on larger micros. 
+
+
+COPYRIGHT
+---------
+Please remember that Time and Magik is protected by copyright and took 
+a lot of time and technological "magik" to produce, so make no more 
+than one copy, for your own use, to keep only as long as you have the 
+original game. Before copying any game you must check the copyright 
+conditions in its documentation. 
+
+
+                        ADDITIONAL FEATURES 
+                        ------------------- 
+The versions of Level 9 adventures on large micros tend to have more 
+facilities than those on smaller machines. Here is a summary of the 
+additional features available with Time and Magik...
+
+AMIGA FEATURES: 
+-------------- 
+* colour pictures (use the mouse, with its left button pressed, to 
+  slide the picture up and down);
+* picture cache (avoiding unnecessary disk loads); 
+* recall and editing of previous commands, by cursor keys and 
+  BACK SPACE; 
+* README file. For more information, boot the Amiga with Workbench, 
+  then insert the game disk and double click on its icon and README.TXT. 
+
+AMSTRAD CPC DISK FEATURES:
+------------------------- 
+* colour pictures (use F8 and F2 to slide the picture up and down). To 
+  see more pictures, wait until the game has loaded and is waiting for 
+  you to type something - then flip the disk over;
+* picture cache (avoiding unnecessary disk loads); 
+* recall and editing of previous commands, by cursor keys and DELETE; 
+* README file. For more information, turn on the CPC, insert the game 
+  disk and enter LOAD"README" and LIST
+  
+AMSTRAD PCW DISK FEATURES (the PCW and CPC versions share a disk):
+-----------------------------------------------------------------
+* black-and-white pictures. To see more pictures, wait until the game 
+  has loaded and is waiting for you to type something - then flip the 
+  disk over;
+* picture cache (avoiding unnecessary disk loads); 
+* recall and editing of previous commands, by cursor keys and DELETE; 
+* README file. For more information, boot the PCW with CP/M+ as usual, 
+  then insert the game disk and enter TYPE README.TXT
+
+ATARI ST FEATURES:
+-----------------
+* pictures on colour and black-and-white displays (use the mouse, with 
+ monstration Game. If you would like a continuous demonstration of 
+  Time and Magik, perhaps for use in a shop, start the game and WAIT 
+  UNTIL THE FIRST PICTURE HAS FINISHED LOADING and the game is waiting 
+  for a command. If necessary, press SPACE a couple of times so the 
+  game can print the rest of its start-up message and reach the first 
+  prompt, ">" or "What now?". Only then should you press Alternate R
+* an interpreter which can be used with Knight Orc and Gnome Ranger, 
+  letting them bemonstration Game. If you would like a continuous demonstration of 
+  Time and Magik, perhaps for use in a shop, start the game and WAIT 
+  UNTIL THE FIRST PICTURE HAS FINISHED LOADING and the game is waiting 
+  for a command. If necessary, press SPACE a couple of times so the 
+  game can print the rest of its start-up message and reach the first 
+  prompt, ">" or "What now?". Only then should you press Alternate R
+* an interpreter which can be used with Knight Orc and Gnome Ranger, 
+  letting them benefit from new features. Copy the previous game to a 
+  new disk, then copy GAME.PRG from the Time and Magik disk, replacing 
+  the old version. Hey presto! Variable text size etc. 
+
+COMMODORE 64/128 DISK FEATURES: 
+------------------------------ 
+* colour pictures (use the cursor keys to slide the picture up and 
+  down). To see more pictures, wait until the game has loaded and is 
+  waiting for you to type something - then flip the disk over;
+* fast performance when the pictures are turned off; partly because 
+  loading from disk takes a little while (even though we use a good 
+  turbo) and not needing to maintain a moveable split screen (the 
+  division between picture and text) frees more processing power. 
+
+IBM PC FEATURES: 
+---------------
+* pictures in MGA, EGA and CGA modes. (To cope with so many display 
+  modes, the disk just contains one set of pictures and converts them 
+  on output when MGA or CGA is chosen);
+* picture cache (avoiding unnecessary disk loads); 
+* recall and editing of previous commands, by cursor keys and 
+  Backspace; 
+* README file. For more information, boot the PC from its normal 
+  operating system disk, then insert the game disk and enter 
+  TYPE README.TXT. 
+* Demonstration Game. If you would like a continuous demonstration of 
+  Time and Magik, perhaps for use in a shop, start the game by entering 
+  MENU and waiting for it to load. Then, before doing anything else, 
+  press ALT R. Continue by choosing a display format as usual.  
+* an interpreter which can be used with Knight Orc and Gnome Ranger, 
+  letting them benefit from new features. Copy the previous game to a 
+  new disk, then copy AINT.EXE, MENU.EXE and MENU.TXT from the Time and 
+  Magik disk, replacing the old versions. Hey presto! CGA graphics etc. 
+
+MAC FEATURES 
+------------
+* black-and-white pictures (use the mouse, with its button pressed, to 
+  slide the picture up and down);
+* recall and editing of previous commands, by cursor keys and DELETE. 

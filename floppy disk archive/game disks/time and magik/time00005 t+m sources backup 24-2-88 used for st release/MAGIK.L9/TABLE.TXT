@@ -1,0 +1,246 @@
+; TABLE DEFINITIONS
+; for Price of Magik
+;
+; 16/2/86 M.J.Austin
+; Copyright (C) 1986 Level 9 Computing
+;
+ ORG 0
+starttables
+ dc.l LIST1-starttables ; MOVEABLE OBJECT START
+ dc.l $8000 ; OBJECT CURRENT
+ dc.l $8000+NUMOBJ ; HI OBJECT CURRENT
+ dc.l LIST4-starttables ; tramlines for mobiles
+ dc.l NPCINITIAL-starttables
+ dc.l $8000+LIST23SIZE ; 6 - spell time, NPC current attributes, chests
+ dc.l $8000+LIST236SIZE ; 7 - output buffer,scoretable
+ dc.l $8000+LIST2367SIZE ; object table
+ dc.l $8000+LIST23678SIZE ; input table
+ dc.l ENDTABLE-starttables
+;---
+; CONTAINER POSITONS
+ON EQU 1
+UNDER EQU 2
+BEHIND EQU 3
+CARRIED EQU 4
+WORN EQU 5
+HANGINGABOVE EQU 6
+IN EQU 7
+HANGINGFROM EQU 8 ; E.G. TREE
+INARE EQU 9 ; E.G. IN THE WARDROBE ARE SOME ROBES
+ONAFINGER EQU 11
+LIEON EQU 12
+SITON EQU 13
+PARTOF EQU 17
+;
+MONKEYWAITING EQU 252
+AXEHANGING EQU 254
+;
+OBV EQU $80
+;
+NUMOBJ EQU 150
+NUMHIOBJ EQU NUMOBJ ; NO. OF OBJECTS WITH A HIGH POSITION
+NUMNPCTIMES4 EQU 104
+NUMSPELLS EQU 19
+NUMCHESTS EQU 10 ; 10 chests in cellar, table indicates blown up / open/etc.
+CHESTOFFSET EQU NUMSPELLS+NUMSPELLS+NUMNPCTIMES4
+STACK EQU 50
+OUTPUTBUFFER EQU 24
+SCORETABLE EQU 98 ;length of score table
+OBJTABLE EQU 16 ; number of objects which can be specified on one line
+SCRATCH EQU 32 ; GENERAL PURPOSE WS LIST
+;
+;
+LIST23SIZE EQU NUMOBJ+NUMHIOBJ
+LIST236SIZE EQU LIST23SIZE+NUMSPELLS+NUMSPELLS+NUMNPCTIMES4+NUMCHESTS
+LIST2367SIZE EQU LIST236SIZE+OUTPUTBUFFER+SCORETABLE
+LIST23678SIZE EQU LIST2367SIZE+OBJTABLE     ; 9 - ELDER CROSS
+ dc.b 0,2      ; 10 - CANDLE
+ dc.b 0,0       ; 11 - SMALL MIRROR
+ dc.b IN,0      ; 12 - CRYSTAL BALL
+ dc.b 0,157    ; 13 - BROOM CUPBOARD
+ dc.b 0,0      ; 14 - ASHES - GET BY BURNING WOODPILE
+ dc.b 0,66     ; 15 - WHEEL
+ dc.b 0,0      ; 16 - CLAWS - GET BY FIGHTING DARK SPAWN
+ dc.b 0,42     ; 17 - BLUE BOX
+ dc.b 0,0      ; 18 - STAFF - GET BY CUTTING VINE
+ dc.b 0,0
+ dc.b 0,147     ; 20 - BAG
+ dc.b 0,0       ; 21 - BANDAGES - DEFEAT MUMMY TO GET THEM
+ dc.b 0,72      ; BONE     ; 9 - ELDER CROSS
+ dc.b 0,2      ; 10 - CANDLE
+ dc.b 0,0       ; 11 - SMALL MIRROR
+ dc.b IN,0      ; 12 - CRYSTAL BALL
+ dc.b 0,157    ; 13 - BROOM CUPBOARD
+ dc.b 0,0      ; 14 - ASHES - GET BY BURNING WOODPILE
+ dc.b 0,66     ; 15 - WHEEL
+ dc.b 0,0      ; 16 - CLAWS - GET BY FIGHTING DARK SPAWN
+ dc.b 0,42     ; 17 - BLUE BOX
+ dc.b 0,0      ; 18 - STAFF - GET BY CUTTING VINE
+ dc.b 0,0
+ dc.b 0,147     ; 20 - BAG
+ dc.b 0,0       ; 21 - BANDAGES - DEFEAT MUMMY TO GET THEM
+ dc.b 0,72      ; BONES
+ dc.b 0,142     ; 23 BOOKS - IN LIBRARY
+ dc.b 0,118     ; 24 CAGE - IN WEST ATTIC
+ dc.b 0,81      ; 25 CROWBAR - IN WEB CAVERN
+ dc.b IN,20     ; 26 - GOLD - STARTS IN BAG
+ dc.b 0,0          ; 27 KNUCKLEBONE - DIG UP MANDRAKE TO FIND ITB
+ dc.b 0,156     ; 28 - LETTER
+ dc.b IN,102    ; 29 PARCHMENT - STARTS IN DESK
+ dc.b 0,71      ; 30 PLATE ARMOUR
+ dc.b 0,0       ; 31 OILY RAG - DIP BANDAGES IN OIL TO GET IT
+ dc.b ONAFINGER,27 ; RING - STARTS ON KNUCKLEBONE
+ dc.b INARE,117 ; 33 ROBES - IN WARDROBE ARE ROBES
+ dc.b 0,0       ; 34 SALT - appears in a chest when it is opened
+ dc.b ON,116    ; 35 SCROLL - ON TABLE
+ dc.b CARRIED,76 ; 36 SHIELD
+ dc.b 0,0        ; 37 SKULL - DIG UP MANDRAKE TO FIND IT
+ dc.b ON,96      ; 38 TALISMAN - STARTS ON ALTAR
+ dc.b 0,0        ; 39
+ dc.b 0,0        ; 40
+ dc.b 0,0        ; 41
+ dc.b 0,0        ; 42
+ dc.b 0,0        ; 43
+ dc.b 0,0        ; 44
+ dc.b 0,0        ; 45
+ dc.b 0,0        ; 46
+ dc.b 0,0        ; 47
+ dc.b 0,0        ; 48
+ dc.b 0,0        ; 49
+ dc.b ON,116     ; 50 KNIFE - ON TABLE
+ dc.b 0,AXEHANGING ; 51 AXE
+ dc.b 0,0        ; 52 SWORD
+ dc.b CARRIED,60 ; 53 CLAYMORE - CARRIED BY STATUE
+ dc.b CARRIED,0  ; 54 POIGNARD (Myglar draws it)
+ dc.b 0,0       ; 55
+ dc.b 0,0       ; 56
+ dc.b 0,201     ; 57 CHERUB
+ dc.b 0,218     ; 58 IDOL
+ dc.b 0,85       ; 59 GARGOYLE
+ dc.b 0,165     ; 60 STATUE
+ dc.b 0,53      ; 61 BLOODWORM
+ dc.b IN,97     ; 62 FERRYMAN - IN BOAT
+ dc.b 0,MONKEYWAITING ; 63 MONKEY
+ dc.b 0,85      ; 64 MOONBEAST
+ dc.b 0,222     ; 65 MYGLAR
+ dc.b ON,118    ; 66 SPIDER - ON WEB
+ dc.b 0,46      ; 67 SLUG
+ dc.b 0,122     ; 6> BAT
+ dc.b 0,158     ; 69 WEREWOLF
+ dc.b 0,217     ; 70 ANTS
+ dc.b 0,0         ; 71 DARK SPAWD
+ dc.b 0,65      ; 76 GHOUL
+ dc.b 0,173     ; 73 GOLEM
+ dc.b 0,78      ; 74 MUEMY
+ dc.b 0,0       ; 75 GHOST
+ dc.b 0,183     ; 76 SKELETON
+ dc.b 0,0       ; 77 VAMPIRE
+ dc.b 0,152     ; 78 WIGHT
+ dc.b 0,75      ; 79 WRAITH
+ dc.b 0,168     ; 80 ZOMBI
+ dc.b 0,0       ; 81
+ dc.b 0,0       ; 82
+ dc.b 0,0       ; 83
+ dc.b 0,0       ; 84
+ dc.b 0,3       ; 85 MANDRAKE
+ dc.b 0,3       ; 86 EYEBRIGHT
+ dc.b 0,4       ; WOLFSBANE
+ dc.b IN,0      ; 88 BLACK BALL
+ dc.b 0,133     ; 89 SHOVEL
+ dc.b 0,0       ; 90 STONE FISH
+ dc.b 0,0       ; 95
+ dc.b 0,0       ; 96
+ dc.b 0,0       ; 97
+ dc.b 0,0       ; 98
+ dc.b OBV,73    ; 95 ALTAR
+ dc.b OBV,82    ; 96 ALTAR (IN TEMPLE)
+ dc.b OBV,48    ; 97 BOAT
+ dc.b 0,122     ; 98 BELL
+ dc.b 0,130     ; 99 CHESTS
+ dc.b 0,154     ; 100 CLOCK
+ dc.b 0,139     ; 101 CURTAIN
+ dc.b 0,144     ; 102 DESK
+ dc.b 0,136     ; 103 INSCRIPTION
+ dc.b 0,44      ; 104 LAKE
+ dc.b 0,135     ; 105 LEVER
+ dc.b 0,0       ; 106 OIL
+ dc.b 0,0          ; 107
+ dc.b 0,0       ;108
+ dc.b 0,49      ; 109 PLAQUE
+ dc.b 0,119     ; 110 MIRROR
+ dc.b 0,206     ; 111 RIDDLE
+ dc.b 0,87      ; 112 ROPE
+ dc.b ON,95     ; 113 RED MOON - STAYS ON ALTAR UNLESS FLOATING
+ dc.b 0,78      ; 114 SARCOPHAGOUS
+ dc.b 0,135     ; 115 SWORD POINT
+ dc.b 0,121     ; 116 TABLE
+ dc.b 0,86      ; 117 WARDROBE
+ dc.b OBV,81    ; 118 WEB
+ dc.b UNDER,120 ; 119 SOMETHING NASTY UNDER WOODPILE
+ dc.b OBV,2     ; 120 WOODPILE
+ dc.b 0,160     ; sword hilt in ceiling
+ dc.b 0,1       ; VINE
+ dc.b 0,124     ; 123 WARGAME
+ dc.b 0,126     ; 124 TAPESTRY
+ dc.b 0,182     ; 125 SNOW
+ dc.b HANGINGABOVE,96 ; 126 WEIGHT - HANGS ABOVE ALTAR
+ dc.b 0,0 ; 127
+ dc.b 0,0          ; 128
+ dc.b 0,56         ; 129 - PICTURE OF STONEHENGE
+ dc.b 0,57         ; 130 - PICTURE OF DARK SPAWN
+ dc.b 0,58         ; 131 - PICTURE OF MOON BEAST
+ dc.b 0,59         ; 132 - PICTURE OF GHOUL
+ dc.b 0,60         ; 133 - PICTURE OF WEREWOLVES
+ dc.b 0,61         ; 134 - PICTURE OF MYGLAR
+ dc.b 0,0 ; 135
+PLAYER EQU 136
+ dc.b 0,1           ; 136 - PLAYER
+ dc.b 0,0           ; 137 - FISH
+ dc.b 0,1       ; 138 - FRONT DOOR
+ dc.b PARTOF,PLAYER ;  139 - EYES
+ dc.b 0,0           ; 140 - PANELLING IN CORRIDORS
+ dc.b 0,0           ; 141 - GENERAL DOOR
+ dc.b 0,0           ; 142 - WAS TORCHES
+;---
+ENDOBJECTS
+LIST4
+; Tramlines for mobilesY,0,20,50 ; statue
+ dc.b PLAYER,0,10,90 ; bloodworm 
+ dc.b FRIENDLY,30,10,50 ; ferryman
+ dc.b FRIENDLY,0,5,20   ; monkey
+ dc.b PLAYER,0,40,200   ; moonbeast
+ dc.b PLAYER,0,20,100  ; myglar
+ dc.b PLAYER,0,10,30  ; spider
+ dc.b PLAYER,0,10,90  ; slug
+ dc.b PLAYER,95,5,5    ; vampire bat
+ dc.b PLAYER,30,20,50  ; werewolf
+ dc.b PLAYER,30,5,255  ; ants  ???? dodge ?
+ dc.b PLAYER,30,10,20  ; dark spawn
+ dc.b PLAYER,20,6,10   ; ghoul
+ dc.b FRIENDLY,10,6,30  ; golem
+ dc.b PLAYER,20,10,30  ; mummy
+ dcY,0,20,50 ; statue
+ dc.b PLAYER,0,10,90 ; bloodworm 
+ dc.b FRIENDLY,30,10,50 ; ferryman
+ dc.b FRIENDLY,0,5,20   ; monkey
+ dc.b PLAYER,0,40,200   ; moonbeast
+ dc.b PLAYER,0,20,100  ; myglar
+ dc.b PLAYER,0,10,30  ; spider
+ dc.b PLAYER,0,10,90  ; slug
+ dc.b PLAYER,95,5,5    ; vampire bat
+ dc.b PLAYER,30,20,50  ; werewolf
+ dc.b PLAYER,30,5,255  ; ants  ???? dodge ?
+ dc.b PLAYER,30,10,20  ; dark spawn
+ dc.b PLAYER,20,6,10   ; ghoul
+ dc.b FRIENDLY,10,6,30  ; golem
+ dc.b PLAYER,20,10,30  ; mummy
+ dc.b FRIENDLY,70,4,20  ; ghost
+ dc.b PLAYER,20,5,10   ; skeleton
+ dc.b PLAYER,30,10,20  ; vampire
+ dc.b PLAYER,40,10,30  ; wight
+ dc.b PLAYER,60,3,15   ; wraith
+ dc.b PLAYER,10,5,10   ; zombi
+ dc.b FRIENDLY,10,5,15 ; fish
+;---
+ENDTABLE
+;---

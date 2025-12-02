@@ -1,0 +1,449 @@
+
+; Tables used for Lords of Time 25/8/84
+;
+ ORG 0000 ; Init.pos: TAB 1 (obj.num - 81)
+starttables
+ dc.l LIST1-80-starttables
+ dc.l $8000
+ dc.l LIST3-80-starttables
+ dc.l LIST4-starttables
+ dc.l LIST5-starttables
+ dc.l LIST6-starttables
+ dc.l $8140 ;>>LIST7
+ dc.l $8180 ;LIST8
+ dc.l $8200 ; list9
+ dc.l LASTPTR-starttables
+;
+LIST1
+ dc.b 254 ; Olive Branch   80
+ dc.b 153 ; Golden Buckle  81
+ dc.b 254 ; Jester's Cap   82
+ dc.b 254 ; Silicon Chip   83
+ dc.b 254 ; Box + Evil Eye 84
+ dc.b 254 ; Teardrop       85
+ dc.b 254 ; Ivory Tusk     86
+ dc.b 083 ; Dragon's Wing  87
+;
+ dc.b 059 ; Dinosaur Egg   88
+;
+ dc.b 076 ; Rotten Apple   89
+ dc.b 086 ; Armour         90
+;
+ dc.b 032 ; Meaty Bone     91
+ dc.b 198 ; Poison Bottle  92
+ dc.b 054 ; Bunch of Leaves93
+;
+ dc.b 119 ; Pack of Cards  94
+ dc.b 124 ; Oriental Rug   95
+ dc.b 011 ; Jewellery Case 96
+ dc.b 074 ; Cask of Ale    97
+;
+ dc.b 083 ; Frog (Prince)  98
+;
+ dc.b 020 ; Keys           99
+ dc.b 085 ; Gauntlet      100
+;
+ dc.b 117 ; Drinking Horn 101
+ dc.b 001 ; Hourglass     102
+;
+ dc.b 035 ; Icicle        103
+;
+ dc.b 183 ; Lightsabre    104
+ dc.b 013 ; Looking Glass 105
+ dc.b 128 ; Lute          106
+;
+ dc.b 002 ; Matchbox      107
+ dc.b 013 ; Metronome     108
+ dc.b 072 ; Milestone     109
+ dc.b 054 ; Mirror        110
+;
+ dc.b 060 ; Stone Pot     111
+;
+ dc.b 254 ; Screwdriver   112
+ dc.b 008 ; Spear         113
+ dc.b 117 ; Sweetmeats    114
+;
+ dc.b 015 ; Valerian      115
+;
+ dc.b 070 ; The Wheel     116
+;
+ dc.b 255 ; ************* 117
+ dc.b 021 ; Axe           118
+;
+ dc.b 119 ; Bell          119
+;
+ dc.b 254 ; Can of Petrol 120
+ dc.b 039 ; Candelabra    121
+ dc.b 002 ; Candle        122
+ dc.b 254 ; Candlestick   123
+ dc.b 210 ; Cloak (Invis) 124
+ dc.b 064 ; Club          125
+ dc.b 254 ; Furry Coat    126
+ dc.b 254 ; Coffer        127
+ dc.b 254 ; Coin          128
+ dc.b 254 ; Crown         129
+;
+ dc.b 177 ; Emerald       130
+;
+ dc.b 255 ; ************* 131
+ dc.b 066 ; Onyx Figurine 132
+ dc.b 254 ; Firefly       133
+ dc.b 254 ; Food          134
+;
+ dc.b 166 ; Galactic Groat135
+;
+ dc.b 254 ; Joker         136
+;
+ dc.b 254 ; Sword         137
+;
+ dc.b 254 ; Lodestone     138
+ dc.b 254 ; Lur           139
+ dc.b 254 ; Parchment Map 140
+ dc.b 176 ; Mattress      141
+ dc.b 146 ; Net           142
+ dc.b 254 ; Nugget        143
+;
+ dc.b 254 ; Tin Opener    144
+;
+ dc.b 061 ; Painted Pebble145
+ dc.b 185 ; Phial         146
+ dc.b 005 ; Pick          147
+ dc.b 005 ; Planks        148
+;
+ dc.b 176 ; Rocket        149
+ dc.b 010 ; Coil of Rope  150
+ dc.b 188 ; Ruby Lens     151
+ dc.b 010 ; Rucksack      152
+;
+ dc.b 254 ; Winged Shoes  153
+ dc.b 021 ; Shovel        154
+ dc.b 169 ; Falling Star  155
+;
+ dc.b 254 ; Cat Food Tin  156
+ dc.b 146 ; Trident       157
+;
+ dc.b 255 ; ************* 158
+;
+ dc.b 254 ; Tooth         159
+ dc.b 255 ; ************* 160
+;
+; Untakeable objects in table 1
+;
+ dc.b 002 ; Clock         161
+ dc.b 003 ; Cogs          162
+ dc.b 003 ; Pendulum      163
+ dc.b 219 ; Cauldron      164
+ dc.b 010 ; Pile of Junk  165
+ dc.b 012 ; Cupboard      166
+ dc.b 022 ; Willow Tree   167
+ dc.b 025 ; Porsche Car   168
+ dc.b 038 ; Ice Wall      169
+;
+ dc.b 042 ; Freezing Lake 170
+ dc.b 244 ; Ice Sheet     171
+ dc.b 044 ; Ice Cube      172
+;
+ dc.b 094 ; Longship      173
+ dc.b 099 ; Rocking Stone 174
+ dc.b 112 ; Pirate Chest  175
+ dc.b 113 ; Handle        176
+;
+ dc.b 125 ; Wardrobe      177
+ dc.b 133 ; Well          178
+;
+ dc.b 157 ; Grate         179
+ dc.b 156 ; Basin         180
+;
+ dc.b 192 ; Arch          181
+ dc.b 254 ; Broken Robots 182
+ dc.b 190 ; Workbench     183
+ dc.b 200 ; Cages         184
+ dc.b 201 ; Barred Wall   185
+;
+ dc.b 024 ; Compost Heap  186
+;
+ dc.b 029 ; Dry Wood      187
+;
+ dc.b 001 ; Time Picture  188
+ dc.b 254 ; Mushroom Ring 189
+ dc.b 255 ; ************* 190
+ dc.b 255 ; ************* 191
+ dc.b 255 ; ************* 192
+ dc.b 255 ; ************* 193
+ dc.b 255 ; ************* 194
+ dc.b 255 ; ************* 195
+ dc.b 255 ; ************* 196
+ dc.b 255 ; ************* 197
+ dc.b 255 ; ************* 198
+ dc.b 255 ; ************* 199
+ dc.b 255 ; ************* 200
+;
+ dc.b 254 ; Tooth Fairy   201
+;
+ dc.b 029 ; Mammoth       202
+ dc.b 033 ; Tiger         203
+;
+ dc.b 053 ; Allosaurus    204
+ dc.b 051 ; T Rex         205
+ dc.b 054 ; Brontosaurus  206
+ dc.b 058 ; Cavepeople    207
+ dc.b 067 ;Cave Chauvenist208
+ dc.b 065 ; Skeleton      209
+;
+ dc.b 074 ; Bartender     210
+ dc.b 076 ; Man in Stocks 211
+ dc.b 077 ; Messenger     212
+ dc.b 081 ; Dragon        213
+ dc.b 089 ; Black Knight  214
+ dc.b 244 ; Fair Prince   215
+;
+ dc.b 254 ; Pirate Pete   216
+ dc.b 254 ; Jester        217
+;
+ dc.b 094 ; Viking Guard  218
+ dc.b 255 ; Ghost         219
+;
+ dc.b 139 ; Roman Sentry  220
+ dc.b 154 ; Gladiator     221
+ dc.b 154 ; Lion          222
+;
+ dc.b 166 ; BdC Android   223
+ dc.b 189 ; Cybermen      224
+;
+ dc.b 019 ; Narcissus     225
+ dc.b 037 ; Silver Fox    226
+ dc.b 125 ; Poodle Dogs   227
+ dc.b 254 ; ************* 228
+ dc.b 254 ; ************* 229
+ dc.b 254 ; ************* 230
+ dc.b 254 ; ************* 231
+ dc.b 254 ; ************* 232
+ dc.b 254 ; ************* 233
+ dc.b 254 ; ************* 234
+ dc.b 254 ; ************* 235
+;
+; ORG $A0-starttables
+;; Curr obj.rooms: TAB 2
+; DS.B $9D; Storage for current positions
+;
+;
+; Table 3 = Object Attributes
+;
+; ORG $0140 ; Address of next table..
+;
+LIST3
+; Objects: ????/4,Treasure/2,Valuable/1
+ dc.b 001 ; Olive Branch   80
+ dc.b 001 ; Golden Buckle  81
+ dc.b 001 ; Jester's Cap   82
+ dc.b 001 ; Silicon Chip   83
+ dc.b 001 ; Box + Evil Eye 84
+ dc.b 001 ; Teardrop       85
+ dc.b 001 ; Ivory Tusk     86
+ dc.b 001 ; Dragon's Wing  87
+;
+ dc.b 001 ; Dinosaur Egg   88
+;
+ dc.b 000 ; Rotten Apple   89
+ dc.b 000 ; Armour         90
+;
+ dc.b 000 ; Meaty Bone     91
+ dc.b 000 ; Poison Bottle  92
+ dc.b 000 ; Bunch of Leaves93
+;
+ dc.b 000 ; Pack of Cards  94
+ dc.b 003 ; Oriental Rug   95
+ dc.b 003 ; Jewellery Case 96
+ dc.b 001 ; Cask of Ale    97
+;
+ dc.b 000 ; Frog (Prince)  98
+;
+ dc.b 000 ; Keys           99
+ dc.b 000 ; Gauntlet      100
+;
+ dc.b 003 ; Drinking Horn 101
+ dc.b 003 ; Hourglass     102
+;
+ dc.b 000 ; Icicle        103
+;
+ dc.b 001 ; Lightsabre    104
+ dc.b 001 ; Looking Glass 105
+ dc.b 003 ; Lute          106
+;
+ dc.b 000 ; Matchbox      107
+ dc.b 003 ; Metronome     108
+ dc.b 000 ; Milestone     109
+ dc.b 001 ; Mirror        110
+;
+ dc.b 003 ; Stone Pot     111
+;
+ dc.b 000 ; Screwdriver   112
+ dc.b 000 ; Spear         113
+ dc.b 000 ; Sweetmeats    114
+;
+ dc.b 001 ; Valerian      115
+;
+ dc.b 003 ; The Wheel     116
+;
+ dc.b 000 ; ************* 117
+ dc.b 000 ; Axe           118
+;
+ dc.b 001 ; Bell          119
+;
+ dc.b 000 ; Can of Petrol 120
+ dc.b 003 ; Candelabra    121
+ dc.b 000 ; Candle        122
+ dc.b 003 ; ************* 123
+ dc.b 003 ; Cloak (Invis) 124
+ dc.b 000 ; Club          125
+ dc.b 001 ; Furry Coat    126
+ dc.b 003 ; Coffer        127
+ dc.b 001 ; Coin          128
+ dc.b 003 ; Crown         129
+;
+ dc.b 003 ; Emerald       130
+;
+ dc.b 000 ; ************* 131
+ dc.b 003 ; Onyx Figurine 132
+ dc.b 000 ; Firefly       133
+ dc.b 001 ; Food          134
+;
+ dc.b 001 ; Galactic Groat135
+;
+ dc.b 001 ; Joker         136
+;
+ dc.b 001 ; Sword         137
+;
+ dc.b 003 ; Lodestone     138
+ dc.b 001 ; Lur           139
+ dc.b 001 ; Parchment Map 140
+ dc.b 000 ; Mattress      141
+ dc.b 000 ; Net           142
+ dc.b 001 ; Nugget        143
+;
+ dc.b 000 ; Tin Opener    144
+;
+ dc.b 000 ; Painted Pebble145
+ dc.b 003 ; Phial         146
+ dc.b 000 ; Pick          147
+ dc.b 001 ; Planks        148
+;
+ dc.b 001 ; Rocket        149
+ dc.b 000 ; Coil of Rope  150
+ dc.b 003 ; Ruby Lens     151
+ dc.b 001 ; Rucksack      152
+;
+ dc.b 001 ; Winged Shoes  153
+ dc.b 000 ; Shovel        154
+ dc.b 003 ; Falling Star  155
+;
+ dc.b 000 ; Cat Food Tin  156
+ dc.b 000 ; Trident       157
+;
+ dc.b 000 ; ************* 158
+;
+ dc.b 000 ; Tooth         159
+ dc.b 000 ; ************* 160
+;
+; Objects ??????????????????
+ dc.b 000 ; Clock         161
+ dc.b 000 ; Cogs          162
+ dc.b 000 ; Pendulum      163
+ dc.b 000 ; Cauldron      164
+ dc.b 000 ; Pile of Junk  165
+ dc.b 000 ; Cupboard      166
+ dc.b 000 ; Willow Tree   167
+ dc.b 000 ; Lada Car      168
+ dc.b 000 ; Ice Wall      169
+;
+ dc.b 000 ; Freezing Lake 170
+ dc.b 000 ; Ice Sheet     171
+ dc.b 000 ; Ice Cube      172
+;
+ dc.b 000 ; Longship      173
+ dc.b 000 ; Rocking Stone 174
+ dc.b 000 ; Pirate Chest  175
+ dc.b 000 ; Handle        176
+;
+ dc.b 000 ; Wardrobe      177
+ dc.b 000 ; Well          178
+;
+ dc.b 000 ; Grate         179
+ dc.b 000 ; Basin         180
+;
+ dc.b 000 ; Arch          181
+ dc.b 000 ; Broken Robots 182
+ dc.b 000 ; Workbench     183
+ dc.b 000 ; Cages         184
+ dc.b 000 ; Barred Wall   185
+;
+ dc.b 000 ; Compost Heap  186
+;
+ dc.b 000 ; Dry Wood      187
+;
+ dc.b 000 ; Time Picture  188
+ dc.b 000 ; Mushroom Ring 189
+ dc.b 000 ; ************* 190
+ dc.b 000 ; ************* 191
+ dc.b 000 ; ************* 192
+ dc.b 000 ; ************* 193
+ dc.b 000 ; ************* 194
+ dc.b 000 ; ************* 195
+ dc.b 000 ; ************* 196
+ dc.b 000 ; ************* 197
+ dc.b 000 ; ************* 198
+ dc.b 000 ; ************* 199
+ dc.b 000 ; ************* 200
+;
+;Alive: Tough/8,Timid/4,Greedy/2,Human/1
+ dc.b 004 ; Tooth Fairy   201
+;
+ dc.b 008 ; Mammoth       202
+ dc.b 008 ; Tiger         203
+;
+ dc.b 008 ; Allosaurus    204
+ dc.b 008 ; T Rex         205
+ dc.b 008 ; Brontosaurus  206  
+ dc.b 011 ; Cavepeople    207
+ dc.b 011 ;Cave Chauvenist208
+ dc.b 008 ; Skeleton      209
+;
+ dc.b 011 ; Bartender     210
+ dc.b 001 ; Man in Stocks 211
+ dc.b 011 ; Messenger     212
+ dc.b 010 ; Dragon        213
+ dc.b 011 ; Black Knight  214
+ dc.b 009 ; Fair Prince   215
+;
+ dc.b 011 ; Pirate Pete   216
+ dc.b 007 ; Jester        217
+;
+ dc.b 011 ; Viking Guard  218
+ dc.b 000 ; Ghost         219
+;
+ dc.b 009 ; Roman Sentry  220
+ dc.b 009 ; Gladiator     221
+ dc.b 008 ; Lion          222
+;
+ dc.b 002 ; BdC Android   223
+ dc.b 008 ; Cybermen      224
+;
+ dc.b 000 ; Narcissus     225
+ dc.b 010 ; Silver Fox    226
+ dc.b 004 ; Poodle Dogs   227
+ dc.b 000 ; ************* 228
+ dc.b 000 ; ************* 229
+ dc.b 000 ; ************* 230
+ dc.b 000 ; ************* 231
+ dc.b 000 ; ************* 232
+ dc.b 000 ; ************* 233
+ dc.b 000 ; ************* 234
+ dc.b 000 ; ************* 235
+;---------
+LIST4
+LIST5
+LIST6
+LIST7
+LIST8
+LASTPTR
+;---

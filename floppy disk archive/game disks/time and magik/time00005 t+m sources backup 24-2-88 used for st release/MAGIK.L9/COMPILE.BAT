@@ -1,0 +1,11 @@
+1\games.l9\timelord.l9\mconst.txt
+1pconst.txt
+1aconst.txt
+1acore.txt
+1aparse.txt
+1\games.l9\red_moon.l9\hires.txt
+1averb.txt
+1aspecial.txt
+1\games.l9\red_moon.l9\book.txt
+1\games.l9\red_moon.l9\cheat.txt
+2340

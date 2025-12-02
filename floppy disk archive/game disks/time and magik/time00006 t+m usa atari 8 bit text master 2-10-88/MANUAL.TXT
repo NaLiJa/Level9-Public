@@ -1,0 +1,293 @@
+Instructions for Time and Magik 
+-------------------------------
+
+    If you have not played a Level 9 adventure before, please read 
+all these instructions. If you are an experienced Level 9 adventurer, 
+skip to the preface and just read that. 
+
+To start the game ("boot it"), see the seperate reference card. 
+
+When the game prints "What now?" or ">", it is waiting for you to 
+type a command. (The game also waits when it has more text to print 
+than will fit on the screen at one time; read what's displayed and 
+press e.g SHIFT or SPACE to continue.)
+
+Time and Magik knows four types of commands: 
+
+* Movement: just type the direction you want to go: NORTH, NORTHEAST, 
+  EAST (and the other compass directions), IN, OUT, UP, DOWN or ACROSS. 
+
+* Actions: e.g LOOK, TAKE THE HOURGLASS, DROP IT, LOOK AT THE PICTURE, 
+  WIND THE CLOCK, WEAR THE RUCKSACK, or GIVE COIN TO THE INNKEEPER. 
+
+* System commands. EXITS, INVENTORY and SCORE give information; WORDS, 
+  PICTURES, BRIEF, VERBOSE, EXITS ON and EXITS OFF control what is 
+  output; UNDO; SAVE, RESTORE, RAM SAVE and RAM RESTORE save your 
+  position or return to an earlier position, and QUIT stops the game. 
+  See the example game, below, for details of these commands. 
+
+* Commands to others. A spell in part 3 lets you control creatures. 
+  Type their name, followed by a command: e.g BAT, GO NORTH.            
+
+You can abbreviate commands, e.g SOUTH to S and SOUTHEAST to SE, and 
+even type several commands on one line, e.g EAST, TAKE ALL, WEST. 
+After typing a command (or commands), press the ENTER or RETURN key. 
+
+
+Preface
+-------
+
+This adventure is a trilogy of key episodes from the struggles of the 
+Guardians to protect Time and Magik. The three parts are played as 
+separate games.
+
+In part 1, "Lords of Time", the evil Timelords are fighting to change
+World History, with the aim of gaining permanent control over Time and 
+warp eternity according to their wishes. You must bring together nine 
+crucial objects from different times to defeat them. 
+
+Part 2, "Red Moon", tells how the Red Moon Crystal, only remaining 
+source of magik power, was lost. And how the Guardians selected a lone 
+adventurer to recover it.  
+
+And finally, part 3, "The Price of Magik", recounts the sad tale of 
+Myglar who, driven mad by the intensity of magikal radiance from the 
+Moon Crystal that he had protected for so long, stole it. His aim was 
+a vain attempt to squander its power and live forever. But a magician 
+of great skill (who eventually rose to lead the Guardian's) avoided 
+Myglar's traps, recovered the crystal and ensured that magik survived 
+as long as the need for it.  
+
+Hints for part 1, "Time and Magik":
+* You need to enter the clock; 9 time zones can be reached from here. 
+* Tackle the time zones in numeric order, most of the time. 
+* After each of the first 8 zones, you can always get back to the clock. 
+* You score points for each of the 9 ingredients, and for each of the 
+  18 treasures collected. There are a few bonusses.  
+
+Hints for part 2, "Red Moon":
+* To cast a spell, enter CAST spell-name optional-target 
+  e.g CAST ESCAPE or CAST SNOOP NORTH 
+* If you must to attack something, wear armour and carry a weapon. 
+* You score points for making progress towards regaining the Red Moon 
+  Crystal, and fifty bonus points for each of nine treasures collected. 
+
+Hints for part 3, "Price of Magik":
+* Tackle the outdoor locations before entering the house. 
+* The HYP (hypnosis) spell lets you command one creature at a time. To 
+  give an order, enter e.g BAT, TAKE THE FELDSPAR. 
+* You score points for learning and using spells, and for reaching a 
+  few inaccessible places. 
+
+If you are really stuck, you can get a free set of clue sheets, with 
+over 1000 entries, from Level 9 at PO Box 39, Weston-super-Mare, Avon 
+BS24 9UR, England. You must enclose the "clue card" from the packaging 
+and provide a large, stamped, self-addressed envelope (UK), or four 
+International reply coupons (overseas). 
+
+
+Talking to Time and Magik
+------------------------- 
+
+As you have seen, Time and Magik understands a lot of commands. The 
+following list is only part of its vocabulary, but it gives an idea 
+of what to try: 
+              
+North, northeast, east (and other compass directions), up, down, in, 
+out, across, climb, again, attack, inventory, quit, restore, save, 
+RAM save, undo, score, wait, shout, search, examine, blink, look, 
+kneel, take, drop, wear, throw, give, fill, empty, open, unlock, 
+close, eat, drink, light, press, wave, blow, rub, dig, insert, turn, 
+pull, wind, kiss, exits, words, pictures, brief, verbose. 
+ 
+Many words can be abbreviated, e.g "INVENTORY" to "INV". 
+       
+The following game example is not Time and Magik, but it shows how to 
+play. The player's commands are in capitals, after each ">" prompt, 
+and any the text in square brackets is a comment. 
+
+> LOOK 
+You're standing on the north shore of a marshy island, lost in the 
+mists and reed-beds of a great swamp. Frogs croak incessantly. 
+
+> GO NORTH 
+You bravely wade into the cool water, sink up to your neck in a tangle 
+of weeds and barely manage to struggle back to the island. 
+
+> NORTH 
+Some people never learn! You wade into the marsh again, get hopelessly 
+tangled in the weeds and sink beneath the waters. The game is over: you 
+scored 0 out of 1000. Enter UNDO, RESTART, RESTORE or RAM RESTORE. 
+
+> UNDO  ["Take back move" - available on most micros.]
+You're standing on the north shore of a marshy island, lost in the 
+mists and reed-beds of a great swamp. Frogs croak incessantly. 
+
+> S  [i.e "SOUTH"] 
+You're on the south shore of the marshy island, which looks exactly 
+like the north shore. You can see a little rowing boat. 
+
+> EXITS 
+Exits lead north and south. 
+
+> LOOK AT THE BOAT. 
+Fragile is too good a description for this craft! The only reason for 
+it remaining in one piece must be because the woodworm, deep in its 
+crumbling timbers, are all holding hands. 
+
+> GET IN BOAT. 
+OK. 
+
+> BRIEF, WORDS, EXITS ON
+OK. OK. OK.  [Locations will be described briefly, pictures turned off 
+and exits reported automatically in future. To reverse these choices, 
+you could use VERBOSE, PICTURES and EXITS OFF respectively.]
+
+> S  [i.e "SOUTH"]
+You're in a little rowing boat in the middle of the swamp. By paddling 
+very carefully, you are able to make slow but steady progress. Exits 
+lead north and south. 
+
+> A  [i.e "AGAIN", repeat previous command]
+You're in a little rowing boat at a jetty. Exits lead north, west and 
+south. You can see a signpost. 
+
+> OUT. EXAMINE SIGNPOST
+
+The boat rocks as you get to your feet, then breaks apart and sinks 
+into the depths. 
+The letters on the sign are too tarnished to see properly. 
+
+> RUB SIGNPOST AND READ IT
+You clean the signpost and it is readable now. 
+Apparantly, the west road leads along a causeway to the City of the 
+Moon. 
+
+> SCORE
+You score 10 out of 1000. 
+
+> RAM SAVE 
+OK.  [Having escaped from the swamp, save your position in RAM - i.e 
+in the computer's memory - in case you encounter difficulties and want 
+to return to this point, using RAM RESTORE. To save to disk or tape, 
+use SAVE and RESTORE respectively - see the reference card.] 
+
+> WEST
+You are on the east end of a long causeway. Exits lead east and west. 
+You can see a wallet.
+
+> TAKE WALLET AND EXAMINE EVERYTHING
+The wallet is a tanned fishskin bag. In the wallet are a coin and a card. 
+The coin is a golden sovereign. 
+The card is printed with, "J. Fisher Esq, The Burrow, Pondside". 
+
+>EXITS OFF  [stop reporting exits]
+OK.
+You can hear a faint buzzing noise!
+
+> WEST
+You are in the middle of the causeway. A swarm of insects appear and 
+start circling around you! 
+
+> EXAMINE THE INSECTS AND HIT THEM 
+The insects are a kind of virulent mosquito. 
+Something bites your neck! 
+You flail wildly at the air, but miss everything. 
+More insects bite you, then they all fly happily away.  
+
+> WEST 
+You are at the west end of the causeway. You can see a pebble. The air 
+seems to be getting colder! 
+
+> GET PEBBLE
+OK. You seem to have a fever. 
+
+> INVENTORY
+You own a pebble and a wallet. You shiver uncontrollably. 
+
+> WEST
+You are on the outskirts of the City of the Moon. Unfortunately, the 
+fever develops apace and you can barely stay on your feet. 
+
+> RAM RESTORE  [return to the position you saved earlier] 
+You're at a jetty. Exits lead north, west and south. You can see a 
+signpost. 
+ 
+> SOUTH
+You are outside a drug store. Exits lead north and in. 
+
+> IN 
+You are in the drug store. You can see a shopkeeper and a bottle of 
+plague antidote pills. 
+"Good Morning", says the shopkeeper, "Can I help you?" 
+
+> TAKE PILLS
+The shopkeeper slaps your hand away. "Naughty!", she scolds, "Antidote 
+pills are extremely valuable - one gold Sovereign each!" 
+
+> OUT.N.W.GET WALLET.E.S.IN.GIVE SOVEREIGN TO SHOPKEEPER
+[then, armed with the antidote pills, try to pass the insects again...]
+
+
+Hints 
+----- 
+
+1. Draw a map (or a series of maps). Remember that the EXITS command 
+   lists the possible paths from each location. 
+
+2. To make life easy for you, the objects that matter in a location 
+   are normally listed in a sentence like, "You can see a shopkeeper 
+   and a bottle of plague antidote pills". (Some other authors mix in 
+   useful objects amidst the background scenery, but Time and Magik 
+   avoids this time-wasting trick.) The rest of your surroundings are 
+   probably scenery, but by all means do things to them if you like. 
+
+3. Examine all the objects that you see, and take everything that you 
+   can. Most objects are useful - either as treasure, or in solving 
+   later puzzles. 
+
+4. Remember "UNDO". If you make a mistake and get "killed" or lose a 
+   vital object, the UNDO command is available on most versions and 
+   takes you back in time - hopefully to before the mistake. On larger 
+   micros, you can use UNDO many times in succession to step backwards 
+   a long way through the game. 
+
+5. SAVE your place occasionally, so that if you notice a mistake too 
+   late to be able to UNDO it, or if the electricity flickers and your 
+   computer crashes, you can RESTORE the saved position and continue 
+   from there. SAVE puts your position on tape or disk (see the 
+   instruction card) and RESTORE can retrieve it later. RAM SAVE is 
+   quicker but less secure, as it just saves the position in memory. 
+
+6. Try everything you can think of - even weird or dangerous actions 
+   sometimes provide clues, and might be fun. You can always use UNDO 
+   (or SAVE followed by RESTORE) to recover if the results are "fatal".  
+
+7. You can word a command in many different ways. For example, if there 
+   were an axe and a ball on the ground, you could take the axe by 
+   typing any of the following:
+   > GET THE AXE 
+   > TAKE AXE 
+   > GET ALL BUT THE BALL 
+   > LOOK AT THE AXE AND TAKE IT
+   If Time and Magik doesn't understand your command, try rephrasing it 
+   and using synonyms. If Time and Magik still doesn't understand, you 
+   are probably trying something that is not important in the game. 
+
+8. If you are really stuck, you can get a free set of clue sheets, with 
+   over 1000 entries, from Level 9 at PO Box 39, Weston-super-Mare, 
+   Avon BS24 9UR, England. You must enclose the "clue card" from the 
+   packaging and provide a large, stamped, self-addressed envelope (UK), 
+   or four International reply coupons (overseas). 
+
+
+Credits
+-------
+
+Game designs: Sue Gazzard, David Williamson and Pete Austin.
+Game program: Pete Austin, Mike Austin and Simon Aspinall. 
+Adventure System: Mike Austin. 
+Transport to your Micro: Nick Austin. 
+Pictures: Godfrey Dowson and Neil Strudwick. 
+  
+

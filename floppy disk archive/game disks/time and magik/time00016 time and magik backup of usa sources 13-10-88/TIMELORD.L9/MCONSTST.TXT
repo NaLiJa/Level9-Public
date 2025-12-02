@@ -1,0 +1,37 @@
+; Machine-specific constants.
+;  for ST/IBM. - These machines did not have a picture of the MARSH
+
+CONST
+ maxactivations=10 ; tailor to each machine. The greater the
+; number, the more that can happen on each turn. Small machines
+; should have this set to as small a value as possible, without
+; losing realism. About 3 might be realistic.
+; 16 bit machines can handle much higher values - perhaps 10-16
+; without losing too much speed.
+
+; kbddelay=30 for 16 bit machines
+; 10 for 8 bit machines
+ kbddelay=30 ; time to wait when attention flag is set
+
+; Versioning notes.....
+
+ diskversion=1 ; set to 1 if running/chaining off disk
+;>NICK 13/10/88 marshpicture=0 ;>NICK 8/3/88
+ marshpicture=1 ;>NICK 13/10/88
+
+ allowcheat=0
+
+ IncludeOops=1
+ IncludePictures=1
+ IncludeProtection=0 ;>NICK 10/10/88 IncludeProtection=1
+
+ usapictures=1 ;>NICK 10/10/88
+
+; set notmac=1 for 16 bit versions other than mac and 8bit disk versions
+; set notmac=0 for 8 bit cassette versions and mac
+; (notmac=0 disables the insert disk messages)
+
+ notmac=1
+ fixst=1 ;>NICK 10/3/88 Fix multi-tasking (driver call 34 after SCREEN T)
+
+;----

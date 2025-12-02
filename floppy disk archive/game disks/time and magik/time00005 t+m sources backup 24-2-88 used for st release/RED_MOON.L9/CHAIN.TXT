@@ -1,0 +1,153 @@
+; Lenslok code
+;
+; 27/05/86
+;
+ BEGIN
+;-----
+
+;>>mike 15/7/87 - was .SOLVEDPREVIOUS
+;;For use in SCORE message.
+; IF C0<>FIRSTPART THEN SOLVED1 ;No previous game ?
+;
+; IF GAMESOLVED<>SOLVING THEN SOLVED1 ;>>
+;;>> IF VERSION<>GAMECOMPLETE THEN SOLVED1
+; MESSAGE 2315 ;You have solved the previous game(s)
+;.SOLVED1
+; RETURN
+;
+;-----
+
+.ASKFINAL
+;Called when current game is complete
+
+;Second and final parts are continuation of previous parts
+;if 'complete' flag already set.
+ IF C0<>FIRSTPART THEN ASK2A
+;>> IF VERSION<>GAMECOMPLETE THEN QUITPLAYAGAIN
+ IF GAMESOLVED<>SOLVING THEN QUITPLAYAGAIN ;>>
+.ASK2
+;If the final part and solved previous parts then win entire trilogy
+ IF C0<>FINALPART THEN SOLVEDALL
+
+.ASK2A ;>>
+ MESSAGE 2313 ;Do you want to SAVE final position ?
+ GOSUB ASKINPUT
+ IF RESULT=FALSE THEN ASK2A ;>>
+;>> IF RESULT=FALSE THEN ASK2
+ IF I1=IYES THEN SAVEFINAL
+ IF I1=INO THEN QUITPLAYAGAIN
+ IF I1=INORTH THEN QUITPLAYAGAIN
+ GOTO ASK2A ;>>
+;>> GOTO ASKFINAL
+.SAVEFINAL
+ GAMESOLVED=ENDPOSITION ;>>
+;(Don't return to game play after here)
+;>>VERSION=GAMECOMPLETE
+ SAVE
+ GOTO ASK2A ;>>
+;>> GOTO ASKFINAL
+.SOLVEDALL
+ MESSAGE 2316 ;You have solved the entire trilogy
+ GOTO QUITPLAYAGAIN
+
+;-----
+.CantRamSave
+ message 2010 ; "I don't understand"
+ message dotcr
+ 
+.ASKINPUT
+ GOSUB @CLEARINPUT
+ GOSUB @GETI1I2I3I4
+ IF I1=IRAM THEN ASKIN2
+ IF I1=IOOPS THEN ASKIN3
+ IF I1=IRESTORE THEN @dorestore ;>>mike19/7/87 - was ASKIN1
+ RESULT=TRUE
+ RETURN
+
+;.ASKIN1
+; GOSUB @L THEN @STARTGAME
+ GOTO QUITPLAYAGAIN
+
+;-----
+
+.ABORTGAME
+.WAITFORSPACE ;Variables may be corrupted
+ GOTO @STARTGAME
+
+;-----
+
+.WORDS
+ SCREEN T
+ GOTO @ENDCOMMAND
+
+;-----
+
+.PICTURES
+ SCREEN G C0
+ LASTPICTURE=0
+ GOTO @DESCRIBE ;Re-describe room
+
+;-----
+;.AFTERRESTORE
+;;After a RESTORE or RAMLOAD or PICTURES
+;
+; C0=0 ;>>
+; LASTPICTURE=C0 ;>>
+;;Solved current game of previous game?
+; IF GAMESOLVED<>ENDPOSITION THEN AFTER2 ;>>
+;
+; IF VERSION=GAMECODE THEN @DIE ;>>Solved current game THEN @STARTGAME
+ GOTO QUITPLAYAGAIN
+
+;-----
+
+.ABORTGAME
+.WAITFORSPACE ;Variables may be corrupted
+ GOTO @STARTGAME
+
+;-----
+
+.WORDS
+ SCREEN T
+ GOTO @ENDCOMMAND
+
+;-----
+
+.PICTURES
+ SCREEN G C0
+ LASTPICTURE=0
+ GOTO @DESCRIBE ;Re-describe room
+
+;-----
+;.AFTERRESTORE
+;;After a RESTORE or RAMLOAD or PICTURES
+;
+; C0=0 ;>>
+; LASTPICTURE=C0 ;>>
+;;Solved current game of previous game?
+; IF GAMESOLVED<>ENDPOSITION THEN AFTER2 ;>>
+;
+; IF VERSION=GAMECODE THEN @DIE ;>>Solved current game
+; IF C0<>FIRSTPART THEN AFTER2 ;First part can't be a chain
+; IF VERSION<>PREVIOUSGAMECODE THEN AFTER2 ;>>
+;;Solved previous game.
+;;>> IF VERSION<>PREVIOUSGAMECOMPLETE THEN AFTER2
+;;Mark as having solved all previous parts:
+; MESSAGE 2317 ;>>
+; CLEAR ;>>
+; VERSION=GAMECODE ;>>
+; GAMESOLVED=SOLVING ;>>
+;;>> VERSION=GAMECOMPLETE
+; GOTO @RETURNTOSTART
+;
+;.AFTER2
+;;>> IF VERSION=GAMECOMPLETE THEN @DIE ;Already solved this game ?
+; IF VERSION<>GAMECODE THEN WRONGPOSITION ;Wong game restored
+; IF C1<>1 THEN WRONGPOSITION
+; IF C2<>2 THEN WRONGPOSITION
+; IF C3=3 THEN @DESCRIBE
+;.WRONGPOSITION
+; MESSAGE 2314 ;Bad restored position
+; GOTO @ABORTGAME
+
+;-----

@@ -1,0 +1,59 @@
+ begin
+
+;--------------------------------------------------
+;-----------------
+.cheat
+ cif allowcheat
+  if noun1<>4 then nicetry ; rainbird
+ cif Pom
+  if noun2=260 then cheatloop
+ cend
+  if noun2<>261 then nicetry ; gravy
+
+.CheatLoop
+ gosub @osrdch
+ if x1=0 then cheatLoop
+ inumber=x1
+ x1=48
+ sub inumber,x1
+
+ cif Pom
+  canseeindark=true
+ cend
+
+
+  room=1
+.cheat1
+ PartToChain=constantPartNum
+ add PartToChain,c1
+ if PartToChain<4 then Cheat2
+ PartToChain=1
+.Cheat2
+ if inumber=3 then @chainPartToChain
+ cheatmode=inumber
+.cheatret
+ return
+;  currentpos(user)=room
+;  hicurrentpos(user)=c0
+;  print room
+;  message cr
+;  message space
+;  message cr
+;  gosub describeroom
+;  input x1 x1 x1 x1
+;  add room,c1
+;  if room<240 then cheat1
+
+ cend ; AllowCheat
+ 
+.nicetry
+
+ cif pom
+  message 2023 ; nice try
+ cend
+
+ cif TimeLord
+  message 755 ; nice try
+ cend
+
+ return

@@ -1,0 +1,64 @@
+ begin
+
+;--------------------------------------------------
+;-----------------
+.cheat
+ cif allowcheat
+  if noun1<>4 then nicetry ; rainbird
+ cif Pom
+  if noun2=260 then cheatloop
+ cend
+  if noun2<>261 then nicetry ; gravy
+
+.CheatLoop
+ gosub @osrdch
+ if x1=0 then cheatLoop
+ inumber=x1
+ x1=48
+ sub inumber,x1
+
+ cif Pom
+  canseeindark=true
+ cend
+
+
+  room=1
+.cheat1
+ PartToChain=constantPartNum
+ add PartToChain,c1
+ if PartToChain<4 then Cheat2
+ PartToChain=1
+.Cheat2
+ if inumber=3 th; Level 9         Red Moon
+; Copyright (C) 1984 Simon Aspinall; Copyright (C) 1987 Level 9
+;
+; Conversion to ST M.J.Austin 17/6/87
+;
+;room 1
+0000 10 213
+1001 4 2
+;room 2
+0001 5 4
+1011 10 4
+;room 3
+0000 7 214
+1001 3 4
+;room 4
+0011 10 7
+1001 5 7
+;room 5
+1001 4 8
+;room 6
+1001 7 5
+;room 7
+1001 7 6
+;room 8
+1001 5 9
+;room 9
+0000 1 9
+1001 4 14
+;room 10
+0001 1 6
+1001 7 9
+;ROOM 11
+0

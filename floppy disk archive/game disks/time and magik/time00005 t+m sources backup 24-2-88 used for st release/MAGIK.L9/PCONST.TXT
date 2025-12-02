@@ -1,0 +1,17 @@
+; Part-specific constants, to distinguish between parts
+;
+;
+;
+var
+ thisgame
+ thispart
+ parttochain
+
+CONST
+ constantpartnum=3 ; price of magik
+ timeandmagik=0787
+;; diskversion=1 ; true
+
+ timelord=0
+; redmoon=0
+ Pom=1

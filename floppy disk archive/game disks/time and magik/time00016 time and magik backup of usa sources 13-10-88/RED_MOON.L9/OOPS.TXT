@@ -1,0 +1,195 @@
+;'RAM' and 'OOPS' for Converted Trilogies
+
+;Copyright (C) 1986 Level 9 Computing
+
+;B:OOPS.TXT
+
+;-----
+
+BEGIN
+
+;'RAM SAVE  or 'RAM LOAD'
+
+.RAMCOMMAND
+ cif includeoops
+ IF i2=IRESTORE THEN RAMLOAD
+
+;Otherwise it's a RAM SAVE:
+
+ PARSEX2=C0 ; first position
+ GOSUB @RAMWRITE
+.RAMSAVEEND
+ IF RESULT<>C0 THEN NOTAVAILABLE
+ MESSAGE OK
+ GOTO @ENDCOMMAND
+
+.NOTAVAILABLE
+ MESSAGE 2300 ;Not available
+ GOTO @CANCELINPUT
+
+;'RAM' keyword followed by LOAD/RESTORE
+
+.RAMLOAD
+ PARSEX2=C0 ; first position
+ GOSUB @RAMREAD
+ IF RESULT=C0 THEN @AFTERoops
+
+
+ cend
+
+ MESSAGE 2300 ;Not available
+ GOTO @CANCELINPUT
+
+;-----
+
+.INITOOPS
+
+ cif includeoops
+; count number of oops positions available
+ LASTOOPSROOM=C0
+ OOPSPOSEND=C0
+ OOPSPOS=C0
+ NEXTOOPSPOS=C0
+ NEXTOOPSEND=C0
+
+ PARSEX2=1
+ GOSUB @RAMWRITE
+ IF RESULT=C0 THEN INITOOPS1
+
+ PARSEX2=C0
+ GOSUB @RAMWRITE
+ IF RESULT<>C0 THEN INITOOPSRET ;No RAM SAVE
+ MESSAGE 2301 ;Only RAM SAVE available
+ GOTO INITOOPS2
+
+.INITOOPS1
+ OOPSPOS=C1
+ NEXTOOPSPOS=C1
+ MESSAGE 2302 ; ram and oops available
+
+; now go through and write 'certified garbage' to all positions
+.INITOOPS2
+ C2=65000 ; show that positions are invalid
+.INITOOPS3
+ GOSUB @RAMWRITE
+ ADD PARSEX2,C1
+ IF RESULT=C0 THEN INITOOPS3
+ C2=2 ; restore C2
+.INITOOPSRET
+ cend
+ RETURN
+
+;-----
+
+.OOPS
+ cif includeoops
+ GOSUB TRYOOPS
+ IF RESULT=TRUE THEN @AFTERoops
+ GOTO @ENDCOMMAND
+
+.TRYOOPS
+; OOPSPOS points to next free position in ram save area
+; go back some positions if ; OOPSPOS points to the next free position in ram save area
+; this routine called on EVERY movement
+; try writing to current position
+
+ IF I1=IOOPS THEN SAVEOOPSRET ;>> NICK 27/6/86
+ IF OOPSPOS=C0 THEN SAVEOOPSRET ;OOPS not available
+
+ LASTOOPSROOM=R1
+ NEXTOOPSPOS=OOPSPOS
+ NEXTOOPSEND=OOPSPOSEND
+
+.SAVEOOPS1
+ PARSEX2=NEXTOOPSPOS
+ GOSUB RAMWRITE
+ IF RESULT=C0 THEN SAVEOOPSOK ; fine, inc pointer and finish
+; something went wrong.
+; if we are in the first position, tell the user
+; that it is no; OOPSPOS points to the next free position in ram save area
+; this routine called on EVERY movement
+; try writing to current position
+
+ IF I1=IOOPS THEN SAVEOOPSRET ;>> NICK 27/6/86
+ IF OOPSPOS=C0 THEN SAVEOOPSRET ;OOPS not available
+
+ LASTOOPSROOM=R1
+ NEXTOOPSPOS=OOPSPOS
+ NEXTOOPSEND=OOPSPOSEND
+
+.SAVEOOPS1
+ PARSEX2=NEXTOOPSPOS
+ GOSUB RAMWRITE
+ IF RESULT=C0 THEN SAVEOOPSOK ; fine, inc pointer and finish
+; something went wrong.
+; if we are in the first position, tell the user
+; that it is not available here
+ IF NEXTOOPSPOS<2 THEN SAVEOOPSRET ; keep quiet, ignore the error
+; ok, so have some saved positions. Rotate round cyclically
+ NEXTOOPSEND=NEXTOOPSPOS ; save first invalid position
+ NEXTOOPSPOS=C1
+ GOTO SAVEOOPS1
+
+.SAVEOOPSOK
+ ADD NEXTOOPSPOS,C1
+.SAVEOOPSRET
+ cend
+ RETURN
+
+;-----
+
+.OOPSCHECK
+ cif includeoops
+ IF R1=LASTOOPSROOM THEN SAMEROOM
+ OOPSPOS=NEXTOOPSPOS
+ OOPSPOSEND=NEXTOOPSEND
+ LASTOOPSROOM=R1
+.SAMEROOM
+ cend
+ RETURN
+
+;-----
+
+.RAMREAD
+ cif includeoops
+ PARSEX1=23 ; code for ramload
+ GOSUB RAMOPERATION
+ IF C2<>2 THEN RAMERROR ;Do not use C2. Check for corrupted variables
+ RETURN
+
+.RAMERROR
+ MESSAGE 2303 ; Must RAM SAVE first
+ thisgame=timeandmagik
+ thispart=constantpartnum ; restart this part
+ GOTO @ABORTGAME
+
+;-----
+
+.RAMWRITE
+ PARSEX1=22 ; code for ramsave
+; drop through to RAMOPERATION
+
+.RAMOPERATION
+; write to position PARSEX2, return RESULT=0 if OK
+ SAVEL90=LINPUT(0)
+ SAVEL91=LINPUT(1)
+ SAVEL92=LINPUT(2)
+ SAVEL93=LINPUT(3)
+
+ LINPUT(0)=PARSEX1
+ LINPUT(1)=PARSEX2 ; position number
+ LINPUT(2)=C0
+ DRIVER
+ C0=0 ;In case variables are corrupted.
+ RESULT=LINPUT(0)
+
+;Now restore LIST 9. However variables may have been corrupted.
+ LINPUT(0)=SAVEL90
+ LINPUT(1)=SAVEL91
+ LINPUT(2)=SAVEL92
+ LINPUT(3)=SAVEL93
+ cend
+
+ RETURN
+;
+;-----

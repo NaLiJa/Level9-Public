@@ -1,0 +1,2198 @@
+; USA version. NICK 7/10/88
+; Lords of Time Text, part 1 of "Time & Magik",
+; copyright (C) 1987/1988 Level 9 Computing.
+;
+; Time & Magik credits..
+; design: Sue Gazzard, David Williamson, Pete Austin.
+; program: Mike Austin, Pete Austin.
+; versions: Nick Austin, John Jones-Steele.
+; pictures: Godfrey Dowson, Neil Strudwick.
+; additional text: Ruth Pracey.
+; 
+[1: ] 
+[2:] 
+[3:, ] 
+[4:. ] 
+[5:%] 
+[6: and ] 
+[7:.%] 
+[8:north] 
+[9:northeast] 
+[10:east] 
+[11:south] 
+[12:southeast] 
+[13:southwest] 
+[14:west] 
+[15:northwest] 
+[16:up] 
+[17:down] 
+[18:in] 
+[19:out] 
+[20:across] 
+[21:exits are] 
+[22: through a door] ;>>mike 19/7/87 
+[23: through an open door] 
+[24:%you are] 
+[25:you own] 
+[26:and you're wearing] 
+[27:you can see] 
+[28:%what now? ] 
+;
+; I don't understand group...
+[29:I don't understand. ] 
+[30:eh? ] 
+[31:I can't think what you mean. ] 
+;
+; Please enter a noun group...
+[32:you'll need to say more than that. ] 
+[33:could you elaborate? ] 
+[34:I think that verb needs an object. ] 
+;
+; Please be more specific group...
+[35:could you rephrase that? ] 
+[36:please be more specific. ] 
+[37:I don't quite understand. ] 
+[38:keep it simple, please. ] 
+[39:you can't. ] 
+[40:don't be silly! ] 
+[41:you can't see] 
+[42:you don't have] 
+[43:you already have] 
+[44:you can't carry any more. ] 
+[45:you can't take] 
+[46:you can't wear] 
+[47:you're carrying too much to take] 
+; 
+; Nothing happens group... 
+[50:nothing happens. ] 
+[51:doesn't seem to work. ] 
+ou find nothing. ] 
+[70:the only visible exit is ] 
+; 
+[72:tied together] 
+[73:which is open] 
+[74:(one match is lit)] 
+[75:burning brightly] 
+[76:peering down from above] 
+[77:full of water] 
+[78:tied up] 
+[79:glowing white-hot] 
+;
+; objects...
+;
+[80:an ^N olive ^N branch] 
+[81:a ^N golden ^N buckle] 
+[82:the ^N jester's ^N cap] 
+[83:a ^N silicon ^N chip|^N microchip] 
+[84:a ^N tightly-closed ^N box|^N eye ^N evil] 
+[85:a ^N diamond ^N teardrop] 
+[86:an ^N ivory ^N tusk] 
+[87:a little ou find nothing. ] 
+[70:the only visible exit is ] 
+; 
+[72:tied together] 
+[73:which is open] 
+[74:(one match is lit)] 
+[75:burning brightly] 
+[76:peering down from above] 
+[77:full of water] 
+[78:tied up] 
+[79:glowing white-hot] 
+;
+; objects...
+;
+[80:an ^N olive ^N branch] 
+[81:a ^N golden ^N buckle] 
+[82:the ^N jester's ^N cap] 
+[83:a ^N silicon ^N chip|^N microchip] 
+[84:a ^N tightly-closed ^N box|^N eye ^N evil] 
+[85:a ^N diamond ^N teardrop] 
+[86:an ^N ivory ^N tusk] 
+[87:a little ^N dragon's ^N wing] 
+[88:a ^N dinosaur ^N egg] 
+[89:a ^N rotten ^N apple] 
+[90:a battered ^N suit of ^N armour] 
+[91:a ^N meaty ^N bone] 
+[92:a ^N grimy ^N brown ^N bottle|^N poison] 
+[93:a ^N bunch of ^N green ^N leaves] 
+[94:a ^N pack of ^N playing ^N cards] 
+[95:an ^N oriental ^N rug|^N carpet] 
+[96:a ^N jewellery ^N case|^N jewelry] 
+[97:a ^N cask of ^N ale] 
+[98:a ^N green ^N frog] 
+[99:a ^N bunch of ^N keys|^N key] 
+[100:a ^N rugged ^N gauntlet|^N glove] 
+[101:a ^N drinking ^N horn] 
+[102:a ^N fine ^N golden ^N hourglass|^N hour-glass] 
+[103:a ^N little ^N icicle] 
+[104:a ^N lightsabre|^N sabre] 
+[105:an ^N inlaid ^N looking ^N glass|^N mirror ^N looking-glass] 
+[106:a ^N lute] 
+[107:a ^N matchbox|^N matches] 
+[108:a ^N fine ^N metronome] 
+[109:a ^N milestone|^N hope] 
+[110:a ^N mirror] 
+[111:a ^N stone ^N pot] 
+[112:a ^N delicate ^N little ^N screwdriver] 
+[113:a ^N Masai ^N spear] 
+[114:some ^N sweetmeats] 
+[115:a ^N stalk of ^N valerian] 
+[116:the ^N first ^N wheel] 
+; 
+[118:a ^N sharp ^N axe] 
+[119:a silver ^N bell] ; silver noise word
+[120:a ^N gallon ^N petrol ^N can] 
+[121:a silver ^N candelabra] ; silver noise word
+[122:a ^N candle|^N candlestick ^N cand] 
+; 
+[124:a ^N filmy ^N cloak] 
+[125:a ^N stone ^N club] 
+[126:a ^N fur ^N coat|^N skin] 
+[127:a ^N jewelled ^N coffer] 
+[128:a silver ^N coin] ; silver noise word
+[129:a ^N jewelled ^N crown] 
+[130:an ^N emerald] 
+; 
+[132:an ^N onyx ^N figurine] 
+[133:a ^N firefly] 
+[134:some ^N delicious ^N food] 
+[135:a ^N galactic ^N groat] 
+[136:the ^N joker of the pack] 
+[137:a ^N fine ^N sharp ^N sword] 
+[138:a ^N carved ^N lodestone|^N magnet] 
+[139:a ^N lur] 
+[140:a ^N scrap of ^N parchment|^N map] 
+[141:an ^N old ^N mattress] 
+[142:a ^N weighted ^N net] 
+[143:a ^N gold ^N nugget] 
+[144:an ^N opener] 
+[145:a ^N painted ^N pebble] 
+[146:a ^N glass ^N phial] 
+[147:a ^N grubby ^N pick] 
+[148:two ^N short ^N planks] 
+[149:a ^N grapple-firing ^N rocket] 
+[150:a ^N coil of ^N rope] 
+[151:a ^N curved ^N ruby|^N lens] 
+[152:a ^N battered ^N rucksack|^N backpack] 
+[153:some ^N winged ^N shoes|^N sandals] 
+[154:a ^N shovel|^N spade] 
+[155:a ^N fallen ^N star] 
+[156:a ^N tin of ^N catfood|^N Kattomush ^N can ^N whalemeat] 
+[157:a ^N long ^N trident] 
+[158:a ^N porcelain ^N vase] 
+[159:a tiger ^N tooth] 
+[160:when a wave of change sweeps across History, triggered by the 
+Timelords' meddling, only one person is unaffected. You are sitting 
+in the comfort of your own home, debugging your latest program, when 
+suddenly there is a blinding flash...%] 
+; 
+; descriptions of objects when on the ground 
+[161:a grandfather clock] 
+[162:huge cogs numbered 1 to 9] 
+[163:a massive pendulum, hanging from the ceiling] 
+[164:a cast-iron cauldron] 
+[165:a pile of family rubbish] 
+[166:a wall cupboard] 
+[167:a weeping willow] 
+[168:a red Porsche] 
+[169:a wall of ice blocking the way south] 
+[170:a clear lake of super-cold water blocking the way to the northwest] 
+[171:a sheet of smooth ice leading northwest] 
+[172:a cube of ice round the throne] 
+[173:a moored Viking longship with a fierce dragon prow] 
+[174:a rocking boulder to the west] 
+[175:a huge iron-bound chest] 
+[176:a recessed handle] 
+[177:an ottoman] 
+[178:a twee little well labelled "Water of Strength"] 
+[179:a grate in the south wall] 
+[180:a marble basin full of water] 
+[181:a crude black archway] 
+[182:a jumble of broken robots] 
+[183:a silicate workbench] 
+[184:many cruel metal cages in which the evil Timelords have 
+imprisoned zillions of cute creatures] 
+[185:thick bars which imprison hundreds of poor people] 
+[186:a compost heap, spilling onto the path] 
+[187:a jumble of dry wood, half-buried in the ice] 
+[188:a picture of a kindly old man] 
+[189:a mushroom ring] 
+[190:it's dark!%] 
+[191:be more careful in future! ] 
+[192:the picture stirs. Its surface ripples, the old man's figure 
+swells out from the flat canvas and he steps forth to stand before 
+you. 
+% 
+%He regards you solemnly, his long nose quivering witpon you!" 
+% 
+%His message complete, Father Time steps back into the picture. ] 
+[193:with a chorus of squeaks, mews, and barks, belling, chirruping, 
+purring, and squealing, squiggling, wriggling, leaping and frolicking, 
+the animals surge joyfully away. ] 
+[194:the people are free! Couples long-separated rush to greet 
+each other, children tear frantically into their parents' arms, 
+the air is filled with the buzz of happy voices. Then by twos and 
+threes and families they begin to leave the scenpon you!" 
+% 
+%His message complete, Father Time steps back into the picture. ] 
+[193:with a chorus of squeaks, mews, and barks, belling, chirruping, 
+purring, and squealing, squiggling, wriggling, leaping and frolicking, 
+the animals surge joyfully away. ] 
+[194:the people are free! Couples long-separated rush to greet 
+each other, children tear frantically into their parents' arms, 
+the air is filled with the buzz of happy voices. Then by twos and 
+threes and families they begin to leave the scene of their miserable 
+confinement - but not before they have thanked you and rewarded 
+you for their liberation. ] 
+[195:the earth around the bottle is loosened. ] 
+[196:it seems to be held fast. ] 
+[197:%a skeletal hand, as cold as death and as strong as the very 
+jaws of hell, clamps around your throat! ] 
+[198:%a scorpion strikes with its deadly sting! ] 
+[199:%lightning sears down and strikes you! ] 
+[200:%with a puff of ancient smoke, Father Time appears.
+% 
+%He sneezes loudly, flapping his wizened hands ineffectually at 
+the pallid vapour. "Nasty stuff". he mutters, then clears his throat 
+and draws himself up his full height. "Do not be afraid!" he 
+declaims nobly, ruining the effect by another fit of sneezing, 
+"What you are about to - ashoo! - witness, is the future as it will 
+be if the Timelords are victorious. Time grows short, yet there may 
+still be enough to defeat them". He sniffs and blows his nose 
+vigorously into a corner of his robe, then shuffles away.%] 
+[201:the Tooth Fairy] 
+[202:a woolly mammoth blocking your escape] 
+[203:a sabre-toothed tiger] 
+[204:an Allosaurus] 
+[205:a Tyrannosaurus Rex] 
+[206:a Brontosaurus] 
+[207:a group of cavemen] 
+[208:a caveman dragging a struggling cavewoman by her hair] 
+[209:an animated cave skeleton] 
+[210:a rotund bartender] 
+[211:an unfortunate wretch in the stocks] 
+[212:a thirsty messenger of the King] 
+[213:a genuine fire-breathing dragon] 
+[214:the Black Knight] 
+[215:a fair prince] 
+[216:Pirate Pete] 
+[217:a jester] 
+[218:a shivering Viking guard] 
+[219:a ghost] 
+[220:two Roman sentries beside the gate] 
+[221:a massively-muscled gladiator] 
+[222:a fierce lion] 
+[223:a splendid android] 
+[224:a fierce cyberman waving a sword] 
+[225:a single beautiful narcissus standing proudly among the weeds] 
+[226:a silver fox] 
+[227:two hunting dogs] 
+;; [228:it hasn't been wound for centuries. ]
+[229:the clock strikes! Dust showers from the ceiling and the floor 
+rocks beneath your feet. ] 
+[230:there is a rumbling in the distance. Roiling clouds gather above 
+and furry things start to rain down upon you; the spitting ones raking 
+you with their claws as they pass, while the less-sharp ones growl 
+ferociously. They all vanish with a "phut!" as soon as they hit the 
+ground. A troop of pretty pink elephants stomp through the air from 
+the east, the pounding of their feet keeping time with the thunder. 
+Then, quite suddenly, they vanish and all is still and normal again. ] 
+[231:you bump your nose painfully against the empty air. "Payment, 
+please", chirps a mechanical voice. ] 
+[232:"You are authorised to enter". ] 
+[233:the cover of an inspection panel flips open, narrowly 
+missing your face. ] 
+[234:the cyberman's steely hand clamps onto your shoulder, digging 
+into your flesh in an unfriendly manner as he flings you backwards. 
+"Oh no you don't", he rasps ominously. ] 
+[235:"Ta, love". ] 
+[236:no one here wants] 
+[237:you can't fill] 
+[238:you can't empty] 
+[239:YEUCH! No, you can't eat] 
+[240:there's no one to give it to. ] 
+[241:you find] 
+[242:it's closed. ] 
+[243:if you insist. There's no accounting for taste! ] 
+[244:yum! ] 
+[245:your vision clears and you realise that there is someone here! ] 
+[246:something slaps the coin from your hand! ] 
+[247:the fairy snatches it back, her delicate face contorted with 
+fury. "You can't just TAKE it!" she trills venomously. "What do you 
+think I am, a bleeding-heart charity, or something? I'm in this for 
+what I can get and don't you forget it! The only way you're going to 
+get a coin off me is to do it the proper way and give me a tooth 
+first. Good grief!" She subsides into resentful muttering. ] 
+[248:guess what? You can't - quite - reach the keys! ] 
+[249:with a single mighty bound, the keys leap across to the 
+magnetic lodestone and snuggle contentedly against it. ] 
+[250:the tree's leaves rustle, and it gives a creaky groan. "Alas! 
+Alas for my clear stream, and the sparkling waters which sang between 
+my roots when the wood was young! glinting teardrops 
+tumble from its branches and soak into the ground. ]
+[251:you need an axe. ] 
+[252:that must be a good axe for, with one swift blow, you sever the 
+tree's trunk and it falls with a peaceful sigh, to rest forever 
+alongside its beloved stream. Looking down, you see that one of the 
+iridescent teardrops remains, glistening at your feet. ] 
+[253:the planks make a lovely splash, but they are too short to 
+cross the stream. ] 
+[254:you tie the planks together, making a longer plank. glinting teardrops 
+tumble from its branches and soak into the ground. ]
+[251:you need an axe. ] 
+[252:that must be a good axe for, with one swift blow, you sever the 
+tree's trunk and it falls with a peaceful sigh, to rest forever 
+alongside its beloved stream. Looking down, you see that one of the 
+iridescent teardrops remains, glistening at your feet. ] 
+[253:the planks make a lovely splash, but they are too short to 
+cross the stream. ] 
+[254:you tie the planks together, making a longer plank. ] 
+[255:the tied planks bridge the stream. ] 
+[256:with what shall you tie them? ] 
+[257:the stream is far too wide to cross without entering the 
+water, and nobody in their right mind would try to swim through 
+THAT yuck!" ] 
+[258:you've done that already! ] 
+[259:%you have no spear! The tiger growls deep in its throat 
+with anticipation. Its great, red maw lolls open, it gives 
+a yowling caterwaul - and attacks! ] 
+[260:crackling ice radiates from the icicle as the super-cold lake 
+water freezes around it. ] 
+[261:petrol pours from the can and soaks into the ground. ] 
+[262:you pour out the petrol and fling the can away. ] 
+[263:the mammoth is blocking that route! You've really done it this 
+time; you're trapped! ] 
+[264:WHOOSH! The petrol burns away in a sheet of roaring flame! ] 
+[265:the mammoth is so surprised that it jumps clean out of its skin 
+and gallops off, goosebumps quivering. ] 
+[266:you have no fire. ] 
+[267:it burns brightly. ] 
+[268:it's empty! ] 
+[269:it burns well. ] 
+[270:the match goes out. ] 
+[271:it goes out. ] 
+[272:the candle flickers. ] 
+[273:you feel very cold! ] 
+[274:the cavepeople grunt to each other. ] 
+[275:the cavepeople grunt louder, at you this time. ] 
+[276:the cavemen advance, waving sticks. ] 
+[277:the cavemen attack you! ] 
+[278:the door swings open. ] 
+[279:armour clanking, the Black Knight strides forwards. ] 
+[280:the Black Knight draws his sword, the wicked blade hissing 
+as it leaves the scabbard. ] 
+[281:the Black Knight springs to the attack, his sword slashing 
+through the air. ] 
+[282:the Black Knight redoubles his attacks! ] 
+[283:Fortunately your armour deflects his blows. ] 
+[284:with a heroic yell, the prince leaps to your defence ] 
+[285:but, alas, he can find no sword and is cut down in moments. ] 
+[286:and with one, mighty blow, slays the evil Black Knight. 
+Carefully, he cleans his blade, nods to you, then hefts the body 
+over his shoulder and carries it away. ] 
+[287:you're in a hole. ] 
+[288:you're in a deep hole. ] 
+[289:you're in a very deep hole which collapses, burying you alive! ] 
+[290:Pirate Pete steals] 
+[291:the lur booms out, its extraordinary harmonics reverberating 
+through the air. It is answered by fierce shouts and yelling, 
+the stamp of marching feet and the rattle of many weapons. A 
+dozen Vikings surge into view. ] 
+[292:when they discover that Pirate Pete is not here, their fury 
+knows no bounds! ] 
+[293:they fall upon the pirate and bind his hands tightly. Then, 
+tying a rope around his neck, the Vikings lead him away, pausing 
+only to hand you an olive branch, with their thanks. ] 
+[294:the Viking is delighted by the warm fur. He throws it over 
+his shoulders and prances around, admiring himself in the 
+polished surface of his shield. He gives you his lur in exchange. 
+"There is a reward for capturing the pirate", he says. ] 
+[295:it's very hot. ] 
+[296:you'll die without water! ] 
+[297:the heat becomes overpowering! ] 
+[298:the lion struggles free from the net. ] 
+[299:with a fierce roar, the lion attacks! ] 
+[300:glistening tears rain down from the willow tree. ] 
+[301:the tree is dead. ] 
+[302:planks bridge the stream. ] 
+[303:there's a hole to the south. ] 
+[304:the wood burns warmly, sending out puffs of pleasantly-scented 
+smoke. ] 
+[305:the dinosaur approaches menacingly, shaking the ground with 
+every step of its gigantic feet. ] 
+[306:a secret door leads east. ] 
+[307:in case you hadn't noticed, the plant is eating YOU! ] 
+[308:I didn't expect that! ] 
+[309:the Timelords realise they are not alone and rise to their feet, 
+their eighteen evil eyes stabbing into you. Your world spins and 
+fades.. ] 
+[310:releasing liquid paraquat. ] 
+[311:the plant gives a little whimper and shrivels into a wrinkled 
+mess. ] 
+[312:the dogs notice you and growl quietly. ] 
+[313:the dogs gain confidence and start barking for real, "WOOF! WOOF! 
+YAP! GRRR!" ] 
+[314:"ARF! ARF! ARF! AOOOUL!" A platoon of guards, finally alerted by 
+all the barking, piles into the room andgrapple and 
+roll into the distance. ] 
+[323:the dinosaur executes a stately, hundred-ton sidestep and 
+blocks your path. ] 
+[324:the ice cube shatters, freeing the Snow Queen. "Thank you". 
+she breathes, her voice as lilting as the cold winds which play 
+among the glimmering snow vaults of Seracia. She takes a 
+finely-wrought sword from beneath the folds of her robe, 
+touches both your shoulders lightly with its glinting blade, 
+and glides away. ] 
+[325:the ice wall shatters, tinkling melodicallygrapple and 
+roll into the distance. ] 
+[323:the dinosaur executes a stately, hundred-ton sidestep and 
+blocks your path. ] 
+[324:the ice cube shatters, freeing the Snow Queen. "Thank you". 
+she breathes, her voice as lilting as the cold winds which play 
+among the glimmering snow vaults of Seracia. She takes a 
+finely-wrought sword from beneath the folds of her robe, 
+touches both your shoulders lightly with its glinting blade, 
+and glides away. ] 
+[325:the ice wall shatters, tinkling melodically as it falls. ] 
+[326:Mmmmmm! ] 
+[327:only a real dodo would kiss ] 
+[328:there is a puff of slimy smoke and the frog turns into a
+handsome prince. He sneezes a couple of times. "Ghastly smoke 
+they use round here" he remarks chattily. ] 
+[329:nice try, but the icicle is out of reach. ] 
+[330:the din shakes the icicle loose. ] 
+[331:noisy little beggar, aren't you! ] 
+[332:the bad tooth comes loose easily and drops into your hand. 
+The tiger beams happily, rubs its head affectionately against 
+your leg, and trots away. ] 
+[333:it has a lean and hungry look, and could be in pain. Be careful! ] 
+[334:the tiger is friendly now, but seems to be in a great deal of 
+pain. ] 
+[335:the tiger purrs deafeningly. ] 
+[336:the tiger gingerly touches its puffy cheek with one long, 
+curving claw. ] 
+[337:the tiger winces and gives a little, moaning roar. ] 
+[338:the fox grabs the bone and slinks off, leaving you thinking 
+uncharitable thoughts about traps and the current market value of 
+silver fox furs. ] 
+[339:the fox nips in front of you and trips you up. ] 
+[340:the tiger blocks your way, snarling to display an impressive 
+array of mottled, rotting teeth. ] 
+[341:you forgot to open it! ] 
+[342:the tiger does not like that one bit. With a gap-toothed 
+growl it attacks... ] 
+[343:oops! Butter-fingers! It smashes to smithereens. ] 
+[344:the vile stench of whalemeat assails your nostrils. ] 
+[345:the dragon stalks off in a huff, spitting small spiteful 
+gobbets of flame at unsuspecting flowers and butterflies. ] 
+[346:the dragon lets you climb on to his shoulders and you flap 
+merrily back the way you came until you reach the edge of a wide 
+moat surrounded by a high, turfed bank. The dragon tries to fly 
+over it, but he is, unfortunately, a very SMALL genuine 
+fire-breathing dragon, and not really equipped for this sort of 
+thing. He gives a despairing whimper (incinerating a couple of 
+wasps and a bluebottle who had been dreamily tootling along 
+wondering where to stand for dinner), and belly-flops 
+into the water. There is a horrible hissing noise, strongly 
+reminiscent of an awful lot of water being poured over hot 
+coals, and a soggy cloud of black smoke and steam squelches to 
+the bank. The dragon coughs and slinks away miserably. ] 
+[347:"I think I'll go for a little fly now, to work this lot off. 
+Would you like to come along for a ride?" ] 
+[348:the dragon eats the food ravenously, apparently oblivious to 
+the gouts of flame which periodically belch from his mouth. 
+"Thanks pal, that was delish". he says finally. "Could have done 
+with a bit more charcoal and mustard, though". ] 
+[349:the android exchanges your coin for a galactic groat. ] 
+[350:the tooth fairy examines it closely and says, "This isn't our 
+usual kind of tooth. It's huge!" Her eyes flicker as she continues, 
+"Tell you what, I'll swap it for one silver coin. Is that a deal?" ] 
+[351:"Mmm. Well, perhaps I could throw in a firefly as well. OK?" ] 
+[352:"You greedy human! I withdraw my offer! You'll just get the coin 
+think yourself lucky". ] 
+[353:%the fairy takes your tooth and flits away, giggling so hard 
+that it crosses your mind to wonder whether the dear little soul 
+may have just ripped you off. ] 
+[354:the tiger gulps down the food greedily and purrs at you. ] 
+[355:the brontosaurus grabs the leaves and jerks them into the air, 
+carrying you out of the pit! ] 
+[356:the innkeeper's eyes light up as he struggles to lift the gold. 
+"OK", he says nonchalantly, "I'm robbing myself really, but I'll let 
+you take the ale if you want". ] 
+[357:the innkeeper snorts rudely, "That's not worth nearly enough!" ] 
+[358:"Thank you, thank you, thank you a thousand times, good 
+traveller!" says the messenger, gulping at the ale. "Methought I 
+was nigh spent from thirst". He drinks every last drop and 
+gratefully shares some of his food with you. ] 
+[359:the Jester capers madly with glee. "A million thanks, good 
+traveller". he chortles. Taking off his motley cap, he throws it 
+to you, bells gaily jin valuable treasure. ] 
+; 
+; Initial positions...
+;
+[368:balanced precariously on a shelf] 
+[369:rolling on the ground] 
+[370:hanging on the wall] 
+[371:lying on blood-stained snow] 
+[372:poking out of the earth] 
+[373:scattered about] 
+[374:on a green-baize table] 
+[375:hanging on the wall] 
+[376:on the dressing table] 
+[377:on a rough wooden table] 
+[378:sitting on a lily pad] 
+[379:pushed out of reach under the shed door] 
+[380:in the dust] 
+[381:on a table] 
+[382:on the mantelpiece] 
+[ valuable treasure. ] 
+; 
+; Initial positions...
+;
+[368:balanced precariously on a shelf] 
+[369:rolling on the ground] 
+[370:hanging on the wall] 
+[371:lying on blood-stained snow] 
+[372:poking out of the earth] 
+[373:scattered about] 
+[374:on a green-baize table] 
+[375:hanging on the wall] 
+[376:on the dressing table] 
+[377:on a rough wooden table] 
+[378:sitting on a lily pad] 
+[379:pushed out of reach under the shed door] 
+[380:in the dust] 
+[381:on a table] 
+[382:on the mantelpiece] 
+[383:hanging from the ceiling] 
+[384:standing in a rack] 
+[385:on the wall] 
+[386:propped in the corner] 
+[387:on the table] 
+[388:in pride of place] 
+[389:beside the road] 
+[390:half-buried in the earth] 
+[391:on a stone shelf] 
+[392:on the workbench] 
+[393:hanging on the wall] 
+[394:on a carved sideboard] 
+[395:hidden among the delphiniums] 
+[396:propped up in a corner] 
+; 
+[400:%You've managed to get yourself killed! ] 
+;
+; Locations... 
+;
+[401:in your ^N own ^N living ^N room] 
+[402:in a ^N large, ^N cold ^N looking ^N room] 
+[403:inside a ^N gigantic ^N clock] 
+[404:at the end of a ^N gravel ^N drive] 
+[405:by some ^N roadworks where the ^N road ends] 
+[406:on a ^N winding ^N gravel ^N drive] 
+[407:outside a ^N delightful half-timbered ^N country ^N cottage] 
+[408:in a ^N bright ^N hallway]
+[409:on the dim ^N landing] 
+[410:in a ^N cramped ^N store-room] 
+[411:in a ^N plushly ^N carpeted ^N master ^N bedroom] 
+[412:in a ^N lovely ^N old-fashioned ^N kitchen] 
+[413:in the ^N living ^N room] 
+[414:on a ^N patio] 
+[415:in the ^N flower ^N garden]
+[416:at the end of the ^N garden beside a ^N five ^N foot ^N fence] 
+[417:beside a ^N fence on the east ^N bank of a ^N wide, ^N dirty 
+^N stream] 
+[418:further upstream where the ^N filthy ^N stream is quite narrow. 
+Something is growing amid ^N the nettles on the ^N opposite ^N bank] 
+;
+[419:west of the ^N stream] 
+[420:outside a ^N garden ^N shed] 
+[421:in a ^N cluttered ^N garden ^N shed] 
+[422:beside the ^N polluted ^N stream] 
+[423:at a red-painted ^N garden ^N gate] 
+[424:on a ^N paved path] 
+[425:in a ^N carport]
+[426:standing on ^N splintered ^N ice in a ^N deep ^N valley] 
+[427:walking unsteadily across a ^N slippery ^N ice ^N sheet] 
+[428:on translucent, glitteringly ^N smooth ^N ice] 
+[429:at the edge of the ^N ice] 
+[430:where a ^N rocky ^N track leads up the ^N mountain] 
+[431:laboriously climbing the ^N snow-covered ^N mountain] 
+[432:in an ^N armchair-shaped ^N hollow on the ^N mountainside, 
+below a ^N cave] 
+[433:on a ^N ledge outside an ^N odoriferous ^N cave] 
+[434:in a ^N huge ^N subterranean ^N chamber with ^N smooth ^N walls] 
+[435:in the ^N freezing ^N cave] 
+[436:at a ^N junction] 
+[437:in a silver fox ^N lair] ; silver noise word
+[438:in the ^N silver-veined ^N cave] 
+[439:in the ^N hidden silver ^N vault] ; silver noise word
+[440:in a ^N splendid ^N frost ^N chamber] 
+[441:in a ^N dark, ^N eerie ^N cave] 
+[442:in the ^N frozen ^N forest] 
+[443:in an ^N intricate ^N alpine ^N garden] 
+[444:in a ^N miniature ^N throne ^N room] 
+[445:beside a glinting ^N ice ^N tunnel] 
+[446:a little way into an ^N ice ^N tunnel: the walls glow 
+faintly with reflected light] 
+[447:a long way along a dim ^N ice ^N tunnel. Faint 
+colours glimmer deep in the translucent walls] 
+[448:deep in a dark ^N ice ^N tunnel] 
+[449:standing below a ^N small ^N hill] 
+[450:west of the ^N waterhole] 
+[451:by a pool of ^N muddy water]
+[452:west of the ^N hill] 
+[453:on the ^N prairie] 
+[454:in a ^N deep ^N pit] 
+[455:by the edge of the ^N pit] 
+[456:climbing a ^N well-worn ^N path] 
+[457:on a ^N wide ^N ledge outside a ^N warm ^N cave] 
+[458:in a ^N large ^N dry ^N cave] 
+[459:in a ^N store ^N cave] 
+[460:in the ^N handicraft ^N cave] 
+[461:in the ^N junk-strewn ^N pebble and ^N shell ^N room] 
+[462:in the ^N smallest ^N cave] 
+[463:in the ^N painting ^N studio] 
+[464:in the ^N stone ^N age ^N armoury] 
+[465:in the ^N trophy ^N cave] 
+[466:in the ^N treasure ^N vault] 
+[467:crossing a rickety ^N wooden ^N bridge] 
+[468:in the ^N invention ^N room] 
+[469:in the ^N invention ^N alcove] 
+[470:in a ^N small ^N recess] 
+[471:at the end of a ^N road leading north] 
+[472:at a bend in the ^N walled ^N road] ; >> was ENCLOSED 
+[473:on the ^N road, which now ^N cuts across a ^N small 
+^N village ^N green] 
+[474:in the ^N bar] 
+[475:on a ^N cobbled ^N street] 
+[476:in the ^N cobbled ^N square west of the ^N castle]
+[477:in front of the ^N imposing ^N castle ^N entrance] 
+[478:in the ^N copse] 
+[4he ^N dungeons] 
+[493:on a ^N beach] 
+[494:at the ^N edge of the ^N sea] 
+[495:on board the ^N ship] 
+[496:between the ^N sea and ^N towering ^N cliffs] 
+[497:on the ^N beach] 
+[498:outside a ^N sea-carved ^N cave] 
+[499:in a ^N low ^N cave ^N smelling of ^N seaweed] 
+[500:in an ^N empty ^N cave] 
+[501:in an ^N old, ^N musty, ^N dry ^N cave]
+[502:walking along a ^N sloping east-west ^N passage] 
+[503:further along the ^N damp ^N passage] 
+[504:in an ^N obnoxious ^N cave] 
+; 
+[506:in a hands anhe ^N dungeons] 
+[493:on a ^N beach] 
+[494:at the ^N edge of the ^N sea] 
+[495:on board the ^N ship] 
+[496:between the ^N sea and ^N towering ^N cliffs] 
+[497:on the ^N beach] 
+[498:outside a ^N sea-carved ^N cave] 
+[499:in a ^N low ^N cave ^N smelling of ^N seaweed] 
+[500:in an ^N empty ^N cave] 
+[501:in an ^N old, ^N musty, ^N dry ^N cave]
+[502:walking along a ^N sloping east-west ^N passage] 
+[503:further along the ^N damp ^N passage] 
+[504:in an ^N obnoxious ^N cave] 
+; 
+[506:in a hands and knees crawl] 
+; 
+[508:at a ^N junction] 
+; 
+[510:in a ^N tight ^N fissure] 
+[511:above the ^N hole, in a ^N cave which shows signs of habitation] 
+[512:in the ^N pirate's ^N hideout] 
+[513:in the ^N large, ^N empty ^N chest] 
+[514:in the ^N entrance ^N porch] 
+[515:in a ^N u-shaped ^N hallway] 
+[516:at the north end of the ^N banqueting ^N hall] 
+[517:at the south end of the ^N hall] 
+[518:at the north end of a ^N long ^N room used for ^N relaxation] 
+[519:at the south end of the ^N long ^N room, between two ^N tables] 
+[520:at the ^N top of the ^N stairway, in the ^N minstrel's ^N gallery. 
+A ^N short ^N staircase leads up] 
+[521:climbing the ^N short ^N stairs] 
+[522:in the ^N middle of a ^N long east-west ^N portrait ^N gallery] 
+[523:at the west end of the ^N portrait ^N gallery] 
+[524:in a ^N bedroom with a ^N four ^N poster ^N bed] 
+[525:in the ^N bedroom of the ^N master of the ^N house] 
+[526:at the east end of the ^N long ^N gallery] 
+[527:in a ^N bedroom, ^N hung about with ^N lavender] 
+[528:in the ^N music ^N room] 
+[529:in a ^N hedge ^N maze] 
+[530:in a ^N hedge ^N maze] 
+[531:in a ^N hedge ^N maze] 
+[532:in a ^N hedge ^N maze] 
+[533:in the ^N middle of the ^N maze] 
+[534:in a ^N hedge ^N maze] 
+[535:in a ^N hedge ^N maze] 
+[536:in a ^N hedge ^N maze] 
+[537:in a ^N hedge ^N maze] 
+[538:down the ^N well, within reach of the water] 
+[539:on a ^N road leading north]
+[540:outside the north ^N entrance of an ^N amphitheatre] 
+[541:just inside the ^N gates, at a ^N junction] 
+[542:on the ^N steps of a ^N small ^N temple] 
+[543:inside the ^N temple] 
+[544:at a ^N road ^N junction] 
+[545:in a ^N spartan ^N barracks, beside an ^N iron-bound ^N locker] 
+[546:inside the ^N locker] 
+[547:on a ^N long ^N straight ^N road north of the ^N gatehouse] 
+[548:in the ^N forum] 
+[549:in the ^N market] 
+[550:in the ^N market] 
+[551:in a ^N butcher's ^N shop] 
+[552:outside a ^N tavern] 
+[553:in the ^N deserted ^N treasury] 
+[554:in the ^N arena of the ^N amphitheatre] 
+[555:in the south end of the ^N caldarium] 
+[556:beside a ^N stone ^N dolphin] 
+[557:in the ^N hot ^N baths] 
+[558:in the ^N hypocaust] 
+[559:in the ^N hypocaust] 
+[560:in the ^N hypocaust] 
+[561:in the ^N hypocaust] 
+[562:in the ^N hypocaust] 
+[563:in the ^N hypocaust] 
+[564:on a ^N starlit ^N plain] 
+[565:at a ^N walkway ^N junction] 
+[566:at the ^N Intergalactic ^N Bureau-de-Change] 
+[567:at the ^N foot of the ^N Milky ^N Way] 
+[568:halfway up the ^N Milky Way] 
+[569:at the top of the ^N Milky Way] 
+[570:lost among the ^N stars] 
+[571:on a ^N walkway ^N south]
+[572:at a ^N walkway ^N junction] 
+[573:at the end of the north ^N walkway] 
+[574:perched on a ^N floating ^N metal ^N platform] 
+[575:inside the ^N starship] 
+[576:in a ^N green ^N sleep ^N room] 
+[577:in a ^N space ^N swimming ^N pool] 
+[578:in the ^N control ^N room] 
+[579:on the edge of a ^N wide ^N crater] 
+[580:in a ^N dull, ^N lifeless ^N crater] 
+[581:in a ^N colossal ^N habidome] 
+[582:in a ^N long ^N room. A ^N guard ^N stands beside each door] 
+[583:in the ^N alcove ^N room. Only one alcove is accessible] 
+[584:in a ^N cubicle] 
+[585:in a ^N room with no roof. An ^N opening is visible far above] 
+[586:outside a ^N sports and ^N aerobotics ^N arena] 
+[587:beside a ^N deep ^N tropical ^N pool] 
+[588:in a ^N dark, ^N dingy ^N hole] 
+[589:in the ^N fencing ^N hall] 
+[590:in a ^N robot ^N repair ^N shop] 
+[591:in a ^N fair ^N field ^N full of ^N flowers] 
+[592:in front of an ^N ugly ^N arch] 
+[593:in the ^N Ruined ^N Land] 
+[594:amid the ^N smoking ^N ruins] 
+[595:on the ^N brink of a ^N deep ^N crack] 
+[596:at the ^N bottom of a ^N deep, earthy ^N pit] 
+[597:in a ^N stifling ^N maze] 
+[598:in a ^N putrescent ^N chamber] 
+[599:at a ^N junction ^N between ^N foul ^N passages] 
+[600:in a ^N square ^N white ^N room] 
+[601:in a ^N worse ^N laboratory] 
+[602:in a ^N room full of ^N strange ^N plants] 
+[603:inside the ^N plant] 
+[604:climbing down a ^N sticky ^N tube] 
+[605:inside the ^N tangled ^N roots oft a ^N crossing of ^N country ^N roads] 
+[617:on a ^N long, ^N straight ^N road] 
+[618:on a ^N long ^N road] 
+[619:lost in the ^N mists of ^N time] 
+;
+; Pseudo-room descriptions, followed by death...
+[620:a water scorpion jabs you with its venomous tail! ] 
+[621:a giant squid streaks towards you, slapping its suckered 
+tentacles around your body!] 
+[622:slithering, slimy seaweed engulfs you! ] 
+[623:this walkway is still under construction and cannot bear 
+your weight. It collapses! ] 
+;
+[624:wt a ^N crossing of ^N country ^N roads] 
+[617:on a ^N long, ^N straight ^N road] 
+[618:on a ^N long ^N road] 
+[619:lost in the ^N mists of ^N time] 
+;
+; Pseudo-room descriptions, followed by death...
+[620:a water scorpion jabs you with its venomous tail! ] 
+[621:a giant squid streaks towards you, slapping its suckered 
+tentacles around your body!] 
+[622:slithering, slimy seaweed engulfs you! ] 
+[623:this walkway is still under construction and cannot bear 
+your weight. It collapses! ] 
+;
+[624:would you like to be resurrected? ] 
+[625:sorry, the sand's run out. ] 
+[626:clouds of sand billow up...%] 
+[627:into the cauldron! ] 
+[628:the recipe is complete! Your surroundings fade away as the 
+structure of time is repaired. You have won! But suddenly, you 
+feel a new force upon you. You feel yourself propelled by an 
+unfamiliar entity into a new place, at a different time...%] 
+[629:the mists of time envelop you.. ] ; on entering clock 
+; 
+; EXAMINE MESSAGES (550+object number)...  
+;
+[630:the branch is gnarled and twisted into fantastic shapes by 
+centuries of erratic growth. Tough, slender green leaves sprout 
+from its tips and a pungent scent comes from it, redolent of hot 
+summers on the red terraces of far-away mountains. From times of 
+old, ever since the dove brought an olive leaf to old Noah waiting 
+patiently in the ark, it has symbolised peace in the 
+world. ] ; olive branch
+;
+[631:it is made of solid gold, intricately crafted, with 
+four interlaced, nielloed snakes writhing round its gleaming 
+bosses, mingling their coils with other, fiercely-beaked 
+monsters. It is obviously very old and very valuable. ] ; buckle
+;
+[632:it is a strange, multi-coloured cloth cap which fits closely to 
+the head, but branches out into three long padded tails, each 
+tipped with a spray of jingling bells. ]  ; jester's cap
+;
+[633:a 68006, I think; but there again, I could be wrong, because 
+it also looks very like one of the miniaturised nuclear grenades 
+they use to kill zorbs on Orion Zeta, so it could one of 
+those. ] ; silicon chip 
+;
+[634:the box is carved out of some dark wood, quite roughly, so 
+that the chisel marks are still visible, yet its lid fits as if 
+it were vacuum-sealed. A small metal plate is set into the lid, 
+with words etched on its surface: 
+%"This box contains an evil eye;
+%if opened, you would surely die". ] ; box with evil eye 
+;
+[635:it is a single, flawless diamond, glinting with blue 
+fire deep in its heart. The tree has left it for you as a 
+last token of its gratitude. ] ; diamond tear
+;
+[636:it is heavy and curved. Its wider end is hollow, and the 
+ivory inside is the rich golden colour of fresh toast. ] ; ivory tusk
+;
+[637:it is tiny; a delicate tissue of iridescent membrane 
+stretched over a fine filigree of veins and tendons: far too 
+small for flying, but exquisitely beautiful. ] ; dragon wing 
+;
+[638:it is enormous, mottled brown in colour with purple striations 
+and whorls criss-crossing its surface. It feels warm to the touch and 
+where your hand touches its leathery integument it leaves a dent which 
+slowly returns to its normal shape. ] ; dinosaur egg
+;
+[639:it's kind of brown and squelchy. ] ; rotten apple
+;
+[640:the dented steel is rusty, having been made in the days 
+before they invented the stainless variety - where do you think 
+the term "red knight" came from? - Indeed, suits like 
+this have been known to seize solid in a good rainstorm, and 
+immobilised knightly figures, their red-streaked legs firmly 
+rooted to the ground, used to be quite a feature of the mediaeval 
+countryside. But this one is still serviceable, if squeaky, and 
+by a truly remarkable coincidence, it is just your size! ] ; armour
+;
+[641:the bone is fresh and crunchy, and still has a few scraps of good 
+meat attached. Delicious, if you like that sort of thing. ] ; bone  
+; 
+[642:an encrustation of ancient dirt flakes off at your touch, 
+exposing golden-brown glass with a skull-and-cross-bones raised 
+upon its surface. ] ; bottle of poison 
+;
+[643:they are young and tender, pale green with delicate pink 
+veins. They look freshly-cut and extremely tasty. ] ; bunch of leaves 
+;
+[644:what can you say about a pack of playing cards? They're a 
+pack of playing cards, that's what, and there's fifty-two of them 
+and a couple of jokers. Oh, and a spare one with things written 
+all over it in case you lose the jokers or anyone else. And a 
+couple of them have chewed corners from when the baby sneaked 
+them out from under the table and sharthe four seasons 
+decorate each face. It is bulging with jewellery: diamond 
+bracelets and necklaces, golden rings, enamel-and-gold brooches, 
+and gems of every shade imaginable. ] ; jewellery case 
+;
+[647:"Reelale", of course. This is a strange brew supposedly 
+invented by our distant ancestors. For some reason you have to 
+have a camera to drink it, and it's generally considered good 
+form to wear your oldest clothes and sing folk songs through 
+your nose at the same time. It is not to be confusethe four seasons 
+decorate each face. It is bulging with jewellery: diamond 
+bracelets and necklaces, golden rings, enamel-and-gold brooches, 
+and gems of every shade imaginable. ] ; jewellery case 
+;
+[647:"Reelale", of course. This is a strange brew supposedly 
+invented by our distant ancestors. For some reason you have to 
+have a camera to drink it, and it's generally considered good 
+form to wear your oldest clothes and sing folk songs through 
+your nose at the same time. It is not to be confused with 
+"Homebru", which can knock a man down at fifty paces - and that's 
+just the fumes! ] ; cask of ale 
+;
+[648:he's really cute, with dinky little green spots, melting eyes 
+and a deadly tongue accurate at fifty mm. ] ; green frog
+;
+[649:there are about twenty of them; some are tiny, as if designed 
+for smaller hands than yours; some middle-sized, ordinary old keys 
+- like those you can usually dig up in your garden by the handful 
+if you live in an old house - and a couple of real whoppers that 
+look as if they haven't been used in centuries. ] ; bunch of keys 
+;
+[650:interesting. You thought it was going to be one of those 
+steel-plated affairs with spikes on every knuckle, didn't you? 
+Well it isn't. It's an ordinary old asbestos glove-cum-gauntlet 
+and as tough as elephant hide. ] ; gauntlet 
+;
+[651:a great, gold-bound ox horn, it has been polished to a fine 
+sheen. Its golden mount is formed from an intricate abstract 
+network of interlacing ribbon-like animals. ] ; drinking horn 
+;
+[652:it is mounted in a three-columned frame - and the sands 
+have almost run through! ] ; golden hourglass 
+;
+[653:it glints with a pallid fire in the sunlight. ] ; icicle 
+;
+[654:it has a reassuringly menacing hum when you use it, and its 
+blade burns a brilliant blue-white. ] ; lightsabre 
+;
+[655:cor! You look prettier every day. ] ; mirror 
+;
+[656:of glowing brown wood, it is shaped like a pear cut vertically 
+in half, with a rounded back. Its stem is surprisingly short, and 
+fretted, with the head bent backwards at an angle. Each string 
+except the top one has a duplicate, and there is no bridge, so 
+that the strings are only slightly raised from its surface. It 
+has a wonderful mellow tone when you strum it. ] ; lute 
+;
+[657: matches are left. ] ; matchbox. Need space at start 
+;
+[658:an almost completely useless musical gadget, guaranteed to 
+destroy any budding musician's sense of rhythm. ] ; metronome
+;
+[659:the legend "Hope Village, 1 mile" has been newly chiselled into 
+its lichen-coated surface. ] ; milestone
+;
+[660:the mirror expands, its surface whirling redly as a howling 
+maelstrom appears, sucking you in! ] ; mirror (small) 
+;
+[661:more like a deep, eight-pound ashtray than a pot by our 
+standards. Yet somebody has obviously put in hours of tender loving 
+care bashing out the inside and rubbing off the more jagged edges. 
+A fine piece of stone age craftsmanship. ] ; stone pot 
+;
+[662:it looks extremely flimsy, yet it has all the tensile 
+strength of a squoogle web. Which means, roughly, that it could 
+transmit the torque of a couple of terrified zorbs. ] ; screwdriver 
+;
+[663:These are very popular as souvenirs, and nearly everyone who 
+has ever been to Africa has one hanging on a wall somewhere in their 
+house, usually flanking a hide shield with a couple of rattly things 
+underneath and one of those sooty wooden pictures of a Xhosa woman 
+smoking a pipe. It has lots of colourful stuff twined around it and 
+an extremely sharp point. It would make a useful weapon. ] ; spear 
+;
+[664:they look absolutely delicious: fluffy pastries and 
+little sugar-cakes, some iced with marvellous fancy decorations, 
+some covered with chocolate or a shiny butter glaze, and some 
+simply oozing rich creamy fillings and fruity sauces. ] ; sweetmeats 
+;
+[665:it has mid-green leaves comprised of a long central stem 
+with lots of little opposing leaflets, and a tall, mauve 
+flowerhead. It is believed to be a magical herb, and certainly 
+has medicinal properties. Its tall stalk looks ideal for waving at 
+other plants. ] ; valerian 
+;
+[666:the first hard disc! ] ; The Wheel 
+; 
+[668:it has a sturdy, curved wooden shaft polished to a muted 
+sheen by years of use, and a serviceable head of some dull metal. 
+The blade is very sharp. ] ; sharp axe 
+;
+[669:a tiny, dainty thing, its paper-thin sides are delicately 
+filigreed with fine silver wire, and its clapper is a small globe 
+of spun platinum. ] ; silver bell 
+;
+[670:it's full. A garish logo on its side proclles it appears translucent, shot with 
+opalescent lights, while from others it is almost - well - 
+VERY odd... ] ; filmy cloak 
+;
+[675:the wooden haft, with bark still attached, has a fork at one 
+end into which is fixed a heavy, crudely-shaped stone head. It 
+seems a good throwing weapon. ] ; stone club 
+;
+[676:it is thick, warm and shaggy. It smells as if it had 
+been rubbed all over with hundred-year-old bear grease and left 
+to mature for a few months. ] ; fur coat 
+;
+[677:it is made of beatles it appears translucent, shot with 
+opalescent lights, while from others it is almost - well - 
+VERY odd... ] ; filmy cloak 
+;
+[675:the wooden haft, with bark still attached, has a fork at one 
+end into which is fixed a heavy, crudely-shaped stone head. It 
+seems a good throwing weapon. ] ; stone club 
+;
+[676:it is thick, warm and shaggy. It smells as if it had 
+been rubbed all over with hundred-year-old bear grease and left 
+to mature for a few months. ] ; fur coat 
+;
+[677:it is made of beaten silver, and heavily encrusted with uncut 
+gemstones. The hasp of its lock is twisted and broken, and it is 
+empty. ] ; coffer 
+;
+[678:it is very small, very thin and very old. The remains of a 
+woman's face are visible on one side, while the other bears 
+an inscription which has nearly worn away and is almost, but not 
+quite, readable. ] ; coin 
+;
+[679:wow! ] ; crown 
+;
+[680:it's big. Very, very big. Ginormously big. Absolutely 
+the most hugest emerald you have ever seen. Well, really, let's 
+face it, more-or-less the only emerald you've ever seen - and you 
+can't count the ones in the Tower of London, because they're all 
+fakes. It's still a pretty big emerald, though - about an inch 
+across, and engraved with a portrait of Cleopatra. ] ; emerald 
+; 
+[682:the figurine has been skillfully carved into the shape of a 
+pouncing tiger, the stripes in the stone cleverly mimicking those 
+of a real tiger. Tiny green stones glint in its eyesockets and 
+its mouth is opened in a silent roar. ] ; onyx figurine 
+;
+[683:it's an unusual firefly this one, because it gives forth a 
+steady light, not a series of flashes like most fireflies. Also it 
+can sing a whole three notes from Stravinsky's "The Rite of Spring", 
+which is quite an achievement for a half-inch beetle - and the 
+firefly knows it, so it sings them over and over and over again, ad 
+nauseum. It's very irritating! ] ; firefly 
+;
+[684:black spiced bread from the kitchens of the Masterchefs of 
+Mudsplot, with a fine selection of local pickles - pickled 
+garlic, pickled pigs' trotters, pickled newts' tongues, 
+pickled sticklebacks, and, for a very special treat, toads' 
+warts in aspic. ] ; food 
+;
+[685:a black metallic disc with a gold edge. On one face it has a 
+four-dimensional picture of the galactic hub and on the other a sonorous 
+representation of a squoogle devouring a zorb. ] ; galactic groat
+;
+[686:it shows the picture of a jester, dancing maniacally on one 
+foot and scowling fiercely. ] ; joker 
+;
+[687:it is hard, ring-patterned and thin-bladed, with straight 
+edges and a slightly-rounded point. The hilt is built up around 
+the tang, which is one with the blade, and the grip is of 
+polished bone bound with leather strips and silver wire. 
+The pommel is gold-chased and ornamented, and embellished with 
+a small gold ring. The whole thing is perfectly balanced for 
+battle. ] ; sharp sword 
+;
+[688:it is a rough chunk of magnetic metallic ore covered with 
+pictures of a narcissus carved by an unpractised hand. ] ; lodestone 
+;
+[689:it is skillfully-made from bronze, and very old: it 
+resembles a modern trumpet, but without the valves. A really 
+good player can get about twelve notes out of it, which isn't 
+bad for a bronze age musical instrument! ] ; lur 
+;
+[690:written on it in a scrawly, hurried hand are the words: 
+%"To the sunset you must go,
+%keeping high and never low.
+%In a sheltered, hidden cove
+%you will find a treasure trove.
+%Pitfalls you are sure to meet,
+%you may even get wet feet!,
+%but in the end you're sure to greet
+%that frightful scoundrel, Pirate Pete!" 
+% 
+%Below this is the remains of a map, but most of it has been torn away 
+and what is left is useless. ] ; scrap of parchment 
+;
+[691:it is well padded, covered with flowery pink material, and 
+has a saggy bit in the middle. There is a coffee stain in one 
+corner and it looks as if it has seen better days, but it is still 
+serviceable. ] ; mattress 
+;
+[692:tough ropes sturdily knotted together form the meshes, and 
+heavy lead weights hang round the edge. ] ; net 
+;
+[693:Have you ever noticed how Nature mimics Art? Purely by 
+chance (of course) this very valuable nugget looks just like the 
+Venus de Milo would look if she were missing her head as well as 
+her arms. ] ; nugget 
+;
+[694:one of the "butterfly" type, thank goodness. Those other 
+ones that you wriggle around in the lid are absolutely useless, 
+and usually leave a trail like a drunken caterpillar, resulting in a 
+hole so small that you have to jimmy thettered and 
+muddy. ] ; two short planks 
+;
+[699:a hand-held launcher that fires a grapple, trailing a climbing 
+rope behind it. ] ; grapple-firing rocket 
+;
+[700:it is a length of thin hessian. ] ; coil of rope 
+;
+[701:the ruby has been cut into an unusual shape. It has no 
+facets, and looks more like a lens than a gemstone. ] ; curved ruby 
+;
+[702:it is a complicated affair, with straps fixed to every available 
+surface, seemingly at random. It has about two zillion pockets, some 
+of which conttered and 
+muddy. ] ; two short planks 
+;
+[699:a hand-held launcher that fires a grapple, trailing a climbing 
+rope behind it. ] ; grapple-firing rocket 
+;
+[700:it is a length of thin hessian. ] ; coil of rope 
+;
+[701:the ruby has been cut into an unusual shape. It has no 
+facets, and looks more like a lens than a gemstone. ] ; curved ruby 
+;
+[702:it is a complicated affair, with straps fixed to every available 
+surface, seemingly at random. It has about two zillion pockets, some 
+of which contain pockets themselves, and is completely empty. Like 
+all backpacks, it can be very useful if you wear it, and should allow 
+you to carry more. ] ; rucksack 
+;
+[703:their soles are made of some flexible material which you 
+cannot identify, with gilded straps to hold the foot in place at 
+toe and heel, and longer straps which are apparently intended to 
+be entwined around the ankle and calf. Small iridescent 
+befeathered wings sprout from the heel-guards, trembling slightly 
+as if they are alive. The sandals are obviously magical - wear 
+them well! ] ; winged shoes 
+;
+[704:it is muddy, battered, and rusty, with a cracked wooden 
+handle and a couple of yards of string tied around the handle to 
+hold it together. ] ; shovel 
+;
+[705:not the most usual of objects to find. It is quite small 
+and gleams dully, like a poor-quality opal. Suddenly, it begins 
+to whimper in a shrill, bell-like voice. "Oh dear, oh dear, 
+don't look at me, please, oh, I must look frightful..". it 
+subsides for a few moments, then continues: "You should have seen 
+me when I was at my zenith! Oh, my dear, all the young planets 
+were positively clamouring for my autograph, I can tell you. 
+I'll never forget the night I made my debut in the Snotgurgle 
+system. The poor things had been in darkness for absolutely 
+centuries, and it really must have been wonderful for them to 
+see me shining so brightly in the sky. Right at the edge of the 
+Galaxy, too, so you can imagine how dismal it was for them there, 
+poor lambs. My dear, they positively worshipped me!... But then 
+this devastatingly gorgeous comet introduced me to angel dust. I 
+know I shouldn't have taken it, of course, but I was young, and 
+foolish and at the peak of my career, and, really, it was the 
+most tremendous fun. And then I started arriving late 
+in the mornings, which upset everybody no end, and a few times I 
+just didn't bother to go in at night at all, which I suppose was 
+the final straw as far as the Powers That Be are concerned. So 
+they kicked me out, and - here I am". It lapses into silence, 
+sniffling miserably. ] ; fallen star 
+;
+[706:its label bears a badly-drawn picture of a running cat and reads: 
+"KATTOMUSH - Maiow-thwatering goodness for Kitty!" ] ; tin of catfood 
+;
+[707:a very lethal weapon. There's a lot of fuss about them in 
+your own time - or, at least, about some kind of trident. This 
+one has three barbed prongs, a seaweedy design running along the 
+haft, and feels a bit slimy to the touch. ] ; trident 
+;
+[708:not very large, it bears a picture of an expressionless 
+Japanese lady clad in a flowery kimono, with a pincushion-thing on 
+her head from which dangle an assortment of bells, tassles and 
+little shiny silver things. She is sitting under a graceful cherry 
+tree, fanning herself. Behind her, mist-shrouded mountains rise 
+into a pale sky. ] ; vase 
+;
+[709:it has long since lost any trace of healthy white enamel; it 
+is a dull grey, with nasty brown areas that look none too savoury. 
+Not the sort of trophy I'd choose to carry around with me, but, 
+there, you can't please everybody. ] ; tiger tooth 
+; 
+; General messages... 
+; 
+[711:water? Where? ] 
+[712:Pete prevents you. ] 
+[713:ghostly footsteps plod dismally up to the short stairs and 
+then fade away. ] 
+[714:a panel moves! ] 
+[715:a jester appears, wringing his hands, his head drooping 
+dejectedly: "The Lord of Misrule is displeased, for I have mislaid  
+one of the tools of my trade. Hast thou seen it?" ] 
+[716:the god Mercury appears in a puff of celestial smoke. He 
+sneezes solemnly, and hands you a pair of winged sandals. ] 
+[717:"SHOW SOME RESPECT!" ] 
+[718:it's very good. ] 
+[719:the skeleton collapses in a heap of dry bones. A little cloud of 
+dust drifts into the air and floats away. ] 
+[720:the skeleton prevents you. ] 
+[721:the vile caveman is knocked off the bridge and falls 
+shrieking into the gulf beneath. The rescued woman 
+thanks you profusely and presses something into your hand. ] 
+[722:ZAP!!! You receive 6,000,000ogue leaps out: "Ahoy there, me 
+hearty! Oi be Pirate Pete what gets me pleasure from robbin' weary 
+travellers like 'ee!"%] 
+[732:you've nothing left to steal! Pirate Pete is furious... ] 
+[733:the stone blocks your path. ] 
+[734:the dogs haughtily turn up their cultured noses. ] 
+[735:a gladiator steals the buckle and flees south to the arena! ] 
+[736:it comes loose. ] 
+[737:you're not strong enough. ] 
+[738:the grating blocks your way. ] 
+[739:it entangles the lion in its meshes. ] 
+[740:the togue leaps out: "Ahoy there, me 
+hearty! Oi be Pirate Pete what gets me pleasure from robbin' weary 
+travellers like 'ee!"%] 
+[732:you've nothing left to steal! Pirate Pete is furious... ] 
+[733:the stone blocks your path. ] 
+[734:the dogs haughtily turn up their cultured noses. ] 
+[735:a gladiator steals the buckle and flees south to the arena! ] 
+[736:it comes loose. ] 
+[737:you're not strong enough. ] 
+[738:the grating blocks your way. ] 
+[739:it entangles the lion in its meshes. ] 
+[740:the trident pins the net in place, securely imprisoning the lion. ] 
+[741:the gladiator is too quick for you and blocks your escape. ] 
+[742:the searing-hot star burns you! ] 
+[743:the gauntlet finally catches fire! ] 
+[744:the water cools the star in a cloud of hissing steam. ] 
+[745:"YOU'RE NOT authorised TO DO THAT!" ] 
+[746:there's nothing to break your fall. ] 
+[747:the mattress breaks your fall. ] 
+[748:and you climb its rope. ] 
+[749:the components are too minute to see. ] 
+[750:your lightsabre makes short work of the cyberman - reducing 
+him from seven feet tall to two in seconds. Electricity arcs 
+through the debris, while his legs stomp off through a wall, 
+leaving the burned-out body whirring on the floor. ] 
+[751:the rocket shoots upwards in a shower of sparks ] 
+[752:but falls back again. ] 
+[753: that.%] 
+[754:you hear nothing special. ] 
+[755:nice try. ] 
+; 
+;Verbs for directions 
+; 
+[1001:^V north|^V n] 
+[1002:^V northeast|^V ne ^V neast] 
+[1003:^V east|^V e] 
+[1004:^V south|^V s] 
+[1005:^V southeast|^V se] 
+[1006:^V southwest|^V sw] 
+[1007:^V west|^V w] 
+[1008:^V northwest|^V nw] 
+; 
+[1009:^V upwards|^V up ^V u] 
+[1010:^V downwards|^V down ^V d] 
+; 
+[1011:^V in|^V inside ^V enter ^V into ^V board] 
+[1012:^V outside|^V leave ^V out] 
+[1013:^V cross|^V across] 
+; 
+[1014:^V climb] 
+[1015:^V jump] 
+; 
+[1016:^V backwards] 
+[1017:^V forwards|^V ahead] 
+[1018:^V left] 
+[1019:^V right] 
+; 
+[1020:^V again|^V a] 
+; 
+;Intransitive verbs 
+; 
+[1021:^V attack|^V kick ^V fight ^V kill ^V chop ^V hit ^V smash 
+^V cut ^V break ^V fell]
+[1022:^V inventory|^V I ^V inv] 
+[1023:^V listen|^V hear] 
+[1024:|^V bloody ^V hobbit ^V magnetic ^V scrolls ^V scott ^V adams 
+^V frigging ^V wanker ^V turd ^V shit ^V twat ^V cunt ^V prick 
+^V bollocks ^V jesus ^V christ ^V god ^V tits ^V asshole ^V arsehole 
+^V cretin ^V spastic ^V coon ^V wog ^V fucking ^V screw ^V fucker 
+^V bastard ^V bugger ^V damn ^V fart ^V sex ^V hell ^V devil ^V nerd 
+^V crap ^V hibbard] ; leave swear words in lower case 
+; 
+[1025:^V plugh|^V plover ^V sesame ^V xyzzy] 
+; 
+[1026:^V quit ^V stop ^V restart] 
+[1027:^V RESTORE ^V load ^N RESTORE ^N load] 
+[1028:^V save ^N save] 
+[1029:^V score] 
+; 
+[1030:^V yes ^V y ^V OK ^V please ^V yeah ^V sure] 
+[1031:^V no ^V never] 
+; 
+[1032:^V wait] 
+[1033:^V shout|^V yell ^V sing] 
+[1034:^V say] 
+; 
+; Possibly transitive verbs 
+; 
+[1035:^V search|^V examine ^V read ^V inspect ^V exam] 
+[1036:^V blink|^V wink] 
+[1037:^V look ^V describe ^V redescribe ^V l] 
+[1038:^V kneel|^V grovel] 
+[1039:^V pray|^V worship] 
+; 
+; Transitive verbs 
+; 
+[1040:^V take|^V get ^V carry ^V keep ^V catch] 
+[1041:^V drop|^V put ^V abandon] 
+[1042:^V wear] 
+[1043:^V throw|^V hurl ^V chuck ^V lob] 
+[1044:^V give|^V feed ^V pay ^V offer] 
+[1045:^V fill] 
+[1046:^V empty|^V pour] 
+[1047:^V open|^V unlock ^V free ^V release] 
+[1048:^V close|^V lock ^V shut] 
+[1049:^V bite|^V eat ^V nibble ^V swallow ^V taste] 
+; 
+[1050:^V drink|^V sip] 
+[1051:^V light] 
+[1052:^V extinguish] 
+[1053:^V press|^V push ^V swing] 
+[1054:^V fasten|^V tie ^V attach ^V fix] 
+[1055:^V shake|^V wave ^V ring] 
+[1056:^V blow|^V play] 
+[1057:^V fire|^V shoot] 
+[1058:^V rub|^V pat] 
+[1059:^V dig] 
+; 
+[1060:^V untie|^V unfasten] 
+[1061:^V insert] 
+[1062:^V turn|^V twist ^V rotate] 
+[1063:sorry, go and run don't work in this trilogy. |^V go ^V run]
+[1064:^V pull|^V remove] 
+[1065:^V wind] 
+[1066:^V kiss] 
+[1067:^V shuffle|^V mix] 
+[1068:^V exits] 
+[1069:^V pictures ^V graphics] 
+[1070:^V RAM] 
+[1071:^V oops|^V whoops ^V UNDO] 
+[1072:^V words ^V text] 
+[1073:^V credits ^V authors ^V copyright] 
+[1074:^V help] 
+[1075:^V brief] 
+[1076:^V verbose] 
+;;[1077:^V obscure] ; *** cheat mode
+[1101:^V baste] ;* cheat mode
+; 
+; Things you can't take... 
+; 
+[1161:^N clock] 
+[1162:^N cogs|^N cog] 
+[1163:^N pendulum] 
+[1164:^N cauldron] 
+[1165:^N junk ^N pile|^N rubbish] 
+[1166:^N cupboard] 
+[1167:^N willow ^N tree|^N tears] 
+[1168:^N car|^N Porsche] 
+[1169:^N wall|^N ice] ; 
+[1201:^N fairy] 
+[1202:^N mammoth] 
+[1203:^N tiger] 
+[1204:^N allosaurus] 
+[1205:^N tyrannosaurus|^N rex] 
+[1206:^N brontosaurus] 
+[1207:^N cavemen|^N cavepeople] 
+[1208:^N caveman|^N cavewoman] 
+[1209:^N skeleton] 
+[1210:^N bartender] 
+[1211:^N unfortunate|^N wretch ^N stocks] 
+[1212:^N messenger|^N messenger] 
+[1213:^N dragon] 
+[1214:^N knight] 
+[1215:^N prince] 
+[1216:^N Pirate ^N Pete] 
+[1217:^N jester] 
+[1218:^N Viking|^N guard] 
+[1219:^N ghost] 
+[1220:^N sentry|^N sentries] 
+[1; 
+[1201:^N fairy] 
+[1202:^N mammoth] 
+[1203:^N tiger] 
+[1204:^N allosaurus] 
+[1205:^N tyrannosaurus|^N rex] 
+[1206:^N brontosaurus] 
+[1207:^N cavemen|^N cavepeople] 
+[1208:^N caveman|^N cavewoman] 
+[1209:^N skeleton] 
+[1210:^N bartender] 
+[1211:^N unfortunate|^N wretch ^N stocks] 
+[1212:^N messenger|^N messenger] 
+[1213:^N dragon] 
+[1214:^N knight] 
+[1215:^N prince] 
+[1216:^N Pirate ^N Pete] 
+[1217:^N jester] 
+[1218:^N Viking|^N guard] 
+[1219:^N ghost] 
+[1220:^N sentry|^N sentries] 
+[1221:^N gladiator] 
+[1222:^N lioness] 
+[1223:^N android|^N chain] 
+[1224:^N cyberman|^N cybermen] 
+[1225:^N narcissus] 
+[1226:^N fox] 
+[1227:^N dogs|^N beagles] 
+; 
+; Intangible objects 
+; 
+[1230:^N eureka|^N ureka ^N archimedes] 
+[1231:^N james] 
+[1232:^N watt] 
+; 
+[1239:^N door|^N trapdoor] 
+; 
+; Numbers for buttons etc 
+; 
+[1241:^N 1 ^N one] 
+[1242:^N 2 ^N two] 
+[1243:^N 3 ^N three] 
+[1244:^N 4 ^N four] 
+[1245:^N 5 ^N five] 
+[1246:^N 6 ^N six] 
+[1247:^N 7 ^N seven] 
+[1248:^N 8 ^N eight] 
+[1249:^N 9 ^N nine] 
+; 
+; Positions / Verb modifiers 
+; 
+[1250:^P at] 
+; 
+[1252:^P on] 
+; 
+; End of list marker 
+; 
+;>>[1250:^N everything ^N all] 
+;>>[1251:^N except|^N but] 
+;>>[1252:^N it ^N him ^N her ^N them] 
+;>>[1253:^N then] 
+[1260:^N rainbird]
+[1261:^N gravy]
+; 
+; Messages for ST loader. 
+;>NICK [1270:%Welcome to the Time and Magik trilogy, copyright (C) 1988 
+;>     from Level 9 and Mandarin. This recreates the three key episodes in 
+;>     the struggle to defend creation. ] 
+
+[1270:%Welcome to the Time and Magik trilogy,
+produced by Level 9 and copyright 
+(C) 1988 Datasoft. Datasoft is a Registered Trademark of 
+IntelliCreations, Inc. ] 
+
+[1271:%Enter 1 for Lords of Time, 2 for Red Moon, or 3 for Price of 
+Magik.%] 
+; 
+; and some additional special case messages... 
+[1280:the door is too stiff. You notice that the clock needs winding. ] 
+[1281:the door won't open. You notice that the pendulum swings easily. ] 
+[1282:A thunderbolt strikes beside you! ] ; rude word 
+; 
+; Examine messages for things you can't take (1200+N)...
+; 
+[1361:the clock looks big enough to climb into, though you can't see 
+any handle to open the door. Perhaps you should wind it]
+; a grandfather clock
+;
+[1362:the cogs are well oiled and each of them looks as though it 
+could be turned easily by hand (e.g by "turn cog 1")] ; huge cogs 1 to 9 
+;
+[1363:the clock seems to have stopped and its pendulum is stationary. 
+It would probably move if pushed] ; a massive pendulum 
+;
+[1364:the cauldron seethes and bubbles, colouring the weird mist which 
+fills the area] ; a cast-iron cauldron
+; 
+[1365:it's one of those heaps of almost-useful objects which grows 
+organically in neglected corners] ; a pile of family rubbish 
+;
+[1366:the cupboard is a crude box of plastic-covered woodstuff, hung 
+on one wall] ; a wall cupboard 
+;
+[1367:this sad-looking tree hangs wearily above the oily surface of 
+the polluted stream. As you watch, a shower of glinting teardrops 
+tumbles from its branches, and the tree seems to heave a weary sigh, 
+as if tired of life] ; a weeping willow 
+;
+[1368:it is a Porsche 911 turbo; an expensive, brick-red toy] 
+;
+[1369:there seems to be a small room behind it] ; ice wall
+;
+[1370:the lake is so chemically pure that you can make out every 
+detail of the lake bed far below. No life disturbs its crystal 
+water] ; a clear lake of very cold water to the northwest 
+;
+[1371:the lake seems to have frozen solid, into a solid block that 
+would easily support your weight] ; sheet of smooth ice
+;
+[1372:the throne and its occupant have been trapped in magic ice, 
+like a living hologram] ; a cube of ice round the throne 
+;
+[1373:fortunately, only one Viking has been left on guard] ; longship 
+;
+[1374:this strange boulder lies on one side] ; a rocking stone
+;
+[1375:you wonder what is inside] ; a huge iron-bound chest 
+;
+[1376:it might trigger something when pulled] ; a recessed handle 
+;
+[1377:this is a richly-decorated box] ; an ottoman 
+;
+[1378:the well is large enough to climb down] ; a little well
+;
+[1379:it blocks access to some tunnels] ; a grate in the south wall 
+;
+[1380:the basin is exquisitely carved] ; a marble basin full of water 
+;
+[1381:a message misquotes Dante, "ABANDON HOPE ALL YE WHO ENTER 
+HERE"] ; a crude black archway 
+;
+[1382:these robots have not worked for years, and never will 
+again] ; a jumble of broken robots 
+;
+[1383:the surface of your average workbench is chipped and gouged 
+from years of work. Not this one! Iling onto the path 
+;
+[1387:a former flood seems to have gathered up refuse of all kinds, 
+depositing it against a rocky outcrop. The wood now protrudes from 
+the ice, like impermanent fossils from rock] ; a jumble of dry wood 
+;
+[1388:the picture shows a bearded patriarch] ; picture of old man 
+;
+[1389:the mushrooms have arranged themselves into a geometrically 
+perfect circle] ; a mushroom ring 
+; 
+; Examine messages for Animate Things 
+; 
+[1401:the fairy flits about on gossamer wings] ; a flling onto the path 
+;
+[1387:a former flood seems to have gathered up refuse of all kinds, 
+depositing it against a rocky outcrop. The wood now protrudes from 
+the ice, like impermanent fossils from rock] ; a jumble of dry wood 
+;
+[1388:the picture shows a bearded patriarch] ; picture of old man 
+;
+[1389:the mushrooms have arranged themselves into a geometrically 
+perfect circle] ; a mushroom ring 
+; 
+; Examine messages for Animate Things 
+; 
+[1401:the fairy flits about on gossamer wings] ; a flighty fairy 
+[1402:you are staring into the beady little eyes of a heavy metal 
+elephant, lumbering forward in top gear] ; a huge mammoth 
+[1403:the tiger seems to be in pain] ; tiger with bad tooth  
+[1404:it's some kind of dinosaur] ; a huge allosaurus 
+[1405:this halitosic beast is every producer's favorite] ; t. rex 
+[1406:this vegetarian dinosaur is very thin at one end; much, much 
+fatter in the middle; and then absolutely string-like 
+again] ; brontosaurus 
+[1407:the cavepeople react angrily to your stare] ; cavemen
+[1408:the caveman seems a nasty piece of work, and much too tough 
+to take on in hand-to-hand combat. But a well-chosen missile might 
+be able to knock him down] ; a hairy caveman 
+[1409:an animated skeleton. It looks as if it could be knocked down 
+like a row of skittles by a bowling ball] ; skeleton  
+[1410:the bartender is a laughing beachball of a man] ; a jolly bartender
+[1411:this petty criminal looks resigned to his fate] ; wretch in stocks 
+[1412:he is sitting down to take a rest] ; a thirsty messenger 
+[1413:the dragon looks exactly like that on the Welsh flag, except 
+a bit hungrier] ; dragon 
+[1414:when you think what mirror glasses do to people, it's not 
+surprising that the anonymity and protection of black plate armour 
+has bad effects; read Malory's "Morte d'Arthur"] ; an armoured knight 
+[1415:he is very cute, if a trifle boss-eyed] ; a handsome prince 
+[1416:Pete looks like a swashbuckling rogue] ; Pirate Pete
+[1417:the jester is a grotesque figure in pied tatters] ; jester 
+[1418:for some strange reason, you think he may be called Erik] ; Viking 
+[1419:the ghost is a sad figure] ; an airy ghost 
+[1420:he is doing his best to ignore you] ; a dour sentry 
+[1421:the gladiator is seriously muscled] ; a fierce gladiator 
+[1422:a cute lioness; stronger than your average kitty] ; lioness 
+[1423:looks like a robot] ; a metallic android 
+[1424:he//she//it is a strange humanoid machine] ; a cyberman 
+[1425:he is a beautiful humanoid flower] ; a narcissus 
+[1426:the fox looks half-starved, but is resolutely guarding its 
+lair] ; a silver fox 
+[1427:they look like any other pack of brutes] ; a pack of dogs 
+; 
+[1440:like any other door] 
+; 
+[1900:^N all ^N everything] 
+[1901:^N except ^N but] 
+[1902:^N it ^N him ^N her ^N them ^N it's] 
+[1903:^J then] 
+; 
+;Parser messages: 
+; 
+[2002:it] 
+[2003:you can't use the word ] 
+[2004: like that] 
+[2005:I don't understand what you mean by the word ] 
+[2006:OK. ] 
+; 
+[2010:I don't understand] 
+[2011:you can't see] 
+[2012:you don't have] 
+[2013:you already have] 
+[2014:you'll have to drop it first. ] 
+; 
+[2017:it's not there. ] 
+; 
+[2020:I think that's somewhere else. ] ; Scenery elsewhere 
+ 
+[2030:I think that's just scenery. ] ; Scenery here (not examine).
+[2031:don't worry about it. ] 
+[2032:forget it! ] 
+; 
+[2053:it's not clear what IT refers to in that context.%] 
+; 
+;--- 
+[2200:really restore? ] 
+[2201:remove the Time and Magik disc, insert your formatted save 
+position disc and press a key. ] 
+[2202:now pull your save position disc out and stuff the Time and 
+Magik disc back in.% %] 
+; 
+[2208:I can't use UNDO to go back further than this. ] 
+[2209:(this version allows you to use RAM SAVE and RAM RESTORE 
+to save a position in memory, and UNDO to retrace your steps). ] 
+[2210:I can't find that saved position in memory. Perhaps 
+you've turned off the computer, or reloaded the game, since 
+it was saved. ] 
+; 
+[2211:you're about to move to another part of the game. Do you 
+want to save your position first, just in case? ] 
+[2212:that data was probably not saved from Time and Magik. ] 
+[2213:play the program cassette containing "] 
+[2214:Lords of Time". ] ; part 1 
+[2215:Red Moon". ] ; part 2 
+[2216:Price of Magik". ] ; part 3 
+[2217:% %do you want to go on to Red Moon? ]
+;--- 
+;Ram save messages: 
+; 
+; Duplicated messages (see also 2408)???... 
+[2300:Sorry, we couldn't fit that facility into this 
+version. ] ;OOPS or RAM 
+[2301:(this version allows you to use :please answer YES or NO. ] 
+[2313:if you now SAVE this position to disc//cassette, and RESTORE 
+it at the start of the game, you can go on to achieve the maximum 
+score for the whole trilogy. Do you want to SAVE? ] ;>> 
+[2314:that position was not saved from this part of the adventure. ] ;>> 
+; 
+;Message as part of SCORE command: 
+;[2315:And you solved the previous part(s) of the game. ] 
+; 
+;At end of final game: 
+;[2316:%Well done! You have solved the entire trilogy with a 
+;display of supreme:please answer YES or NO. ] 
+[2313:if you now SAVE this position to disc//cassette, and RESTORE 
+it at the start of the game, you can go on to achieve the maximum 
+score for the whole trilogy. Do you want to SAVE? ] ;>> 
+[2314:that position was not saved from this part of the adventure. ] ;>> 
+; 
+;Message as part of SCORE command: 
+;[2315:And you solved the previous part(s) of the game. ] 
+; 
+;At end of final game: 
+;[2316:%Well done! You have solved the entire trilogy with a 
+;display of supreme brilliance, cleverness, ingenuity, intelligence, 
+;perspicacity, insight, intuition, sagacity, imagination, wisdom and 
+;sheer genius. Not to mention enduring persistence. This proves you 
+;to be an intellectual, mastermind and mental giant, all rolled into 
+;one. In fact, I'm sure you'd be running the country right now, if you 
+;weren't so honest! Congratulations! ] 
+; 
+ 
+[2319:This game was designed and programmed by Mike, Nick and Pete 
+Austin, with additional text from Ruth Pracey and pictures by Godfrey 
+Dowson. It was produced by Level 9 Computing, who can be 
+contacted at PO Box 39, Weston-super-Mare, Avon BS24 9UR, England.
+Please enclose four international reply coupons.]
+
+;>NICK If 
+;>NICK you want cluesheets, please enclose a self-addressed envelope and a 
+;>NICK stamp or four international reply coupons.] 
+; 
+
+; 
+[2320:sorry, you're on your own here. ] 
+; 
+[2400:really restore? ] 
+[2401:remove the Time and Magik disc, insert your formatted save 
+position disc and press a key. ] 
+[2402:now pull your save position disc out and stuff the 
+Time and Magik disc back in.% %] 
+; 
+; Duplicated messages (see also 2300)???... 
+;
+[2408:I can't use UNDO to go back further than this. ] 
+[2409:(this version allows you to use RAM SAVE and RAM RESTORE 
+to save a position in memory, and UNDO to take back bad moves). ] 
+[2410:I can't find that saved position in memory. Perhaps 
+you've turned off the computer, or reloaded the game, since 
+it was saved. ] 
+; 
+[2411:you're about to move to another part of the game. Do you 
+want to save your position first, just in case? ] 
+[2412:that data was probably not saved from Time and Magik. ] 
+[2413:play the program cassette containing "] 
+[2414:Lords of Time". ] ; part 1 
+[2415:Red Moon". ] ; part 2 
+[2416:Price of Magik". ] ; part 3 
+; 
+[3000:, ] 
+[3001:. ] 
+[3002:: ] 
+[3003:%] 
+[3004:.%] 
+[3005:the ] 
+[3006:a ] 
+[3007:an ] 
+[3008:"] 
+[3009:the] 
+[3010:and] 
+[3011: ] 
+[3012::] 
+; 
+[3020:there seem to be exits leading ] 
+[3021:an exit leads ] 
+; 
+; 
+; Long Room Descriptions 
+; 
+; 
+[3401:, surrounded by the usual clutter of ^N books, ^N mags, 
+half-full ^N cups of ^N cold ^N coffee and the ^N remains of 
+^N yesterday's lunch. Your ^N hi-fi is blaring out a very loud 
+remixed noise, and the ^N cat is asleep on top of the ^N fish 
+^N tank. All is well with the world]
+[3402:, whose ^N grey ^N stone ^N walls are bare and threatening. The 
+^N rushes on the floor smell faintly of ^N mould and old food, and the 
+^N furniture is of dark, carved ^N oak] 
+[3403:, which smells of old ^N wood, ^N dust and ^N cobwebs. It is 
+very gloomy and cramped] 
+[3404: which bends to the southwest. The ^N grassy ^N lawns 
+beside the drive are edged with the ^N vibrant ^N colours of 
+^N summer ^N flowers. A ^N narrow ^N country ^N road runs 
+north-south and the buzzing of ^N bees fills the warm air] 
+[3405:. A ^N red-and-white ^N striped ^N barrier bars the way to some 
+rough ^N diggings, with ^N heaps of ^N sand and ^N gravel] 
+[3406: whose edges are planted with ^N lavender ^N bushes, full of 
+^N bees and ^N butterflies. From all over the ^N garden comes the hum 
+of ^N toiling ^N insects]
+[3407:, its ^N pale ^N pink ^N walls covered with ^N trailing ^N sprays 
+of ^N red and ^N white ^N roses. ^N Fragrant ^N herbs grow beneath its 
+^N windows] 
+[3408: at the ^N foot of a ^N carpeted ^N stairway. ^N Dust-flecked 
+^N beams of ^N sunlight play upon the ^N rich ^N blue ^N treads, and 
+waken ^N golden ^N lights in the ^N carved ^N wooden ^N banisters] 
+[3409: at the ^N top of the ^N stairs, where all is still and 
+silence hangs heavy upon the musty air] 
+[3410:; along with ^N fifty-seven ^N spiders and a ^N dead ^N mouse. 
+The ^N shelves seem to be empty and the air is dank and chill] 
+[3411:. A ^N mighty ^N four-poster ^N bed stands in the centre of the 
+room, surmounted by a ^N complicated ^N coat-of-arms in ^N lacquered 
+^N wood. ^N Brocade-covered ^N chairs and a ^N rose-wood ^N table 
+stand near the ^N fireplace, and dotted with ^N urns of ^N flowers. A ^N crazy-paving 
+^N path winds southwest across the ^N lawn to a ^N garden ^N shed. 
+The garden ends at a ^N wooden ^N fence] 
+[3415:, which is ablaze with ^N flowers, their colours shining like 
+^N jewels against the ^N green ^N turf. The air is heavy with 
+^N pollen and the sonorous ^N perfumes of ^N summer. As you brush 
+against the flowers, their ^N yellow ^N pollen spills out, covering 
+your clothes in a torrent of ^N fragrant ^N dust] 
+[3416:, covered in ^ dotted with ^N urns of ^N flowers. A ^N crazy-paving 
+^N path winds southwest across the ^N lawn to a ^N garden ^N shed. 
+The garden ends at a ^N wooden ^N fence] 
+[3415:, which is ablaze with ^N flowers, their colours shining like 
+^N jewels against the ^N green ^N turf. The air is heavy with 
+^N pollen and the sonorous ^N perfumes of ^N summer. As you brush 
+against the flowers, their ^N yellow ^N pollen spills out, covering 
+your clothes in a torrent of ^N fragrant ^N dust] 
+[3416:, covered in ^N ivy] 
+[3417:^N clogged with ^N crisp ^N packets and ^N MacRonalds 
+^N boxes. A ^N greasy, ^N evil-looking ^N slick swirls lazily on its 
+surface; a ^N faint, ^N greenish ^N fume spiralling up from its centre] 
+[3418: and the ^N ground is faintly marshy beneath your feet] 
+[3419:. The ^N grass is yellowed and dying, and the few ^N scrawny 
+^N plants grow in ^N strange, ^N distorted ^N shapes, as though 
+writhing in pain] 
+[3420: whose ^N timbers are pungent with ^N sun-heated ^N creosote. 
+^N Ants run busily up and down its ^N sides] 
+[3421:, among a ^N jumble of ^N old ^N boots, bits of ^N rotten 
+^N timber, ^N broken ^N tools and ^N rusty ^N tins full of ^N nails 
+that nobody will ever use. It is stiflingly hot] 
+[3422:, its ^N oily ^N surface swirling. Occasionally, a ^N bubble 
+glops to the surface and bursts with a noxious smell] 
+[3423: which opens onto a ^N paved ^N path leading east. 
+^N Blades of ^N grass and ^N sweet-smelling ^N camomile grow in the 
+^N cracks between the ^N stones] 
+[3424: which leads east-west beside the ^N garden, its ^N pale 
+^N stones cracked and flaking] 
+[3425: with an ^N examination ^N pit sunk into the ^N floor. 
+^N Dark, ^N oily ^N marks stain the ^N dry ^N ground, and there is a 
+strong smell of petrol] 
+[3426:. The ^N sky is very ^N grey and an icy wind howls 
+dejectedly across the ^N glacier, its gusts like icy needles 
+against your skin. ^N Fell ^N voices echo from the ^N faraway 
+^N hills] 
+[3427:, whose ^N treacherous ^N pits and ^N ridges are hidden beneath a 
+^N light ^N dusting of ^N snow] 
+[3428:, whose ^N sheer ^N surface seems to slither away beneath your 
+feet, as though alive] 
+[3429:, where ^N drifting ^N snow has banked up at the ^N foot 
+of the ^N mountains, making walking a misery. It reaches up to 
+your thighs, dragging at your legs with icy hands as you flounder 
+through it] 
+[3430:, snaking across the ^N steep, ^N white ^N slopes in ^N icy, 
+^N hairpin ^N curves] 
+[3431:, your fingers and toes numb with cold. Your hands are 
+bruised from bashing against ^N stones as you scrabble for a hold, 
+and your feet continually slide out from under you on the ^N icy 
+^N surface] 
+[3432: with a ^N ledge running outside its ^N mouth] 
+[3433:, whose smell fairly leaps out to meet you] 
+[3434:, its limits out of sight in the surrounding ^N darkness] 
+[3435:, where ^N ice crusts the walls, glittering like ^N diamonds] 
+; 
+[3437:, its floor strewn with ^N long, ^N white, ^N black-tipped ^N hairs] 
+[3438:, so-called because its dark walls are shot with ^N veins of the 
+purest silver ^N ore, glimmering with a pallid light] ; silver noise word
+[3439:, a ^N large ^N cube carved out of ^N living ^N rock by 
+^N long-dead ^N hands] 
+[3440: where ^N ice has grown into ^N fantastic ^N shapes of 
+^N flowers, ^N animals and ^N hoary ^N faces] 
+[3441: melted from ^N slushy ^N black ^N ice, and filled with 
+the "plink - plink - plink" of dripping water] 
+[3442:, amid ^N tall, ^N snow-laden ^N trees, bowed down 
+beneath their chilly burden. Every now and then, a ^N branch rids 
+itself of its load of ^N snow with a soft "flump"] 
+[3443:, filled with ^N carefully-tended ^N plants. Here are 
+^N silver-furry ^N eidelweiss and ^N radiant ^N blue ^N gentians, 
+^N delicate ^N violets and ^N tiny ^N yellow irises; ^N tall 
+^N foxgloves with ^N tiny, ^N brown-spotted, ^N white-and-gold 
+^N flowers, and a ^N delicate, ^N purple ^N primula] 
+[3444:. A ^N crack in the ^N ice leads south. A ^N tiny ^N gilded 
+^N throne, studded with ^N diamonds, stands at one end; and ^N graceful 
+^N pillars curve up to the ^N vaulted ^N roof, barely ten feet high] 
+[3445:, whose ^N translucent ^N walls contain a ^N pallid ^N heart of 
+^N fire] 
+[3446:, their ^N cold ^N fires dimmed] 
+[3447:, like a forgotten echo of former fires] 
+[3448:, with a ^N passage leading downwards] 
+[3449: rising from a ^N lush ^N green ^N grassy ^N valley. There 
+is an ^N opening in the ^N hillside. Far to the east is a 
+^N watering ^N hole, surrounded by ^N grazing ^N aniy the 
+purest good fortune that you have missed being impaled on 
+the ^N sharp, ^N fire-blackened ^N stakes that surround you] 
+; 
+[3456:, its ^N dusty ^N surface rutted by the passage of many feet] 
+[3457:, high up on the hillside] 
+[3458:, warmed by a ^N blazing ^N fire and clouded by 
+^N billowing ^N smoke] 
+[3459:, filled with ^N roughly-cured ^N hides, ^N deers' ^N antlers 
+and ^N large ^N chalk-covered ^N nodules of ^N unworked ^N flint] 
+[3460:. The ^N cavemen have obviously been very busy y the 
+purest good fortune that you have missed being impaled on 
+the ^N sharp, ^N fire-blackened ^N stakes that surround you] 
+; 
+[3456:, its ^N dusty ^N surface rutted by the passage of many feet] 
+[3457:, high up on the hillside] 
+[3458:, warmed by a ^N blazing ^N fire and clouded by 
+^N billowing ^N smoke] 
+[3459:, filled with ^N roughly-cured ^N hides, ^N deers' ^N antlers 
+and ^N large ^N chalk-covered ^N nodules of ^N unworked ^N flint] 
+[3460:. The ^N cavemen have obviously been very busy here, as there 
+are lots of ^N carved ^N bone ^N bowls and ^N stone ^N dishes on the 
+^N floor] 
+[3461: where the ^N cave people make cheap gifts for barter 
+with travellers]
+[3462: where a ^N rudely-fashioned ^N wooden ^N seat hangs over a 
+^N small ^N crevasse. A pile of soft leaves lies beside the seat, and 
+a ^N thin ^N trickle of water runs perpetually from a ^N hole near 
+the ^N roof] 
+[3463:. Clearly ^N minimalism is all the rage, and ^N matchstalk 
+^N men chase ^N matchstalk ^N mammoths across the walls] 
+[3464:, stacked with an ^N impressive ^N array of ^N stone ^N axes, 
+^N spears, ^N knives, ^N bows and ^N arrows] 
+[3465:. Skeleton ^N heads hang from the ^N walls - some of them 
+^N human] 
+[3466:, an ^N echoing ^N limestone ^N chamber] 
+[3467: over an ^N exceedingly ^N deep ^N crevasse; its timbers 
+groan beneath your weight] 
+[3468:. You find a ^N cartoon of a ^N man in a ^N bath on one ^N wall, 
+and find the ^N cryptic ^N slogan, "backwardness can make rueful"] 
+[3469:: "JWAAMTETS (5,4 inventor)" is inscribed high on one ^N wall, 
+and the rest of the contents are equally incomprehensible] 
+[3470: which sounds hollow underfoot] 
+[3471:. ^N High ^N stone ^N walls block the ^N view to east 
+and west, and its surface is dusty and strewn with stones] 
+[3472:] 
+[3473:. To the north is a little ^N mediaeval ^N ale-house 
+with ^N wattled ^N walls and a ^N thatched ^N roof] 
+[3474: a ^N grubby ^N room with ^N straw on the ^N floor; and 
+a liberal spattering of ^N rat ^N droppings on the ^N stained ^N bar 
+^N top - not at all the sort of ^N place you usually frequent] 
+[3475: leading past a ^N dense ^N copse to a ^N splendid 
+^N castle visible in the east, its ^N grey ^N stone ^N walls shining 
+in the ^N afternoon ^N sun] 
+[3476:. There are ^N pillories and a pair of ^N stocks, 
+surrounded by a ^N jeering ^N crowd, who are happily lobbing 
+rotten ^N tomatoes, ^N eggs, ^N hard ^N green ^N apples and anything else 
+they can get their hands on] 
+[3477:. The ^N drawbridge is raised and the ^N moat looks extremely 
+deep and smelly] 
+[3478:, which has been invaded by ^N tangled ^N masses of ^N rhododendron 
+that makes movement difficult] 
+; 
+[3480:. The ^N dense ^N tangle of ^N twigs and ^N branches catches in 
+your clothes and pulls your hair] 
+[3481:, struggling through the ^N tangled ^N undergrowth, your hands 
+scratched and bleeding] 
+; 
+[3483: below the south ^N bank of the ^N moat, savouring the 
+heady ^N stench that glurps up from its ^N muddy ^N bottom] 
+[3484:, between two ^N tall ^N battle-scarred ^N towers. The 
+^N sinister ^N mouth of a ^N murder ^N hole opens in the ^N arch 
+above your head, and the ^N cold ^N grey ^N stones are dank and 
+forbidding] 
+[3485:. ^N Battered ^N armour and ^N notched ^N swords litter the 
+^N blood-soaked ^N ground. The ^N Keep stands open to the southeast, 
+and the air is unnaturally still] 
+[3486:, a long, ^N high-ceilinged ^N room with a ^N stone ^N flagged 
+^N floor] 
+[3487:at the ^N Keep ^N entrance. There is a ^N hole in one 
+wall through which everyone entering or leaving the living 
+quarters can be secretly vetted] 
+[3488:, ^N piled ^N high with ^N kegs and ^N barrels and filled 
+with the ^N slightly ^N sour ^N scent of old wine] 
+[3489:. A ^N sweet ^N scent rises as you crush the ^N rushes 
+underfoot, and you realize that ^N fragrant ^N herbs have been 
+mixed among them] 
+[3490:, shrouded in darkness] 
+[3491:, which shine with moisture and are stained with ^N patches of 
+^N livid ^N green ^N algae] 
+[3492:, which are dismal, ^N dank and ^N depressing. There's 
+a ^N red ^N cross on the ^N wall and the ^N earth ^N floor 
+looks disturbed]
+[3493: in a ^N small ^N bay surrounded by ^N overhanging ^N cliffs. 
+^N Breakers ^N roll in from the ^N sea to the north, rocking the 
+^N Viking ^N longship ^N drawn up on the ^N sand to the north of you] 
+[3494: where little ^N wavelets ^N ripple on the sand, and the 
+^N seagulls mewl] 
+[3495:, its ^N deck warm beneath your feet, its ^N furled ^N sail 
+hanging idle02:. The ^N ground is very ^N damp and ^N seaweed ^N clings to 
+the ^N walls]
+[3503:, beside the ^N entrance to a ^N small ^N cave]
+[3504: deep down in the ^N rocks, beside a ^N slimy ^N little ^N pool]
+; 
+[3506:. An ^N opening slopes down to the north]
+; 
+[3508: between the ^N tunnel and a ^N vertical ^N fissure]
+; 
+[3510:, ^N jagged, ^N sharp ^N rocks pressing into your chest and back] 
+[3511:: the ^N ashes from a recent ^N fire smoulder acridly]
+[3512:, a filthy ^N tip of a place that smells o02:. The ^N ground is very ^N damp and ^N seaweed ^N clings to 
+the ^N walls]
+[3503:, beside the ^N entrance to a ^N small ^N cave]
+[3504: deep down in the ^N rocks, beside a ^N slimy ^N little ^N pool]
+; 
+[3506:. An ^N opening slopes down to the north]
+; 
+[3508: between the ^N tunnel and a ^N vertical ^N fissure]
+; 
+[3510:, ^N jagged, ^N sharp ^N rocks pressing into your chest and back] 
+[3511:: the ^N ashes from a recent ^N fire smoulder acridly]
+[3512:, a filthy ^N tip of a place that smells of rotting shellfish] 
+[3513:]
+[3514: of an ^N impressive ^N country ^N house with ^N exposed 
+^N oak ^N beams]
+[3515: with ^N doors to east and west. A ^N magnificent 
+^N staircase sweeps upwards to a ^N gallery above, its ^N wood 
+glowing like golden honey] 
+[3516:, on a large ^N dais, raised some four feet above the rest of 
+the room] 
+[3517: where ^N dust ^N motes dance in a ^N beam of ^N sunlight] 
+[3518:]
+[3519:]
+[3520: through the wall, steep and narrow] 
+[3521:. ^N Several ^N wall ^N panels sound hollow] 
+[3522:. ^N Leaded ^N windows overlook the ^N beautiful ^N knot 
+^N gardens below] 
+[3523:]
+[3524: hung with ^N crimson draperies] 
+[3525:, a ^N magnificent ^N room done in the ^N oriental ^N style, 
+with ^N red ^N lacquered ^N furniture picked out in gold and black] 
+[3526:]
+[3527:, and with ^N pretty ^N chintz ^N curtains] 
+[3528:. ^N Straight-backed ^N chairs face ^N empty ^N music ^N stands, 
+and a ^N large ^N bookcase is filled with ^N books and ^N sheets of 
+music, in ^N manuscript form and all neatly filed and labelled] 
+[3529:, ^N tall, ^N unclipped ^N privet ^N bushes tower above your head] 
+[3530:, ^N tall, ^N unclipped ^N privet ^N bushes tower above your head] 
+[3531:, ^N tall, ^N unclipped ^N privet ^N bushes tower above your head] 
+[3532:, ^N tall, ^N unclipped ^N privet ^N bushes tower above your head] 
+[3533:, a grassy, open space with a ^N small ^N mound in the centre] 
+[3534:, ^N tall, ^N unclipped ^N privet ^N bushes tower above your head] 
+[3535:, ^N tall, ^N unclipped ^N privet ^N bushes tower above your head] 
+[3536:, ^N tall, ^N unclipped ^N privet ^N bushes tower above your head] 
+[3537:, ^N tall, ^N unclipped ^N privet ^N bushes tower above your head] 
+[3538:]
+[3539: through the ^N gates of a ^N walled ^N city, its 
+^N surface paved with ^N meticulously ^N cut and placed ^N stone 
+^N flags] 
+[3540:: an ^N enormous ^N circular ^N building made from 
+^N gleaming ^N marble and ^N decorated with ^N heroic 
+^N statues. You can hear the roar of the ^N crowds inside]
+[3541:]
+[3542:. Stone ^N columns support the ^N lintel over its ^N doorway 
+and, all around, caryatids stare sightlessly from beneath their 
+stone urns] 
+[3543:, which contains ^N shrines to many ^N gods] 
+[3544:]
+[3545:]
+[3546: where ^N soldiers ^N store their ^N weapons]
+[3547:. Around you are the ^N buildings of a ^N small ^N garrison 
+^N town; ^N mud ^N huts for the most part, with the ^N occasional 
+^N low, ^N stone ^N villa housing an official or ranking officer. 
+Where the ^N road passes through the ^N shopping ^N areas, it is 
+sunk below the ^N pavement, with ^N stepping-stones placed at regular 
+intervals so that citizens can cross to the other side without 
+falling into the ^N swill of ^N refuse and ^N dung that covers its 
+^N surface. The ^N stones are carefully placed so that cart and 
+chariot wheels can - just - run between them] 
+[3548:: an open ^N courtyard surrounded by ^N buildings] 
+[3549:, at a ^N vegetable ^N stall. ^N Ladies, wearing ^N long 
+^N flowing ^N robes gathered at the waist and clasped at the 
+shoulder, are jostling each other to get at the best bargains, 
+while ^N street ^N vendors hawk their wares in strident voices] 
+[3550:, at a ^N bread ^N stall] 
+; 
+[3552: with "^N Taberna ^N Nausica" painted on the ^N lintel] ;
+[3553:]
+[3554:, surrounded by an ^N immense ^N cheering ^N crowd] 
+[3555:. ^N Steps lead down into a ^N great ^N square bath 
+decorated with ^N dolphin ^N mosaics. A pair of ^N flabby ^N praetors 
+are floating in the water, splashing and shivering, and ^N slaves 
+pad silently about, waiting to attend to your every need] 
+[3556: which pours out ^N cold water] 
+[3557: where, between the ^N drifting ^N steam, you can see ^N naked 
+^N figures cleaning the accumulated sweat and grime from their skins 
+with some sort of ^N scraper] 
+[3558:]
+[3559:] 
+[3560:] 
+[3561:]
+[3562:]
+[3563:]
+[3564: which stretches for many miles. It is covered by ^N fine 
+^N grey ^N dust. The night air is cold. ^N Luminous ^N walkways 
+^N ]
+[3574:, suspended in mid-air. To the north is a ^N starship, 
+the sharp contrast between light and dark cutting its ^N squat 
+^N shape in half] 
+[3575:, which is decorated in really exciting shades of pus 
+yellow, gan green, and bile brown] 
+[3576: which would be really cozy if you were a tapeworm] 
+[3577:, splashing around on a ^N colossal water ^N drop 
+which wobbles around uncertainly in mid-air] 
+[3578:, surrounded by ^N instrument ^N panels and lots of 
+flashing lights] 
+[3579: which was l]
+[3574:, suspended in mid-air. To the north is a ^N starship, 
+the sharp contrast between light and dark cutting its ^N squat 
+^N shape in half] 
+[3575:, which is decorated in really exciting shades of pus 
+yellow, gan green, and bile brown] 
+[3576: which would be really cozy if you were a tapeworm] 
+[3577:, splashing around on a ^N colossal water ^N drop 
+which wobbles around uncertainly in mid-air] 
+[3578:, surrounded by ^N instrument ^N panels and lots of 
+flashing lights] 
+[3579: which was left when a few hundred tonnes of classified 
+waste from planet Earth went up with a flash and a bang and a 
+mushroom-shaped cloud, nearly getting Earth booted out of the 
+Federation in the process. It glows with a fetching blue light] 
+[3580:. ^N High up the west ^N wall is an ^N opening]
+[3581:] 
+[3582:, ^N stun-guns cradled against their ^N chests] 
+[3583:]
+[3584: with metal walls] 
+[3585:]
+[3586:, designed for low-grav manoeuvres] 
+[3587: with ^N clear ^N blue water and ^N exotic ^N plastic ^N plants] 
+[3588: between a ^N ladder and a ^N low ^N tunnel]
+[3589: which has an empty smell of hot people and floor polish. 
+^N Racks of ^N foils, ^N rapiers and other ^N swords line the walls] 
+[3590:, surrounded by all kinds of ^N electrical and ^N solid-state 
+^N junk, most of which are beyond your comprehension] 
+[3591:. ^N Butterflies flitter happily in the ^N bright ^N sunshine 
+and a ^N heady ^N perfume fills the air. You could be in ^N paradise. 
+You could also be excused for thinking it's too good to be true] 
+[3592:: "ABANDON HOPE ALL YE WHO ENTER HERE" it declares, in 
+friendly red-neon letters] 
+[3593:. Where trees and grasses once grew is now a ^N smouldering 
+^N wasteland and the ^N sun hangs low: a ^N huge ^N ball of molten 
+^N red ^N fire. The heat is terrible and the ^N ground below your 
+feet quivers as though in agony]
+[3594: of a ^N small ^N village, its ^N pathetic ^N remains hiding 
+who-knows-what tragedies] 
+[3595:, which plunges into darkness] 
+[3596:. The walls are too crumbly to climb]
+[3597: of ^N decayed earthy ^N passages, their walls pallid 
+with ^N mould] 
+[3598: that glows faintly with a sickly light] 
+[3599:, each adding its own contribution to the general stench] 
+[3600:, some sort of ^N experimental ^N laboratory, filled with 
+^N incomprehensible ^N equipment. It smells of rotten eggs and sulphur] 
+[3601:, dirty, as well as smelly] 
+[3602: which ^N grab at you. One ^N flower is particularly 
+^N enormous] 
+[3603:. ^N Sharp ^N hairs block your escape and the ^N walls 
+ooze ^N digestive ^N juices]
+[3604:, lined with ^N hairs that make good ^N stepping-stones] 
+[3605:]
+[3606:]
+[3607:. ^N Crude ^N steps lead upwards]
+[3608:]
+[3609:, between ^N jagged, ^N constricting ^N walls] 
+[3610:. You can feel a trapdoor above, through which comes 
+a faint burr of conversation] ;don't mark trapdoor
+[3611:, though you cannot see their ^N faces, having only a 
+wonderful view of their ^N knees, or ^N tentacles, as the case may be] 
+[3612: as they discuss their wicked plans. They are of different 
+races and species, and probably from different planets. 
+Some look like lizards, another like a dog. Two bear more 
+relation to giant squids than anything else, and one is a 
+heap of green slime that glurbles and splots on the table]
+[3613:. Nasty cold things squiggle and squirm beneath your groping 
+fingers] 
+[3614:, covered with ^N putrescent ^N weeds] 
+[3615:, hung with ^N ancient, ^N clinging ^N cobwebs] 
+[3616:]
+[3617:. To the west, it shimmers and fades away]
+[3618:. It fades into mist in the east]
+[3619:]
+; 
+; Prepositions: 
+; 
+[3900:^P at ^P on ^P onto ^P underneath ^P below ^P behind ^P in 
+^P into ^P with ^P off ^P up ^P down ^P to] 
+; 
+; Garbage words 
+; 
+[4000:^N the ^N this ^N these ^N that ^N some ^N a ^N and ^N also 
+^N before ^N wade ^N jog ^N plod ^N rush ^N dash ^N march ^N amble 
+^N good ^N of ^N cute ^N there ^N at] 
+[4001:^N about ^N therefore 
+^N am ^N to ^N of ^N on ^N my ^N your ^N try ^N carefully ^N slowly 
+^N warily ^N quickly ^N rapidly ^N want ^N like ^N love 
+^N say ^N please ^N wait ^N water ^N together ^N silver] 
+;>>mike-water added to allow "DRINK WATER" to work 
+;------------------------------------------- 
+; 
+; Book protection code... 
+; 
+;>NICK 7/10/88 No protection.

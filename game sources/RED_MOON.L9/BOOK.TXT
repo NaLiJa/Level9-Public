@@ -1,0 +1,235 @@
+; Code for book protection system
+;
+; Copyright (C) 1986 Level 9 Computing
+;
+; For Knight Orc
+;
+; 16/5/87
+;
+; table of comparison words start at 4300 (MATCHOFFSET)
+;
+CONST
+ MaxPage=23
+ MaxLine=10
+ MaxWord=8
+ MaxAttemptsPerWord=3
+ TotalWords=100
+
+ nullvalue=0
+;
+VAR
+ PAGE
+ LINE
+ WORD
+ RANDOMSEED
+ count TESTcount SAVEcount
+ ATTEMPTS
+ c10
+
+BEGIN
+
+;;.LENSLOK
+;;.BOOKPROTECT
+;.BookProtect
+;.TRYALLWORDS
+;;.TESTUSER
+; TESTcount=1
+;.TAW1
+; count=TESTcount
+; GOSUB @getWORDcount
+; PRINT TESTcount
+; MESSAGE SPACE
+; count=TESTcount
+; if count=0 then taw2
+; GOSUB @DISPLAYWORD
+; count=TESTcount
+; GOSUB COMPAREPROTECTIONWORD
+; PRINT VALUE
+; MESSAGE CR
+;.taw2
+; ADD TESTcount,C1
+; GOTO TAW1
+;---
+.COMPAREPROTECTIONWORD
+ cif IncludeProtection
+; return VALUE=word entered, or zero if failed
+.CPWgetWORD
+ NOMOREINPUT=FALSE
+ WORDNOTPROCESSED=FALSE
+ SUPRESSCHECKING=TRUE
+ GOSUB @getNEXTWORD
+ INDEX=0
+ GOSUB @readINPUTlist
+ IF VALUE=NULLvalue THEN CPWgetWORD
+.CPW1
+ SEARCHTYPE=MATCHTYPE
+ GOSUB @CHECKTYPEMORE
+ IF VALUE=NULLVALUE THEN CPWFAIL
+ IF VALUE=count THEN CPWOK
+ GOTO CPW1
+.CPWFAIL
+ VALUE=NULLVALUE
+.CPWOK
+ SUPRESSCHECKING=FALSE
+ RETURN
+;---
+;.Lenslok
+;.BookProtect
+;.TEST
+; C1=1
+; TESTcount=1
+;.TEST1
+; count=TESTcount
+; GOSUB getWORDcount
+; IF PAGE=0 THEN TEST2 ; some problem, so skip over it
+; GOSUB @DISPLAYWORD
+;.TEST2
+; ADD TESTcount,C1
+; IF TESTcount<TOTALWORDS THEN TEST1
+; goto tryAllWords
+
+;.ILOOP 
+; GOTO ILOOP
+;---
+ cend
+.LENSLOK
+.BOOKPROTECT
+ cif IncludeProtection
+ IF TESTcount<>0 THEN TESTUSER1
+ GOSUB @getRANDOMword ; only pick a new word on startup, or on success
+ if count=0 then bookprotect
+ TESTcount=count
+;
+.TESTUSER1
+ ATTEMPTS=0
+ MESSAGE 4200 ; whatsit appears
+.TESTUSER2
+ MESSAGE 4207 ; tell me the...
+ GOSUB @DISPLAYWORD
+ count=TESTcount
+ GOSUB @COMPAREPROTECTIONWORD
+ IF VALUE<>NULLVALUE THEN TESTUSEROK
+ ADD ATTEMPTS,C1
+ IF ATTEMPTS<MAXATTEMPTSPERWORD THEN TESTUSERAGAIN
+ MESSAGE 4208 ; whatsit kills yer
+ GOTO @restartorrestore ;>>Mike 16/7/87 userdeath
+
+.TESTUSERAGAIN
+ MESSAGE 4205 ; wrong. Try again
+ GOTO TESTUSER2
+
+.TESTUSEROK
+ MESSAGE 4206 ; correct
+ GOSUB getRANDOMWORD ; set up a new word for subsequent attempts
+ TESTcount=count
+ RESULT=TRUE ; tell caller all was well
+ RETURN
+;---
+.getRANDOMword
+ parsex2=TotalWords
+ GOSUB @randomparsex1modparsex2
+ count=parsex1
+ if count=0 then GetRandomWord
+; Avoid random choice of unsuitable words...
+ if count=3 then GetRandomWord
+ if count=11 then GetRandomWord
+ if count=41 then GetRandomWord
+ if count=44 then GetRandomWord
+ if count=48 then GetRandomWord
+ if count=65 then GetRandomWord
+ if count=83 then GetRandomWord
+ if count=91 then GetRandomWord
+ if count=99 then getRANDOMword
+;
+ SAVEcount=count
+ GOSUB getWORDcount
+ count=SAVEcount
+ if count=0 then @GetRandomWord
+ IF PAGE=0 THEN @getRANDOMword
+ RETURN
+;---
+.DISPLAYWORD
+ MESSAGE 4201 ; 'page '
+ PRINT PAGE
+ MESSAGE 4202 ; ', line '
+ PRINT LINE
+ MESSAGE 4203 ; ', word '
+ PRINT WORD
+ MESSAGE 4204 ; '". '
+ RETURN
+;---
+.RANDOM ; return random parsex1, 0<=parsex1<=255. And update RANDOMSEED
+ parsex1=RANDOMSEED
+ ADD parsex1,parsex1
+ ADD parsex1,parsex1
+ ADD parsex1,parsex1
+ ADD parsex1,parsex1
+ ADD parsex1,parsex1
+ ADD parsex1,parsex1
+ ADD parsex1,parsex1
+ ADD parsex1,parsex1 
+ c10=10
+ ADD parsex1,C10 ; parsex1:=RANDOMSEED*256 (Hi-byte := Low-byte. Low-byte := 10) 
+
+ SUB parsex1,RANDOMSEED ; Shuffle bits about
+ ADD parsex1,parsex1
+ ADD parsex1,parsex1
+ ADD parsex1,RANDOMSEED
+ ADD parsex1,C1
+ RANDOMSEED=parsex1
+; and return low-order byte of seed as a random number
+ parsex2=31
+ LIST9(parsex2)=parsex1
+ parsex1=LIST9(parsex2)
+ RETURN
+;---
+.getWORDcount
+; step through pseudo-random sequence to set PAGE, LINE and WORD 
+; for the COUNTth word
+ RANDOMSEED=10491
+.GWC1
+ GOSUB @RANDOM
+ if count=0 then getPageNumber ; fail-safe >>mike 15/2/88
+ SUB count,C1
+ IF count>0 THEN GWC1
+;
+; now get page number
+.getPAGEnumber
+ GOSUB RANDOM
+ parsex2=maxPAGE
+ GOSUB @parsex1modparsex2
+ PAGE=parsex1
+ ADD PAGE,C1; So 1 <= PAGE <= maxPAGE
+;
+.getLINEnumber
+ GOSUB RANDOM
+ parsex2=maxLINE
+ GOSUB @parsex1modparsex2
+ LINE=parsex1
+ ADD LINE,C1; So 1 <= LINE <= maxLINE 
+;
+.getWORDnumber
+ GOSUB RANDOM
+ parsex2=maxWORD
+ GOSUB @parsex1modparsex2
+ WORD=parsex1
+ ADD WORD,C1; Now 1 <= WORD <= maxWORD 
+.dividebyzero
+.parsex1modparsex2ret
+.x1timesx2ret
+ cend
+ RETURN
+;---
+;---
+.randomparsex1modparsex2
+ cif includeProtection
+ random parsex1 ; falls through to..
+;
+.parsex1modparsex2 ; return remainder of division
+ if parsex2=0 then dividebyzero
+.mod1
+ if parsex1<parsex2 then parsex1modparsex2ret
+ sub parsex1,parsex2
+ goto mod1
+ cend
+;---

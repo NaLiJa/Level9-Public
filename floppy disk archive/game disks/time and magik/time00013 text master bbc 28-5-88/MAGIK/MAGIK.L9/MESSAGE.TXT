@@ -1,0 +1,2096 @@
+; Price of Magik Text, part 3 of "Time & Magik", 
+; BBC disc (21579) version, 
+; copyright (C) 1987/1988 Level 9 Computing.
+;
+; Time & Magik credits..
+; design: Sue Gazzard, David Williamson, Pete Austin.
+; program: Mike Austin, Pete Austin.
+; versions: Nick Austin, John Jones-Steele.
+; pictures: Godfrey Dowson, Neil Strudwick.
+; additional text: Ruth Pracey.
+; 
+[1:_] 
+[2::] 
+[3:,_] 
+[4:._] 
+[5:%] 
+[6:and ] 
+[7:.%] 
+[8:?%] 
+[9:. ] 
+[10:exits are ] 
+[11:an exit leads ] 
+[12: through a door] 
+[13: through an open door] 
+[14: and ] 
+[15:you are standing on ] 
+[17:%What now? ] 
+[18:: ] ; 
+[19:"] 
+; Messages for printing objects 
+; 
+[20:a ] 
+[21:the ] 
+[22:an ] 
+[23:some ] 
+; 
+; Message pairs for use in describing containment positions 
+; also used for preposition table 
+; 
+; part printed before container 
+; 
+[24:you can see]     ; 0 - you can see 
+[25:^P on |^P onto]  ; 1 - on 
+[26:^P underneath|^P below] ; 2 - under 
+[27:^P behind]       ; 3 - behind 
+[28:]                ; 4 - carrying 
+[29:]                ; 5 - wearing 
+[30:hanging above |^P at ^P through] 
+; 6 - hanging above (altar and weight) 
+[31:^P in |^P into]  ; 7 - in  
+[32:hanging ^P from] ; 8 
+[33:in|^P with]      ; 9 - in is for 'in ... are ', with is for input 
+[34:jammed in]       ;10 - for behemoth 
+[35:around]          ;11 - for ring of knucklebone 
+[36:lying on]        ;12 
+[37:sitting on]      ;13 
+[38:clinging to]     ;14 
+[39:fastened to]     ;15 
+; 
+; part printed between container a 'you' 
+; 
+; part printed before container 
+; 
+; part printed between container and contained 
+; 
+[77:are standing on] 
+[80:own] 
+[81:are wearing] 
+[83:are in] 
+[88:are lying on] 
+[89:are sitting on] 
+; 
+[90:^P off] 
+[91:^P up] 
+[92:^P down] 
+[93:^P to] 
+[94:^P out] 
+; 
+[101:^V north|^V n ^V northwards] 
+[102:^V northeast|^V ne] 
+[103:^V east|^V e ^V eastwards] 
+[104:^V south|^V s ^V southwards] 
+[105:^V southeast|^V se] 
+[106:^V southwest|^V sw] 
+[107:^V west|^V w ^V westwards] 
+[ 'you' 
+; 
+; part printed before container 
+; 
+; part printed between container and contained 
+; 
+[77:are standing on] 
+[80:own] 
+[81:are wearing] 
+[83:are in] 
+[88:are lying on] 
+[89:are sitting on] 
+; 
+[90:^P off] 
+[91:^P up] 
+[92:^P down] 
+[93:^P to] 
+[94:^P out] 
+; 
+[101:^V north|^V n ^V northwards] 
+[102:^V northeast|^V ne] 
+[103:^V east|^V e ^V eastwards] 
+[104:^V south|^V s ^V southwards] 
+[105:^V southeast|^V se] 
+[106:^V southwest|^V sw] 
+[107:^V west|^V w ^V westwards] 
+[108:^V northwest|^V nw] 
+[109:^V upwards|^V u ^V up] 
+[110:^V downwards|^V d ^V down] 
+[111:^V in|^V inside ^V enter ^V into] 
+[112:^V outside|^V out ^V leave] 
+[113:^V cross|^V across ^V over] 
+[114:^V climb|^V ascend] 
+[115:^V plugh|^V xyzzy ^V sesame ^V humakaat ^V satarh ^V ollabin 
+^V obis] 
+[119:^V fear ^V terror ^V panic] ; also 3905 
+; 
+; Intransitive verbs 
+; 
+[121:^V again|^V a] 
+[122:^V inventory|^V inv ^V I] 
+[124:^V quit|^V restart] 
+[125:^V restore|^V load] 
+[126:^V save] 
+[127:^V score|^V rating ^V status] 
+[128:^V verbose] 
+[129:^V brief] 
+[130:^V wait|^V wa] 
+[131:^V exits|^V exit] 
+[132:^V on] 
+[133:^V off] 
+[134:^V pictures|^V graphics] 
+[135:^V words|^V text] 
+[136:^V hello ^V welcome ^V hi] 
+[137:^V ramsave|^V ram] 
+[138:^V ramload] 
+[139:^V oops|^V whoops ^V UNDO] 
+; 
+; Possibly transitive verbs 
+; 
+[141:^V attack|^V fight ^V kill ^V hit ^V break ^V kick ^V punch 
+^V smash] 
+[142:^V look|^V redisplay ^V refresh ^V l] 
+[143:^V listen|^V hear] 
+;; [144:^V search|^V explore] 
+[145:^V examine|^V read ^V inspect ^V search] 
+[146:^V cut] 
+[147:^V help|^V hint] 
+; 
+[148:^V wake|^V arouse ^V rouse ^V alert] 
+[149:^V smell|^V sniff] 
+[150:^V knock] 
+[151:^V cast] 
+; 
+; Transitive verbs 
+; 
+;; [160:^V get] 
+[161:^V take|^V get ^V carry ^V buy ^V steal ^V collect] 
+[162:^V wear] 
+[163:^V drop|^V discard] 
+[164:^V put|^V hide ^V conceal] 
+[165:^V remove ^V free ^V release] 
+[166:^V throw|^V chuck ^V toss ^V hurl] 
+[167:^V give|^V offer ^V sell] 
+[168:^V stand] 
+[169:^V lie] 
+[170:^V sit] 
+[171:^V ask|^V question] 
+; 
+[173:^V open|^V unlock] 
+; 
+[175:^V light|^V burn] 
+[176:^V extinguish] 
+[177:^V press|^V push ^V select ^V poke ^V prod ^V touch ^V choose] 
+[178:^V pull|^V tug] 
+[179:^V fasten|^V tie ^V attach] 
+[180:^V unfasten|^V untie] 
+[181:^V ring] 
+[182:^V fill] 
+[183:^V eat|^V bite ^V taste ^V nibble ^V lick] 
+[184:^V dig] 
+[185:^V rub|^V wave] 
+[186:^V bury] 
+[187:^V insert] 
+[188:^V say|^V shout ^V call ^V tell] 
+[189:^V pick|^V pluck] 
+[190:^V squeeze|^V squash ^V crush] 
+[191:^V dress] 
+;; [192:^V goto] ; *** cheat mode 
+;; [193:^V getme] ; *** cheat mode 
+[194:^V think] 
+[195:^V drink] 
+[196:^V play|^V blow] 
+[197:^V y|^V why] ; used for 'why not' response - do not add 'yes' etc. 
+[198:^V yes|^V OK ^V sure] 
+[199:^V no] 
+[200:^V board] 
+;; [201:^V baste] ; *** cheat mode 
+;  
+; Objects (300+N) 
+; 
+[301:^N grimoire] 
+[302:^N pendulum] 
+[303:^N feldspar ^N lens] 
+[304:^N silver ^N mail] 
+[305:^N valerian ^N plant] 
+; 
+[307:^N trumpet] 
+[308:^N prism] 
+[309:^N elder ^N cross] 
+[310:^N candle] 
+[311:^N small ^N mirror] 
+[312:^N crystal ^N ball] ; adjectives ! 
+[313:^N broom] 
+[314:^N ashes] 
+[315:^N wheel] 
+[316:^N claw] 
+[317:^N blue ^N box] 
+[318:^N staff] 
+; 
+[320:^N bag] 
+[321:^N bandages] 
+[322:^N bones] 
+[323:^N books] 
+[324:^N cage] 
+[325:^N crowbar] 
+[326:^N gold] 
+[327:^N knucklebone] 
+[328:^N postcard|^N card] 
+[329:^N parchment] 
+[330:^N plate ^N armour] 
+;
+[332:^N ring|^N diamond] 
+[333:^N robes] 
+[334:^N pile of ^N salt] 
+[335:^N scroll] 
+[336:^N shield] 
+[337:^N skull] 
+[338:^N talisman] 
+; 
+[350:^N knife] 
+[351:^N axe] 
+[352:^N sword] 
+[353:^N claymore] 
+[354:^N poniard] ; Myglar's weapon 
+; 
+[357:^N chubby ^N stone ^N cherub] 
+[358:^N stone ^N idol] 
+[359:^N gargoyle] 
+[360:^N marble ^N statue] 
+[361:^N colossal ^N bloodworm] 
+[362:^N ferryman] 
+[363:^N monkey] 
+[364:^N moonbeast] 
+[365:^N Myglar] 
+[366:^N giant ^N spider] 
+[367:^N giant ^N slug] 
+[368:^N blood-sucking ^N bat] 
+[369:^N werewolf] 
+[370:^N giant ^N army ^N ants]  ; "some giant army ants"
+[371:^N dark ^N spawn]
+[372:^N ghoul] 
+[373:^N metallic ^N golem] 
+[374:^N mummy] 
+[375:^N ghost] 
+[376:^N walking ^N skeleton] 
+;; [377:^N vampire] 
+[378:^N wight] 
+[379:^N wraith] 
+[380:^N zombi] 
+;; [381:^N you|^N player ^N me] 
+;; [382:^N fish|^N you ^N player] 
+; 
+[385:^N mandrake] 
+[386:^N eyebright ^N flowers] 
+[387:^N sprig of ^N wolfsbane|^N wolvesbane] 
+[388:^N blphagus] 
+[415:^N sword ^N point] 
+[416:^N table] 
+[417:^N wardrobe] 
+[418:^N web] 
+[419:^N something ^N nasty] 
+[420:^N woodpile|^N wood ^N pile] 
+[421:^N sword ^N hilt] 
+[422:^N vine|^N creepers ^N vines] 
+[423:^N wargame] 
+[424:^N tapestry] 
+[425:^N snow] 
+[426:^N weight] 
+; 
+[429:^N picture of ^N Stonehenge] 
+[430:^N picture of ^N dark ^N spawn] 
+[431:^N picture by ^N moon ^N light] 
+[432:^N picture of a ^N ghoul] 
+[433:^N picture of ^N werewolves] 
+[434:^N warped ^N portrait|^N picturphagus] 
+[415:^N sword ^N point] 
+[416:^N table] 
+[417:^N wardrobe] 
+[418:^N web] 
+[419:^N something ^N nasty] 
+[420:^N woodpile|^N wood ^N pile] 
+[421:^N sword ^N hilt] 
+[422:^N vine|^N creepers ^N vines] 
+[423:^N wargame] 
+[424:^N tapestry] 
+[425:^N snow] 
+[426:^N weight] 
+; 
+[429:^N picture of ^N Stonehenge] 
+[430:^N picture of ^N dark ^N spawn] 
+[431:^N picture by ^N moon ^N light] 
+[432:^N picture of a ^N ghoul] 
+[433:^N picture of ^N werewolves] 
+[434:^N warped ^N portrait|^N picture] 
+; 
+[436:^N you|^N player ^N me] 
+[437:^N fish|^N me ^N you] 
+;
+; Now any invisible objects...  
+[438:^N front ^N door|^N knocker] 
+[439:^N eyes|^N eye] 
+[440:^N panel|^N panels] 
+[441:^N door] 
+;; [442:^N torches] 
+; 
+; and finally, some miscellaneous nouns which are used 
+; for various purposes. 
+[480:^N everything ^N all ^N everyone ^N everybody ^N every] 
+[481:^N except ^N but] 
+[482:^N it|^N that ^N them ^N those ^N none] 
+[483:they] ; do NOT mark for input - output only 
+[484:them] ; do NOT mark for input - output only 
+[485:^J then ^J next] 
+[486:^J therefore ^J so] 
+; 
+; Numbers (490+N) 
+; 
+[490:^N black|^N chest] 
+[491:^N brown|^N chest] 
+[492:^N red|^N chest] 
+[493:^N orange|^N chest] 
+[494:^N yellow|^N chest] 
+[495:^N green|^N chest] 
+[496:^N blue|^N chest] 
+[497:^N violet|^N chest] 
+[498:^N grey|^N chest] 
+[499:^N white|^N chest] 
+; 
+; Spells... 
+[521:^N MAD] 
+[522:^N DOW] 
+[523:^N SEE] 
+[524:^N FIN] 
+[525:^N FIX] 
+[526:^N KIL] 
+[527:^N BOM] 
+[528:^N XAM] 
+[529:^N DET] 
+[530:^N SPY] 
+[531:^N ZEN] 
+[532:^N ESP] 
+[533:^N FLY] 
+[534:^N ZAP] 
+[535:^N DED] 
+[536:^N SAN] 
+[537:^N IBM] 
+[538:^N HYP] 
+; 
+; omni-present objects.. 
+[550:^N water] 
+[551:^N voice|^N Myglar] 
+[552:^N ground|^N floor] 
+[553:^N wall|^N walls] 
+[554:^N sky|^N sun ^N moon] 
+;; [555:^N eyes|^N eye] 
+;; 
+;; [560:^N rainbird]
+;; [561:^N gravy]
+;
+; Examine messages (600+N). NO full stops at end please. 
+; 
+[601:a leather-bound ^N tome which explains, very nicely, that you 
+must be mad to use magik] ; grimoire
+; 
+[602:about eighteen inches long, with the word "DOW" etched into 
+its beaten surface] ;pendulum
+; 
+[603:a ^N see-through ^N mineral with a specific gravity of 2.55 
+to 2.76, conchoidal to uneven fracture planes, and which comes in 
+lots of pretty colours] ; feldspar lens
+; 
+[604:a suit of delicate metal, made from overlapping ^N silver 
+^N scales and inscribed "FIN"] ; silver mail 
+; 
+[605:a magik ^N herb with purplish ^N flowers] ; valerian
+; 
+[606:] 
+;
+[607:a musical instrument of curling brass tubes] ; trumpet
+; 
+[608:shaped like a pyramid. The word "XAM" is etched on its base] ; prism 
+; 
+[609:a ^N weird ^N wooden cross] ; elder cross 
+; 
+[610:made of ^N tallow] ; candle 
+; 
+[611:a small, ^N circle of glass. It reflects the features of a 
+wild-eyed fanatic; haggard and almost unrecognisable] ; mirror 
+; 
+[612:not really ^N crystal, more a bluish type of glass, but it is 
+certainly spherical] ; crystal ball
+; 
+[613:used for ^N sweeping floors or, in the hands of council workmen, 
+for leaning on] ; broom
+; 
+[614:the remains of the ^N woodpile] ; ashes
+; 
+[615:made of some dark ^N alloy, this wheel is reinforced by powerful 
+enchantments] ; wheel
+; 
+[616:curved, sharp and wickedly-pointed] ; claw 
+; 
+[617:stamped "IBM", in large letters] ; blue box 
+; 
+[618:a crude section of vine, with rough-cut ends. Just goes to prove 
+you can't get a good staff nowadays] ; staff
+; 
+[619:] 
+; 
+[620:made of tough, close-woven ^N canvas] ; bag
+; 
+[621:made of strong, flexible ^N cloth] ; bandages
+; 
+[622:from a human-sized creature] ; bones
+; 
+[623:illustrated ^N coffin-table ^N tomes] ; books 
+; 
+[624:a ^N bird ^N cage, made from gilded wire in an attractive domed 
+shape] ; cage 
+; 
+[625:made of strong ^N metal, with a curved end] ; crowbar 
+; 
+[626:worth a ^N large ^N fortune and then some] 
+; 
+[627:obviously intended for strange rituals] ; knucklebone
+; 
+[628:"Following the mysterious disappearances of three ^N postmen 
+working in this area, we have suspended deliveries locally. Post may 
+be collected from the ^N sorting ^N office. We apologise for any 
+inconvenience"] ; postcard 
+; 
+[629:about ZEN and the art of rapid progress] ; parchment
+; 
+[630:it is made from some kind of ^N metal, possibly steel] ; plate armour 
+; 
+[632:set with a ^N beautiful, ^N solitaire diamond] ; ring 
+; 
+[633:made of heavy ^N cloth, in a rich shade of red] ; robes 
+; 
+[634:^N sodium ^N chloride] ; salt 
+; 
+[635:part of an ^:inscribed, "Bat's Bane"]; axe 
+; 
+[652:its blade is inscribed, "^N rubilacxe"] ;sword
+; 
+[653:a ^N huge ^N sword, one-handed and two-edged; the claidheamh
+of old] ; claymore
+; 
+[654:an assassins' knife] ; poniard 
+; 
+;; [655-656] 
+; 
+[657:a ^N chubby little ^N statuette, cavorting like a ^N baby 
+^N elephant] ; cherub 
+; 
+[658;a huge ^N stone ^N representation of ^N Myglar] ; idol 
+; 
+[659:a ^N hideous ^N winged ^N monster with bulbous eyes and lolling 
+tongue] ; gargoyle 
+; 
+[660:a ^N t:inscribed, "Bat's Bane"]; axe 
+; 
+[652:its blade is inscribed, "^N rubilacxe"] ;sword
+; 
+[653:a ^N huge ^N sword, one-handed and two-edged; the claidheamh
+of old] ; claymore
+; 
+[654:an assassins' knife] ; poniard 
+; 
+;; [655-656] 
+; 
+[657:a ^N chubby little ^N statuette, cavorting like a ^N baby 
+^N elephant] ; cherub 
+; 
+[658;a huge ^N stone ^N representation of ^N Myglar] ; idol 
+; 
+[659:a ^N hideous ^N winged ^N monster with bulbous eyes and lolling 
+tongue] ; gargoyle 
+; 
+[660:a ^N tall ^N image of ^N Myglar. A ^N vandal has scrawled 
+"SPY" on its ^N left ^N foot] ; statue
+; 
+[661:an unloved ^N creature, similar in shape to R*b*rt M*xw*ll, but 
+with fewer chins] ; bloodworm 
+; 
+[662:an ^N unpleasant-looking, stooped old ^N man. He notices your 
+gaze and snarls, "Stop gawping, monkey-features"] ; ferryman 
+; 
+[663:a ^N perfect ^N replica of a ^N monkey] ; monkey 
+; 
+[664:a ^N hideous ^N monster, whose bug-eyes glow with silvery 
+light] ; moonbeast 
+; 
+[665:an ancient wizard. As you look, Myglar's image fixes you with a 
+hypnotic stare] ; Myglar
+; 
+[666:a mass of hairy ^N legs. I should look out if I were you; it's 
+pretty narked because it was almost included in a very successful 
+television documentary, but was rejected at the last minute in 
+favour of something with a more interesting sex life] ; giant spider 
+; 
+[667:^N slimy and horribly big, its body filling the tunnel] ; giant slug 
+; 
+[668:^N small, ^N ugly and extremely short-sighted. It works 
+part-time for you-know-who, dubbing all those squeaks and whistles 
+onto the line] ; bat 
+; 
+[669:very hairy - even its ^N hairs have ^N hairs] ; werewolf 
+; 
+[670:streaming over the stone columns and covering the floor in a 
+seething blanket. (Didn't they do a film with J**n C*ll*ns 
+recently?...)] ; ants 
+; 
+[671:^N terrible, born of a dark mother in the depths of the Earth, 
+amidst horrors beyond the ken of Man] ; dark spawn 
+; 
+[672:licking its lips, its shrivelled skin pulled surgically tight 
+over its bones, its eyes narrowed dangerously] ; ghoul 
+; 
+[673:grinning cheerfully, revealing a fortune in gold fillings. It 
+has just passed a screen test for the leading role in "The Robots 
+are Coming! (Part IX)", and hasn't killed anyone for at least 
+three days. It looks very uncomfortable in armour] ; metallic golem 
+; 
+[674:wrapped in grimy ^N bandages that bind the ancient cerecloths 
+to its desiccated frame. It has absolutely no ambition, and has 
+spent most of its death right here, enjoying the peace and quiet] ; mummy 
+; 
+[675:^N see-through - rather like Louis Hayward in the 1939 version 
+of "The Man in the Iron Mask"] ; ghost - do not mark "through" 
+; 
+[676:it's very ^N bony, and not quite right about the rib-cage, 
+owing to its having been assembled by a group of first-year 
+necromancy students on an off day] ; skeleton 
+; 
+;; [677:] ; vampire.
+; 
+[678:a ^N see-through ^N spirit, 70/% proof. Against weapons, 
+magik, that sort of thing, that is] ; wight - do not mark "through" 
+; 
+[679:a ^N fearsome ^N graveyard ^N spirit, a ^N living ^N fog that 
+expands to fill the room] ; wraith 
+; 
+[680:an ^N animated ^N corpse who started life in an obscure 
+graveyard in Haiti and went on to star in such gems of the silver 
+screen as "Graduation Day III at Living Dead High"] ; zombi 
+; 
+;; [681-684] 
+; 
+[685:a ^N vile ^N weed, shaped like a man daubed by a maniacal 
+toddler] ; mandrake
+; 
+[686:a ^N magical ^N plant which is ^N rumoured to miraculously 
+improve ^N vision when ^N rubbed into the eyes] ; eyebright flowers
+; 
+[687:perhaps useful, but there again, perhaps not]  ; wolfsbane
+; 
+[688:made of a very hard ^N material] ; black ball
+; 
+[689:a special ^N tool used by ^N grave diggers] ; shovel 
+; 
+[690:very lifelike. You can almost hear its fins flapping] ; stone fish 
+; 
+;; [691-693] 
+; 
+[694:quite deep] ; hole
+; 
+[695:a ^N small ^N lump of ^N rock, dwarfed by a stone moon] ; moon altar in chapel 
+; 
+[696:an ^N impressive ^N edifice, but you know how it is: when 
+you've seen one perspex altar, you've seen them all..] ; altar in temple 
+; 
+[697:a ^N rowing ^N boat, painted bright blue with staring eyes 
+on the prow] ; boat 
+; 
+[698:cast from several tonnes of ^N bronze and covered with 
+bat-droppings] ; bell 
+; 
+[699:a matched set of nine, made of ^N dense ^N oak and bound
+with ^N metal ^N ribs] ; chests
+; 
+[700:an antique - and it's ticking] ; grandmother clock
+; 
+[701:of green ^N velvet, and covering the whole west wall] ; curtain 
+; 
+[702:a ^N giving a very clear 
+view of your every move] ; mirror 
+; 
+[711:somewhat obscure: 
+%"My father is dark, 
+%My mother's unknown. 
+%I dwell in high places, 
+%and where the ghosts moan"] ; riddle
+; 
+[712:made of strong ^N hessian] ; rope
+; 
+[713:larger than of ^N yore, it has grown to some 7 feet across, and 
+glows ^N brightly] ; red moon 
+; 
+[714:covered with ancient scribblings] ; sarcophagus
+; 
+[715:it is very ^N sharp and ^N sticks up through a ^N hole in the 
+^N floor] ; sword point 
+; 
+giving a very clear 
+view of your every move] ; mirror 
+; 
+[711:somewhat obscure: 
+%"My father is dark, 
+%My mother's unknown. 
+%I dwell in high places, 
+%and where the ghosts moan"] ; riddle
+; 
+[712:made of strong ^N hessian] ; rope
+; 
+[713:larger than of ^N yore, it has grown to some 7 feet across, and 
+glows ^N brightly] ; red moon 
+; 
+[714:covered with ancient scribblings] ; sarcophagus
+; 
+[715:it is very ^N sharp and ^N sticks up through a ^N hole in the 
+^N floor] ; sword point 
+; 
+[716:it has been sorely misused over the years, and is covered 
+with gouges hacked in it by the over-enthusiastic wielding of a 
+meat cleaver. The word "MAD" is carved in chunky letters] ; table
+; 
+[717:it is made of elegantly carved ^N mahogany, with 
+mother-of-pearl inlays] ; wardrobe 
+; 
+[718:it's ^N sticky, in much the same way that water isn't] ; web 
+; 
+[719:it slimes desperately across the floor, chittering with 
+terror] ; nasty something 
+; 
+[720:neatly stacked, all ^N ready for a ^N fire] ; wood pile
+; 
+[721:stuck firmly in the ^N ceiling] ; sword hilt 
+; 
+[722:a ^N strong ^N vine with a good, ^N straight ^N trunk, 
+^N clinging tenaciously to the ^N side of the ^N house] ; vine 
+; 
+[723:a model which re-enacts, through endless repetitions, 
+the ^N massacre in the ^N council ^N chamber which brought 
+^N Myglar to power] ; wargame 
+; 
+[724:a picture of a scrawny female ^N healer, plying her wares in a 
+crowded market-place] ; tapestry 
+; 
+[725:a ^N dirty ^N yellow] ; snow 
+; 
+[726:about 10 tonnes, I would say] ; weight 
+; 
+;; [727-728] 
+; 
+[729:of ^N Stonehenge, cut off from the ^N people by 
+^N blood-stained ^N razor-wire] ; picture of Stonehenge
+; 
+[730:of a hellish ^N beast, clawing its way through the dark 
+places beneath the earth] ; picture of dark spawn 
+; 
+[731:of foul ^N beasts ^N howling at the ^N moon. They are incredibly 
+ugly] ; picture of moonbeasts 
+; 
+[732:of a ^N ghoul ^N feasting happily on the ^N remains of a 
+familiar ^N adventurer] ; picture of ghoul 
+; 
+[733:of a family of ^N werewolves] ; picture of werewolves 
+; 
+[734:of an ^N evil-looking ^N man, gloating over the ^N red ^N moon 
+^N crystal as he sucks at its power] ; portrait 
+; 
+[735:] 
+; 
+[736:a fine ^N specimen of ^N humanity] ; you
+; 
+[737:much like a small trout] ; fish 
+; 
+[738:a ^N magnificent ^N oak ^N door with embossed ^N knobs on 
+every panel. The word "ESP" is moulded roughly into the ^N brass 
+^N knocker] ; front door 
+; 
+[739:like a ^N hawk's. Not a single thing escapes your ^N piercing 
+^N gaze] ; eyes
+; 
+[740:made of ^N beautifully ^N carved ^N wood] ; panels 
+; 
+[741:an ^N ordinary ^N wooden ^N door] ; door 
+; 
+; Short-Form room Descriptions (1000+N). NO full stops at end please. 
+; 
+; first 46 are ON, others are IN, except where otherwise stated
+; 
+[1001:a dark and ^N winding ^N drive] 
+[1002:a rickety ^N woodshed] ; IN ...
+[1003:a ^N herb ^N garden] 
+[1004:a ^N roof ^N garden] 
+[1005:a ^N vine] 
+[1006:a ^N vine] 
+[1007:the top of the ^N vine] 
+[1008:a ^N sloping ^N roof] 
+[1009:a ^N roof] 
+; 
+[1018:a ^N grassy ^N plain] 
+[1019:a ^N grassy ^N plain] 
+[1020:some ^N steps] 
+[1021:some ^N steps] 
+[1022:some ^N steps] 
+[1023:some ^N steps] 
+[1024:some ^N steps] 
+; 
+[1026:a ^N strange ^N rock ^N formation] 
+[1027:a ^N grassy ^N plain] 
+[1028:a ^N volcanic ^N rock ^N outcrop] 
+[1029:a ^N grassy ^N plain beside a ^N pillar] 
+[1030:a sullen ^N standing ^N stone] 
+[1031:a sullen ^N standing ^N stone] 
+[1032:a sullen ^N standing ^N stone] 
+[1033:a sullen ^N standing ^N stone] 
+[1034:a sullen ^N standing ^N stone] 
+[1035:a sullen ^N standing ^N stone] 
+[1036:a sullen ^N standing ^N stone] 
+[1037:a cold ^N pillar] 
+[1038:a cold ^N pillar] 
+[1039:a cold ^N pillar] 
+[1040:a cold ^N pillar] 
+[1041:a cold ^N pillar] 
+[1042:a carved ^N pedestal] 
+; 
+[1044:a ^N lake ^N shore] 
+[1045:a ^N yellow ^N river] 
+[1046:a ^N slide of ^N slime] 
+; IN from here on except where stated...
+[1047:a ^N slime ^N room]
+[1048:a ^N damp ^N cave] 
+[1049:a ^N river bed] ; ON
+[1050:the ^N river] 
+[1051:an ancient ^N boardwalk] ; ON
+[1052:the rickety ^N landing ^N stage] ; ON
+[1053:a ^N watery ^N tunnel] 
+[1054:a ^N watery ^N tunnel] 
+[1055:a ^N boardwalk] 
+; 
+[1056:a ^N rock-walled ^N room] 
+[1057:a ^N dark ^N room] 
+[1058:a ^N silvery ^N room] 
+[1059:a ^N dangerous ^N dead ^N end] 
+[1060:a ^N winding ^N corridor] 
+[1061:a ^N hall ^N hung with ^N paintings] 
+[1062:a ^N dry ^N gallery] 
+; 
+[1065:a ^N once-good ^N room] 
+[1066:a ^N mistN temple, beside an ^N altar] 
+[1083:a room just south of a ^N glowing ^N gateway] 
+[1084:an ^N ice ^N room] 
+[1085:a ^N moon ^N room] 
+[1086:a ^N shadowy ^N alcove] 
+[1087:the north ^N tower] 
+[1088:a ^N dead end] 
+; 
+; The mists of time maze has but one description 
+; for rooms 90-115 and this is it: 
+; 
+[1090:the ^N mists of ^N time] 
+; 
+[1116:a ^N landing] 
+[1117:the ^N doorway to an ^N attic] 
+[1118:the west of an ^N attic] 
+[1119:the east of an ^N attic] 
+[1120:a ^N recess] 
+[1121:anN temple, beside an ^N altar] 
+[1083:a room just south of a ^N glowing ^N gateway] 
+[1084:an ^N ice ^N room] 
+[1085:a ^N moon ^N room] 
+[1086:a ^N shadowy ^N alcove] 
+[1087:the north ^N tower] 
+[1088:a ^N dead end] 
+; 
+; The mists of time maze has but one description 
+; for rooms 90-115 and this is it: 
+; 
+[1090:the ^N mists of ^N time] 
+; 
+[1116:a ^N landing] 
+[1117:the ^N doorway to an ^N attic] 
+[1118:the west of an ^N attic] 
+[1119:the east of an ^N attic] 
+[1120:a ^N recess] 
+[1121:an ^N office] 
+[1122:a ^N belfry] 
+[1123:a ^N marble ^N hall] 
+[1124:a ^N room with a ^N large ^N table] 
+[1125:a small ^N landing] 
+[1126:a ^N musty ^N hall] 
+[1127:a ^N spiral ^N stair] 
+[1128:a ^N stairway] 
+[1129:an oak ^N panelled ^N corridor] 
+[1130:a ^N cellar] 
+[1131:an old ^N sea-dog's ^N room] 
+[1132:a ^N white-wood ^N corridor] 
+[1133:a ^N store ^N room] 
+[1134:an ^N oak ^N panelled ^N corridor] 
+[1135:a ^N store ^N room] 
+[1136:an ^N arch-roofed ^N corridor] 
+; 
+[1137:a ^N laboratory] 
+[1138:a ^N solarium] 
+[1139:a ^N collapsing ^N junction] 
+[1140:a ^N sagging ^N corridor] 
+[1141:a ^N rest ^N room] 
+[1142:a ^N library] 
+[1143:a ^N library] 
+[1144:a ^N study] 
+[1145:a ^N dusty ^N priest ^N hole] 
+[1146:a ^N cold ^N room] 
+[1147:a ^N magnificent ^N treasury] 
+[1148:an ^N alcove] 
+[1149:a ^N hole] 
+[1150:a ^N better ^N hole] 
+[1151:a ^N distorted ^N junction] 
+[1152:among ^N hanging ^N tentacles] 
+[1153:a ^N store ^N room] 
+[1154:an ^N entrance ^N hall] 
+[1155:an ^N alcove] 
+[1156:an ^N entrance ^N hall] 
+[1157:a ^N broom ^N cupboard] 
+[1158:an ^N elm ^N panelled ^N corridor] 
+[1159:a ^N cupboard] 
+[1160:a ^N panelled ^N corridor] 
+[1161:a ^N rough-hewn ^N tunnel] 
+[1162:a ^N butler's ^N passage] 
+; 
+[1163:a ^N store ^N room] 
+[1164:a ^N store ^N room] 
+[1165:some ^N steps] 
+[1166:a ^N circular ^N room] 
+[1167:a ^N pentagonal ^N room] 
+[1168:a ^N triangular ^N room] 
+[1169:a ^N store ^N room] 
+[1170:a ^N store ^N room] 
+[1171:a red ^N room] 
+[1172:a green ^N room] 
+[1173:some ^N steps] 
+[1174:a ^N sloping ^N room] 
+[1175:a low ^N cellar] 
+[1176:a ^N room ^N smelling unpleasantly of ^N incense] 
+[1177:a short ^N corridor] 
+[1178:a ^N cloakroom] 
+[1179:a ^N store ^N room] 
+[1180:a ^N pantry] 
+[1181:a ^N depressing ^N junction] 
+[1182:a ^N cold ^N store] 
+[1183:a ^N scullery ^N kitchen] 
+[1184:a ^N corridor with ^N shelving from ^N wall-to-wall and 
+^N floor-to-ceiling] 
+[1185:a ^N tiled ^N corridor] 
+[1186:a ^N tight ^N squeeze] 
+[1187:a ^N stone ^N archway] 
+[1188:a ^N limestone ^N cave with ^N torches on the ^N wall] 
+[1189:a ^N stone ^N platform] 
+[1190:a ^N rotting ^N wood ^N room] 
+[1191:a stupendous ^N cavern] 
+[1192:a ^N grotto] 
+[1193:some rickety ^N steps] 
+; 
+[1194:a ^N laboratory] 
+[1195:a perfectly ^N spherical ^N junction] 
+[1196:a ^N glass ^N cave] 
+[1197:a ^N short ^N stone ^N corridor] 
+[1198:a ^N storeroom] 
+[1199:a ^N misty ^N room] 
+[1200:a ^N glass ^N room] 
+[1201:a ^N hall of ^N statues] 
+[1202:a ^N pillar] 
+[1203:some ^N steps] 
+[1204:some ^N steps] 
+[1205:some ^N steps] 
+[1206:a ^N spherical ^N rock ^N bubble] 
+[1207:a ^N spherical ^N rock ^N bubble] 
+[1208:a ^N spherical ^N rock ^N bubble] 
+[1209:an ^N arched ^N stone ^N corridor] 
+[1210:a ^N jet-black ^N room] 
+[1211:an ^N arched ^N stone ^N corridor] 
+[1212:an ^N arched ^N stone ^N corridor] 
+[1213:an ^N arched ^N stone ^N corridor] 
+[1214:a ^N jade ^N room] 
+[1215:a ^N statue-lined ^N room] 
+[1216:an ^N entrance ^N hall] 
+[1217:a palatial ^N portico] 
+[1218:a huge ^N hall of ^N swirling ^N mist] 
+[1219:a ^N cylindrical ^N chamber] 
+[1220:a ^N stone ^N room] 
+[1221:a ^N great ^N stone ^N room] 
+[1222:the ^N tomb of ^N Myglar] 
+; 
+; Now long additions to location descriptions (1300+n). 
+; These are printed immediately after the short description, without 
+; any intervening punctuation (you may start this message with either 
+; punctuation or just text) 
+; 
+[1301: just to the south of a ^N house, whose venerable magnificence 
+has decayed through years of abandonment and neglect. It stands, 
+desolate and hollow-windowed, a malevolent shadow of its former 
+self. Gnarled ^N creepers cling ^N desperately 
+to the ^N walls, almost completely ^N enveloping the ^N building. 
+A huge ^N carved door with a ^N blackened ^N brass ^N knocker in the 
+shape of a ^N griffin's ^N head is set in the middle of the 
+^N sprawling ^N facade] ; facade was ^N FRONT 
+; 
+[1302: which is slowly sinking into the ^N dank marsh that has 
+grown up and ensteadily on the ^N slick ^N grey ^N slates] 
+; 
+[1309:, high above the ^N dismal ^N marshes and ^N mist-covered 
+^N plain] 
+;; [1310,1311,1312,1313,1314,1315,1316,1317] 
+; 
+[1318:, mist-covered and stretching into obscurity] 
+; 
+[1319:, where the ^N dew hangs like ^N jewels and ^N cold ^N mist 
+gathers] 
+; 
+[1320: leading around and up to a ^N Gothic ^N portico] 
+; 
+[1321:, in the middle of the ^N great ^N staircase]
+; 
+[1322:, that are ^N part of a ^N single ^N stone ^N staircase] 
+; 
+[13nsteadily on the ^N slick ^N grey ^N slates] 
+; 
+[1309:, high above the ^N dismal ^N marshes and ^N mist-covered 
+^N plain] 
+;; [1310,1311,1312,1313,1314,1315,1316,1317] 
+; 
+[1318:, mist-covered and stretching into obscurity] 
+; 
+[1319:, where the ^N dew hangs like ^N jewels and ^N cold ^N mist 
+gathers] 
+; 
+[1320: leading around and up to a ^N Gothic ^N portico] 
+; 
+[1321:, in the middle of the ^N great ^N staircase]
+; 
+[1322:, that are ^N part of a ^N single ^N stone ^N staircase] 
+; 
+[1323:, part of the ^N great ^N staircase that leads to an ^N ancient 
+^N portico] 
+; 
+[1324: leading around and up to a ^N Gothic ^N portico] 
+;; [1325,1326] 
+; 
+[1327: where the ^N mist curls damply] 
+;; [1328,1329,1330,1331,1332,1333,1334,1335,1336,1337,
+;;  1338,1339,1340,1341,1342,1343,1344] 
+; 
+[1345: which oozes through a ^N deep ^N chasm] 
+; 
+[1346: which glistens viscidly against the ^N yellow ^N mud] 
+;; [1347,1348] 
+; 
+[1349:. The water bubbles past, cool against your sides, while 
+strange creaks and groanings sound from the ^N depths] 
+; 
+[1350:, sussurating gently like a still sea at midnight] 
+; 
+[1351:, its ^N timbers creaking slightly beneath your feet] 
+; 
+[1352:, quivering to the rhythm of the ^N waves] 
+; 
+[1353:, cold and damp] 
+; 
+[1354: whose chilly air carries a hint of rottenness] 
+; 
+[1355:, listening to the sound of rushing waters flowing in the 
+darkness of the ^N cave beyond] 
+; 
+[1356:, where the air trembles with the far-off boom of rushing 
+waters] 
+; 
+[1357:. The atmosphere is heavy, as though charged with mystic power] 
+; 
+[1358:. The walls shimmer with an ethereal light] 
+;; [1359:] 
+; 
+[1360: which twists and turns aimlessly] 
+; 
+[1361: showing desolate ^N landscapes] 
+; 
+[1362:, panelled with ^N wood which glows like sleepy afternoon sunlight] 
+;; [1363,1364] 
+; 
+[1365: now fallen into disrepair] 
+; 
+[1366:, where phantom voices whisper in your ears] 
+; 
+[1367:. Forbidding ^N grey ^N walls tower on every side and 
+wide-eyed ^N gargoyles leer down] 
+; 
+[1368:, its walls hung with ^N red ^N velvet] 
+; 
+[1369:; a ^N peaceful ^N room, sparsely furnished] 
+; 
+[1370:, ^N wood-panelled, like the ^N sanctum, but unkempt and 
+neglected] 
+; 
+[1371:, its ^N cold ^N stone ^N walls and ^N vaulted ^N roof hung with 
+^N dusty ^N cobwebs] 
+; 
+[1372:. The ^N walls are pocked with tiny alcoves, each holding a 
+^N neat ^N pile of ^N bones] 
+; 
+[1373:, its ^N arched ^N entrance engraved with ^N indecipherable 
+^N runes] 
+; 
+[1374:, its walls carved with scenes from the life of the ^N master] 
+;; [1375:] 
+; 
+[1376:, carved into ^N wicked ^N shapes] 
+; 
+[1377:. The word "FLY" is picked out in a ^N bright ^N mural on 
+the floor] 
+;; [1378:] 
+; 
+[1379:; a ^N great ^N mausoleum, buried beneath the ^N earth] 
+; 
+[1380:, in pristine condition, its white walls and surfaces 
+gleaming in the cold air] 
+;; [1381:] 
+; 
+[1382:. ^N Wind ^N chimes hang from the ceiling, tinkling 
+melodically with children's voices] 
+;; [1383,1384,1385] 
+; 
+[1386: to the ^N north of the ^N attic] 
+; 
+;; [1387,1388,1389,1390,1391,1392,1393,1394,1395,1396,
+;;  1397,1398,1399,1400,1401,1402,1403,1404,1405,1406,
+;;  1407,1408,1409,1410,1411,1412,1413,1414,1415] 
+; 
+[1416: above a ^N staircase spiralling down into the gloom] 
+; 
+[1417:, ^N bare ^N boards beneath your feet] 
+;; [1418] 
+; 
+[1419: with a ^N sloping ^N ceiling that droops despondently] 
+; 
+[1420:, which was hidden behind the ^N mirror] 
+;; [1421:] 
+; 
+[1422: where ^N mist curls sleepily through the ^N slatted ^N shutters] 
+; 
+[1423:, its ^N ceiling supported by ^N graceful ^N columns] 
+; 
+[1424:. The ^N walls are hung with ^N faded ^N pictures, some in 
+^N watercolour, some in ^N gouache] 
+;; [1425,1426] 
+; 
+[1427:, its ^N cold ^N stone ^N steps hollowed by long usage] 
+; 
+[1428: the ^N banister smooth and cold under your grasping hand] 
+;; [1429:] 
+; 
+[1430:, still dry and cool, though all around has fallen into 
+neglect and ruin] 
+; 
+[1431:, an extraordinary place, like the ^N bridge of a ship] 
+;; [1432,1433] 
+; 
+[1434:. Its ^N ancient ^N panels sound strangely hollow] 
+;; [1435:] 
+; 
+[1436:, walls lined by ^N torches] 
+; 
+[1437:. There is a strong ^N chemical ^N smell and one wall is 
+blackened by an explosion. The word "SEE" is scratched in the soot] 
+;; [1438:] 
+; 
+[1439:. Every slightest sound sets off a trickle of dust and an 
+^N ominous ^N rumbling] 
+; 
+[1440:, its ^N ceiling bulging towards the ^N ground, its ^N walls 
+bowing outwards] 
+;oor have been pruned so that 
+they can do little but waggle their ^N stumps] 
+; 
+[1453:. ^N Great ^N jars and ^N bottles line the walls] 
+;; [1454:] 
+; 
+[1455:, almost completely filled by a ^N huge, ^N leather-and-wood 
+^N porter's ^N chair, which commands a view of every exit] 
+; 
+[1456: of the ^N ruined ^N mansion] 
+;; [1457,1458,1459,1460] 
+; 
+[1461:, carved from the ^N living ^N rock] 
+;; [1462,1463,1464,1465,1466,1467] 
+; 
+[1468: like being inside of a ^N three-sided ^N pyramid] 
+; 
+[oor have been pruned so that 
+they can do little but waggle their ^N stumps] 
+; 
+[1453:. ^N Great ^N jars and ^N bottles line the walls] 
+;; [1454:] 
+; 
+[1455:, almost completely filled by a ^N huge, ^N leather-and-wood 
+^N porter's ^N chair, which commands a view of every exit] 
+; 
+[1456: of the ^N ruined ^N mansion] 
+;; [1457,1458,1459,1460] 
+; 
+[1461:, carved from the ^N living ^N rock] 
+;; [1462,1463,1464,1465,1466,1467] 
+; 
+[1468: like being inside of a ^N three-sided ^N pyramid] 
+; 
+[1469:: a rather ^N pokey ^N room in which are kept all kinds of 
+^N stationery. ^N Quills, ^N ink, and books of ^N gold and ^N silver 
+^N leaf are neatly contained in ^N wooden ^N pigeon-holes] 
+; 
+[1470: which once housed ^N bales of ^N cloth] 
+; 
+[1471:. Every ^N surface is ^N lacquered a different ^N shade of 
+^N crimson] 
+;; [1472,1473,1474,1475,1476,1477,1478,1479,1480,1481] 
+; 
+[1482:, whose ^N freezing ^N air catches in your throat] 
+;; [1483,1484] 
+; 
+[1485: with a ^N repeating ^N pattern of ^N dinky ^N milk ^N jugs, 
+^N apples, and ^N dead ^N peasants] ; yes, I do mean peasants! 
+; 
+[1486:, squeezing tightly] 
+; 
+[1487: that leads out into a ^N mist-shrouded ^N plain] 
+;; [1488,1489,1490] 
+; 
+[1491:. Water cascades over ^N tumescent stone the colour of 
+^N candy ^N floss] 
+; 
+[1492:, a ^N small ^N cave, carved by the passage of water long 
+since gone, into ^N fantastic ^N shapes and ^N hollows. Here is the 
+^N likeness of a ^N lion's ^N head; there, a ^N whale sports amid 
+the ^N billowing ^N waves] 
+; 
+[1493: that creak and quiver ominously beneath your feet] 
+; 
+[1494: that would have done credit to Dr. Frankenstein's madder 
+moments] 
+; 
+[1495:, which is confusing at first, until you get the hang of 
+scrabbling around the ^N glassy-smooth ^N floor] 
+; 
+;; [1496,1497,1498,1499,1500] 
+; 
+[1501:, a ^N motley ^N collection of ^N monstrosities on the "^N chubby 
+^N child" theme] 
+;; [1502:] 
+; 
+[1503:, their ^N worn ^N stone ^N treads cold beneath your feet] 
+;; [1504:] 
+; 
+[1505:, and your head reels from the continual turning] 
+;; [1506,1507,1508,1509,1510] 
+; 
+[1511: like an ^N enclosed ^N cloister] 
+; 
+[1512: and your every footstep echoes between its ^N fluted ^N pillars] 
+;; [1513,1514] 
+; 
+[1515:, where ^N representations of ^N cruel and ^N ancient ^N gods 
+alternate with ^N death ^N masks] 
+; 
+[1516:. Echoes whisper around the walls, eerily mocking the 
+sound of your breathing] 
+; 
+[1517:, its ^N pointed ^N roof supported on ^N four ^N huge ^N columns 
+of ^N figured ^N marble]
+; 
+[1518:, where ^N unseen ^N things caress your hands and face] 
+;; [1519:] 
+; 
+[1520:, whose ^N walls are carved with the ^N graffiti of a 
+^N dozen ^N times and ^N tongues] 
+;; [1521,1522] 
+; 
+; Parser messages... 
+; 
+[2000:you are on ] 
+[2001:you are in ] 
+[2003:you can't use the word ] 
+[2004: like that] 
+; 
+[2005:I don't know the word ] 
+; 
+; general error message when parsing has broken down. 
+[2010:I don't understand what you mean by that] 
+; 
+[2011:you can't see] 
+[2012:you don't have] 
+[2013:you already have] 
+;; [2014:can't say that. ] 
+[2017:it's not there. ] 
+; 
+[2020:don't be silly. ] 
+[2021:strange concept. ] 
+[2022:say what? ] 
+[2023:nice try. ] 
+; 
+; that's scenery group... 
+[2030:leave it alone. ]
+[2031:forget about it. ] 
+[2032:ignore it. ] 
+; 
+; now must supply an object group... 
+[2033:you must supply an object. ] 
+[2034:that verb needs an object. ] 
+[2035:could you elaborate? ] 
+ 
+[2036:absolutely nothing happens. ] 
+; ^ verb in keyword table but not in CALLVERB routine 
+; 
+[2039:what a mouthful! ] 
+; 
+[2042:you can't ] 
+;; [2043: on that. ] 
+[2044:you can't ] 
+[2045:that. ] 
+; 
+; again used following a command referring to scenery. Group... 
+[2050:the previous command was not repeatable. ] 
+[2051:you can't repeat that. ] 
+[2052:it wouldn't help to try that again. ] 
+; 
+[2053:it's not clear to what IT is referring. ] 
+; 
+[2055:(removing] ; E.g "(Removing the bat from the cage first)". 
+[2056:from the] ; to avoid containers inside themselves. 
+[2057:first). ] 
+; 
+; error messages for NPC's 
+[2060:enjoy talking to yourself, do you?] 
+[2061:you can't talk to several people at once. ] 
+[2062:stops, looking confused. ] 
+[2063:looks puzzled. ] 
+[2064:seems annoyed. ] 
+; 
+[2065:looks around, as if searching for something. ] 
+[2066:drops ] 
+[2067:takes ] 
+[2068:gives ] 
+[2069:opens ] 
+[2070:you hear a scream in the distance] 
+[2071: won't let you. ] 
+[2072:has too firm a grip on it. ]nsity. But its power proved too tempting for one 
+magician; Myglar by name. Thinking to have eternal life, he stole 
+the moon and locked himself away. One last hero would have to 
+defeat this last threat to history and recover the crystal, even 
+if it meant paying the price of magik...] 
+[2101:you can't see] 
+[2102:you don't have] 
+[2103:you already have] 
+[2104:you can't see that here. ] 
+; 
+[2106:you own nothing at all! ] 
+[2108:it is pitch dark. ] 
+; 
+[2109:nothing happens. ] ; Nothing happensity. But its power proved too tempting for one 
+magician; Myglar by name. Thinking to have eternal life, he stole 
+the moon and locked himself away. One last hero would have to 
+defeat this last threat to history and recover the crystal, even 
+if it meant paying the price of magik...] 
+[2101:you can't see] 
+[2102:you don't have] 
+[2103:you already have] 
+[2104:you can't see that here. ] 
+; 
+[2106:you own nothing at all! ] 
+[2108:it is pitch dark. ] 
+; 
+[2109:nothing happens. ] ; Nothing happens group 
+[2110:doesn't seem to work. ] 
+[2111:there is no effect. ] 
+; 
+; examining something greater than maxobject: (but not scenery). It's 
+; a rare occurrence - mostly for omnipresent objects, numbers, spells. 
+[2112:it looks exactly as you would expect. ] 
+; 
+[2113: nothing. ] 
+[2114:you can't go that way. ] 
+[2115:you bump into the door. ] 
+[2116:the door closes behind ] 
+[2117:it's already open. ] 
+;; [2118:it's already closed. ] 
+[2119:you find] 
+; 
+[2120:you can't move that. ] ; tried to take (move) fixed object 
+[2121:it doesn't budge. ] ; (person) group 
+[2122:it won't move. ] 
+; 
+[2123:you can't put it there. ] 
+[2125:you can't go there! ] 
+[2126:you'll have to drop it first. ] 
+; 
+[2127:you can't climb that. ] 
+;; [2128:you can't drop that. ] 
+[2129:wheee! That was fun. ] ; jump to no effect 
+; 
+; 2130 is used when player refers to scenery which is not nearby 
+[2130:I can't see it. ] 
+[2131:you're on it! ] 
+[2132:what? ] 
+[2133:where? ] 
+[2134:you're wearing it! ] 
+[2135:Please try again, saying what with? ] 
+[2136:which one?] 
+[2137:at what?] 
+[2138:you can't carry any more. ] 
+[2139:is full. ] 
+; 
+[2142:you can't wear that. ] 
+[2143:you can't reach it from here. ] 
+; 
+[2144:don't bother. ] ; don't bother group 
+[2145:that would be a waste of time. ] 
+[2146:that's pointless. ] 
+[2147:you're already wearing that. ] 
+[2148:you don't need to do that. ] 
+[2149:you slither down a greasy chute, which slams shut behind you. ] 
+; 
+; Confirmation messages 
+; 
+[2150:taken. ] 
+[2151:dropped. ] 
+[2152:worn. ] 
+[2153:OK. ] 
+[2154:yeuch! ] ; don't want to eat it 
+[2155:time passes. ]
+[2156:said. ] 
+[2157:most refreshing. ] ; water / other pleasant liquids 
+; 
+[2160:YES or NO please.%] 
+; 
+[2172:nobody wants that. ] 
+[2173:you hear nothing special. ] 
+[2174:you smell nothing special. ] 
+[2175:"Hullo, boss". ] 
+[2176:you polish it till it shines. ] 
+; 
+[2180:a bolt of lightning singes your ears.] 
+; 
+[2190:(] 
+[2191:). ] 
+; 
+; Death, scoring, game control etc. 
+; 
+[2200:really restart? ] 
+[2201:%press space to play again. ] 
+;; [2202:really restore? ] 
+[2203:%please answer YES or NO] 
+;; [2204:you score ] 
+;; [2205: out of 1000 and are ] 
+[2206:you seem to be dead. You got to be ] 
+[2207:do you want to continue? ] 
+[2208:your sanity is shaken. ] 
+[2209:thy adventure is over. Enter RESTART or RESTORE (or UNDO//RAM 
+RESTORE on a big BBC). ] 
+; 
+; Ratings 
+[2250:an archmage] 
+[2251:a mage] 
+[2252:a wizard] 
+[2253:a magician] 
+[2254:a sorcerer] 
+[2255:a spellbinder] 
+[2256:a shaman] 
+[2257:a soothsayer] 
+[2258:a conjuror] 
+[2259:a sorcerer's apprentice] 
+[2260:a novice] 
+; 
+; Help messages 
+[2270:sorry: I can't help you with this one. ] 
+[2271:try climbing the vine or opening the door. ] 
+[2272:perhaps you need magical help. ] 
+[2273:the eyebright may be of some assistance. ] 
+[2274:you don't have to smash the mirror to get rid of it. ] 
+; 
+[2300:there's not enough memory for UNDO and RAM SAVE//RESTORE. ] 
+; 
+[2308:can't use UNDO to go back further than this. ] 
+[2309:(This BBC allows RAM SAVE and RAM RESTORE to save a position 
+in memory, and UNDO to retrace your steps). ] 
+[2310:can't return to that saved position in memory. Perhaps 
+you've restarted the game, since it was saved. ] 
+;; [2311:%read "OK" and press space.%] 
+;; [2315:and you solved the previous parts of the trilogy. ] 
+; 
+;At end of final game: 
+[2316:%Well done! You have solved the entire trilogy with a 
+display of supreme brilliance, cleverness, ingenuity, intelligence, 
+perspicacity, insight, intuition, sagacity, imagination, wisdom and 
+sheer genius. Not to mention enduring persistence. This proves you 
+to be an intellectual, mastermind and mental giant, all rolled into 
+one! ] 
+; 
+[2319:Time & Magik is copyright (C) 1988 Level 9 Computing; program 
+by Mike, Nick and Pete Austin; additional text from Ruth Pracey. ] 
+; 
+[2320:sorry, you're on your own here. ] 
+; 
+[2400:really restore? ] 
+;; 
+[2401:remove the Time and Magik dis about to move to another part of the game. Do you 
+;; want to save your position first, just in case? ] ; tape ***
+[2412:that data was probably not saved from Time and Magik. ] 
+;; [2413:play the program cassette containing "] ; tape *** 
+;; [2414:Lords of Time". ] ; part 1 tape ***
+;; [2415:Red Moon". ] ; part 2 tape ***
+;; [2416:Price of Magik". ] ; part 3 tape ***
+; 
+; 'Game play' messages... 
+[2500:the mandrake is resting peacefully in one corner of the garden. ] 
+[2501:the mandrake screams i about to move to another part of the game. Do you 
+;; want to save your position first, just in case? ] ; tape ***
+[2412:that data was probably not saved from Time and Magik. ] 
+;; [2413:play the program cassette containing "] ; tape *** 
+;; [2414:Lords of Time". ] ; part 1 tape ***
+;; [2415:Red Moon". ] ; part 2 tape ***
+;; [2416:Price of Magik". ] ; part 3 tape ***
+; 
+; 'Game play' messages... 
+[2500:the mandrake is resting peacefully in one corner of the garden. ] 
+[2501:the mandrake screams in terror as you grab its leaves. ] 
+[2502:as you brutally wrench it from the ground, some things fall 
+from its roots. ] 
+[2503:the mandrake heaves a sigh of relief.] 
+[2504:it is burning weakly. ] ; the candle 
+[2505:the last of the candle burns away! ] 
+[2506:the woodpile bursts into flames and within moments is 
+reduced to ashes. ] 
+[2507:you can't light it. ] 
+[2508:you rub the eyebright into your eyes. ] 
+[2509:the mirror is in the way. ] 
+[2510:the mirror breaks into thousands of little pieces. ] 
+[2511:you score out a neat circle of glass and tap it gently. As 
+it falls away, the rest of the mirror shimmers and disappears. ] 
+[2512:you have no source of fire. ] 
+[2513:the nasty slithers away into a little hole. ] 
+[2514:the candle goes out. ] 
+[2515:rat-a-tat-tat! ] 
+[2516:You gingerly climb the ancient rope. ] 
+[2517:the door creaks slowly open... ] 
+[2520:you can hear vile slithering noises coming towards you. ] 
+[2521:the squelching noises are getting closer. ] 
+[2522:A nameless horror rears from the gloom. You pass out from 
+sheer terror. ] 
+[2523:the noises die away. ] 
+[2524:you are ] 
+;; [2525:slightly worried. ] 
+;; [2526:a little panicky. ] 
+;; [2527:sorely afraid. ] 
+;; [2528:scared witless. ] 
+;; [2529:you run in blind panic to the ] 
+; 
+[2530:it is less than half burnt. ] ; candle 
+[2531:it is more than half burnt. ] 
+[2532:there is only a tiny stump left. ] 
+; 
+[2539:the bat disappears into the mist then, after a short time, 
+returns and drops the wheel on your foot. ] 
+[2540:you almost fall over a wheel that some idiot has left lying 
+about. Before you can get it, the wheel rolls away out of sight in 
+the mist. ] 
+[2541:you can't seem to find it. The mist is really very thick in here. ] 
+[2542:the panels on the east wall sound hollow. ] 
+[2543:the panels sound normal. ] 
+[2544:about two thirds of the way along, one of the panels gives 
+slightly under your groping fingers, you hear a quiet "snick", and the 
+wall swings back. You have found a secret door to the east. ] 
+[2545:It rings. ] 
+; 
+[2550:the chest is coloured ] 
+[2551:the chests are coloured ] 
+[2552:as you start to lift the lid, there is a flash of light 
+and an enormous explosion. You are flung backwards as shards of 
+pulverised chest rain down. ] 
+[2553:it is closed. ] 
+[2554: (which is open)] 
+[2555:it is empty. ] 
+; 
+[2560:it is too far above your head. ] ; both inscription and sword hilt 
+[2561:it reads: "HYP". ] 
+[2562:you'll need to be much higher than this!] ; standing on something 
+; both inscription and sword hilt 
+; 
+[2565:the sword abruptly drops from sight and clatters into the room 
+below. ] 
+[2566:you could cut yourself, doing that. ] 
+[2567:the hilt is firmly fixed in the ceiling. ] 
+; 
+[2570:the curtain is in the way! ] 
+[2571:as your blow lands on the enchanted curtain, it shimmers 
+and fades away. ] 
+; 
+[2575:you dig a little hole. ] 
+[2576:you fill it in again. ] 
+[2577:you throw ] 
+[2578:into the hole. ] 
+[2579:I think you should fill in your last hole first. ] 
+[2580:the ground is too hard for digging here. ] 
+[2581:you have nothing to dig with. ] 
+[2582:you cut a staff from the vine. ] 
+; 
+[2610:the bat flies out of the cage, obviously furious at its 
+imprisonment] 
+[2611:the bat seems to be worried about something. ] 
+[2612:the bat swoops upon the bloodworm with a happy cry. This howls, 
+turns tail and wriggles off into the gloom. ] 
+[2613:the bat deftly avoids your grasp. ] 
+[2614:the bat can't manage to lift it. ] 
+; 
+[2615:the fish tries to grab it with one ^N fin, but fails. ] 
+[2616:you can't get a grip on it with your ^N fin. ] 
+; 
+[2620:somewhere nearby, you hear a clock strike. ] 
+[2621:the clock goes BOM. ] 
+[2622:the time is ] 
+[2623: am] 
+[2624: pm] 
+; 
+[2625:the salt hits the slug and it howls and slithers away. ] 
+[2626:on top of the altar is a small recess, previously hidden by 
+the moon. In here is written, "DED". ] 
+[2627:as soon as you touch the moon, a thrill runs through your 
+body, and you feel verPrepare to die"] 
+[2642:says, "Pass, master"] 
+; 
+[2650:the seething ants are between you and the door. ] 
+[2651:you float over the ants. ] 
+;; [2652:the ants cower away from you. ] 
+; 
+[2655:as you approach the talisman, the weight wobbles ominously. ] 
+[2656:as it moves, you hear a click. ] 
+[2657:the weight comes crashing down, squelching you beneath it. ] 
+[2658:a sudden thrill of terror runs down your spine, and you leap 
+back in panic. ] 
+[2659:the weight stays right where it is, suspendedPrepare to die"] 
+[2642:says, "Pass, master"] 
+; 
+[2650:the seething ants are between you and the door. ] 
+[2651:you float over the ants. ] 
+;; [2652:the ants cower away from you. ] 
+; 
+[2655:as you approach the talisman, the weight wobbles ominously. ] 
+[2656:as it moves, you hear a click. ] 
+[2657:the weight comes crashing down, squelching you beneath it. ] 
+[2658:a sudden thrill of terror runs down your spine, and you leap 
+back in panic. ] 
+[2659:the weight stays right where it is, suspended by your spell. ] 
+[2660:the weight crashes to the ground, crushing the altar beneath it. ] 
+[2661:the weight is suspended above the altar. ] 
+[2662:the weight is squatting on the ground where the altar once was. ] 
+; 
+[2665:there is a flash, and you feel yourself being propelled 
+through space... ] 
+[2666:the black ball absorbs the spell and crumbles into dust. ] 
+; 
+[2670:% %Well done, you have won the right to take Myglar's 
+place as guardian of the Red Moon crystal! There are two alternate 
+views of your future. Do you want the good version? ] 
+[2671:you live in a luxurious castle as an all-powerful magician, 
+tended hand and foot by loyal servants. Everyone lives in awe of 
+your wise magik and every millennium is more enjoyable than the 
+last. You have beaten the Price of Magik! ] 
+[2672:the quest for magik has driven you absolutely stark, staring 
+mad. You spend your time incarcerated in a modern asylum, cared for by 
+efficient nurses. They humour your obsession with chanting arcane 
+gibberish and your screams of "ZAP" and "KIL" when they bring you 
+your cocoa, so it's not a bad life. ] 
+; 
+[2680:"Hello fleshy", the golem grunts, "We don't get many of your 
+kind down here. I don't suppose you've got anything that I could wear 
+instead of this scratchy mail suit?" ] 
+;
+[2681:the golem thanks you curtly and quickly changes into the robes, 
+handing you the silver mail. ] 
+;
+[2682:"Huh!, I have my pride you know!" ] 
+; 
+[2690:you're not insane enough to go through the gateway. ] 
+[2691:head down, you charge right at the gate. ] 
+[2692:an invisible Something stops you and a phantom voice intones, 
+"Before any enter, a gift must be offered to Myglar". ] 
+[2693:the voice says impatiently, "That won't do. Absolute rubbish!" ] 
+[2694:the voice says, "Hmmm. I suppose that will do". ] 
+[2695: disappears. ] 
+[2696:the voice says, "One gift is quite sufficient, thank you". ] 
+; 
+[2700:as you go through it, a monkey drops onto your back. ] 
+[2701:there is a loud crack from the monkey and something falls 
+with a clatter. The monkey leaps from your back and runs away. ] 
+[2702:the monkey is clinging too tightly - it seems to be 
+locked in its position. ] ; trying to drop it 
+[2703:you start to shiver. ] 
+[2704:it may be your imagination, but the monkey seems to be shivering 
+pretty violently. ] 
+[2705:your teeth start to clatter like castanets. ] 
+[2706:the monkey's teeth are chattering! ] 
+; 
+[2710:the ferryman rasps, "Hands off my boat, you ill-mannered 
+little pod! "] 
+[2711:the ferryman mutters, "The fee for a crossing is a single item. 
+And I don't want no rubbish". ] 
+[2712:the ferryman says grudgingly, "I suppose that will do. Get 
+in". ] 
+[2713:the ferryman pulls doughtily on his oars and the boat moves 
+quietly through the water. ] 
+[2714:he pulls the boat onto the shore, and waits for you to get 
+out. "So long," he says. ] 
+;; [2715:you are in the boat. ] 
+[2716:you jump out of the boat - into icy cold water. ] 
+[2717:you flop into the water. ] 
+[2718:you can't hold your breath for long enough to read anything. ] 
+[2719:you flap about, desperately gasping for water. ] 
+[2720:the ferryman stops you. "Oi, Creep, this river is a closed shop", 
+he growls, champing his toothless jaws. "No crossing except by union 
+labour". ] 
+; 
+[2730:there is a feeling of magik. ] 
+[2731:it sounds almost like music. ] ; blow trumpet 
+[2732:the web collapses in a sticky heap, and the spider runs 
+away, gibbering with terror. ] 
+[2733:the moonbeast sees its reflection, yelps with terror and 
+gallops off into the gloom. ] 
+; 
+; miscellaneous spell messages 
+; first some witty (?) comments when the player casts a 
+; spell at something without a specific message 
+; all messages are preceded by "the target " 
+; and followed by ". " 
+[3000:does nothing] 
+[3001:is not affected] 
+[3002:is unchanged] 
+; 
+; now equivalent of above, for plural targets 
+[3010:do nothing] 
+[3011:are not affected] 
+[3012:are unchanged] 
+; 
+; spell responses - individual cases for eacl again] 
+[3181:looks very healthy now] 
+[3182:shudders violently, as if struck a mortal blow] 
+; 
+; BERSERK 
+[3200:feel a burning rage with the world] 
+[3201:jumps into the air, and comes charging at you with a 
+terrifying scream] 
+; 
+; WAKEN (BOM) 
+[3220:are awake, dummy] 
+[3221:wakening THAT is beyond your power] 
+;; [3222:it stirs feebly, then stops] 
+[3223:Myglar's already done that] 
+[3224:wakes with a jump, sees you, and flies off. 
+In its panic, it drops the trumpet it was carrying] ;l again] 
+[3181:looks very healthy now] 
+[3182:shudders violently, as if struck a mortal blow] 
+; 
+; BERSERK 
+[3200:feel a burning rage with the world] 
+[3201:jumps into the air, and comes charging at you with a 
+terrifying scream] 
+; 
+; WAKEN (BOM) 
+[3220:are awake, dummy] 
+[3221:wakening THAT is beyond your power] 
+;; [3222:it stirs feebly, then stops] 
+[3223:Myglar's already done that] 
+[3224:wakes with a jump, sees you, and flies off. 
+In its panic, it drops the trumpet it was carrying] ; cherub 
+[3225:wakes] ; idol 
+[3226:wakes] ; gargoyle 
+[3227:wakes] ; statue 
+[3228:it's already awake] 
+; 
+[3231:it comes to life. The assembled elders eye the psychotic 
+wizard with distaste, awaiting his explanations. But, instead 
+of addressing them, Myglar shrieks: "ZAP!" and "KIL!" and hurls 
+jagged lightning across the room. The scene flares, fades, and 
+the wargame is still again] 
+[3232:it briefly comes to life. The healer looks into your eyes and 
+mutters "FIX"] ; no end dot
+[3233:you are sucked into the picture] ;Stonehenge 
+[3234:a dark spawn bursts out of the picture] 
+[3235:the moonbeasts awaken and whimper miserably, cowering. They seem 
+terrified of each other] ; no end dot 
+[3236:the ghoul steps down from the picture and eyes your flesh 
+hungrily]  ; no end dots on these messages...
+[3237:the werewolves howl in chorus, then the picture becomes still]
+[3238:Myglar's image turns, stares from the wakened picture, and 
+taunts you for your lack of success in reaching his lair. ] ; needs dot 
+[3239:In its frenzy, it breaks a claw on the frame. ] ; needs end dot
+; 
+; ANALYSE (XAM) 
+[3240:are certainly not magik] 
+[3241:it's not magik] 
+[3242:that's for the ] 
+[3243: spell. ] 
+[3244:it's animated by powerful magik] 
+[3245:it's been animated] 
+[3246:it's enchanted] ; explosive chest 
+; 
+; WARD 
+[3260:feel very secure] 
+; 
+; FIND (SPY) 
+[3280:you see a vision of another place... ] ; then short room description
+[3281:nothingness. ] 
+;; [3282:yourself, looking remarkably foolish. ] 
+; 
+; MAZE 
+[3300:You are transported to another place.. ] 
+; 
+; ESP 
+[3320:you briefly see the inside of a wall. ] 
+[3321:your astral self floats into another room] ; no end dot
+[3322:you're only an astral image! ] ; not spell routine 
+[3323:you return to your body. ] ; not spell routine 
+; 
+; FLY 
+[3340:float into the air] 
+[3341:sink back down to the ground] 
+[3342:are floating in mid-air] 
+[3345:floats upwards] 
+[3346:sinks back down] 
+[3347:on the top of pedestal is the word "DED"] ; examine message 
+[3348:shudders, but remains exactly where it is] 
+[3349:floats upwards. It doesn't seem too happy about 
+the experience] 
+[3350:is floating. ] 
+[3351:it swings gently in the breeze. ] 
+;; [3352:but the blow has no force. ] 
+[3353:the floor is so cold that you jump back. ] ; ice room 
+; 
+; ZAP 
+[3360:are wreathed in jagged lightning] 
+[3361:is wreathed in jagged lightning] 
+[3362:Myglar cocks one finger and a thunderbolt smashes into you. ] 
+; 
+; DED (exorcise ALL magik) 
+[3380:there is a thunderclap and all nearby magik is neutralized] 
+[3381:there is a loud thunderclap as Myglar's magik is neutralized. He 
+crumples as Time regains its power, no longer held at bay by his 
+spells. Finally, nothing remains of the evil wizard but ancient dust] 
+; 
+; SANity 
+[3400:realise that magik is a delusion] 
+[3401:stares at you from newly sane eyes, haunted by the 
+realization of his crimes, and unwillingly draws his sword] ; Myglar 
+; 
+; IBM (fear) 
+[3420:feel terrified] 
+[3421:looks at you in terror] 
+[3422:try to hide in a corner] ; ants 
+; 
+; HYP 
+[3440:start to hypnotize yourself, but think better of it] 
+[3441:doesn't have much of a mind to hypnotize] 
+[3442:says, "No chance, mate. The Ferryman's training manual, 
+page 374, lines 7-9, gives three separate ways of nullifying 
+that spell"] 
+[3443:laughs at your puny spell] 
+[3444:looks at you expectantly] 
+[3445:ignores you. ] ; trying to talk to someone who is not HYPed 
+[3446:looks stony. ] ; trying to HYP statue / idol before BOM 
+; 
+; Combat messages 
+; 
+[3500:attack ] 
+[3501:attacks ] 
+[3502:with a ] 
+[3503: spell] 
+[3504:, causing ] 
+[3505: points of damage. ] 
+[3506:it is dead, the body vanishes. ] 
+[3507: point of damage. ] 
+ 
+[3510:. The blow strikes your ] 
+[3511:. The blow strikes its ] 
+[3512:. The spell strikes your ] 
+[3513:. The spell strikes its ] 
+[3514:, shattering it. ] 
+[3515:the spell strikes ] 
+[3516: spell wears off. ] 
+[3517: but you dodge. ] 
+[3518: but it dom the ] 
+[3541:enters from the ] 
+[3542:leave, going ] 
+[3543:leaves, going ] 
+; 
+[3550:that spell requires] 
+[3551: as focus. ] 
+[3552:that spell requires you to be less than ] 
+[3553: percent sane] 
+[3554:the spell expends itself harmlessly in mid-air. ] 
+[3555:that's not a spell !] 
+[3556: years old. ] 
+[3557:and feel ] 
+[3558:and felt ] 
+; 
+;; [3560:says, "] 
+; 
+; First, some special-case code for NPCs 
+[3570:says, "Take pity on me, most merciful adventurer. My bones have 
+been scattem the ] 
+[3541:enters from the ] 
+[3542:leave, going ] 
+[3543:leaves, going ] 
+; 
+[3550:that spell requires] 
+[3551: as focus. ] 
+[3552:that spell requires you to be less than ] 
+[3553: percent sane] 
+[3554:the spell expends itself harmlessly in mid-air. ] 
+[3555:that's not a spell !] 
+[3556: years old. ] 
+[3557:and feel ] 
+[3558:and felt ] 
+; 
+;; [3560:says, "] 
+; 
+; First, some special-case code for NPCs 
+[3570:says, "Take pity on me, most merciful adventurer. My bones have 
+been scattered. Please bury them so I may find peace at last"] 
+[3571:says, "I thank thee, adventurer, but wouldst thou leave the job 
+undone? I can only find peace when all my remains are thus 
+entombed"] 
+[3572:says, "Thank you, most noble adventurer. As a reward, I give you 
+two things. Firstly, you may take my armour which served me well 
+until I met my end. Secondly, some advice. BEWARE OF MYGLAR, for 
+his magik is deadly"] 
+; 
+[3574:says, "The armour is mine. You may have it if you bury my bones"] 
+[3575:a ghost appears. ] 
+; 
+;; 3600+ are responses from NPCs to certain types of comments from 
+;; players. First let's have some 'singing of gold' type messages 
+;; for when an NPC is feeling bored... 
+; 
+; FERRYMAN 
+[3600:cracks his knuckles] 
+[3601:mutters, "This job will be the death of me, rowing across 
+this stinking river, day and night"] 
+[3602:yawns broadly] 
+; 
+; BAT 
+[3603:eyes a vein in your neck] 
+[3604:whistles] 
+[3605:stretches its wings] 
+; 
+; GHOST 
+[3606:moans, "I cannot rest until my bones are buried"] 
+[3607:flaps about in the breeze, like a large, white sheet] 
+[3608:drones on and on about its fate] 
+; 
+; Standard NPC messages. Each picks from 3... 
+[3609:flaps its stone wings] ; *, *, Gargoyle 
+[3610:leaves footprints in the floor] ; *, Gargoyle, Statue 
+[3611:lumbers heavily forwards] ; Gargoyle, Statue, Bloodworm 
+[3612:doesn't move] ; Statue, Bloodworm, * 
+[3613:wriggles about] ; Bloodworm, *, Monkey 
+[3614:bares its teeth] ; *, Monkey, Moonbeast 
+[3615:growls angrily] ; Monkey, Moonbeast, Myglar 
+[3616:stares angrily at you] ; Moonbeast, Myglar, Spider 
+[3617:shuffles about] ; Myglar, Spider, Slug 
+[3618:focuses all its eyes in your direction] ; Spider, Slug, * 
+[3619:sways from side to side] ; Slug, *, Werewolf 
+[3620:seems to be trying to talk] ; *, Werewolf, * 
+[3621:rears up on its back legs] ; Werewolf, *, Dark Spawn 
+[3622:howls eerily] ; *, Dark Spawn, Ghoul 
+[3623:flexes its slab-like muscles] ; Dark Spawn, Ghoul, Golem 
+[3624:shuffles about] ; Ghoul, Golem, Mummy 
+[3625:stamps its feet] ; Golem, Mummy, * 
+[3626:rustles quietly as it moves] ; Mummy, *, Skeleton 
+[3627:rattles its bones angrily] ; *, Skeleton, * 
+[3628:strikes horror into your heart] ; Skeleton, *, Wight 
+[3629:seems to float in the air] ; *, Wight, Wraith 
+[3630:gropes out towards you] ; Wight, Wraith, Zombi 
+[3631:utters a low moan] ; Wraith, Zombi, * 
+[3632:holds its right ear in place] ; Zombi, *, * 
+; 
+; Responses to player saying "Hello"... 
+[3700:sleeps on peacefully] ; cherub 
+[3701:looks impassive] ; idol 
+[3702:says nothing] ; gargoyle 
+[3703:looks stony-faced] ; statue 
+[3704:doesn't seem to hear you] ; bloodworm 
+[3705:grunts, "Hello, Creep"] ; ferryman 
+[3706:gives you a brassy look] ; monkey 
+[3707:growls, menacingly] ; moonbeast 
+[3708:hisses, "Die, scum"] ; Myglar 
+[3709:clicks its mandibles] ; spider 
+[3710:waves its eyestalks in greeting] ; slug 
+[3711:cheeps in a friendly manner] ; bat 
+[3712:howls piteously] ; werewolf 
+[3713:take no notice of you at all] ; ants 
+[3714:lets out a blood-curdling shriek] ; dark spawn 
+[3715:stalks towards you menacingly] ; ghoul 
+[3716:smiles, exposing a row of beautiful iron teeth] ; golem 
+[3717:raises a bandaged arm] ; mummy 
+[3718:moans piteously] ; ghost 
+[3719:tries to speak, but no sound emerges] ; skeleton 
+;; [3720:smiles unpleasantly] ; vampire 
+[3721:says nothing] ; wight 
+[3722:says nothing] ; wraith 
+[3723:mumbles something] ; zombi 
+; 
+[3800:rattles its bones] 
+[3801:makes a strange clicking noise] 
+[3802:makes a mocking gesture] 
+; 
+; Things for NPCs to do when they don't understand the player. 
+; Remember, some of the NPCs can't talk, and the bloodworm can't 
+; do much at all. (The ants don't use these, by the way)...
+[3850:doesn't seem to care] 
+[3851:ignores you] 
+[3852:stifles a little yawn] 
+[3853:shrugs impressively] 
+[3854:looks at you strangely] 
+[3855:makes a mocking gesture] 
+[3856:yawns openly, obviously bored stiff by your chatter] 
+[3857:sneezes] 
+[3858:se
+^N bollocks ^N jesus ^N christ ^N god ^N coon ^N wog ^N fucking 
+^N bastard ^N bugger ^N damn ^N hell ^N devil ^N nerd ^N crap]  
+; 
+; Garbage words... 
+[4000:^N the ^N this ^N these ^N that ^N some ^N a ^N and ^N also 
+^N before ^N wade ^N good ^N of ^N there ^N go ^N about ^N therefore 
+^N am ^N to ^N of ^N on ^N my ^N your ^N try] 
+; 
+;------------------------------------------- 
+; 
+; Book protection code.... 
+; 
+[4200:%Something is standing behind you! "Don't look round", it 
+breathes, "J
+^N bollocks ^N jesus ^N christ ^N god ^N coon ^N wog ^N fucking 
+^N bastard ^N bugger ^N damn ^N hell ^N devil ^N nerd ^N crap]  
+; 
+; Garbage words... 
+[4000:^N the ^N this ^N these ^N that ^N some ^N a ^N and ^N also 
+^N before ^N wade ^N good ^N of ^N there ^N go ^N about ^N therefore 
+^N am ^N to ^N of ^N on ^N my ^N your ^N try] 
+; 
+;------------------------------------------- 
+; 
+; Book protection code.... 
+; 
+[4200:%Something is standing behind you! "Don't look round", it 
+breathes, "Just tell me one word from the book. ] 
+[4201:page ] 
+[4202:, line ] 
+[4203:, word ] 
+[4204:?"%] 
+[4205:The presence exhales between clenched teeth, "Ha! Try again. ] 
+[4206:The phantom fades away.%] 
+[4207:What is the word at ] 
+[4208:"Wrong!" The phantom hurls you from the game. ] 
+; 
+[4301:^C his] ;15/7/8
+[4302:^C but] ;6/6/5
+;; [4303:] ;10/3/6
+[4304:^C I] ;18/8/3
+[4305:^C certain] ;20/3/4
+[4306:^C Baskalos] ;14/2/1
+[4307:^C can] ;6/5/2
+[4308:^C course] ;7/2/7
+[4309:^C wore] ;7/1/8
+[4310:^C quill ^C cut] ;7/10/5
+;; [4311:] ;10/3/6
+[4312:^C a ^C almost] ;1/2/3
+[4313:^C we] ;22/5/4
+[4314:^C future] ;5/8/1
+[4315:^C were] ;16/3/2
+[4316:^C to] ;3/4/7
+[4317:^C of] ;22/5/8
+[4318:^C a] ;8/8/5
+[4319:^C his] ;7/3/6
+[4320:^C attempts] ;7/2/3
+[4321:^C and] ;4/1/4
+[4322:^C where] ;16/4/1
+[4323:^C passing] ;3/5/2
+[4324:^C the] ;19/6/7
+[4325:^C the] ;14/9/8
+[4326:^C in ^C had] ;9/6/5
+[4327:^C ten] ;4/3/6
+[4328:^C it] ;13/6/3
+[4329:^C to] ;6/7/4
+[4330:^C the] ;4/10/1
+[4331:^C his] ;13/3/2
+[4332:^C eventide] ;15/8/7
+[4333:^C that] ;6/7/8
+[4334:^C long] ;7/4/5
+[4335:^C for ^C at] ;1/9/6
+[4336:^C the] ;22/6/3
+[4337:^C through] ;11/9/4
+[4338:^C could] ;18/10/1
+[4339:^C back] ;20/1/2
+[4340:^C us] ;11/10/7
+;; [4341:] ;21/1/8
+[4342:^C a] ;8/8/5
+[4343:^C for ^C at] ;1/9/6
+;; [4344:] ;5/6/3
+[4345:^C upwards] ;16/5/4
+[4346:^C what] ;6/6/1
+[4347:^C set] ;7/3/2
+;; [4348:] ;4/2/7
+[4349:^C to] ;13/5/8
+[4350:^C in ^C had] ;9/6/5
+[4351:^C yet] ;21/9/6
+[4352:^C met] ;11/10/3
+[4353:^C came] ;18/7/4
+[4354:^C mine] ;20/2/1
+[4355:^C price ^C small] ;17/1/2
+[4356:^C shall] ;23/4/7
+[4357:^C ought] ;5/9/8
+[4358:^C trembling] ;10/4/5
+[4359:^C pyramids] ;18/9/6
+[4360:^C its ^C there] ;17/10/3
+[4361:^C against] ;23/3/4
+[4362:^C and] ;8/8/1
+[4363:^C the] ;4/9/2
+[4364:^C the] ;19/6/7
+;; [4365:] ;20/3/8
+[4366:^C the] ;11/8/5
+[4367:^C pyramids] ;18/9/6
+[4368:^C he] ;23/4/3
+[4369:^C light ^C the] ;2/9/4
+[4370:^C in] ;19/4/1
+[4371:^C a] ;14/1/2
+[4372:^C for] ;12/8/7
+[4373:^C focussed] ;12/7/8
+[4374:^C does] ;12/6/5
+[4375:^C fellow] ;15/9/6
+[4376:^C you] ;6/4/3
+[4377:^C and] ;7/1/4
+[4378:^C the] ;10/4/1
+[4379:^C could] ;21/9/2
+[4380:^C of] ;8/10/7
+[4381:^C them] ;4/1/8
+[4382:^C while] ;13/4/5
+;; [4383:] ;12/5/6
+[4384:^C took] ;15/8/3
+[4385:^C that ^C to] ;9/7/4
+[4386:^C second] ;21/10/1
+[4387:^C for] ;8/1/2
+[4388:^C the ^C day] ;1/2/7
+[4389:^C but] ;19/5/8
+[4390:^C afforded] ;14/2/5
+;; [4391:] ;9/5/6
+[4392:^C was] ;21/8/3
+[4393:^C was] ;14/9/4
+[4394:^C but] ;12/6/1
+[4395:^C them] ;18/9/2
+[4396:^C and] ;20/4/7
+[4397:^C darkness] ;11/9/8
+[4398:^C him] ;15/6/5
+;; [4399:^C it] ;9/5/6
+; 

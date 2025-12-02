@@ -1,0 +1,105 @@
+; Time and Magik Loader
+const
+ oswrchdcode=2
+
+var
+ x4
+
+begin
+
+
+;---
+.menu
+ message 1270 ; welcome!
+
+
+ cif diskversion ;>nick 7/3/88
+
+.loop
+ message 1271 ; which game?
+.loop1
+ input x1 x1 x1 x1
+ index=0
+ gosub @ReadInputList
+ cend ;>(diskversion) NICK 7/3/88
+
+ parttochain=1 ; lords
+
+ cif diskversion ;>NICK 7/3/88
+ if value=241 then menuend
+ parttochain=2
+ if value=242 then loadit
+ parttochain=3
+ if value=243 then loadit
+
+ cif IncludePictures
+  if value=249 then demopictures
+ cend ;(IncludePictures)
+
+ goto loop1
+
+.loadit
+ x1=oswrchdcode
+ list9(0)=x1
+
+ x1=14 ; enable paging (but reset page count)
+ list9(1)=x1
+ driver
+
+ message cr
+
+ thisgame=timeandmagik
+ thispart=1
+ list9(1)=parttochain
+ x1=11
+ list9(0)=x1
+ driver
+ goto loop ; in event of error, try again
+
+
+.menuend
+ cend ;>NICK 7/3/88
+
+ x1=1
+
+ cif IncludePictures
+  goto @drawpicturex1 ; start border drawing again
+ cend
+
+;>>mike 17/2/88 return
+;---
+
+ cif IncludePictures
+.demopictures
+; code to demonstrate all pictures
+; screen g c0
+
+ x1=oswrchdcode
+ list9(0)=x1
+ x1=15 ; disable paging
+ list9(1)=x1
+ driver
+
+ x4=2
+.demo1
+ if x4=30 then demo2
+ x1=x4
+ print x1
+ message space
+ gosub @drawpicturex1
+
+.demo2
+.demo4
+ gosub @osrdch
+ if x1=0 then demo4
+ if x1=13 then loop
+ add x4,c1
+
+;>NICK 10/10/88 USA version
+;>NICK 10/10/88 if x4<32 then demo1
+ if x4<61 then demo1
+
+ goto demopictures
+ cend
+ return ; for conditional assembly off
+;----

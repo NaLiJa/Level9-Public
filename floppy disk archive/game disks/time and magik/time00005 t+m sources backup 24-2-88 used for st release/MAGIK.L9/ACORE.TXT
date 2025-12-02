@@ -1,0 +1,649 @@
+; Price of Magik Asource
+;
+; M.J.Austin 21/1/86
+;
+; ACORE.TXT (CORE)
+;
+; THIS IS THE FIRST PART OF THE GAME TO BE COMPILED (After ACONST)
+;
+VAR
+ DESCRIPTIONMODE WHEELFOUND
+
+
+;>>mike 17/2/88 - whole caboudle moved from averb.txt
+ CANDLEBURNING
+ SHIELDSTRENGTH ARMOURSTRENGTH MAILSTRENGTH
+ ATTACKER TARGET WEAPON WEAPONSTRENGTH
+ SAVEHIPOS SAVEPOS SAVEOBJECT
+ SANITYOFFSET AGE
+ HORRORCOMING PANELOPENED CANDLELIFE
+ STONEUNLOCKED
+ PLAINROOM
+ GENERALSAVE ADDSCORESAVE
+ GIFTGIVEN
+ SolvedTMandRedMoon
+
+;>>mike 17/2/88 - moved from ASPECIAL.TXT
+ MANDRAKEPULLED
+ OTPOS ; OTHIPOS
+ SPELLDURATION
+ MOONTOUCHES
+ ExitsOn
+
+BEGIN
+ GOTO @STARTGAME
+;---
+.DESCRIBEROOM
+ LASTWORDPRINTED=0 ; prevent printing of 'it'
+ GOSUB @POSITIONSHADOWS
+ GOSUB @CHECKIFLIGHT
+ IF RESULT=TRUE THEN DESCROOM1
+ MESSAGE 2108 ; It's dark
+ LASTPICTURE=0
+;>>mike 21/2/88 CLS G ; clear graphics window
+
+.drRet
+ RETURN
+
+.DESCROOM1
+;; if player=fish then dr1b ;>>mike 17/2/88 - failsafe code
+;; if player<>user then drRet ;>>mike 17/2/88
+;; .dr1b
+
+ GOSUB @SPECIALPLAYER
+ GOSUB @SETUPROOM
+
+.ABSDESCROOM
+; *** SPECIAL TO MAGIK
+ IF ROOM<90 THEN ADRNMIST
+ IF ROOM>115 THEN ADRNMIST
+ ROOM=90 ; room for mists of time desc / picture
+
+.ADRNMIST
+ SEARCHPOS=ROOM
+ HISEARCHPOS=0
+
+; X1=500 ; base for pictures
+; ADD X1,ROOM
+; IF X1=LASTPICTURE THEN DESCROOM2
+; CLS G
+; PICTURE X1
+; LASTPICTURE=X1
+ gosub @pictureforROOM
+; X1=ROOM
+; GOSUB DRAWPICTUREX1 ;* change for hires!
+
+;.DESCROOM2
+ X1=SHORTROOMDESCS
+ ADD X1,ROOM
+ MESSAGE X1
+ IF DESCRIPTIONMODE<>IBRIEF THEN DESCROOM3A
+ MESSAGE DOT
+ GOTO DESCROOM3C
+
+.DESCROOM3A
+ X1=LONGROOMDESCS
+ ADD X1,ROOM
+ MESSAGE X1
+.DESCROOM3
+ MESSAGE DOT
+
+.descroom3c
+; if in mists of time, set up room again to use proper exits for room
+ IF ROOM<>90 THEN DESCROOM3B ; ** SPECIAL TO MAGIK
+ GOSUB @SETUPROOM ; ** SPECIAL TO MAGIK
+.DESCROOM3B
+ if ExitsOn=false then DescRoom3d ;>>mike 17/2/88
+ GOSUB PRINTEXITS
+
+.DESCROOM3d
+ SEARCHPOS=ROOM
+ HISEARCHPOS=0
+ IF WHEELFOUND=TRUE THEN DESCROOM4A ; SPECIAL
+ IF ROOM=66 THEN DESCROOM4 ; SPECIAL to Price of Magik
+.DESCROOM4A ; SPECIAL
+ GOSUB @PRINTOBJECTS
+.DESCROOM4 ; SPECIAL to Price of Magik
+
+ GOSUB DESCPLAYER
+ GOto @SPECIALDESC ;>>mike 21/2/88
+;---
+;.DRAWPICTUREX1
+;; display picture for room X1
+; X2=500
+; ADD X1,X2
+; IF X1=LASTPICTURE THEN DPX1RET
+; CLS G
+; PICTURE X1
+; LASTPICTURE=X1
+;.DPX1RET
+; RETURN
+
+;---
+.DESCPLAYER
+; Print any special messages for player
+; e.g. 'You are standing on the object'
+ X1=HICURRErrent direction
+.PELOOP
+; PRINT AN EXIT ( IF VISIBLE)
+ FROM=ROOM
+ GOSUB @CHECKEXIT
+ WORD1=0
+ WORD2=0
+ WORD3=0
+ WORD4=0
+ IF EXITVISIBLE=FALSE THEN PENEXTDIR
+ WORD1=EXITDESCBASE
+ ADD WORD1,DIR
+ IF DOOR=0 THEN PENODOOR
+ WORD2=12 ; base for door messages
+ ADD WORD2,DOOROPEN
+.PENODOOR
+ ADD NUMEXITS,C1
+ IF NUMEXITS<>2 THEN PE2
+ MESSAGE 10 ; EXITS ARE
+.PE2
+ IF WORD2<>0 THEN PEDESC ; through a door, so don't describe destination
+ WORD2=93 ; to
+ WORD3=SHORTROOMDESCS
+; check if in mists of timerrent direction
+.PELOOP
+; PRINT AN EXIT ( IF VISIBLE)
+ FROM=ROOM
+ GOSUB @CHECKEXIT
+ WORD1=0
+ WORD2=0
+ WORD3=0
+ WORD4=0
+ IF EXITVISIBLE=FALSE THEN PENEXTDIR
+ WORD1=EXITDESCBASE
+ ADD WORD1,DIR
+ IF DOOR=0 THEN PENODOOR
+ WORD2=12 ; base for door messages
+ ADD WORD2,DOOROPEN
+.PENODOOR
+ ADD NUMEXITS,C1
+ IF NUMEXITS<>2 THEN PE2
+ MESSAGE 10 ; EXITS ARE
+.PE2
+ IF WORD2<>0 THEN PEDESC ; through a door, so don't describe destination
+ WORD2=93 ; to
+ WORD3=SHORTROOMDESCS
+; check if in mists of time * SPECIAL TO MAGIK
+ IF DEST<90 THEN PE2NMIST
+ IF DEST>115 THEN PE2NMIST
+ DEST=90
+
+.PE2NMIST
+ ADD WORD3,DEST
+
+.PEDESC
+ GOSUB @OUTWORD1234
+.PENEXTDIR
+ ADD DIR,C1
+ IF DIR<14 THEN PELOOP
+.PERET1
+ IF NUMEXITS>1 THEN PERET2
+ IF NUMEXITS=0 THEN PERET
+ MESSAGE 11 ; ONLY EXIT IS
+.PERET2
+ WORD1=0
+ WORD2=0
+ GOto @OUTWORD12 ;>>Mike 21/2/88
+;---
+.CHECKIFOBVIOUS
+; see if 'OBJECT' is immediately obvious
+ OBVIOUS=TRUE
+ IF SEARCHDEPTH=0 THEN CIORET
+ IF OBJECT=NASTY THEN CIOFAIL ;???
+ X1=HICURRENTPOS(OBJECT)
+ IF X1=0 THEN CIORET ; things on ground are always obvious
+ X1=CURRENTPOS(OBJECT)
+ ADD X1,X1
+; look at hi initial position of container
+ X2=OBJECTSTART(X1)
+ IF X2>127 THEN CIORET ; 'obvious' bit set
+;??? IF SEARCHDEPTH=0 THEN CIORET
+.CIOFAIL
+ OBVIOUS=FALSE
+;
+.CIORET
+ RETURN
+;---
+.PRINTOBJECTS
+; GO THROUGH CURRENT OBJECT POSITION LIST,
+; AND DISPLAY ALL THE OBJECTS AT (HISEARCHPOS,SEARCHPOS)
+ OWTYPE=OWOBJECTS
+ GOSUB INITGETOBJ
+ TOTALOBJECTFOUND=0
+.PO1
+ GOSUB GETNEXTOBJECT
+ IF OBJECT=PLAYER THEN PO1
+ IF OBJECT>MAXOBJECTVISIBLE THEN PO1
+ IF OBJECT=0 THEN PO1A
+ GOSUB CHECKIFOBVIOUS
+ IF OBVIOUS=FALSE THEN PO3
+
+.PO1A
+ IF NUMOBJECTFOUND<>1 THEN PO2 ; have already printed containment type
+ ADD TOTALOBJECTFOUND,C1
+ WORD1=0
+ WORD2=0
+ GOSUB OUTWORD12 ; output any buffered words
+ GOSUB PRINTCONTAINMENT ; PRINT CONTAINER ON FIRST OBJECT FOUND ONLY
+.PO2
+ WORD1=OBJECT
+ WORD2=0
+ GOSUB @OUTWORD12 ; Output object name (delayed effect)
+.PO3
+ IF OBJECT<>0 THEN @PO1
+ RETURN
+;---
+.GETNEXTOBJECT
+; RETURN OBJECT=OBJECT FOUND
+;    SEARCHPOS=ROOM OR CONTAINER WHERE FOUND
+;  HISEARCHPOS=TYPE OF CONTAINMENT (=0 FOR ROOMS)
+;
+; BEFORE FIRST CALL, GOSUB INITGETOBJ AND SETUP HI,SEARCHPOS
+; AT END OF SEARCH, ALL ZEROS ARE RETURNED
+; RETURN NUMOBJECTFOUND=NUMBER OF OBJECT FOUND IN THIS PASS
+;
+ X1=MAXOBJECTVISIBLE
+.GETNEXTOBJX1
+ GETNEXT X1 HISEARCHPOS SEARCHPOS OBJECT NUMOBJECTFOUND SEARCHDEPTH
+; IF OBJECT>X1 THEN GNOERR
+.GNORET
+;.GNOERR
+ RETURN
+;?.GNOEBR
+;? OBJECT=0
+;? NUMOBJECTFOUND=0 ; ??
+;? RETURN
+;---      
+ 
+.INITGETOBJ
+ SEARCHDEPTH=1
+ X1=0
+ GETNEXT X1 X1 X1 X1 X1 X1
+ RETURN
+;--- 
+.PRINTCONTAINMENT
+ X3=24 ; BASE FOR CONTAINMENT MESSAGES (You can see)
+ IF HISEARCHPOS=0 THEN PC1
+ IF HISEARCHPOS=NONSPECIFIC THEN PCRET
+ IF HISEARCHPOS=CLINGINGTO THEN PC1 ; * SPECIAL TO MAGIK
+ IF SEARCHPOS<>PLAYER THEN PC1
+ X3=60 ; BASE for 'You are wearing' and 'You are carrying'
+.PC1
+ ADD X3,HISEARCHPOS
+ MESSAGE X3
+ IF HISEARCHPOS=0 THEN PCRET ; DON'T PRINT 'THE object' FOR 'YOU CAN SEE'
+ X1=SEARCHPOS ; CONTAINER OBJECT NUMBER
+ GOSUB @DESCTHEOBJX1
+ X1=16
+ ADD X3,X1 ; print second half of containment messages
+ MESSAGE X3
+.PCRET
+ RETURN
+;---
+.OUTWORD12
+ WORD3=0
+ WORD4=0
+.OUTWORD1234
+; WE ARE OUTPUTING A LIST OF WORDS, SEPARATED BY COMMAS
+; ETC. THIS ROUTINE TAKES A SERIES OF WORDS ONE AT A TIME
+; AND OUTPUTS THEM. BEFORE CALLING, SET OUTPUTWORD=0
+; AT THE END OF THE LIST, CALL THIS ROUTINE WITH X1=0 AND THE LIST
+; WILL BE FINISHED OFF WITH A FULL STOP ETC.
+ IF WORD1=0 THEN OWEND
+; FIRST OR SECOND WORD - JUST ADD TO BUFFER
+ X4=OUTPUTWORD
+ VALUE=WORD1
+ GOSUB WRITEOUTBUFFER
+ VALUE=WORD2
+ GOSUB WRITEOUTBUFFER
+ VALUE=WORD3
+ GOSUB WRITEOUTBUFFER
+ VALUE=WORD4
+ GOSUB WRITEOUTBUFFER
+ OUTPUTWORD=X4
+ IF OUTPUTWORD<>24 THEN OWRET
+;
+.OW1
+; THIRD TO SUBSEQUENT WORDS - print out oldest word
+; in buffer, and shift the other two down
+ X4=0 ; index into OUTPUTBUFFER
+ GOSUB OWPRINT
+ X1=0
+ X2=8
+.OW2
+ X3=OUTPUTBUFFER(X2)
+ OUTPUTBUFFER(X1)=X3
+ ADD X1,C1
+ ADD X2,C1
+ IF X1<16 THEN OW2
+ MESSAGE COMMA
+ OUTPUTWORD=16
+.OWRET
+ RETURN
+
+.OWEND
+; HAVE RECEIVED THE TERMINATOR
+ IF OUTPUTWORD=0 THEN OWRET ; NO WORDS OUTPUT AT ALL
+; THERE MUST BE AT LEAST ONE WORD REMAINING IN BUFFER - SO OUTPUT IT
+ X4=0 ; index into OUTPUTBUFFER
+ GOSUB OWPRINT
+ IF OUTPUTWORD=8 THEN OWSTOP ; ONLY ONE WORD OUTPUT - SO THATS IT !
+; MUST HAVE OUTPUTWORD=2, SO 2 OR MORE WORDS OUTPUT.
+; THEREFORE WANT TO FINISH OFF WITH "AND"
+ MESSAGE SPACEAND
+ X4=8 ; index into OUTPUTBUFFERVALUE
+ SUB X4,C1
+ GOSUB @VALUEDIV256
+ OUTPUTBUFFER(X4)=VALUE
+ ADD X4,C2 ; skip on to next entry
+ RETURN
+;---
+.READOUTBUFFER
+; read 16 bit word VALUE from OUTPUTBUFFER(X4)
+; do 16 bit autoincrement after the read
+ VALUE=OUTPUTBUFFER(X4)
+ GOSUB @VALUETIMES256
+ ADD X4,C1
+ X1=OUTPUTBUFFER(X4)
+ ADD VALUE,X1
+ ADD X4,C1 ; skip on to next entry
+ RETURN
+;---
+.DESCTHEOBJX1
+; PRINT OUT 'THE <desc>'
+; First check if can print 'it'
+ GOSUB @CONJUGATEX1
+ IF RESULT=CONJNOTHING THEN DESCOBJX1 ; e.g. 'tVALUE
+ SUB X4,C1
+ GOSUB @VALUEDIV256
+ OUTPUTBUFFER(X4)=VALUE
+ ADD X4,C2 ; skip on to next entry
+ RETURN
+;---
+.READOUTBUFFER
+; read 16 bit word VALUE from OUTPUTBUFFER(X4)
+; do 16 bit autoincrement after the read
+ VALUE=OUTPUTBUFFER(X4)
+ GOSUB @VALUETIMES256
+ ADD X4,C1
+ X1=OUTPUTBUFFER(X4)
+ ADD VALUE,X1
+ ADD X4,C1 ; skip on to next entry
+ RETURN
+;---
+.DESCTHEOBJX1
+; PRINT OUT 'THE <desc>'
+; First check if can print 'it'
+ GOSUB @CONJUGATEX1
+ IF RESULT=CONJNOTHING THEN DESCOBJX1 ; e.g. 'the you' looks silly
+ IF LASTWORDPRINTED<>X1 THEN DTOXTHE
+ if x1=ferryman then dtoxthe ; >>mike 20/2/88 - prevent "IT" for ferryman
+ IF ANIMATE=FALSE THEN DTOXIT
+ IF RESULT=CONJSOME THEN DTOXTHEY
+.DTOXIT
+ MESSAGE 482 ; 'it'
+ RETURN
+.DTOXTHEY
+ IF RESULT=FALSE THEN DTOXTHEM
+ MESSAGE 483 ; 'they'
+ RETURN
+.DTOXTHEM
+ MESSAGE 484 ; 'them'
+ RETURN
+;
+.DTOXTHE
+ MESSAGE THE
+.DTOXNOTHE
+ GOTO DESCOBJX1
+;---
+.DOSOME
+ MESSAGE 23 ; SOME
+ GOTO DESCOBJX1
+.DOAN
+ MESSAGE 22 ; AN
+;---
+.DESCOBJX1
+ LASTWORDPRINTED=X1
+;? IF X1>MAXVISIBLEOBJECT THEN DESCOBJRET
+ X2=OBJECTDESCBASE
+ ADD X2,X1
+ MESSAGE X2
+.DESCOBJRET
+ RETURN
+;---
+.CHECKEXIT
+ GOSUB ABSCHECKEXIT
+ GOTO @SPECIALEXITS ; Exits conditional on game
+;---
+.ABSCHECKEXIT
+; EXIT ( From FROM diection DIR )
+; return DEST, DOOR, EXITVISIBLE
+ DOOR=FALSE
+ EXITVISIBLE=FALSE
+ EXIT FROM DIR STATUS DEST
+ IF DEST=0 THEN CERET
+.CHECKEXITSTATUS
+ X1=STATUS
+ IF X1<4 THEN CE2
+ DOOR=TRUE
+ CURRENTPOS(GENERALDOOR)=ROOM
+ X2=4
+ SUB X1,X2 ; subtract 4
+.CE2
+ IF X1>1 THEN CERET
+ EXITVISIBLE=TRUE
+.CERET
+ RETURN
+;---
+.CALCDIRECTION
+; given 'FROM', 'TO' as adjacent locations,
+; return 'DIR'=direction going from 'FROM' to 'TO'
+ DIR=15
+.CALCDIR1
+ SUB DIR,C1
+ GOSUB ABSCHECKEXIT
+ IF DIR=0 THEN CALCDIRRET
+ IF DEST<>TO THEN CALCDIR1
+.CALCDIRRET
+ RETURN
+;---
+.CRVARYMESSAGE
+ MESSAGE CR
+.VARYMESSAGE
+; OUTPUT ONE OF THREE MESSAGES AT 'M1'
+ GOSUB GETVARYM1
+ MESSAGE M1
+ RETURN
+;---
+.GETVARYM1
+ ADD CURRENTMESSAGE,C1
+ IF CURRENTMESSAGE<3 THEN VMOK
+ CURRENTMESSAGE=0
+.VMOK
+ ADD M1,CURRENTMESSAGE
+ RETURN
+;---
+;.GETCHESTS
+;; return X1=number of chests, X2=number which are open
+; X1=0
+; X2=0
+; X3=CHESTBASE
+;.GETCH1
+; H4=CHESTTABLE(X39
+; IF X4=CHESTDESTROYED THEN @GUTCH3
+; ADD X1,C1
+; IF X4<>CHESTOPEN THEN GETCH3
+; ADD X2,C1
+;.GETCH3
+; ADD X3,C1
+; IF X3<SHESTMAXPLUSONE DHEN GETCH1
+; RUTURN
+;---
+.CHECKFORDOOR
+; from ROOM, return DOOR =true if there is one
+ FROM=ROOM
+ DIR=1
+.CFD1
+ GOSUB CHECKEXIT
+ IF DOOR=TRUE THEN CFDRET
+ ADD DIR,C1
+ IF DIR<14 THEN CFD1
+.CFDRET
+ RETURN
+;---
+.SETUPDOOR
+ GOSUB CHECKFORDOOR
+ CURRENTPOS(GENERALDOOR)=C0
+;>>mike 20/2/88 IF RESULT=FALSE THEN SUDRET
+ if door=false then sudret
+ CURRENTPOS(GENERALDOOR)=ROOM
+.SUDRET
+ RETURN
+;---
+;--------------------------------------------------------
+;---------------------------------------------------------
+;---------------------------------------------------------
+.PictureForRoom
+ if room=4 then sudret ;>>mike 20/2/88 - prevent roof garden picture.
+ x1=20 ; mists of time ;>>mike 20/2/88
+ if room=222 then @SDrawPictureX1
+
+ x1=11 ;>>mike 17/2/88 - marsh
+ if room<10 then @SDrawPictureX1
+; 10-17 are unused
+ x1=16 ; grassy plain
+ if room<20 then SDrawPictureX1
+ if room=27 then SDrawPictureX1
+ if room=29 then SDrawPictureX1
+ x1=9 ; portico/roman street
+ if room<26 then SDrawPictureX1
+ if room=217 then SDrawPictureX1 ;>>Mike 20/2/88 
+
+ x1=18 ; rocky mountains
+ if room<30 then SDrawPictureX1
+ 
+ x1=14 ; stonehenge
+ if room<43 then SDrawPictureX1
+
+;43 unused
+
+ x1=15 ; lakeshore
+ if room=44 then SDrawPictureX1 ; lake shore
+
+ x1=26 ; river tunnel ;>>Mike 20/2/88
+ if room<56 then SDrawPicturex1 ; >>mike 20/2/88 ; yellow river/slime slide etc.
+
+ x1=31 ; big cave
+ if room<61 then SDrawPictureX1
+ if room=188 then SDrawPictureX1
+ if room=189 then SDrawPictureX1
+ if room<191 then notcave
+ if room<194 then SDrawPictureX1
+
+.notcave
+ x1=21 ; panelled corridor
+ if room<63 then SDrawPictureX1
+ if room<116 then notcorridor
+ if room<130 then SDrawPictureX1 ;; if room=129 then SDrawPictureX1
+ if room=132 then SDrawPictureX1 ; white-wood corridor
+ if room=134 then SDrawPictureX1 ; panelled corridor
+
+.notcorridor
+;???63-64
+ x1=25 ; cave temple
+ if room=73 then SDrawPictureX1
+ if room=76 then SDrawPictureX1
+;>>mike 20/2/88 if room=82 then SDrawPictureX1
+
+ x1=29 ; corridor
+;>>Mike 20/2/88 if room<76 then SDrawPictureX1
+;>>Mike 20/2/88 x1=29 ; corridor
+ if room<89 then SDrawPictureX1
+ if room<210 then NotSDraw ;>>mike 20/2/88
+ if 88
+
+ if room=127 then SDrawPictureX1
+ if room=128 then SDrawPictureX1
+ if room<202 then NotStairCase ;>>mike 20/2/88
+ if room<206 then SDrawPictureX1 ;>>Mike 20/2/88
+
+.NotStairCase
+ x1=29 ; corridor
+ if room<133 then SDrawPictureX1
+
+ x1=24 ; store room
+ if room=133 then SDrawPictureX1
+ if room=135 then SDrawPictureX1
+ if room=147 then SDrawPictureX1
+ if room=153 then SDrawPictureX1
+ if room=198 then SDrawPictureX1
+ if room=163 then SDrawPictureX1
+ if room=164 then SDrawPictureX1
+ if room=88
+
+ if room=127 then SDrawPictureX1
+ if room=128 then SDrawPictureX1
+ if room<202 then NotStairCase ;>>mike 20/2/88
+ if room<206 then SDrawPictureX1 ;>>Mike 20/2/88
+
+.NotStairCase
+ x1=29 ; corridor
+ if room<133 then SDrawPictureX1
+
+ x1=24 ; store room
+ if room=133 then SDrawPictureX1
+ if room=135 then SDrawPictureX1
+ if room=147 then SDrawPictureX1
+ if room=153 then SDrawPictureX1
+ if room=198 then SDrawPictureX1
+ if room=163 then SDrawPictureX1
+ if room=164 then SDrawPictureX1
+ if room=169 then SDrawPictureX1
+ if room=170 then SDrawPictureX1
+
+ x1=26 ; cave (river) tunnel
+ if room<48 then NotTunnel ;>>Mike 20/2/88
+ if room<56 then S2DrawPictureX1 ;>>mike 20/2/88
+ if room=161 then S2DrawPictureX1
+ if room=197 then S2DrawPictureX1
+
+ x1=27 ; cave tunnel
+ if room<199 then nottunnel
+ if room<223 then S2DrawPictureX1
+
+.nottunnel
+;???136
+ x1=26 ; cave with stalagtites ;>>mike 20/2/88
+ if room=171 then S2DrawPictureX1 ;>>Mike 20/2/88
+
+ x1=29 ; corridor
+ if room<142 then S2DrawPictureX1
+
+ x1=22 ; wood-panelled room
+ if room<147 then S2DrawPictureX1
+ if room=154 then S2DrawPictureX1
+ if room=158 then S2DrawPictureX1
+ if room=159 then S2DrawPictureX1
+ if room=160 then S2DrawPictureX1
+ if room=190 then S2DrawPictureX1
+ if room=194 then S2DrawPictureX1
+
+; 147 is above
+ x1=29 ; corridor
+ if room<197 then S2DrawPictureX1
+;???162
+;???190
+
+.drawpicret
+; any other combinations leave picture alone
+ return
+;---
+.S2DrawPictureX1
+ goto @SDrawPictureX1
+;---
