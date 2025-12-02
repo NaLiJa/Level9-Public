@@ -1,0 +1,549 @@
+; Knight Orc exits:
+; Copyright (C) 1986 Level 9 Computing.
+;
+; format is LDIR dir dest
+;
+;              1
+;           8     2
+;              !
+;         7  --+--   3
+;              !
+;           6     5
+;              4
+;
+; up=9
+; down=10
+; in=11
+; out=12
+; cross=13
+; climb=14
+; jump=15
+;
+; special notes for interface between static and synth rooms..
+;
+; There must be an in/out connection between the static
+; and the object number of the scenery object
+; to which it connects.
+;
+; e.g. If you have a location object "[480:^N castle]"
+;
+;
+; then an exit from room 15:
+;		 1001 12 180
+; will set up an in/out connection to the room where object no. 180
+; is situated. This allows the exit table to be changed easily.
+;
+;
+;Room number 1
+; room modifiers for forest in part1
+0000 1 16
+0000 2 17
+0000 3 1
+0000 4 240
+0000 5 241
+0000 6 239
+0000 7 255
+1000 8 15
+;Room number 2 (in castle courtyard)
+0001 12 20 ; out to drawbridge
+1001 4 20 ; south to drawbridge
+;Room number 3 (lobby where black knight waits)
+1101 4 2
+;Room number 4 (staircase)
+1001 10 3
+;Room number 5 (keep roof)
+0001 14 181 ; climb to castle object (outside)
+1001 10 4
+;Room number 6 (cave)
+1001 12 186 ; out to cave object
+;Room number 7 (royal oak)
+1001 12 187 ; out to oak scenery object
+;Room number 8
+0001 12 184 ; out to fairground object
+1001 7 184 ; west to fairground object
+;Room number 9
+1001 7 8 ; west from saloon into public
+;Room number 10
+1001 9 9 ; up to saloon bar
+;Room number 11 - market
+1001 3 184
+;Room number 12 
+1000 0 0
+;Room number 13 - stable
+1001 3 14
+;Room number 14 - jousting field
+1001 1 184
+;Room number 15 - trampled field
+0010 11 29 ; in to garbage heap
+0010 9 29 ; up to garbage heap
+1001 7 14
+;Room number 16 - grandstand
+1001 1 14
+;Room number 17 - (tower where rapunzel sits)
+1000 0 0
+;Room number 18 - (on viaduct - just north of broken bit)
+1001 1 189
+;Room number 19 - (well)
+0001 14 190 ; climb to well object
+1001 9 190 ; up to well object
+;Room number 20 - on drawbridge
+0011 4 181 ; south to synthesised room
+1001 12 181 ; out to synthesised room ; must have in/out for link
+;Room number 21 - east of crossroads
+1001 7 183
+;Room number 22 - north of crossroads
+1001 4 183
+;Room number 23 - west of crossroads
+1001 3 183
+;Room number 24 - 
+1000 0 0
+;Room number 25 - base of tower
+0001 9 17
+0001 14 17
+1001 4 188 ; south to tower object
+;Room number 26 - laboratory1
+1001 1 191 ; north to olympus gate
+;Room number 27 - laboratory2
+1000 0 0 ;not present in part 1. 1001 7 26
+;Room number 28 - holding tank
+1000 0 0
+;Room number 29 - garbage heap
+0000 10 15 ; down to trampled field
+1000 12 15
+;Room number 30
+1000 0 0
+;Room number 31
+1000 0 0
+;Room number 32
+1000 0 0
+;Room number 33
+1000 0 0
+;Room number 34
+1000 0 0
+;Room number 35
+1000 0 0
+;Room number 36
+1000 0 0
+;Room number 37
+1000 0 0
+;Room number 38
+1000 0 0
+;Room number 39
+1000 0 0
+;Room number 40
+1000 0 0
+;Room number 41
+1000 0 0
+;Room number 42
+1000 0 0
+;Room number 43
+1000 0 0
+;Room number 44
+1000 0 0
+;Room number 45
+1000 0 0
+;Room number 46
+1000 0 0
+;Room number 47
+1000 0 0
+;Room number 48
+1000 0 0
+;Room number 49
+1000 0 0
+;Room number 50
+1000 0 0
+;Room number 51
+1000 0 0
+;Room number 52
+1000 0 0
+;Room number 53
+1000 0 0
+;Room number 54
+1000 0 0
+;Room number 55
+1000 0 0
+;Room number 56
+1000 0 0
+;Room number 57
+1000 0 0
+;Room number 58
+1000 0 0
+;Room number 59
+1000 0 0
+;Room number 60
+1000 0 0
+;Room number 61
+1000 0 0
+;RRoom number 81
+1000 0 0
+;Room number 82
+1000 0 0
+;Room number 83
+1000 0 0
+;Room number 84
+1000 0 0
+;Room number 85
+1000 0 0
+;Room number 86
+1000 0 0
+;Room number 87
+1000 0 0
+;Room number 88
+1000 0 0
+;Room number 89
+1000 0 0
+;Room number 90
+1000 0 0
+;Room number 91
+1000 0 0
+;Room number 92
+1000 0 0
+;Room number 93
+1000 0 0
+;Room number 94
+1000 0 0
+;Room number 95
+1000 0 0
+;Room number 96
+1000 0 0
+;Room number 97
+1000 0 0
+;Room number 98
+1000 0 0
+;Room number 99
+1000 0 0
+Room number 81
+1000 0 0
+;Room number 82
+1000 0 0
+;Room number 83
+1000 0 0
+;Room number 84
+1000 0 0
+;Room number 85
+1000 0 0
+;Room number 86
+1000 0 0
+;Room number 87
+1000 0 0
+;Room number 88
+1000 0 0
+;Room number 89
+1000 0 0
+;Room number 90
+1000 0 0
+;Room number 91
+1000 0 0
+;Room number 92
+1000 0 0
+;Room number 93
+1000 0 0
+;Room number 94
+1000 0 0
+;Room number 95
+1000 0 0
+;Room number 96
+1000 0 0
+;Room number 97
+1000 0 0
+;Room number 98
+1000 0 0
+;Room number 99
+1000 0 0
+;Room number 100
+1000 0 0
+;Room number 101
+1000 0 0
+;Room number 102
+1000 0 0
+;Room number 103
+1000 0 0
+;Room number 104
+1000 0 0
+;Room number 105
+1000 0 0
+;Room number 106
+1000 0 0
+;Room number 107
+1000 0 0
+;Room number 108
+1000 0 0
+;Room number 109
+1000 0 0
+;Room number 110
+1000 0 0
+;Room number 111
+1000 0 0
+;Room number 112
+1000 0 0
+;Room number 113
+1000 0 0
+;Room number 114
+1000 0 0
+;Room number 115
+1000 0 0
+;Room number 116
+1000 0 0
+;Room number 117
+1000 0 0
+;Room number 118
+1000 0 0
+;Room number 119
+1000 0 0
+;Room number 120
+1000 0 0
+;Room number 121
+1000 0 0
+;Room number 122
+1000 0 0
+;Room number 123
+1000 0 0
+;Room number 124
+1000 0 0
+;Room number 125
+1000 0 0
+;Room number 126
+1000 0 0
+;Room number 127
+1000 0 0
+;Room number 128
+1000 0 0
+;Room number 129
+1000 0 0
+;Room number 130
+1000 0 0
+;Room number 131
+1000 0 0
+;Room number 132
+1000 0 0
+;Room number 133
+1000 0 0
+;Room number 134
+1000 0 0
+;Room number 135
+1000 0 0
+;Room number 136
+1000 0 0
+;Room number 137
+1000 0 0
+;Room number 138
+1000 0 0
+;Room number 139
+1000 0 0
+;Room number 140
+1000 0 0
+;Room number 141
+1000 0 0
+;Room number 142
+1000 0 0
+;Room number 143
+1000 0 0
+;Room number 144
+1000 0 0
+;Room number 145
+1000 0 0
+;Room number 146
+1000 0 0
+;Room number 147
+1000 0 0
+;Room number 148
+1000 0 0
+;Room number 149
+1000 0 0
+;Room number 150
+1000 0 0
+;Room number 151
+1000 0 0
+;Room number 152
+1000 0 0
+;Room number 153
+1000 0 0
+;Room number 154
+1000 0 0
+;Room number 155
+1000 0 0
+;Room number 156
+1000 0 0
+;Room number 157
+1000 0 0
+;Room number 158
+1000 0 0
+;Room number 159
+1000 0 0
+;Room number 160
+1000 0 0
+;Room number 161
+1000 0 0
+;Room number 162
+1000 0 0
+;Room number 163
+1000 0 0
+;Room number 164
+1000 0 0
+;Room number 165
+1000 0 0
+;Room number 166
+1000 0 0
+;Room number 167
+1000 0 0
+;Room number 168
+1000 0 0
+;Room number 169
+1000 0 0
+;Room number 170
+1000 0 0
+;Room number 171
+1000 0 0
+;Room number 172
+1000 0 0
+;Room number 173
+1000 0 0
+;Room number 174
+1000 0 0
+;Room number 175
+1000 0 0
+;Room number 176
+1000 0 0
+;Room number 177
+1000 0 0
+;Room number 178
+1000 0 0
+;Room number 179
+1000 0 0
+;Room number 180
+1000 0 0
+;Room number 181
+1000 0 0
+;Room number 182
+1000 0 0
+;Room number 183
+1000 0 0
+;Room number 184
+1000 0 0
+;Room number 185
+1000 0 0
+;Room number 186
+1000 0 0
+;Room number 187
+1000 0 0
+;Room number 188
+1000 0 0
+;Room number 189
+1000 0 0
+;Room number 190
+1000 0 0
+;Room number 191
+1000 0 0
+;Room number 192
+1000 0 0
+;Room number 193
+1000 0 0
+;Room number 194
+1000 0 0
+;Room number 195
+1000 0 0
+;Room number 196
+1000 0 0
+;Room number 197
+1000 0 0
+;Room number 198
+1000 0 0
+;Room number 199
+1000 0 0
+;Room number 200
+1000 0 0
+;Room number 201
+1000 0 0
+;Room number 202
+1000 0 0
+;Room number 203
+1000 0 0
+;Room number 204
+1000 0 0
+;Room number 205
+1000 0 0
+;Room number 206
+1000 0 0
+;Room number 207
+1000 0 0
+;Room number 208
+1000 0 0
+;Room number 209
+1000 0 0
+;Room number 210
+1000 0 0
+;Room number 211
+1000 0 0
+;Room number 212
+1000 0 0
+;Room number 213
+1000 0 0
+;Room number 214
+1000 0 0
+;Room number 215
+1000 0 0
+;Room number 216
+1000 0 0
+;Room number 217
+1000 0 0
+;Room number 218
+1000 0 0
+;Room number 219
+1000 0 0
+;Room number 220
+1000 0 0
+;Room number 221
+1000 0 0
+;Room number 222
+1000 0 0
+;Room number 223
+1000 0 0
+;Room number 224
+1000 0 0
+;Room number 225
+1000 0 0
+;Room number 226
+1000 0 0
+;Room number 227
+1000 0 0
+;Room number 228
+1000 0 0
+;Room number 229
+1000 0 0
+;Room number 230
+1000 0 0
+;Room number 231
+1000 0 0
+;Room number 232
+1000 0 0
+;Room number 233
+1000 0 0
+;Room number 234
+1000 0 0
+;Room number 235
+1000 0 0
+;Room number 236
+1000 0 0
+;Room number 237
+1000 0 0
+;Room number 238
+1000 0 0
+;Room number 239
+1000 0 0
+;Room number 240
+1000 0 0
+;Room number 241
+1000 0 0
+;Room number 242
+1000 0 0
+;Room number 243
+1000 0 0
+;Room number 244
+1000 0 0
+;Room number 245
+1000 0 0
+;Room nu; Machine-specific constants.
+CONST
+ maxactivations=10 ; tailor to each machine. The greater the
+; number, the more that can happen on each turn. Small machines
+; should have this set to as small a va

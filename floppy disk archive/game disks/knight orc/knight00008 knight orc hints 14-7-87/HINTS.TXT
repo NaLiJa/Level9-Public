@@ -1,0 +1,1137 @@
+     KNIGHT ORC CLUES. COPYRIGHT (C) LEVEL 9 COMPUTING 1987
+
+This clue sheet starts with four alphabetical lists of things from 
+Knight Orc: general hints, objects, creatures and people, and 
+places. Look down the appropriate list to find what you want to 
+know about; then turn to the answers corresponding to the bracketed 
+numbers after it. Note that when words in the answers have capital 
+letters, this usually means that they can be referenced in turn. 
+
+General Hints
+
+  1. A MAP IS NOT NECESSARY. See (950).
+  2. Beginning: details (932).
+  3. Escaping from enemies: details (594).
+  4. Finding things: details (575).
+  5. Finishing part 1: details (654).
+  6. Finishing the game: details (975).
+  7. Fighting: details (837).
+  8. Game background: see (1009).
+  9. Joust sequence: details (632).
+ 10. Magic: details (690).
+ 11. Ordering people about: details (918).
+ 12. Power gardening: details (779).
+ 13. Rope: details (683).
+ 14. Scoring: details (832).
+ 15. Spells: details (690).
+ 16. Staying Alive: details (955).
+ 17. Treasure: details (576).
+
+
+Objects
+ 20. Abelmosk: where (600), details (669).
+ 21. Acid: where (724), details (938).
+ 22. Amber: where (712), details (824).
+ 23. Ambrosia: where (516), details (940).
+ 24. Anthill: where (474), details (829).
+ 25. Apple: where (570), details (733).
+ 26. Apple, golden: where (633), details (672).
+ 27. Archway: where (687), details (931).
+ 28. Armour: where (486), details (957).
+ 29. Axe, Green Knight's: where (351), details (9re (199), details (652).
+ 42. Bones: where (828), details (860).
+ 43. Brick, gold: where (46), details (672).
+ 44. Bridge: where (605), details (968).
+ 45. Broadsword: where (757), details (694).
+ 46. Bucket: where (571), details (773).
+ 47. Burger: see (613), then (202).
+ 48. Button: where (21), details (844).
+
+ 50. Cabinet: where (472), details (934).
+ 51. Candlestick, silver: where (601), details (660).
+ 52. Card: see (639), then (158).
+ 53. Carrier bag: see (613), then (240).
+ 54. Cask: where (199), details (652).
+ 42. Bones: where (828), details (860).
+ 43. Brick, gold: where (46), details (672).
+ 44. Bridge: where (605), details (968).
+ 45. Broadsword: where (757), details (694).
+ 46. Bucket: where (571), details (773).
+ 47. Burger: see (613), then (202).
+ 48. Button: where (21), details (844).
+
+ 50. Cabinet: where (472), details (934).
+ 51. Candlestick, silver: where (601), details (660).
+ 52. Card: see (639), then (158).
+ 53. Carrier bag: see (613), then (240).
+ 54. Cask: where (510), details (583).
+ 55. Chest: where (478), details (758).
+ 56. Chipboard: see (613), then (89).
+ 57. Circle of blue: see (626), then (212).
+ 58. Cliche: where (736), details (707).
+ 59. Cloak: where (115), details (617).
+ 60. Club: where (313), details (825).
+ 61. Coil of rope: where (693), details (959).
+ 62. Coin, half: where (515), details (843).
+ 63. Comb, gold: where (633), details (672).
+ 64. Container, industrial: see (613), then (547).
+ 65. Cord: where (55), details (710).
+ 66. Crack: where (776), details (914).
+ 67. Crash helmet: see (613), then (141).
+ 68. Crest, gold: where (633), details (672).
+ 69. Crevice: where (776), details (914).
+ 70. Cushion: see (626), then (60).
+
+ 75. Dagger, in part 1: where (942), details (682).
+ 76. Dagger, later parts: where (961), details (857).
+ 77. Database: see (613), then (41).
+ 78. Deodand: where (678), details (622).
+ 79. Disk, golden: where (633), details (672).
+ 80. Dollar, silver: where (601), details (660).
+ 81. Door, dart-riddled: see (613), then (85).
+ 82. Door, off scarred corridor: where (477), details (933).
+ 83. Door, metal: where (540), details (958).
+ 84. Door, secret: where (463), details (346).
+ 85. Door, termite-riddled: where (547), details (618).
+ 86. Door on bridge: where (465), details (983).
+ 87. Drawbridge, part 1: where (471), details (658).
+ 88. Drawbridge, supported by ropes: where (485), details (729).
+ 89. Driftwood: where (650), details (845).
+
+ 90. Egg: where (677), details (587).
+ 91. Eye: where (661), details (936).
+ 
+ 95. Fence: see (613), then (508).
+ 96. Fibreglass: see (626), then (245).
+ 97. Filofax: see (626), then (290).
+ 98. Filter: see (613), then (22).
+ 99. Finch, gold: where (633), details (672).
+100. Finger, gold: where (633), details (672).
+101. Fire: where (123), details (947).
+102. Fireball: where (661), details (621).
+103. Fireplace: where (508), details (123).
+104. Fish, silver: where (601), details (660).
+105. Fishing rod: where (731), details (809).
+106. Flagpole: where (490), details (615).
+107. Fleece, golden: where (633), details (672).
+108. Fog: see (626), then (21).
+109. Fox, silver: where (601), details (660).
+110. Fruit: see (626), then (25).
+111. Fungus, honey: where (270), details (859).
+
+115. Garbage heap: where (716), details (848).
+116. Garlic: where (495), details (685).
+117. Gate: where (886), details (952).
+118. Gauntlets: where (802), details (993).
+119. Ghost, gold: where (633), details (672).
+120. Gibbet: where (580), details (615).
+121. Glass: where (510), details (935).
+122. Gold objects: where (633), details (672).
+123. Grate: where (508), details (807).
+124. Gravel: see (613), then (499).
+125. Gravestone: where (499), details (946).
+126. Growbag: see (626), then (172).
+
+130. Hair: where (426), details (710).
+131. Half coin: where (515), details (843).
+132. Halyard: where (106), details (710).
+133. Hare, silver: where (601), details (660).
+134. Hat: where (677), details (614).
+135. Hatch, inspection: where (476), details (992).
+136. Hawser, hessian: where (561), details (710).
+137. Head, horse's: where (943), details (616).
+138. Head, orc's: where (962), details (987).
+139. Heart, gold: where (633), details (672).
+140. Hedge: where (555), details (808).
+141. Helmet: where (411), details (572).
+142. Hemidisk: see (613), then (62).
+143. Herb: where (677), details (866).
+144. Hole, mouse's: where (464), details (973).
+145. Holly: where (351), details (610).
+146. Hologram: see (626), then (101).
+
+150. Inscription: where (27), details (437).
+151. Invisibility potion: where (755), details (917).
+152. Ivy: where (471), details (711).
+
+155. Kalevala: where (516), details (763).
+156. Key, part 1: where (294), details (758).
+157. Key, skeleton: where (507), details (853).
+158. Keycard: where (963), details (998).
+159. Kinnock: see (626), then (944).
+160. Kiosk: where (494), details (997).
+161. Knife, kitchen: where (513), details (682).
+162. Knife, putty: where (115), details (602).
+163. Knitwear: where (330), (561), details (585).
+178. Matting: see (626), then (551).
+179. Mechanism: see (639), then (225).
+180. Medicine: where (802), details (865).
+181. Mousehole: where (464), details (973).
+182. Monolith: see (613), then (274).
+183. Mound: see (626), then (24).
+
+185. Noose: where (120), details (710).
+186. Nodule, silver: where (601), details (660).
+187. Note, mysterious: where (642), details (760).
+188. Note, part 1: where (88), details (815).
+189. Nugget, gold: where (633), details (672).
+
+190. O(561), details (585).
+178. Matting: see (626), then (551).
+179. Mechanism: see (639), then (225).
+180. Medicine: where (802), details (865).
+181. Mousehole: where (464), details (973).
+182. Monolith: see (613), then (274).
+183. Mound: see (626), then (24).
+
+185. Noose: where (120), details (710).
+186. Nodule, silver: where (601), details (660).
+187. Note, mysterious: where (642), details (760).
+188. Note, part 1: where (88), details (815).
+189. Nugget, gold: where (633), details (672).
+
+190. Onion: see (626), then (116).
+191. Opening in kiosk: where (160), details (997).
+
+195. Panel, wooden: where (518), details (688).
+196. Paper, silver: where (601), details (660).
+197. Paper, rolled-up: see (613), then (246).
+198. Pebble: where (699), details (847).
+199. Pedestal: where (474), details (817).
+200. Pen: see (613), then (161).
+201. Perch: where (474), details (425).
+202. Pie, rat: where (513), details (689).
+203. Piece of silver: where (601), details (660).
+204. Plant, on wall: see (639), then (247).
+205. Plaque: where (525), details (869).
+206. Plate, gold: where (633), details (672).
+207. Plate, silver: where (601), details (660).
+210. Poems: where (640), details (775).
+211. Poignard: where (942), details (682).
+212. Pond: where (492), details (611).
+213. Pool of Acid: where (724), details (938).
+214. Post: where (516), details (974).
+215. Pumice Stone: where (677), details (879).
+216. Putty knife: where (115), details (602).
+
+220. Ramp: see (626), then (44).
+221. Rapier: where (942), details (682).
+222. Recess: where (125), details (946).
+223. Reed, good: where (507), details (940).
+224. Reins: where (927), details (710).
+225. Reprogrammer: where (481), details (995).
+226. Ring, in nose: where (138), details (987).
+227. Ring, silvery: where (880), details (796).
+228. Robes: where (361), details (623).
+229. Rod, golden: where (633), details (672).
+230. Roller: where (561), details (751).
+231. Room dividers: see (954), then (981).
+232. Rope, bonds: where (787), details (800).
+233. Rope, coil: where (693), details (959).
+234. Rope, slippery: where (465), details (889).
+235. Ropes overhead: where (470), details (916).
+236. Royal Oak: where (580), details (791).
+237. Ruler, golden: where (633), details (672).
+
+240. Sack: where (513), details (705).
+241. Saffron robes: where (361), details (623).
+242. Salver, silver: where (601), details (660).
+243. Scabbard: where (486), details (614).
+244. Scaffolding: see (613), then (470).
+245. Scale: where (595), details (814).
+246. Scrolls: where (403), details (734).
+247. Sensor: where (487), details (988).
+248. Sheet of Fibreglass: see (613), then (245).
+249. Shoulder, gold: where (633), details (672).
+250. Signposts: where (479), details (888).
+251. Silver objects: where (601), details (660).
+252. Sixpence, silver: where (601), details (660).
+253. Slab: see (626), then (125).
+254. Sliver, silver: where (601), details (660).
+255. Socket: see (626), then (222).
+256. Sovereign, gold: where (633), details (672).
+257. Soyaburger: see (613), then (202).
+258. Spear: where (727), details (1000).
+259. Spoon, silver: where (601), details (660).
+260. Standard, gold: where (633), details (672).
+261. Star, silver: where (601), details (660).
+262. Statue: where (495), details (590).
+263. String: see (626), then (234).
+
+270. Table: where (603), details (940).
+271. Teapot, silver: where (601), details (660).
+272. Tether: where (348), details (710).
+273. Thorn hedge: where (555), details (808).
+274. Tomb: where (526), details (803).
+275. Tonic: where (507), details (180).
+276. Tongue, silver: where (601), details (660).
+277. Top, silver: where (601), details (660).
+278. Trapeze: see (626), then (201).
+279. Tray: where (513), details (615).
+280. Tree, apple: where (495), details (570).
+281. Tree-trunk: see (613), then (280).
+282. Trident: where (677), details (926).
+283. Turnstile: where (876), details (811).
+
+285. Ventilator: where (1001), details (1008).
+286. Visor: where (818), details (994).
+
+290. Wallet: where (556), details (574).
+291. Wallflower: where (596), details (603).
+292. War axe: where (351), details (930).
+293. Washing line: where (236), details (710).
+294. Welcome mat: where (561), details (585).
+295. Wriggly writing: where (684), details (703).
+
+
+Creatures and People
+300. Adolescent: see (769), then (421).
+301. Amazon Grace: where (649), details (718).
+302. Annihilator: where (641), details (742).
+303. Ants: where (24), details (697).
+304. Arthur: where (516), details (826)tails (918).
+322. Dogs: where (802), details (704).
+323. Donkey: where (603), details (912).
+324. Dragon: where (925), details (976).
+325. Druid: where (492), details (701).
+326. Dwarf: where (507), details (912).
+
+330. Elrond: where (755), details (912).
+331. Elves: where (755), details (830).
+332. Erik Bloodeagle: where (649), details (868).
+333. Eye: where (661), details (936).
+
+335. Fireball: where (592), details (621).
+336. Fish below bridge: where (653), details (889).
+337. Fiend: where tails (918).
+322. Dogs: where (802), details (704).
+323. Donkey: where (603), details (912).
+324. Dragon: where (925), details (976).
+325. Druid: where (492), details (701).
+326. Dwarf: where (507), details (912).
+
+330. Elrond: where (755), details (912).
+331. Elves: where (755), details (830).
+332. Erik Bloodeagle: where (649), details (868).
+333. Eye: where (661), details (936).
+
+335. Fireball: where (592), details (621).
+336. Fish below bridge: where (653), details (889).
+337. Fiend: where (755), details (910).
+338. Foxy minx: see (769), then (397).
+339. Frog: where (551), details (681).
+340. Fungus the boggit-man: where (641), details (868).
+
+345. Genghis: where (641), details (718).
+346. Ghost: where (792), details (820).
+347. Girl in Jeans: see (769), then (301).
+348. Goat: where (473), details (615).
+349. Goldberry: where (677), details (924).
+350. Green Horse: where (351), details (573).
+351. Green Knight: where (493), details (966).
+352. Green Sleeves: where (677), details (597).
+353. Grindleguts: where (700), details (455).
+354. Gripper: where (641), details (718).
+355. Grok: where (505), details (770).
+356. Guy: see (769), then (449).
+
+360. Heathcliffe: where (649), details (742).
+361. Hermit: where (472), details (911).
+362. Herne: where (649), details (718).
+363. Hobbit: where (755), details (608).
+364. Horse, Green: where (351), details (573).
+365. Horse, Hunter's: where (370), details (923).
+366. Horse, Yours: where (577), details (636).
+367. Humanoid Robots: see (613), then (369).
+368. Humans: details (996).
+369. Humans on the Battlements: where (470), details (977).
+370. Hunter: where (479), details (867).
+
+375. Innkeeper: where (510), details (754).
+
+376. Jabberwock: where (677), details (910).
+377. Jailor: where (486), details (989).
+378. Jeanie II: where (641), details (868).
+379. John Doe: where (649), details (718).
+380. Juggernaut: where (507), details (679).
+
+385. Kid: see (769), then (320).
+386. Kitten: where (603), details (578).
+387. Knight, Green: where (493), details (966). 
+388. Knight, Huge: where (577), details (789).
+389. Knight in White Satin: where (512), details (584).
+390. Kris the ant-warrior: where (641), details (742).
+
+395. Lad: see (769), then (362).
+396. Lady, bemused: see (769), then (433).
+397. Lady of Shallot: where (649), details (718).
+398. Liquidiser: where (649), details (718).
+399. Little John: where (641), details (742).
+
+400. Man with a Beard: see (769), then (360).
+401. Meistersinger: where (677), details (798).
+402. Mighty Flynn: where (641), details (718).
+403. Monk: where (530), details (778).
+404. Mouse: where (464), details (949).
+405. Mrs Wallop: where (641), details (821).
+406. Muscleman: where (641), details (742).
+
+407. Nurse: see (613), then (441).
+
+410. Odin: where (641), details (718).
+411. Oink: where (523), details (761).
+412. Old guy: see (769), then (449).
+413. Orcs: where (588), details (881).
+414. Owen: where (802), details (666).
+
+415. Pensioner: see (769), then (324).
+416. Phantom of the Opera: where (641), details (718).
+417. Player: see (700), then (353).
+418. Pope Joan: where (641), details (742).
+419. Professor Nutter: where (507), details (884).
+420. Prophet: where (641), details (718).
+421. Prophet of Greater Manchester: where (649), details (742).
+422. Puppet: where (603), details (679).
+
+425. Rainbird: where (201), details (579).
+426. Rapunzel: where (555), details (668).
+
+430. Sam: where (641), details (718).
+431. Schoolboy: see (769), then (430).
+432. Sir Cecil: where (577), details (388).
+433. Susan: where (921), details (718).
+434. Synonym the Wizard: where (641), details (718).
+
+435. Thud the Barbarian: where (649), details (742).
+436. Transvestite: where (649), details (638).
+437. Troll: where (465), details (968).
+438. Tweedledee: where (603), details (833).
+
+440. Uruk: where (641), details (766).
+
+441. Valkyrie: where (664), details (920).
+442. Vampire: where (461), details (982).
+443. Vidcam on a string: see (613), then (333).
+
+445. Wallop, Mrs: where (641), details (718).
+446. Werewolf: where (802), details (906).
+447. Whippersnapper: see (769), then (332).
+448. Wight: where (641), details (717).
+449. Wily Wizard: where (649), details (742).
+450. Wolf: where (641), details (719).
+451. Wose: where (507), details (793).
+
+455. You: where (644), details (919).
+456. Youngster: see (769), then (435).
+
+
+Places
+
+460. Bar: where (510), details (894).
+461. Barrow: where (580), details (982).
+462. Basin of Fog: see (954beyond Exit: where (487), details (978).
+477. Corridor, scarred: where (1004), details (933).
+478. Courtyard of Castle: where (882), details (1008).
+479. Crossroads: where (580), details (902).
+480. Cubicle: see (954), then (513).
+481. Cupboard: where (971), details (980).
+
+485. Drawbridge: where (702), details (658).
+486. Dungeon: where (604), details (980).
+
+487. Exit: where (606), details (1002).
+
+490. Fairground: where (580), details (106).
+491. Forest, part 1: where (698), details (706).
+beyond Exit: where (487), details (978).
+477. Corridor, scarred: where (1004), details (933).
+478. Courtyard of Castle: where (882), details (1008).
+479. Crossroads: where (580), details (902).
+480. Cubicle: see (954), then (513).
+481. Cupboard: where (971), details (980).
+
+485. Drawbridge: where (702), details (658).
+486. Dungeon: where (604), details (980).
+
+487. Exit: where (606), details (1002).
+
+490. Fairground: where (580), details (106).
+491. Forest, part 1: where (698), details (706).
+492. Forest, part 2: where (606), details (713).
+493. Forest lawn: where (580), details (966).
+494. Foyer: where (907), details (997).
+
+495. Garden: where (606), details (713).
+496. Gate: where (886), details (952).
+497. Gibbet: where (580), details (615).
+498. Gravel: see (954), then (499).
+499. Graveyard: where (606), details (946).
+500. Guardroom: where (892), details (915).
+
+505. Headquarters cave: where (667), details (905).
+506. Hedge: where (580), details (808).
+507. Hole in the ground: where (603), details (802).
+508. House: where (606), details (1005).
+
+510. Inn: where (580), details (797).
+
+511. Jousting field: where (872), details (2).
+
+512. Keep: where (882), details (899).
+513. Kitchen: where (892), details (915).
+
+515. Lair: where (804), details (980).
+516. Lake town: where (953), details (974).
+517. Lawn: where (580), details (966).
+518. Library: where (805), details (990). 
+
+520. Marsh: where (606), details (634).
+521. Maze: where (835), details (691).
+522. Mine, salt: where (901), details (991).
+523. Mountain: where (606), details (986).
+524. Mouse-hole: where (464), details (973).
+525. Mud: where (520), details (634).
+
+526. Necropolis: where (651), details (803).
+
+530. Office in Castle: where (822), details (778).
+531. Orc Lair: where (609), details (903).
+532. Outcrop of Rock: where (603), details (974).
+
+535. Paradise: see (1006), then (540).
+536. Pile of Garbage: where (716), details (848).
+537. Pond: where (492), details (611).
+
+540. Repair shed: where (1006), details (971).
+541. Repository: where (823), details (581).
+542. River: where (891), details (1007).
+543. Roof of keep: where (831), details (969).
+544. Royal Oak: where (580), details (980).
+
+545. Salt mine: where (901), details (991).
+546. Scaffolding: see (954), then (470).
+547. Shed in garden: where (495), details (896).
+548. Shed, repair: where (1006), details (971).
+549. Stable: where (663), details (2).
+550. Study: where (822), details (967).
+551. Swamp: where (606), details (885).
+
+555. Tower: where (580), details (909).
+556. Troll's lair: where (804), details (980).
+557. Tunnels inside Mountain: where (523), details (986).
+
+560. Viaduct: where (580), details (654).
+
+561. Well: where (580), details (582).
+562. Woodland glade: where (492), details (713).
+
+
+Answers
+
+570. Shake the Apple Tree. If you still have problems, see (589).
+571. In the Well. See (582).
+572. Wear it for protection. See (313).
+573. Hit it, to trap and temporarily subdue (387).
+574. Get this, and keep it, to subdue (437).
+575. You should not need to make a map in Knight Orc. If you want 
+     to find something, enter e.g "FIND HERMIT" or "GO TO CASTLE". 
+     To learn what important places are worth visiting, see (591) 
+     in part 1, or (175) in later parts of the game.
+576. Objects of great value to humans, who collect them and take 
+     them to specified places in the game to earn 'points'. Orcs 
+     can't earn points. See (122) for gold and (251) for silver.
+577. At the very start of the game.
+578. Catches the (404).
+579. Can be asked about objects, even those far away. Especially the 
+     (201). Can also be recruited, see (970).
+
+580. In the first part of the game. Once the Joust is over, you can 
+     use "GO TO place", or "RUN TO place" to get there.
+581. Where unused spells are kept. See (10).
+582. You need a rope of some kind to climb down. See (593).
+583. Protected by the Innkeeper. Of no use, but see (598) for fun.
+584. Run away!
+585. Look under it. It's good, thick material, ideal for (612).
+586. Lists the important places to visit.
+587. Definitely not a chicken's! Return it to the (324).
+588. All but you are wandering about in (523).
+589. You need help. See (11) and (619) for full details.
+
+590. Something is written underneath. See (599) to see this.
+591. From the Fairground, you can see the (471). Go there and (620).
+592. Cast the spell of the same name. 
+593. Tie any of these, e.g the Halyard, to the (230).
+594. Don't fight creatures yourself. Se\sources\ed
+еееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееее-know-what), you can use "GO TO place", or 
+     "RUN TO place" to get there. Read (175) to find other places.
+607. Throw it at the Hermit.
+608. Slice thinly and feed to the Dragon.
+609. In the Mountain beyond the Viaduct. See (654).
+
+610. Just scenery, but see (351).
+611. Shows the name of the Charisma spell, when (325) arrives. 
+612. It's useful for reaching the (555).
+613. You're in an adventure game and this is one of the objects. 
+     Wear the visor to see what it looks like 'in character'.
+614. You need help to remove its contents. See (625).
+615. Examine it and take what you find.
+616. Not needed to complete the game.
+617. People don't like orcs much. See (629).
+618. It conceals a spell name. See (628).
+619. Tell the troll to wait 1 and catch apple. Then shake the tree.
+
+620. Climb the ivy to see everything from the roof. 
+621. Give it orders. When it hits anything it explodes. See (403).
+622. Interesting UK legal term for an animal or object which caused 
+     someone's death and was, in consequence, forfeit to the crown. 
+623. Possibly the strangest-ever robes of their colour.
+624. Where you start the second part of the game.
+625. Give it to someone, then take whatever is inside.
+626. See (613). 
+627. Try getting away by running to a distant place. Or try (637).
+628. Close it.
+629. Wear it to disguise yourself.
+
+630. Help! I am trapped in an adventure game factory.
+631. Worn by the Hermit. To get it, see (646).
+632. There's no way of avoiding this bit of scene-setting,  
+     played by women at all, with potentially amusing consequences.
+     Hence this individual. See (965), then (314)
+639. You're in an adventure game and this is one of the objects, 
+     disguised by your hitech visor which gives everything a 
+     magical 'game' appearance. This object is intended for use 
+     by the game's technicians and disguised so players won't 
+     cheat. Remove the visor to see what it looks like in reality. 
+640. Connected with the Green Knight and, later, the Inscrip 
+     played by women at all, with potentially amusing consequences.
+     Hence this individual. See (965), then (314)
+639. You're in an adventure game and this is one of the objects, 
+     disguised by your hitech visor which gives everything a 
+     magical 'game' appearance. This object is intended for use 
+     by the game's technicians and disguised so players won't 
+     cheat. Remove the visor to see what it looks like in reality. 
+640. Connected with the Green Knight and, later, the Inscription.
+641. Wandering about in part 1.
+642. Hidden in the Shed. See (877).
+643. Find what fits. See (222).
+644. Surely you know that! Try 'examine me'.
+645. Examine it and read what you find. See (658).
+646. Get him off guard; looking the other way. See (674).
+647. A different fight, when someone else steals it in turn.
+648. To discover the secret of perpetual motion, see (671).
+649. Wandering about in part 2.
+
+650. At the east end of the Bridge.
+651. South of the Graveyard.
+652. Read it to learn one new spell, so see (665).
+653. Pull the rope, hanging from the Bridge.
+654. You need a hundred-foot rope. See (233).
+656. Simply cut it.
+657. Throw it over an opponent, to immobilize them.
+658. Knock safely on the Drawbridge by (675).
+659. Attack.
+
+660. Treasure. To keep them, see (676). For a use, see (695).
+661. Cast the spell of the same name.
+662. A weapon. To avoid being stunned, see (141).
+663. Beside the Jousting Field.
+664. Flying over the land, carrying bodies back through the Gate.
+665. Wait until you know as many as possible.
+666. The worst thing to happen to the Liberals.
+667. In the Mountain: east, north and west from the Archway.
+668. You need some of her Hair. See (656).
+669. Malvaceous evergreen shrub.
+
+670. Cast cold at the (520).
+671. To learn about perpetual motion, see (648).
+672. Treasure. For a use, see (637).
+673. See the clues for the Fire and the Bedrooms.
+674. Give him something. Then (659).
+675. Throw something at it.
+676. It's a good idea to 'hide' treasures in the Sack.
+677. Not in this game.
+678. In the dictionary.
+679. Avoid it at all costs!
+
+680. Owned by Grok. See (692). 
+681. Kiss it.
+682. A weapon. Useful in fighting, I suppose.
+683. You need one long enough to span the Viaduct. See (693).
+684. In the maze. See (691).
+685. As this game is set inside an adventure game, we needed some 
+     typical adventure game puzzles. The use of the garlic is about 
+     as typical as you get. See (442).
+686. Unimportant: it's just something for the Dragon to guard.
+687. Outside the Mountain Orc Lair, south of where you enter the 
+     second part of the game.
+688. Read it to learn the Lightning spell.
+689. Give it to Grok and get the (175).
+
+690. You can only learn magic in the later stages of the game, after 
+     crossing the viaduct. Use it by, e.g, cast spellname at target. 
+     See (714). 
+691. From the entrance, go S, SE, E. Then see (703).
+692. Give him the (202).
+693. Tie together shorter pieces. See (709).
+694. A magical blade, tougher then normal weapons. See (21).
+695. See (637). Better, use to bypass the Troll. See (806).
+696. Light it to see in the dark.
+697. You need help to dispose of the Ants. See (708).
+698. All over the place.
+699. Got from the Frog. See (681).
+
+700. You.
+701. Follow him.
+702. Each of the castles has a Drawbridge.
+703. The writing is faintly luminous. See (715).
+704. The main offensive weapons people take onto the streets.
+705. Look inside. It's also a useful container. See (676).
+706. Examinsguise yourself.
+
+630. Help! I am trapped in an adventure game factory.
+631. Worn by the Hermit. To get it, see (646).
+632. There's no way of avoiding this bit of scene-setting, other 
+     than using restore. The best way through is probably to enter 
+     E.E.E and press SPACE twice.
+633. Scattered randomly in the first part of the game.
+634. There is a way to block the Slimy Daemon's claw. See (670).
+635. There's something funny about this place. See (346).
+636. You can't escape it. See (632).s name, or a message 
+     describing it. Names are typically short words in capital 
+     letters. For details of the 21 spells, look at every third 
+     message starting with (720), (723), (726) etc.  
+715. Read it in the dark.
+716. On the Jousting Field, where you are left after the joust.
+717. Leave it alone: perhaps it will kill some humans for you.
+718. A human, see (368). To avoid them, see (16).  
+719. See (717).
+
+720. To learn about Cold, see (295). For its use, see (785).
+721. In the Inn. The Humans buy it with treasure.
+722. Cast at almost any creature to heal it.
+723. To learn about Death, see (738). For the use, see (810).
+724. Just inside the Crystal Castle. See (470).
+725. Put trellis, painted to match your windows, around the doors, 
+     but don't let anything grow up it. Then see (739).
+726. To learn about Lightning, see (195). For its use, see (836).
+727. Behind the Bar. Don't take it before you need it, see (375).
+728. Eat the Frog.
+729. To learn about magic Knives, see (442). To use, see (816).
+
+730. Walking around part 2 of the game, checking on things.
+731. In the Gnome's hand. See (212).
+732. To learn Fireball, see (205). To use, see (621).
+733. Examine it to learn (762).
+734. Needed by the Monk for his magic. See (746).
+735. To learn Sword, see (545). For its use, see (849). 
+736. Used fairly widely: you can't have too much of a good thing, 
+     though I have tried to keep a sense of proportion.
+737. Makes things bigger. See (176) and, less important, (30).
+738. To learn Slow, see (42). For its use, see (858). 
+739. When you're going to sell the house, and not before, plant 
+     red and yellow roses below the trellis. See (745). 
+
+740. You're in an adventure game and this is one of the players. 
+     Wear the visor to see what they look like 'in character'.
+741. To learn Fly, see (89). For its uses, see (795). 
+742. A human, see (368). To avoid them, see (16).  
+743. Cast on yourself, this may make humans hate you less.
+744. To learn Jump, see (339). For its use, see (846).
+745. Now plant a couple of container-grown fruit trees. Chose posh 
+     kinds like peach or greengage and just shove them in the 
+     ground. No need for any preparation. See (749).
+746. Destroy them to defeat him. See (732).
+747. To learn Teleport, see (76). For its use, see (839).
+748. It takes one to know one. See (58).
+749. On the day before the house goes on the market, cut a border 
+     in the front lawn and fill it with bedding plants. See (871).
+
+750. To learn Glow, see (150). For its use, see (782).
+751. Tie something to it. See (582)
+752. Look under it.
+753. To learn Eye, see (123). For its use, see (799).
+754. Wanders around the Inn, serving Beer to people who arrive with 
+     money and guarding the objects there.
+755. In the northwest corner of Faerie. See (507).
+756. To learn Locate, see (425). For its use, see (812) .
+757. Cast Sword, see (735).
+758. Unlock the Chest with the Key and take what you find, i.e (65).
+759. To learn Detect, see (125). For its use, see (840).
+
+760. Read it to learn a spell. See (771).
+761. Steal his Helmet. Then see (572).
+762. To learn Empathy, see (25). For its use, see (854).
+763. The national epic of the Finns.
+764. Deliciously slimy, but of no help in the game.
+765. To learn Cure, see (176). For its use, see (722).
+766. Loathly and best avoided.
+767. If people can't see you, they can't kill you.
+768. To learn Exorcise, see (227). For its use, see (781).
+769. A peculiar human. If you've not crossed the Viaduct, stop 
+     reading. Otherwise, see (740).
+
+770. You need his Map, so get the rat Pie from (513).
+771. To learn Grow, see (547). For its use, see (737).
+772. Don't tackle him directly, look at his possessions. See (734).
+773. A container. Treasure is safer inside.
+774. To learn Charisma, see (325). For its use, see (743).
+775. If you liked the rhymes, you might want to read one of the 
+     full translations of "Sir Gawain and the Green Knight" which 
+     have been produced by many authors, including JRRT himself. 
+     Or maybe not.
+776. Discovered when the Mouse uses it. See (404).
+777. To learn Shield, see (262). For its uses, see (790).
+778. The mad Monk is dangerous and you have little time. See (772).
+779. You have probably heard of power dressing, breakfasts etc.. 
+     Well, Level 9 have extended the concept to horticulture. For 
+     maximum effect with minimum work, start by covering your whole 
+     garden with grass. This is just about the cheapest and easiest 
+     plant to care for. Then see (725).
+
+780. To learn Magician, see (22). For its use, see (874).
+781. It cancels spells in the area. See especially (89).
+782. Cast at an object, this makes it act as a light.
+783. To learn Invisibility, see (151). For its use, see (767).
+785. Cools things down. See (101) and (525).
+786. Tell it to go into the (181) and find what's there.
+787. Tied to you at the start.
+788. Charging into them is a good way to go.
+789. May as well attack him; you can't run away.
+
+790. Cast it on yourself when entering the (470).
+791. Go inside.
+792. Wandering between the Necropolis and the House.
+793. A wild man who, by any other name, would smell as sweet.
+794. Examine it to find the Book.
+795. It's useful when cast on you, e.g to cross the river, and on 
+     other things. See (495) and (470).
+796. Has secret lettering, only visible when in the (101).
+797. Where humans being treasure, for points. Something useful is 
+     hidden here. See (258).
+798. Mentioned as an obscure tribute to John Varley's work.
+799. It's small and mobile. Use for reconnaissance, and (786).
+
+800. You can't do anything about this.
+801. 20 points per spell learnt, see (690); 30 points for feeding 
+     Grok; 30 points for each of the 3 potential allies you placate
+     and the same again when the 4 allies are recruited, see (11); 
+     40 points for solving the paradise puzzle, see (535); plus two 
+     bonuses of 100 for completing the game.
+802. Not in this game.
+803. Something is inside. To open it, see (125).
+804. 'In' the Bridge. See (968).
+805. In the Crystal Castle, north of (530).
+806. Collect several silver objects - I use 'go' to move about and 
+     abandon this with space whenever I pass a treasure. See (819).
+807. Describes a spell, see (753), but you can't read this until 
+     the Fire is dealt with.
+808. Put something on it for protection. See (177).
+809. Tie anything edible to it, then 'drop' this into the water.  
+
+810. Disposes of a few enemies, but do not push your luck by you, when starting the second part of the game.
+819. Find the Troll and save your position. (The mechanics of this 
+     puzzle are not simple, and there's always a chance that the 
+     Troll will be distracted by people crossing her Bridge, so you 
+     might need a couple of tries to get it right). Then see (873).
+
+820. Follow it.
+821. The ferocious landlady of the Orcs Head Inn. See (865).
+822. On the other side of the door, off the scarred Corridor.
+823. Inaccessible from the game.
+824. E by you, when starting the second part of the game.
+819. Find the Troll and save your position. (The mechanics of this 
+     puzzle are not simple, and there's always a chance that the 
+     Troll will be distracted by people crossing her Bridge, so you 
+     might need a couple of tries to get it right). Then see (873).
+
+820. Follow it.
+821. The ferocious landlady of the Orcs Head Inn. See (865).
+822. On the other side of the door, off the scarred Corridor.
+823. Inaccessible from the game.
+824. Examine it to learn the spell named in (780).
+825. A weapon. To avoid Brainz hitting you with it, see (834).
+826. Mythic British king, possibly based in Somerset area.
+827. Patrols the game, relighting the Fire and so on.
+828. Near the north Bedroom. See (635).
+829. You need the Amber. See (712).
+
+830. Pointy-eared weirdos with dubious leanings.
+831. Climb the Ivy which clings to the ugly Castle.
+832. In part 1, you just score 10 points for each foot of rope. For 
+     subsequent scoring, see (801). 
+833. Fighting Tweedledum.
+834. You need protection. Wear (141).
+835. Inside the Mountain, east and south of the Archway.
+836. You don't need to use this to finish the game. Just know it.
+837. If you really want to, see (851). For escape, see (627).
+838. Only an indestructible object will do, so use (45) to push it.
+839. Provides rapid movement to target, almost wherever that is.
+
+840. Gives a clue as to whether target is magical.
+841. E.g if a creature is doing something too quickly. See (404).
+842. The program will automatically select your best weapon, if you 
+     have one. Some spells are useful, too. See (723), (765) etc.
+843. Put it where it fits. See (852).
+844. Push it. If you find this difficult, see (838).
+845. Examine it to learn details of (741). Can't read it? See (856).
+846. Move instantly in stated direction, almost wherever that takes 
+     you. The important use is to use this to reach (545).
+847. Examine it to learn (744).
+848. Rubbish left after the joust. Use the objects which are here.
+849. Creates a Broadsword. See (694).
+
+850. Traps target's feet in sticky mud.
+851. 'Hit someone' for a single blow, or 'Attack someone' to enter 
+     an ongoing aggression situation. Make sure the enemy is smaller 
+     then you. See (842). 
+852. Put (62) in (222) to open (274) and learn (759). See (875).
+853. Use to open the Tomb.
+854. Gives a clue about target's thoughts.
+855. Give it to the Valkyrie.
+856. Exorcise the spell on it first.
+857. Inscribed on it are the details of (747).
+858. Slows target. See (841).
+859. Good at killing trees.
+
+860. Drop it to learn (738).
+861. She will follow. Repeat this until you're a long way from the 
+     Bridge and almost out of Treasure. Now drop your remaining 
+     silver and run back to the Bridge. When there, see (898).
+862. Command someone else to do this, too.
+863. If only it were bigger. See (771).
+864. Only works when you know every spell. Then see (874).
+865. The landlady of the Inn is famous for "Old Mrs Wallops Original 
+     Formula Orcs Blood Tonic" which is, alas, not to found in this 
+     game. It is said to have a unique flavour, but no survivor has
+     been willing or able to disclose the details.
+866. Very tasty! Give to the Dragon, so you can sneak past.
+867. You need his Lassoo. To knock him down, see (250).
+868. A human player, see (368). To avoid them, see (16).  
+869. Clean it to learn (732). Having problems cleaning? See (862).
+
+870. Wear to keep warm.
+871. The idea is to get a nice, simple effect which promises a lot 
+     of potential, hence the almost-empty trellis, and that will 
+     look really good for exactly a month. See (893).
+872. In the area where you start.
+873. Let her steal something from you. Then move away. See (861)
+874. Cast it at yourself to earn promotion and the right to recruit 
+     the (425). If you have, congratulations on getting this far!
+875. Command the Troll to carry out the actions involving the Coin, 
+     while you go south and await results.
+876. Just beyond the Exit.
+877. Do you live in a field? See (887).
+878. A good example of why, if buying a house near flowing water, 
+     you must find out for certain where it is flowing from.
+879. This is 'The rock that floats'.
+ 
+880. Below the Bridge. See (889).
+881. Marvellous people. Dirty, untrustworthy, violent and evil. 
+882. In the ugly Castle, on the other side of the Drawbridge.
+883. Home.
+884. It seems incredible that, when a company donates money to UK 
+     education, such teachers react by to boycotting their products.
+885. Think about the Mud, Plaque and Frog.
+886. Versions of this can be found in both parts of the game.
+887. Shut that door.
+888. On opposite sides of the Road. See (897). 
+889. Pull the Rope. Doesn't achieve anything? See (862).
+
+890. Too many cooks spoil the Broth.
+891. Flowing north-south down the middle of the part 2 landscape.
+892. In the Mountain: east, north and east from the Archway. If you 
+     have a headache, see (834).
+893. Then the bedding plants stop flowering, the trees shrivel and 
+     the roses get terminal greenfly. But it's no longer your 
+     problem. Grindleguts would approve!
+894. Where humans gather to buy beer. You'll find the (258) here.
+895. Bracknell.
+896. There IS something here. See (877).
+897. Tie any rope to them to dismount the (370).
+898. Open the Door and enter the Lair. Now see (290).
+899. From the roof you can see everything, see (575). Keep away from 
+     the Knight.
+
+900. Many hands make light work.
+901. Hidden n, and rob him. See (646).
+912. Tastes delicious.
+913. Cast Jump to reach there.
+914. Every time the Mouse escapes, wait for it to return and put 
+     something in the escape route to block it. See (928).
+915. Take everything here.
+916. Cut them to lower the Drawbridge. See (729).
+917. Bypasses many obstacles as, once drunk, no one can see you... 
+     Unlike Old Mrs Wallops Tonic; when drunk, you can't see 
+     anyone (865).
+918. In part 1, only Denzyl will obey your orders. For the second 
+  n, and rob him. See (646).
+912. Tastes delicious.
+913. Cast Jump to reach there.
+914. Every time the Mouse escapes, wait for it to return and put 
+     something in the escape route to block it. See (928).
+915. Take everything here.
+916. Cut them to lower the Drawbridge. See (729).
+917. Bypasses many obstacles as, once drunk, no one can see you... 
+     Unlike Old Mrs Wallops Tonic; when drunk, you can't see 
+     anyone (865).
+918. In part 1, only Denzyl will obey your orders. For the second 
+     part, see (929).
+919. You are Grindleguts the orc, as described in Peter McBrides' 
+     introductory short story. Your initial aim is to escape over 
+     the broken viaduct to orc mountain. See (8) for more details.
+
+920. A flying necrophile, who exists only to collect dead bodies 
+     and transport them to Paradise for resurrection.
+921. Wandering about aimlessly in all parts of the game.
+922. Don't accept his offer; he cheats. Do something slightly 
+     different instead. See (939).
+923. Deadly. But deal with the man and you deal with the horse.
+924. Don't eat her special fudge.
+925. In a winding tunnel in the Mountain, roughly SE of the Archway.
+926. When thrown, turns into a deadly bolt of lightning.
+927. Defeat the Green Knight, then take them. See (922).
+928. Close the door and try to catch it again. See (941).
+929. Creatures must be subdued (956) and then recruited (225), 
+     before they will obey your orders; though 'beings' created by 
+     magic will obey automatically, see (333) and (335). You need 
+     the abilities of some of the following creatures to finish the 
+     game: (324), (337), (380), (404), (425) and (437).
+
+930. A good weapon, but probably not worth the trouble of keeping.
+931. Examine its Inscription to learn a spell, see (750).
+932. Once through the Joust, see (632), you need to find where 
+     things are. See (575). Next, the idea is to use 'find' and 
+     'run' to dash about, collecting bits of Rope to tie together. 
+     See (683). Finally, you need to cross the Viaduct, see (560).
+933. Don't open it unless prepared for a lightning bolt. See (948).
+934. A bit irrelevant, really.
+935. For beer. Leave it in the Inn.
+936. If you command it to move about, you get a report of wherever 
+     it goes - without any risk to you. See also (945).
+937. A poetic clue to a spell name. See (750).
+938. Fly above the Acid. Notice that Button? See (844).
+939. Hit the Horse. Then take the (224) and run away.
+ 
+940. Not in this game.
+941. Drop the Sack es of Knight Orc is something you should 
+     NOT do: i.e make a map. As you'll realise if you try mapping, 
+     only the named locations have puzzles - see (4) for details - 
+     and it's a waste of time to map the whole game. The interior 
+     areas (of which the Mountain is the largest) are small enough 
+     to "map" in your head. Finally, please note that future Level 
+     9 games will not need detailed mapping, either.
+951. This is metal and trails on the ground. See (964).
+952. The exit es of Knight Orc is something you should 
+     NOT do: i.e make a map. As you'll realise if you try mapping, 
+     only the named locations have puzzles - see (4) for details - 
+     and it's a waste of time to map the whole game. The interior 
+     areas (of which the Mountain is the largest) are small enough 
+     to "map" in your head. Finally, please note that future Level 
+     9 games will not need detailed mapping, either.
+951. This is metal and trails on the ground. See (964).
+952. The exit from 'Paradise'. You can't enter, except when dead.
+953. Not in this game.
+954. The 'real' appearance of game scenery. Wear the Visor to see 
+     it's more conventional appearance. See (8).
+955. Avoid fighting; See (3) to escape. Run away a lot. Then, later 
+     in the game, learn and use the Shield and Cure spells. 
+956. Subduing a creature involves catching it, see (404); getting 
+     past its defences, see (324) and (437); or proving your worth,
+     see (425). Denzyl, of course, doesn't need subduing.
+957. Wear this to be completely enclosed in metal. See (964).
+958. To open it, you need authorization. See (158)
+959. Is this a hundred foot long yet? If not, see (693). If so, it's 
+     long enough to span the Viaduct. See (972).
+ 
+960. To catch it, see (914).
+961. In the Scabbard. To remove it from there, see (614).
+962. Beyond the Viaduct. See (654).
+963. Has been lost, and slid away inside a small place. See (181).
+964. With (28) and (30) together, you are completely protected by 
+     earthed metal. See (82).
+965. Wear the Visor to see him/her in character.
+966. Outwit the Knight, Orc-fashion. See (922).
+967. Defeat the mad Monk indirectly. See (246).
+968. Give a silver treasure to the Troll, as payment for crossing 
+     her Bridge. To subsequently outwit the Troll and gain entrance 
+     to her Lair, see (806).
+969. From here, you can see all the important places in part 1.
+
+970. Once you're a Magician, see (780), anyway. See also (929). Its 
+     main purpose is to solve the very last puzzle, see (997).
+971. You need to get past the metal Door. See (958).
+972. The idea is to throw it through the Ring (226). If you are 
+     unable to throw it far enough, see (979).
+973. See (464) to trap the Mouse, and use the (333) to discover 
+     what what's hidden in the hole.
+974. Very scenic.
+975. Learn all the spells (690), recruit all the useful creatures 
+     (929) and get everyone to the Exit. See (985).
+976. He won't go outdoors without protection. See (245). Get him to 
+     dispose of bothersome Humans, and then take his smoke to (247).
+977. Deflect the Humans' attacks with (777). Then see (88).
+978. The Line stops artificial creatures leaving, until it is 
+     deactivated (992).
+979. The the Rope to the Spear and throw this.
+
+980. Take everything and keep it.
+981. Prove a tactile equivalent for walls. See (8)
+982. The Vampire attacks unless you've got the (116). Groan.. But 
+     see (685) for game background. Lure another creature inside, 
+     to be told about (729).
+983. Open the Door to reach the Troll's Lair. See (968).
+984. How should I know?
+985. Get (324) to the Sensor to trigger it, deactivate the red Line 
+     (992) and go to the Foyer. Then see (997).
+986. See entries for the individual objects, creatures and rooms 
+     you find here. See also (545).
+987. Outside the Orc Lair, where you want to be. See (962).
+988. A smoke detector. To trigger it, consider bringing the (324).
+989. His Ball and Chain are actually quite useful. See (951).
+
+990. Read the Panel to learn a spell. See (726)
+991. A spell is described here. See (735).
+992. Command the Troll to open the Hatch, look inside it and put 
+     the Mouse inside to chew the wires.
+993. The original coin-op machines were excellent. 
+994. All humanoids in this game are wearing Visors, but this is the 
+     only one that we are concerned with. When worn, it alters the 
+     appearance of objects to correspond to the magical scenario of 
+     the game. When removed, you see 'reality'. See (1009).
+995. Needed for recruiting creatures. See (11).
+996. Xenophobes who hate Orcs. Keep clear!
+997. Command the Troll to put the Rainbird in the Kiosk, so it can 
+     peck the button there.
+998. Carry it to open a Door, see (83). To get it where you need it, 
+     see (855).  
+999. Visit the Roof of the Keep, and open the Drawbridge to get to 
+     the Chest.
+
+1000. Attach to the Rope. See (959).
+1001. Remove your Visor in the Forest (492).
+1002. The way out of the game: your desti                       KNIGHT ORC CLUES
+
+Please note: this is a preliminary version of the clues and has not 
+(yet) been fully checked. Level 9 apologise for any errors.
+
+This clue sheet starts with four alphabetical lists of things from 
+Knight Orc: general hints, objects, creatures and people, and 
+places. Look down the appropriate list to find what you want to 
+know about; then turn to the answers corresponding to the bracketed 
+numbers after it. 
+
+
+General Hints
+
+  1. DO NOT MAKE A MAP. Seers about it.
+
+      Jmhfgs Nqb szjdr okzbd hm z etkk-rhydc zcudmstqd fzld, rszeedc 
+      ax qnans. Rn xnt zqd mns nmkx zm nqb, ats z qnans nqb. Qnansr 
+      zmc btrsnldqr zkhjd vdzq etkk-ezbd uhrnqr, nmsn vghbg zqd 
+      oqnidbsdc hlzfdr ne sgd lzfhbzk kzmcrbzod, zmc sgd zbbhcdms zs 
+      sgd dmc ne ozqs 1 knnrdmr xntq nmd. Sgdqdzesdq, qzhrhmf sgd 
+      uhrnq rgnvr znt "qdzkhsx", vghkd vdzqhmf hs kdsr xnt rdd vgzs 
+      hr fnhmf nm hm sgd fzld. Hs'r mns ltbg etm adhmf z qnans nqb, 
+      adbztrd zkk sgd nccr zqd rszbjdc hm ezuntq ne sgd gtlzm 
+      btrsnldqr, rn xntq zhl hr sn drbzod hmsn sgd vnqkc ntsrhcd. 
+      Mnv okzx nm... 

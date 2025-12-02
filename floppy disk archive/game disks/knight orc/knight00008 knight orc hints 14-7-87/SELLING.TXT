@@ -1,0 +1,42 @@
+Knight Orc features:
+
+* High level commands. You don't need to map Knight Orc: GO, RUN, 
+  FIND and FOLLOW work out the route to a named place or object and 
+  take you there. And ambushes are Orc-kid's play when you can just 
+  enter WAIT FOR INNKEEPER AND KILL HIM. 
+
+* Simultaneous actions: when you give people commands, you can get 
+  on with the game while they carry them out.
+
+* Realistic characters: a cast of 70 who make their own decisions 
+  and live their own lives (e.g stealing treasure to buy their next 
+  beer), whether or not you're still around to see them.
+
+* Masses of text: occupying 240,000 bytes of source file. The text 
+  is compressed to fit on the game disk, of course.
+
+* 21 spells to use in off-beat ways.
+
+
+Features of Level 9's Adventure System on 16 bit machines:
+
+* Digitised Pictures, on both colour and Black & White monitors; 
+  displayed, in a tasteful border, by a pseudo-random fade.
+
+* RAM SAVE/RESTORE and UNDO: save your position in memory, so you 
+  don't need to fiddle with data disks.
+
+* Command-line editor, with a 1K buffer of your previous input 
+  lines. Useful if you make mistaks; it combines well with 'undo'.
+
+* Three programs, loading automatically as needed, to avoid the 
+  memory limitations that can restrict one-part adventures.
+
+* Multi-tasking: e.g the game continues while pictures load.
+
+* Picture cache: prevents unnecessary disk loads, speeding the game 
+  and avoiding disk wear. 
+
+* Hard disk use. Owners of Winchesters should be able to load Knight 
+  Orc onto hard disk and run it from there (making one copy, for the 
+  player's own use, as long as they still have the original). 
